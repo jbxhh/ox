@@ -1,8 +1,8 @@
 package=sodium
-$(package)_version=1.0.16
-$(package)_download_path=https://github.com/jedisct1/libsodium/archive
-$(package)_file_name=$($(package)_version).tar.gz
-$(package)_sha256_hash=0c14604bbeab2e82a803215d65c3b6e74bb28291aaee6236d65c699ccfe1a98c
+$(package)_version=1.0.15
+$(package)_download_path=https://download.libsodium.org/libsodium/releases/
+$(package)_file_name=libsodium-$($(package)_version).tar.gz
+$(package)_sha256_hash=fb6a9e879a2f674592e4328c5d9f79f082405ee4bb05cb6e679b90afe9e178f4
 
 define $(package)_set_vars
 $(package)_config_opts=--enable-static
