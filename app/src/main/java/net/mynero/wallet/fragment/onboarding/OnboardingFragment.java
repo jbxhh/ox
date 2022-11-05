@@ -28,8 +28,10 @@ import net.mynero.wallet.model.Wallet;
 import net.mynero.wallet.model.WalletManager;
 import net.mynero.wallet.service.PrefService;
 import net.mynero.wallet.util.Constants;
+import net.mynero.wallet.util.RestoreHeight;
 
 import java.io.File;
+import java.util.Calendar;
 
 public class OnboardingFragment extends Fragment {
 
@@ -172,7 +174,8 @@ public class OnboardingFragment extends Fragment {
             File walletFile = new File(mainActivity.getApplicationInfo().dataDir, Constants.WALLET_NAME);
             Wallet wallet = null;
             if (walletSeed.isEmpty()) {
-                wallet = WalletManager.getInstance().createWallet(walletFile, walletPassword, Constants.MNEMONIC_LANGUAGE, restoreHeight);
+                Wallet tmpWallet = createTempWallet(mainActivity.getApplicationInfo().dataDir); //we do this to get seed, then recover wallet so we can use seed offset
+                wallet = WalletManager.getInstance().recoveryWallet(walletFile, walletPassword, tmpWallet.getSeed(""), "", getNewRestoreHeight());
             } else {
                 if (!checkMnemonic(walletSeed)) {
                     Toast.makeText(mainActivity, getString(R.string.invalid_mnemonic_code), Toast.LENGTH_SHORT).show();
@@ -215,6 +218,17 @@ public class OnboardingFragment extends Fragment {
             walletProxyAddressEditText.setText(proxyAddress);
             walletProxyPortEditText.setText(proxyPort);
         }
+    }
+
+    private long getNewRestoreHeight() {
+        Calendar restoreDate = Calendar.getInstance();
+        restoreDate.add(Calendar.DAY_OF_MONTH, 0);
+        return RestoreHeight.getInstance().getHeight(restoreDate.getTime());
+    }
+
+    private Wallet createTempWallet(String dir) {
+        File tmpWalletFile = new File(dir, Constants.WALLET_NAME + "_tmp");
+        return WalletManager.getInstance().createWallet(tmpWalletFile, "", Constants.MNEMONIC_LANGUAGE, 0);
     }
 
     private boolean checkMnemonic(String seed) {
