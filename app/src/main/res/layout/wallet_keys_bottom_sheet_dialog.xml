@@ -51,11 +51,24 @@
             app:layout_constraintTop_toBottomOf="@id/wallet_seed_label_textview" />
 
         <TextView
+            android:id="@+id/wallet_seed_offset_textview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="11sp"
+            android:textColor="#f80"
+            android:visibility="gone"
+            android:text="@string/wallet_seed_offset_desc"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/information_textview" />
+
+        <TextView
             android:id="@+id/information_textview"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textSize="14sp"
+            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/wallet_seed_desc_textview"
@@ -71,7 +84,7 @@
             android:text="@string/wallet_viewkey_label"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/information_textview" />
+            app:layout_constraintTop_toBottomOf="@id/wallet_seed_offset_textview" />
 
         <TextView
             android:id="@+id/wallet_viewkey_desc_textview"
@@ -90,7 +103,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:textSize="14sp"
+            android:textSize="16sp"
             app:layout_constraintEnd_toStartOf="@id/copy_viewkey_imagebutton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/copy_viewkey_imagebutton"
@@ -125,7 +138,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textSize="14sp"
+            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/wallet_restore_height_label_textview"

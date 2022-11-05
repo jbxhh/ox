@@ -108,8 +108,10 @@
     <string name="edit_node">Edit Node</string>
     <string name="wallet_seed_label">Recovery phrase</string>
     <string name="wallet_seed_desc">Anyone with your recovery phrase can spend ALL coins in this wallet!</string>
+    <string name="wallet_seed_offset_desc">Your wallet seed offset is the password you use to open the wallet. It will not be displayed here, but it is needed to fully restore this wallet.</string>
     <string name="wallet_viewkey_label">Private view-key</string>
     <string name="wallet_viewkey_desc">Anyone with your private view-key can see all incoming transactions!</string>
     <string name="wallet_restore_height_label">Restore height</string>
     <string name="block_height">Block Height</string>
+    <string name="use_password_as_seed_offset">Use password as seed offset</string>
 </resources>

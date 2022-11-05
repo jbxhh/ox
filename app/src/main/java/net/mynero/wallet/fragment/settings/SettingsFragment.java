@@ -156,7 +156,7 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
                 passwordDialog.listener = this;
                 passwordDialog.show(getActivity().getSupportFragmentManager(), "password_dialog");
             } else {
-                displaySeedDialog();
+                displaySeedDialog("");
             }
         });
 
@@ -183,14 +183,15 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
         });
     }
 
-    private void displaySeedDialog() {
+    private void displaySeedDialog(String password) {
         WalletKeysBottomSheetDialog informationDialog = new WalletKeysBottomSheetDialog();
+        informationDialog.password = password;
         informationDialog.show(getActivity().getSupportFragmentManager(), "information_seed_dialog");
     }
 
     @Override
     public void onPasswordSuccess(String password) {
-        displaySeedDialog();
+        displaySeedDialog(password);
     }
 
     @Override

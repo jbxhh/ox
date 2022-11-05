@@ -8,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -23,18 +25,19 @@ import androidx.lifecycle.ViewModelProvider;
 import net.mynero.wallet.MainActivity;
 import net.mynero.wallet.MoneroApplication;
 import net.mynero.wallet.R;
-import net.mynero.wallet.data.DefaultNodes;
 import net.mynero.wallet.model.Wallet;
 import net.mynero.wallet.model.WalletManager;
 import net.mynero.wallet.service.PrefService;
 import net.mynero.wallet.util.Constants;
 import net.mynero.wallet.util.RestoreHeight;
 
+import org.json.JSONObject;
+
 import java.io.File;
 import java.util.Calendar;
 
 public class OnboardingFragment extends Fragment {
-
+    private boolean useOffset = true;
     private OnboardingViewModel mViewModel;
     TextWatcher proxyAddressListener = new TextWatcher() {
         @Override
@@ -91,11 +94,15 @@ public class OnboardingFragment extends Fragment {
         ImageView moreOptionsChevronImageView = view.findViewById(R.id.advanced_settings_chevron_imageview);
         SwitchCompat torSwitch = view.findViewById(R.id.tor_onboarding_switch);
         ConstraintLayout proxySettingsLayout = view.findViewById(R.id.wallet_proxy_settings_layout);
+        CheckBox seedOffsetCheckbox = view.findViewById(R.id.seed_offset_checkbox);
         walletProxyAddressEditText = view.findViewById(R.id.wallet_proxy_address_edittext);
         walletProxyPortEditText = view.findViewById(R.id.wallet_proxy_port_edittext);
+        seedOffsetCheckbox.setChecked(useOffset);
 
         moreOptionsDropdownTextView.setOnClickListener(view12 -> mViewModel.onMoreOptionsClicked());
         moreOptionsChevronImageView.setOnClickListener(view12 -> mViewModel.onMoreOptionsClicked());
+
+        seedOffsetCheckbox.setOnCheckedChangeListener((compoundButton, b) -> useOffset = b);
 
         createWalletButton.setOnClickListener(view1 -> {
             prepareDefaultNode();
@@ -165,17 +172,18 @@ public class OnboardingFragment extends Fragment {
     }
 
     private void createOrImportWallet(String walletPassword, String walletSeed, String restoreHeightText) {
+        String offset = useOffset ? walletPassword : "";
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
             if (!walletPassword.isEmpty()) {
                 PrefService.getInstance().edit().putBoolean(Constants.PREF_USES_PASSWORD, true).apply();
             }
-            long restoreHeight = -1;
+            long restoreHeight = getNewRestoreHeight();
             File walletFile = new File(mainActivity.getApplicationInfo().dataDir, Constants.WALLET_NAME);
             Wallet wallet = null;
             if (walletSeed.isEmpty()) {
                 Wallet tmpWallet = createTempWallet(mainActivity.getApplicationInfo().dataDir); //we do this to get seed, then recover wallet so we can use seed offset
-                wallet = WalletManager.getInstance().recoveryWallet(walletFile, walletPassword, tmpWallet.getSeed(""), "", getNewRestoreHeight());
+                wallet = WalletManager.getInstance().recoveryWallet(walletFile, walletPassword, tmpWallet.getSeed(""), offset, restoreHeight);
             } else {
                 if (!checkMnemonic(walletSeed)) {
                     Toast.makeText(mainActivity, getString(R.string.invalid_mnemonic_code), Toast.LENGTH_SHORT).show();
@@ -184,7 +192,10 @@ public class OnboardingFragment extends Fragment {
                 if (!restoreHeightText.isEmpty()) {
                     restoreHeight = Long.parseLong(restoreHeightText);
                 }
-                wallet = WalletManager.getInstance().recoveryWallet(walletFile, walletPassword, walletSeed, "", restoreHeight);
+                if(!offset.isEmpty()) {
+                    PrefService.getInstance().edit().putBoolean(Constants.PREF_USES_OFFSET, true).apply();
+                }
+                wallet = WalletManager.getInstance().recoveryWallet(walletFile, walletPassword, walletSeed, offset, restoreHeight);
             }
             Wallet.Status walletStatus = wallet.getStatus();
             wallet.close();

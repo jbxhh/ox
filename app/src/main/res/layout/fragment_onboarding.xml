@@ -34,6 +34,14 @@
         app:layout_constraintTop_toBottomOf="@id/create_wallet_textview"
         tools:visibility="visible" />
 
+    <CheckBox
+        android:id="@+id/seed_offset_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/use_password_as_seed_offset"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/wallet_password_edittext"/>
+
     <TextView
         android:id="@+id/tor_onboarding_switch_label"
         android:layout_width="0dp"
@@ -49,10 +57,9 @@
         android:id="@+id/tor_onboarding_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:minHeight="48dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/wallet_password_edittext" />
+        app:layout_constraintTop_toBottomOf="@id/seed_offset_checkbox" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/wallet_proxy_settings_layout"

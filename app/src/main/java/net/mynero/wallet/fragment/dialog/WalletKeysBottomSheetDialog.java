@@ -15,9 +15,12 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import net.mynero.wallet.R;
 import net.mynero.wallet.model.Wallet;
 import net.mynero.wallet.model.WalletManager;
+import net.mynero.wallet.service.PrefService;
+import net.mynero.wallet.util.Constants;
 import net.mynero.wallet.util.Helper;
 
 public class WalletKeysBottomSheetDialog extends BottomSheetDialogFragment {
+    public String password = "";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -34,6 +37,11 @@ public class WalletKeysBottomSheetDialog extends BottomSheetDialogFragment {
 
         Wallet wallet = WalletManager.getInstance().getWallet();
         String seed = wallet.getSeed("");
+        boolean usesOffset = PrefService.getInstance().getBoolean(Constants.PREF_USES_OFFSET, false);
+        if(usesOffset) {
+            seed = wallet.getSeed(password);
+            view.findViewById(R.id.wallet_seed_offset_textview).setVisibility(View.VISIBLE);
+        }
         String privateViewKey = wallet.getSecretViewKey();
 
         informationTextView.setText(seed);
