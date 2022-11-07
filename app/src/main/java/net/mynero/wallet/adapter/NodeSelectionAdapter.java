@@ -19,6 +19,7 @@ package net.mynero.wallet.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -108,6 +109,18 @@ public class NodeSelectionAdapter extends RecyclerView.Adapter<NodeSelectionAdap
             TextView nodeAddressTextView = itemView.findViewById(R.id.node_uri_textview);
             nodeNameTextView.setText(node.getName());
             nodeAddressTextView.setText(node.getAddress());
+
+            ImageView nodeAnonymityNetworkImageView = itemView.findViewById(R.id.anonymity_network_imageview);
+
+            if(node.isOnion()) {
+                nodeAnonymityNetworkImageView.setVisibility(View.VISIBLE);
+                nodeAnonymityNetworkImageView.setImageResource(R.drawable.tor);
+            } else if(node.isI2P()) {
+                nodeAnonymityNetworkImageView.setVisibility(View.VISIBLE);
+                nodeAnonymityNetworkImageView.setImageResource(R.drawable.i2p);
+            } else {
+                nodeAnonymityNetworkImageView.setVisibility(View.GONE);
+            }
 
             itemView.setOnLongClickListener(view -> {
                 if(match) {

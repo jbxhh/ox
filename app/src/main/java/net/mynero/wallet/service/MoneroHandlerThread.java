@@ -85,7 +85,9 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
 
     @Override
     public void newBlock(long height) {
-        refresh(false);
+        if(height % 100 == 0) {
+            refresh(false);
+        }
         BlockchainService.getInstance().setDaemonHeight(wallet.isSynchronized() ? height : 0);
     }
 

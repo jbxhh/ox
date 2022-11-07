@@ -6,14 +6,25 @@
     android:layout_height="wrap_content"
     android:padding="8dp"
     android:layout_marginBottom="8dp">
+    <ImageView
+        android:id="@+id/anonymity_network_imageview"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_fingerprint"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/node_uri_textview"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/node_name_textview"/>
     <TextView
         android:id="@+id/node_name_textview"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Node Name"
+        android:layout_marginStart="8dp"
         android:textStyle="bold"
         android:textSize="16sp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/anonymity_network_imageview"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/node_uri_textview"
         app:layout_constraintTop_toTopOf="parent"/>

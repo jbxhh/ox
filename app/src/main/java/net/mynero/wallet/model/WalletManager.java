@@ -258,7 +258,7 @@ public class WalletManager {
     // this should not be called on the main thread as it connects to the node (and takes a long time)
     public void setDaemon(Node node) {
         if (node != null) {
-            this.daemonAddress = node.getDaemonAddress();
+            this.daemonAddress = node.getAddress();
             if (networkType != node.getNetworkType())
                 throw new IllegalArgumentException("network type does not match");
             this.daemonUsername = node.getUsername();

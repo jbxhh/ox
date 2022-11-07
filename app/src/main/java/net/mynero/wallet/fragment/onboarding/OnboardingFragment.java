@@ -186,7 +186,7 @@ public class OnboardingFragment extends Fragment {
                 wallet = WalletManager.getInstance().recoveryWallet(walletFile, walletPassword, tmpWallet.getSeed(""), offset, restoreHeight);
             } else {
                 if (!checkMnemonic(walletSeed)) {
-                    Toast.makeText(mainActivity, getString(R.string.invalid_mnemonic_code), Toast.LENGTH_SHORT).show();
+                    mainActivity.runOnUiThread(() -> Toast.makeText(mainActivity, getString(R.string.invalid_mnemonic_code), Toast.LENGTH_SHORT).show());
                     return;
                 }
                 if (!restoreHeightText.isEmpty()) {
