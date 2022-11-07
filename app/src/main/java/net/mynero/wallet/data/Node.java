@@ -230,6 +230,10 @@ public class Node {
         return OnionHelper.isOnionHost(host);
     }
 
+    public boolean isI2P() {
+        return OnionHelper.isI2PHost(host);
+    }
+
     public String toNodeString() {
         return toString();
     }
@@ -240,7 +244,10 @@ public class Node {
         if (!username.isEmpty() && !password.isEmpty()) {
             sb.append(username).append(":").append(password).append("@");
         }
-        sb.append(host).append(":").append(rpcPort);
+        sb.append(host);
+        if(!isI2P()) {
+            sb.append(":").append(rpcPort);
+        }
         sb.append("/");
         switch (networkType) {
             case NetworkType_Mainnet:
@@ -263,6 +270,14 @@ public class Node {
     }
 
     public String getAddress() {
+        String port = "";
+        if(!isI2P()) {
+            port = ":" + rpcPort;
+        }
+        return getHost() + port;
+    }
+
+    public String getDaemonAddress() {
         return getHost() + ":" + rpcPort;
     }
 

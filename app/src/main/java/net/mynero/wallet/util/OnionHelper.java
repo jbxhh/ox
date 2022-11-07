@@ -21,4 +21,8 @@ public class OnionHelper {
     public static boolean isOnionHost(String hostname) {
         return hostname.endsWith(".onion");
     }
+
+    public static boolean isI2PHost(String hostname) {
+        return hostname.endsWith(".b32.i2p");
+    }
 }

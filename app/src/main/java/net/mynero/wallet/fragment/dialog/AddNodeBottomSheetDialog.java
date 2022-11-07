@@ -47,10 +47,11 @@ public class AddNodeBottomSheetDialog extends BottomSheetDialogFragment {
         addNodeButton.setOnClickListener(view1 -> {
             String node = addressEditText.getText().toString();
             String name = nodeNameEditText.getText().toString();
-            if (node.contains(":") && !name.isEmpty()) {
-                String[] nodeParts = node.split(":");
-                if (nodeParts.length == 2) {
-                    try {
+            try {
+
+                if (node.contains(":") && !name.isEmpty()) {
+                    String[] nodeParts = node.split(":");
+                    if (nodeParts.length == 2) {
                         String address = nodeParts[0];
                         int port = Integer.parseInt(nodeParts[1]);
                         String newNodeString = address + ":" + port + "/mainnet/" + name;
@@ -75,10 +76,31 @@ public class AddNodeBottomSheetDialog extends BottomSheetDialogFragment {
                             }
                             dismiss();
                         }
-                    } catch (NumberFormatException | JSONException e) {
-                        e.printStackTrace();
+
                     }
+                } else if(node.endsWith(".b32.i2p")) {
+                    String newNodeString = node + "/mainnet/" + name;
+                    String nodesArray = PrefService.getInstance().getString(Constants.PREF_CUSTOM_NODES, "[]");
+                    JSONArray jsonArray = new JSONArray(nodesArray);
+                    boolean exists = false;
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        String nodeString = jsonArray.getString(i);
+                        if (nodeString.equals(newNodeString))
+                            exists = true;
+                    }
+
+                    if (!exists) {
+                        jsonArray.put(newNodeString);
+                    }
+
+                    PrefService.getInstance().edit().putString(Constants.PREF_CUSTOM_NODES, jsonArray.toString()).apply();
+                    if (listener != null) {
+                        listener.onNodeAdded();
+                    }
+                    dismiss();
                 }
+            } catch (NumberFormatException | JSONException e) {
+                e.printStackTrace();
             }
         });
     }
