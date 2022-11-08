@@ -89,7 +89,7 @@ public class ReceiveBottomSheetDialog extends BottomSheetDialogFragment {
                     if (bitMatrix.get(j, i)) {
                         pixels[i * width + j] = night ? 0xffffffff : 0x00000000;
                     } else {
-                        pixels[i * height + j] = night ? getResources().getColor(R.color.oled_colorBackground) : 0xffffffff;
+                        pixels[i * height + j] = getResources().getColor(R.color.oled_txBackgroundColor);
                     }
                 }
             }

@@ -51,7 +51,7 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
     @Override
     public synchronized void start() {
         super.start();
-        this.listener.onRefresh();
+        this.listener.onRefresh(BlockchainService.GETHEIGHT_FETCH);
     }
 
     @Override
@@ -85,15 +85,17 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
 
     @Override
     public void newBlock(long height) {
-        if(height % 100 == 0) {
-            refresh(false);
+        if(isEveryNthBlock(height, 100)) { // refresh services every 100 blocks downloaded
+            refresh(false, height);
+        } else if(isEveryNthBlock(height, 2160)) { // save wallet every 2160 blocks (~3 days)
+            wallet.store();
         }
         BlockchainService.getInstance().setDaemonHeight(wallet.isSynchronized() ? height : 0);
     }
 
     @Override
     public void updated() {
-        refresh(false);
+        refresh(false, BlockchainService.GETHEIGHT_FETCH);
     }
 
     @Override
@@ -107,21 +109,22 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
                 listener.onConnectionFail();
             }
         } else {
-            BlockchainService.getInstance().setDaemonHeight(wallet.getDaemonBlockChainHeight());
+            long height = wallet.getDaemonBlockChainHeight();
+            BlockchainService.getInstance().setDaemonHeight(height);
             wallet.setSynchronized();
             wallet.store();
-            refresh(true);
+            refresh(true, height);
         }
 
         BlockchainService.getInstance().setConnectionStatus(status);
     }
 
-    private void refresh(boolean refreshCoins) {
+    private void refresh(boolean refreshCoins, long height) {
         wallet.refreshHistory();
         if (refreshCoins) {
             wallet.refreshCoins();
         }
-        listener.onRefresh();
+        listener.onRefresh(height);
     }
 
     public PendingTransaction createTx(String address, String amountStr, boolean sendAll, PendingTransaction.Priority feePriority, ArrayList<String> selectedUtxos) throws Exception {
@@ -156,8 +159,12 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
         return pendingTx.commit("", true);
     }
 
+    private boolean isEveryNthBlock(long height, long interval) {
+        return height % interval == 0;
+    }
+
     public interface Listener {
-        void onRefresh();
+        void onRefresh(long height);
 
         void onConnectionFail();
     }

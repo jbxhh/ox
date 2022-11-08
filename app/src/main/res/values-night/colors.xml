@@ -30,6 +30,7 @@
     <color name="oled_colorOnError">#ffffff</color>
     <color name="edittext_bg_color">#202020</color>
     <color name="oled_locked_utxo">#956E43</color>
+    <color name="oled_txBackgroundColor">#0E0E0E</color>
 
     <!-- CLASSIC -->
 

@@ -1,77 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_marginTop="2dp"
+    android:background="@color/oled_txBackgroundColor"
+    android:padding="16dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/pbConfirmations"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="false"
+        android:max="10"
+        android:progress="8"
+        android:visibility="visible"
+        app:indicatorInset="0dp"
+        app:indicatorSize="30dp"
+        app:trackThickness="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tx_amount"
+        app:layout_constraintBottom_toBottomOf="@id/tx_failed"/>
 
-        <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:id="@+id/pbConfirmations"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:indeterminate="false"
-            android:max="10"
-            android:progress="8"
-            android:visibility="visible"
-            app:indicatorInset="0dp"
-            app:indicatorSize="30dp"
-            app:trackThickness="4dp"
-            android:layout_marginStart="16dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/tx_amount"
-            app:layout_constraintBottom_toBottomOf="@id/tx_failed"/>
+    <TextView
+        android:id="@+id/tvConfirmations"
+        style="@style/MoneroText.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="1dp"
+        android:text="8"
+        android:visibility="visible"
+        app:layout_constraintTop_toTopOf="@id/pbConfirmations"
+        app:layout_constraintBottom_toBottomOf="@id/pbConfirmations"
+        app:layout_constraintStart_toStartOf="@id/pbConfirmations"
+        app:layout_constraintEnd_toEndOf="@id/pbConfirmations"/>
 
-        <TextView
-            android:id="@+id/tvConfirmations"
-            style="@style/MoneroText.Small"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingBottom="1dp"
-            android:text="8"
-            android:visibility="visible"
-            app:layout_constraintTop_toTopOf="@id/pbConfirmations"
-            app:layout_constraintBottom_toBottomOf="@id/pbConfirmations"
-            app:layout_constraintStart_toStartOf="@id/pbConfirmations"
-            app:layout_constraintEnd_toEndOf="@id/pbConfirmations"/>
+    <TextView
+        android:id="@+id/tx_amount"
+        style="@style/MoneroText.PosAmount"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="+ 999.999999"
+        android:layout_marginStart="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/pbConfirmations"
+        app:layout_constraintEnd_toStartOf="@id/tx_datetime"/>
 
-        <TextView
-            android:id="@+id/tx_amount"
-            style="@style/MoneroText.PosAmount"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            tools:text="+ 999.999999"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="8dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@id/pbConfirmations"
-            app:layout_constraintEnd_toStartOf="@id/tx_datetime"/>
+    <TextView
+        android:id="@+id/tx_failed"
+        style="@style/MoneroText.PosFee"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/tx_list_failed_text"
+        android:layout_marginStart="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/pbConfirmations"
+        app:layout_constraintTop_toBottomOf="@id/tx_amount"/>
 
-        <TextView
-            android:id="@+id/tx_failed"
-            style="@style/MoneroText.PosFee"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/tx_list_failed_text"
-            android:layout_marginBottom="8dp"
-            android:layout_marginStart="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/pbConfirmations"
-            app:layout_constraintTop_toBottomOf="@id/tx_amount"/>
-
-        <TextView
-            android:id="@+id/tx_datetime"
-            style="@style/MoneroText.PosDate"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            tools:text="2017-05-22 21:32"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginEnd="16dp"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</com.google.android.material.card.MaterialCardView>
+    <TextView
+        android:id="@+id/tx_datetime"
+        style="@style/MoneroText.PosDate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="2017-05-22 21:32"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

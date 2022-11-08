@@ -137,15 +137,17 @@ public class OnboardingFragment extends Fragment {
             PrefService.getInstance().edit().putBoolean(Constants.PREF_USES_TOR, b).apply();
             if (b) {
                 String proxyString = PrefService.getInstance().getString(Constants.PREF_PROXY, "");
-                if (proxyString.contains(":")) {
-                    removeProxyTextListeners();
+                removeProxyTextListeners();
 
+                if (proxyString.contains(":")) {
                     String proxyAddress = proxyString.split(":")[0];
                     String proxyPort = proxyString.split(":")[1];
                     initProxyStuff(proxyAddress, proxyPort);
-
-                    addProxyTextListeners();
+                } else {
+                    initProxyStuff("127.0.0.1", "9050");
                 }
+                addProxyTextListeners();
+
                 proxySettingsLayout.setVisibility(View.VISIBLE);
             } else {
                 proxySettingsLayout.setVisibility(View.GONE);
