@@ -30,10 +30,10 @@ android {
         mainnet {
             dimension 'net'
         }
-        stagenet {
+        beta {
             dimension 'net'
-            applicationIdSuffix '.stage'
-            versionNameSuffix ' (stage)'
+            applicationIdSuffix '.beta'
+            versionNameSuffix ' (beta)'
         }
         devnet {
             dimension 'net'
