@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:fillViewport="true"
     android:fitsSystemWindows="true"
-    android:background="@color/oled_txBackgroundColor"
+    android:background="@color/oled_dialogBackgroundColor"
     android:padding="24dp">
 
 

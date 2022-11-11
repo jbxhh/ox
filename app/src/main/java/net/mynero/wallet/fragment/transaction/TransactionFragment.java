@@ -2,6 +2,7 @@ package net.mynero.wallet.fragment.transaction;
 
 import static net.mynero.wallet.util.DateHelper.DATETIME_FORMATTER;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -87,7 +89,6 @@ public class TransactionFragment extends Fragment {
             txHashTextView.setText(transactionInfo.hash);
             txConfTextView.setText("" + transactionInfo.confirmations);
             txDateTextView.setText(getDateTime(transactionInfo.timestamp));
-            txAmountTextView.setText(getResources().getString(R.string.tx_amount_no_prefix, Helper.getDisplayAmount(transactionInfo.amount)));
             if(transactionInfo.confirmations > 0) {
                 blockHeightTextView.setText("" + transactionInfo.blockheight);
                 blockHeightTextView.setVisibility(View.VISIBLE);
@@ -95,6 +96,17 @@ public class TransactionFragment extends Fragment {
             } else {
                 blockHeightTextView.setVisibility(View.GONE);
                 blockHeightLabelTextView.setVisibility(View.GONE);
+            }
+
+            Context ctx = getContext();
+            if(ctx != null) {
+                if (transactionInfo.direction == TransactionInfo.Direction.Direction_In) {
+                    txAmountTextView.setTextColor(ContextCompat.getColor(ctx, R.color.oled_positiveColor));
+                    txAmountTextView.setText(getString(R.string.tx_list_amount_positive, Helper.getDisplayAmount(transactionInfo.amount)));
+                } else {
+                    txAmountTextView.setTextColor(ContextCompat.getColor(ctx, R.color.oled_negativeColor));
+                    txAmountTextView.setText(getString(R.string.tx_list_amount_negative, Helper.getDisplayAmount(transactionInfo.amount)));
+                }
             }
         });
 

@@ -11,7 +11,7 @@
     <color name="oled_toolbarTextColor">@color/oled_colorOnBackground</color>
     <color name="oled_favouriteColor">#FFDB72</color>
     <color name="oled_softFavouriteColor">@color/oled_favouriteColor</color>
-    <color name="oled_positiveColor">#27C79C</color>
+    <color name="oled_positiveColor">#19ED60</color>
     <color name="oled_negativeColor">#f38854</color>
     <color name="oled_neutralColor">#171717</color>
     <color name="oled_noticeColor">#3DC2FF</color>
@@ -31,7 +31,8 @@
     <color name="edittext_bg_color">#CCCCCC</color>
     <color name="button_disabled_bg_color">#454545</color>
     <color name="oled_locked_utxo">#B5895A</color>
-    <color name="oled_txBackgroundColor">#F1F1F1</color>
+    <color name="oled_txBackgroundColor">#FBFBFB</color>
+    <color name="oled_dialogBackgroundColor">#E8E8E8</color>
 
     <!-- CLASSIC -->
 

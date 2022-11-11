@@ -32,6 +32,7 @@ import net.mynero.wallet.util.DayNightMode;
 import net.mynero.wallet.util.Helper;
 import net.mynero.wallet.util.NightmodeHelper;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,7 +79,7 @@ public class ReceiveBottomSheetDialog extends BottomSheetDialogFragment {
     public Bitmap generate(String text, int width, int height) {
         if ((width <= 0) || (height <= 0)) return null;
         Map<EncodeHintType, Object> hints = new HashMap<>();
-        hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
+        hints.put(EncodeHintType.CHARACTER_SET, StandardCharsets.UTF_8);
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M);
         try {
             BitMatrix bitMatrix = new QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, width, height, hints);
@@ -89,7 +90,7 @@ public class ReceiveBottomSheetDialog extends BottomSheetDialogFragment {
                     if (bitMatrix.get(j, i)) {
                         pixels[i * width + j] = night ? 0xffffffff : 0x00000000;
                     } else {
-                        pixels[i * height + j] = getResources().getColor(R.color.oled_txBackgroundColor);
+                        pixels[i * height + j] = getResources().getColor(R.color.oled_dialogBackgroundColor);
                     }
                 }
             }
