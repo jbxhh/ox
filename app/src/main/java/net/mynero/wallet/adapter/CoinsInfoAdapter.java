@@ -27,6 +27,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import net.mynero.wallet.R;
 import net.mynero.wallet.model.CoinsInfo;
 import net.mynero.wallet.model.Wallet;
+import net.mynero.wallet.service.PrefService;
+import net.mynero.wallet.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,8 +104,9 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
             TextView amountTextView = itemView.findViewById(R.id.utxo_amount_textview);
             TextView globalIdxTextView = itemView.findViewById(R.id.utxo_global_index_textview);
             TextView outpointTextView = itemView.findViewById(R.id.utxo_outpoint_textview);
-
-            amountTextView.setText(itemView.getResources().getString(R.string.tx_amount_no_prefix, Wallet.getDisplayAmount(coinsInfo.getAmount())));
+            boolean streetModeEnabled = PrefService.getInstance().getBoolean(Constants.PREF_STREET_MODE, false);
+            String balanceString = streetModeEnabled ? Constants.STREET_MODE_BALANCE : Wallet.getDisplayAmount(coinsInfo.getAmount());
+            amountTextView.setText(itemView.getResources().getString(R.string.tx_amount_no_prefix, balanceString));
             pubKeyTextView.setText(coinsInfo.getPubKey());
             globalIdxTextView.setText(itemView.getResources().getString(R.string.global_index_text, coinsInfo.getGlobalOutputIndex()));
             outpointTextView.setText(itemView.getResources().getString(R.string.outpoint_text, coinsInfo.getHash() + ":" + coinsInfo.getLocalOutputIndex()));

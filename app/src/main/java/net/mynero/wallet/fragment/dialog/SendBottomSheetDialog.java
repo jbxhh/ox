@@ -38,8 +38,6 @@ import net.mynero.wallet.util.UriData;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class SendBottomSheetDialog extends BottomSheetDialogFragment {
     private final MutableLiveData<Boolean> _sendingMax = new MutableLiveData<>(false);
@@ -136,11 +134,10 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
     }
 
     private void bindObservers() {
-
-        BalanceService.getInstance().balance.observe(getViewLifecycleOwner(), balance -> {
-            createButton.setEnabled(balance != 0);
+        BalanceService.getInstance().balanceInfo.observe(getViewLifecycleOwner(), balanceInfo -> {
+            createButton.setEnabled(balanceInfo.getRawUnlocked() != 0);
             if(!isChurning) {
-                sendMaxButton.setEnabled(balance != 0);
+                sendMaxButton.setEnabled(balanceInfo.getRawUnlocked() != 0);
             }
         });
 
