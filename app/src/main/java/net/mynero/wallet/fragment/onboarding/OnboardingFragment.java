@@ -75,6 +75,16 @@ public class OnboardingFragment extends Fragment {
     };
     private EditText walletProxyAddressEditText;
     private EditText walletProxyPortEditText;
+    private EditText walletPasswordEditText;
+    private EditText walletPasswordConfirmEditText;
+    private EditText walletSeedEditText;
+    private EditText walletRestoreHeightEditText;
+    private Button createWalletButton;
+    private TextView moreOptionsDropdownTextView;
+    private SwitchCompat torSwitch;
+    private ConstraintLayout proxySettingsLayout;
+    private ImageView moreOptionsChevronImageView;
+    private CheckBox seedOffsetCheckbox;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -86,22 +96,41 @@ public class OnboardingFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(OnboardingViewModel.class);
-        EditText walletPasswordEditText = view.findViewById(R.id.wallet_password_edittext);
-        EditText walletSeedEditText = view.findViewById(R.id.wallet_seed_edittext);
-        EditText walletRestoreHeightEditText = view.findViewById(R.id.wallet_restore_height_edittext);
-        Button createWalletButton = view.findViewById(R.id.create_wallet_button);
-        TextView moreOptionsDropdownTextView = view.findViewById(R.id.advanced_settings_dropdown_textview);
-        ImageView moreOptionsChevronImageView = view.findViewById(R.id.advanced_settings_chevron_imageview);
-        SwitchCompat torSwitch = view.findViewById(R.id.tor_onboarding_switch);
-        ConstraintLayout proxySettingsLayout = view.findViewById(R.id.wallet_proxy_settings_layout);
-        CheckBox seedOffsetCheckbox = view.findViewById(R.id.seed_offset_checkbox);
+        walletPasswordEditText = view.findViewById(R.id.wallet_password_edittext);
+        walletPasswordConfirmEditText = view.findViewById(R.id.wallet_password_confirm_edittext);
+        walletSeedEditText = view.findViewById(R.id.wallet_seed_edittext);
+        walletRestoreHeightEditText = view.findViewById(R.id.wallet_restore_height_edittext);
+        createWalletButton = view.findViewById(R.id.create_wallet_button);
+        moreOptionsDropdownTextView = view.findViewById(R.id.advanced_settings_dropdown_textview);
+        moreOptionsChevronImageView = view.findViewById(R.id.advanced_settings_chevron_imageview);
+        torSwitch = view.findViewById(R.id.tor_onboarding_switch);
+        proxySettingsLayout = view.findViewById(R.id.wallet_proxy_settings_layout);
+        seedOffsetCheckbox = view.findViewById(R.id.seed_offset_checkbox);
         walletProxyAddressEditText = view.findViewById(R.id.wallet_proxy_address_edittext);
         walletProxyPortEditText = view.findViewById(R.id.wallet_proxy_port_edittext);
         seedOffsetCheckbox.setChecked(useOffset);
 
+        bindListeners();
+        bindObservers();
+    }
+
+    private void bindObservers() {
+        mViewModel.showMoreOptions.observe(getViewLifecycleOwner(), show -> {
+            if (show) {
+                moreOptionsChevronImageView.setImageResource(R.drawable.ic_keyboard_arrow_up);
+                walletSeedEditText.setVisibility(View.VISIBLE);
+                walletRestoreHeightEditText.setVisibility(View.VISIBLE);
+            } else {
+                moreOptionsChevronImageView.setImageResource(R.drawable.ic_keyboard_arrow_down);
+                walletSeedEditText.setVisibility(View.GONE);
+                walletRestoreHeightEditText.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void bindListeners() {
         moreOptionsDropdownTextView.setOnClickListener(view12 -> mViewModel.onMoreOptionsClicked());
         moreOptionsChevronImageView.setOnClickListener(view12 -> mViewModel.onMoreOptionsClicked());
-
         seedOffsetCheckbox.setOnCheckedChangeListener((compoundButton, b) -> useOffset = b);
 
         createWalletButton.setOnClickListener(view1 -> {
@@ -109,10 +138,31 @@ public class OnboardingFragment extends Fragment {
             ((MoneroApplication)getActivity().getApplication()).getExecutor().execute(() -> {
                 createOrImportWallet(
                         walletPasswordEditText.getText().toString(),
+                        walletPasswordConfirmEditText.getText().toString(),
                         walletSeedEditText.getText().toString().trim(),
                         walletRestoreHeightEditText.getText().toString().trim()
                 );
             });
+        });
+        walletPasswordEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String text = editable.toString();
+                if (text.isEmpty()) {
+                    walletPasswordConfirmEditText.setText(null);
+                    walletPasswordConfirmEditText.setVisibility(View.GONE);
+                } else {
+                    walletPasswordConfirmEditText.setVisibility(View.VISIBLE);
+                }
+            }
         });
         walletSeedEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -155,29 +205,21 @@ public class OnboardingFragment extends Fragment {
 
             mViewModel.updateProxy(((MoneroApplication)getActivity().getApplication()));
         });
-
-        mViewModel.showMoreOptions.observe(getViewLifecycleOwner(), show -> {
-            if (show) {
-                moreOptionsChevronImageView.setImageResource(R.drawable.ic_keyboard_arrow_up);
-                walletSeedEditText.setVisibility(View.VISIBLE);
-                walletRestoreHeightEditText.setVisibility(View.VISIBLE);
-            } else {
-                moreOptionsChevronImageView.setImageResource(R.drawable.ic_keyboard_arrow_down);
-                walletSeedEditText.setVisibility(View.GONE);
-                walletRestoreHeightEditText.setVisibility(View.GONE);
-            }
-        });
     }
 
     private void prepareDefaultNode() {
         PrefService.getInstance().getNode();
     }
 
-    private void createOrImportWallet(String walletPassword, String walletSeed, String restoreHeightText) {
+    private void createOrImportWallet(String walletPassword, String confirmedPassword, String walletSeed, String restoreHeightText) {
         String offset = useOffset ? walletPassword : "";
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
             if (!walletPassword.isEmpty()) {
+                if(!walletPassword.equals(confirmedPassword)) {
+                    mainActivity.runOnUiThread(() -> Toast.makeText(mainActivity, getString(R.string.invalid_confirmed_password), Toast.LENGTH_SHORT).show());
+                    return;
+                }
                 PrefService.getInstance().edit().putBoolean(Constants.PREF_USES_PASSWORD, true).apply();
             }
             long restoreHeight = getNewRestoreHeight();
