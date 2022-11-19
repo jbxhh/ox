@@ -32,6 +32,7 @@ import net.mynero.wallet.model.WalletManager;
 import net.mynero.wallet.service.BalanceService;
 import net.mynero.wallet.service.BlockchainService;
 import net.mynero.wallet.service.HistoryService;
+import net.mynero.wallet.util.Constants;
 
 import java.util.Collections;
 
@@ -91,16 +92,16 @@ public class HomeFragment extends Fragment implements TransactionInfoAdapter.TxI
         BlockchainService blockchainService = BlockchainService.getInstance();
 
         if (balanceService != null) {
-            balanceService.balance.observe(getViewLifecycleOwner(), balance -> {
-                unlockedBalanceTextView.setText(getString(R.string.wallet_balance_text, Wallet.getDisplayAmount(balance)));
-            });
+            balanceService.balanceInfo.observe(getViewLifecycleOwner(), balanceInfo -> {
+                if(balanceInfo != null) {
+                    unlockedBalanceTextView.setText(getString(R.string.wallet_balance_text, balanceInfo.getUnlockedDisplay()));
 
-            balanceService.lockedBalance.observe(getViewLifecycleOwner(), lockedBalance -> {
-                if (lockedBalance == 0) {
-                    lockedBalanceTextView.setVisibility(View.INVISIBLE);
-                } else {
-                    lockedBalanceTextView.setText(getString(R.string.wallet_locked_balance_text, Wallet.getDisplayAmount(lockedBalance)));
-                    lockedBalanceTextView.setVisibility(View.VISIBLE);
+                    if (balanceInfo.getLockedDisplay().equals(Constants.STREET_MODE_BALANCE) || balanceInfo.isLockedBalanceZero()) {
+                        lockedBalanceTextView.setVisibility(View.INVISIBLE);
+                    } else {
+                        lockedBalanceTextView.setText(getString(R.string.wallet_locked_balance_text, balanceInfo.getLockedDisplay()));
+                        lockedBalanceTextView.setVisibility(View.VISIBLE);
+                    }
                 }
             });
         }

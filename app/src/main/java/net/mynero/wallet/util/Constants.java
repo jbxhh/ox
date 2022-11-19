@@ -10,9 +10,12 @@ public class Constants {
     public static final String PREF_NODE_2 = "pref_node_2";
     public static final String PREF_CUSTOM_NODES = "pref_custom_nodes";
     public static final String PREF_USES_OFFSET = "pref_uses_offset";
+    public static final String PREF_STREET_MODE = "pref_street_mode";
 
     public static final String URI_PREFIX = "monero:";
     public static final String URI_ARG_AMOUNT = "tx_amount";
     public static final String URI_ARG_AMOUNT2 = "amount";
     public static final String NAV_ARG_TXINFO = "nav_arg_txinfo";
+
+    public static final String STREET_MODE_BALANCE = "#.############";
 }

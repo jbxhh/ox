@@ -18,6 +18,8 @@ import androidx.lifecycle.ViewModelProvider;
 
 import net.mynero.wallet.R;
 import net.mynero.wallet.model.TransactionInfo;
+import net.mynero.wallet.model.Wallet;
+import net.mynero.wallet.service.PrefService;
 import net.mynero.wallet.util.Constants;
 import net.mynero.wallet.util.Helper;
 
@@ -100,12 +102,14 @@ public class TransactionFragment extends Fragment {
 
             Context ctx = getContext();
             if(ctx != null) {
+                boolean streetModeEnabled = PrefService.getInstance().getBoolean(Constants.PREF_STREET_MODE, false);
+                String balanceString = streetModeEnabled ? Constants.STREET_MODE_BALANCE : Wallet.getDisplayAmount(transactionInfo.amount);
                 if (transactionInfo.direction == TransactionInfo.Direction.Direction_In) {
                     txAmountTextView.setTextColor(ContextCompat.getColor(ctx, R.color.oled_positiveColor));
-                    txAmountTextView.setText(getString(R.string.tx_list_amount_positive, Helper.getDisplayAmount(transactionInfo.amount)));
+                    txAmountTextView.setText(getString(R.string.tx_list_amount_positive, balanceString));
                 } else {
                     txAmountTextView.setTextColor(ContextCompat.getColor(ctx, R.color.oled_negativeColor));
-                    txAmountTextView.setText(getString(R.string.tx_list_amount_negative, Helper.getDisplayAmount(transactionInfo.amount)));
+                    txAmountTextView.setText(getString(R.string.tx_list_amount_negative, balanceString));
                 }
             }
         });

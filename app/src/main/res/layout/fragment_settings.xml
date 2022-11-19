@@ -113,6 +113,27 @@
             app:layout_constraintTop_toBottomOf="@id/appearance_settings_textview" />
 
         <TextView
+            android:id="@+id/street_mode_label_textview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/street_mode"
+            android:textSize="16sp"
+            android:layout_marginStart="24dp"
+            app:layout_constraintBottom_toBottomOf="@id/street_mode_switch"
+            app:layout_constraintEnd_toStartOf="@id/street_mode_switch"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/street_mode_switch" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/street_mode_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/day_night_switch" />
+
+        <TextView
             android:id="@+id/network_settings_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -124,7 +145,7 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/day_night_switch" />
+            app:layout_constraintTop_toBottomOf="@id/street_mode_switch" />
 
         <Button
             android:id="@+id/select_node_button"
