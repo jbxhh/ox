@@ -32,6 +32,9 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 import net.mynero.wallet.R;
 import net.mynero.wallet.data.UserNotes;
 import net.mynero.wallet.model.TransactionInfo;
+import net.mynero.wallet.model.Wallet;
+import net.mynero.wallet.service.PrefService;
+import net.mynero.wallet.util.Constants;
 import net.mynero.wallet.util.Helper;
 import net.mynero.wallet.util.ThemeHelper;
 
@@ -111,8 +114,8 @@ public class TransactionInfoAdapter extends RecyclerView.Adapter<TransactionInfo
         }
 
         public void bind(TransactionInfo txInfo) {
-            String displayAmount = Helper.getDisplayAmount(txInfo.amount, Helper.DISPLAY_DIGITS_INFO);
-
+            boolean streetModeEnabled = PrefService.getInstance().getBoolean(Constants.PREF_STREET_MODE, false);
+            String displayAmount = streetModeEnabled ? Constants.STREET_MODE_BALANCE : Helper.getDisplayAmount(txInfo.amount, Helper.DISPLAY_DIGITS_INFO);
             TextView confirmationsTextView = itemView.findViewById(R.id.tvConfirmations);
             CircularProgressIndicator confirmationsProgressBar = itemView.findViewById(R.id.pbConfirmations);
             confirmationsProgressBar.setMax(TransactionInfo.CONFIRMATION);

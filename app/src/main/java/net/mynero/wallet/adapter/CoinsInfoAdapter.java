@@ -122,7 +122,7 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
             if (!coinsInfo.isUnlocked()) {
                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.oled_locked_utxo));
             } else if (selected) {
-                itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.oled_negativeColor));
+                itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.oled_colorSecondary));
             } else {
                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), android.R.color.transparent));
             }
