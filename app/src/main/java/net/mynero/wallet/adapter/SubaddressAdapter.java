@@ -56,7 +56,7 @@ public class SubaddressAdapter extends RecyclerView.Adapter<SubaddressAdapter.Vi
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         // Create a new view, which defines the UI of the list item
         View view = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.utxo_selection_item, viewGroup, false);
+                .inflate(R.layout.address_item, viewGroup, false);
 
         return new ViewHolder(view);
     }
@@ -89,9 +89,8 @@ public class SubaddressAdapter extends RecyclerView.Adapter<SubaddressAdapter.Vi
         }
 
         public void bind(Subaddress subaddress) {
-            TextView pubKeyTextView = itemView.findViewById(R.id.utxo_pub_key_textview);
-            pubKeyTextView.setText(subaddress.getAddress());
-
+            TextView addressTextView = itemView.findViewById(R.id.address_item_address_textview);
+            addressTextView.setText(subaddress.getAddress());
         }
     }
 }
