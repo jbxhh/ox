@@ -55,10 +55,10 @@
         android:id="@+id/onboarding_fragment"
         android:name="net.mynero.wallet.fragment.onboarding.OnboardingFragment"
         android:label="fragment_onboarding"
-        tools:layout="@layout/fragment_settings" />
+        tools:layout="@layout/fragment_onboarding" />
     <fragment
         android:id="@+id/transaction_fragment"
         android:name="net.mynero.wallet.fragment.transaction.TransactionFragment"
         android:label="fragment_onboarding"
-        tools:layout="@layout/fragment_settings" />
+        tools:layout="@layout/fragment_transaction" />
 </navigation>

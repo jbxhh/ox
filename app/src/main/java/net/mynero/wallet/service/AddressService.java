@@ -39,6 +39,10 @@ public class AddressService extends ServiceBase {
         return lastUsedSubaddress;
     }
 
+    public int getLatestAddressIndex() {
+        return latestAddressIndex;
+    }
+
     public String getPrimaryAddress() {
         return WalletManager.getInstance().getWallet().getAddress();
     }

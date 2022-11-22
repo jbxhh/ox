@@ -13,6 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
@@ -22,6 +24,7 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 import net.mynero.wallet.R;
+import net.mynero.wallet.adapter.SubaddressAdapter;
 import net.mynero.wallet.data.Subaddress;
 import net.mynero.wallet.util.DayNightMode;
 import net.mynero.wallet.util.Helper;
@@ -35,6 +38,7 @@ import timber.log.Timber;
 
 public class ReceiveFragment extends Fragment {
     private TextView addressTextView = null;
+    private TextView addressLabelTextView = null;
     private ImageView addressImageView = null;
     private ImageButton copyAddressImageButton = null;
     private ReceiveViewModel mViewModel;
@@ -51,10 +55,11 @@ public class ReceiveFragment extends Fragment {
         mViewModel = new ViewModelProvider(this).get(ReceiveViewModel.class);
         addressImageView = view.findViewById(R.id.monero_qr_imageview);
         addressTextView = view.findViewById(R.id.address_textview);
+        addressLabelTextView = view.findViewById(R.id.address_label_textview);
         copyAddressImageButton = view.findViewById(R.id.copy_address_imagebutton);
-        mViewModel.init();
         bindListeners(view);
         bindObservers(view);
+        mViewModel.init();
     }
 
     private void bindListeners(View view) {
@@ -65,10 +70,16 @@ public class ReceiveFragment extends Fragment {
     }
 
     private void bindObservers(View view) {
+        SubaddressAdapter adapter = new SubaddressAdapter();
+        RecyclerView recyclerView = view.findViewById(R.id.address_list_recyclerview);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setAdapter(adapter);
         mViewModel.address.observe(getViewLifecycleOwner(), this::setAddress);
+        mViewModel.addresses.observe(getViewLifecycleOwner(), adapter::submitList);
     }
 
     private void setAddress(Subaddress subaddress) {
+        addressLabelTextView.setText(subaddress.getLabel());
         addressTextView.setText(subaddress.getAddress());
         addressImageView.setImageBitmap(generate(subaddress.getAddress(), 256, 256));
         copyAddressImageButton.setOnClickListener(view1 -> Helper.clipBoardCopy(getContext(), "address", subaddress.getAddress()));
