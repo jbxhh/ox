@@ -14,6 +14,10 @@
             app:destination="@id/settings_fragment">
         </action>
         <action
+            android:id="@+id/nav_to_receive"
+            app:destination="@id/receive_fragment">
+        </action>
+        <action
             android:id="@+id/nav_to_onboarding"
             app:destination="@id/onboarding_fragment">
         </action>
@@ -35,6 +39,12 @@
             android:id="@+id/nav_to_utxos"
             app:destination="@id/utxos_fragment">
         </action>
+    </fragment>
+    <fragment
+        android:id="@+id/receive_fragment"
+        android:name="net.mynero.wallet.fragment.receive.ReceiveFragment"
+        android:label="fragment_send_amount"
+        tools:layout="@layout/fragment_receive">
     </fragment>
     <fragment
         android:id="@+id/utxos_fragment"

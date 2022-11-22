@@ -24,7 +24,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import net.mynero.wallet.MainActivity;
 import net.mynero.wallet.R;
 import net.mynero.wallet.adapter.TransactionInfoAdapter;
-import net.mynero.wallet.fragment.dialog.ReceiveBottomSheetDialog;
 import net.mynero.wallet.fragment.dialog.SendBottomSheetDialog;
 import net.mynero.wallet.model.TransactionInfo;
 import net.mynero.wallet.model.Wallet;
@@ -76,8 +75,7 @@ public class HomeFragment extends Fragment implements TransactionInfoAdapter.TxI
         });
 
         receiveButton.setOnClickListener(view1 -> {
-            ReceiveBottomSheetDialog receiveDialog = new ReceiveBottomSheetDialog();
-            receiveDialog.show(getActivity().getSupportFragmentManager(), null);
+            navigate(HomeFragmentDirections.navToReceive());
         });
     }
 
