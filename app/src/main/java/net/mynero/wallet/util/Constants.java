@@ -18,4 +18,5 @@ public class Constants {
     public static final String NAV_ARG_TXINFO = "nav_arg_txinfo";
 
     public static final String STREET_MODE_BALANCE = "#.############";
+    public static final String DONATE_ADDRESS = "87MRtZPrWUCVUgcFHdsVb5MoZUcLtqfD3FvQVGwftFb8eSdMnE39JhAJcbuSW8X2vRaRsB9RQfuCpFciybJFHaz3QYPhCLw";
 }

@@ -33,6 +33,7 @@ import net.mynero.wallet.model.Wallet;
 import net.mynero.wallet.service.BalanceService;
 import net.mynero.wallet.service.TxService;
 import net.mynero.wallet.service.UTXOService;
+import net.mynero.wallet.util.Constants;
 import net.mynero.wallet.util.Helper;
 import net.mynero.wallet.util.UriData;
 
@@ -76,6 +77,7 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
     private ImageButton pasteAddressImageButton;
     private ImageButton scanAddressImageButton;
     private RadioGroup feeRadioGroup;
+    private TextView donateTextView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -99,7 +101,8 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
         feeRadioGroup = view.findViewById(R.id.tx_fee_radiogroup);
         feeRadioGroupLabelTextView = view.findViewById(R.id.tx_fee_radiogroup_label_textview);
         selectedUtxosValueTextView = view.findViewById(R.id.selected_utxos_value_textview);
-
+        donateTextView = view.findViewById(R.id.donate_label_textview);
+        donateTextView.setOnClickListener(view1 -> addressEditText.setText(Constants.DONATE_ADDRESS));
         if (uriData != null) {
             addressEditText.setText(uriData.getAddress());
             if (uriData.hasAmount()) {
@@ -306,6 +309,7 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
             selectedUtxosValueTextView.setVisibility(View.GONE);
             feeRadioGroup.setVisibility(View.GONE);
             feeRadioGroupLabelTextView.setVisibility(View.GONE);
+            donateTextView.setVisibility(View.GONE);
         } else {
             sendButton.setVisibility(View.GONE);
             addressEditText.setVisibility(View.VISIBLE);
@@ -323,6 +327,7 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
             }
             feeRadioGroup.setVisibility(View.VISIBLE);
             feeRadioGroupLabelTextView.setVisibility(View.VISIBLE);
+            donateTextView.setVisibility(View.VISIBLE);
         }
     }
 
