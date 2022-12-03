@@ -70,7 +70,7 @@ public class ReceiveFragment extends Fragment {
     }
 
     private void bindObservers(View view) {
-        SubaddressAdapter adapter = new SubaddressAdapter();
+        SubaddressAdapter adapter = new SubaddressAdapter(mViewModel::selectAddress);
         RecyclerView recyclerView = view.findViewById(R.id.address_list_recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(adapter);
@@ -79,7 +79,10 @@ public class ReceiveFragment extends Fragment {
     }
 
     private void setAddress(Subaddress subaddress) {
-        addressLabelTextView.setText(subaddress.getLabel());
+        final String label = subaddress.getDisplayLabel();
+        final String address = getContext().getString(R.string.subbaddress_info_subtitle,
+                subaddress.getAddressIndex(), subaddress.getSquashedAddress());
+        addressLabelTextView.setText(label.isEmpty() ? address : label);
         addressTextView.setText(subaddress.getAddress());
         addressImageView.setImageBitmap(generate(subaddress.getAddress(), 256, 256));
         copyAddressImageButton.setOnClickListener(view1 -> Helper.clipBoardCopy(getContext(), "address", subaddress.getAddress()));
@@ -99,7 +102,7 @@ public class ReceiveFragment extends Fragment {
                     if (bitMatrix.get(j, i)) {
                         pixels[i * width + j] = night ? 0xffffffff : 0x00000000;
                     } else {
-                        pixels[i * height + j] = getResources().getColor(R.color.oled_dialogBackgroundColor);
+                        pixels[i * height + j] = getResources().getColor(R.color.oled_colorBackground);
                     }
                 }
             }

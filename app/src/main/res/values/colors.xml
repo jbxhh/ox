@@ -9,7 +9,7 @@
     <color name="oled_streetColorA">@color/oled_gradientTopColor</color>
     <color name="oled_streetColorB">@color/oled_colorBackground</color>
     <color name="oled_toolbarTextColor">@color/oled_colorOnBackground</color>
-    <color name="oled_favouriteColor">#FFDB72</color>
+    <color name="oled_favouriteColor">#f38854</color>
     <color name="oled_softFavouriteColor">@color/oled_favouriteColor</color>
     <color name="oled_positiveColor">#19ED60</color>
     <color name="oled_negativeColor">#f38854</color>
@@ -33,6 +33,7 @@
     <color name="oled_locked_utxo">#B5895A</color>
     <color name="oled_txBackgroundColor">#FBFBFB</color>
     <color name="oled_dialogBackgroundColor">#E8E8E8</color>
+    <color name="oled_addressListColor">#bbbbbb</color>
 
     <!-- CLASSIC -->
 

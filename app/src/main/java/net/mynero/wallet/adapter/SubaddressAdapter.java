@@ -37,12 +37,14 @@ import java.util.List;
 public class SubaddressAdapter extends RecyclerView.Adapter<SubaddressAdapter.ViewHolder> {
 
     private List<Subaddress> localDataSet;
+    private SubaddressAdapterListener listener = null;
 
     /**
      * Initialize the dataset of the Adapter.
      */
-    public SubaddressAdapter() {
+    public SubaddressAdapter(SubaddressAdapterListener listener) {
         this.localDataSet = new ArrayList<>();
+        this.listener = listener;
     }
 
     public void submitList(List<Subaddress> dataSet) {
@@ -58,7 +60,7 @@ public class SubaddressAdapter extends RecyclerView.Adapter<SubaddressAdapter.Vi
         View view = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.address_item, viewGroup, false);
 
-        return new ViewHolder(view);
+        return new ViewHolder(view, listener);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -83,14 +85,26 @@ public class SubaddressAdapter extends RecyclerView.Adapter<SubaddressAdapter.Vi
      * (custom ViewHolder).
      */
     public static class ViewHolder extends RecyclerView.ViewHolder {
+        private SubaddressAdapterListener listener = null;
 
-        public ViewHolder(View view) {
+        public ViewHolder(View view, SubaddressAdapterListener listener) {
             super(view);
+            this.listener = listener;
         }
 
         public void bind(Subaddress subaddress) {
             TextView addressTextView = itemView.findViewById(R.id.address_item_address_textview);
+            TextView addressLabelTextView = itemView.findViewById(R.id.address_label_textview);
+
             addressTextView.setText(subaddress.getAddress());
+
+            final String label = subaddress.getDisplayLabel();
+            final String address = itemView.getContext().getString(R.string.subbaddress_info_subtitle,
+                    subaddress.getAddressIndex(), subaddress.getSquashedAddress());
+            addressLabelTextView.setText(label.isEmpty() ? address : label);
+
+
+            itemView.setOnClickListener(view -> listener.onSubaddressSelected(subaddress));
         }
     }
 }

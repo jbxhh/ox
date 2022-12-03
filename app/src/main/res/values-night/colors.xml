@@ -32,6 +32,7 @@
     <color name="oled_locked_utxo">#956E43</color>
     <color name="oled_txBackgroundColor">#060606</color>
     <color name="oled_dialogBackgroundColor">#0E0E0E</color>
+    <color name="oled_addressListColor">#353535</color>
 
     <!-- CLASSIC -->
 

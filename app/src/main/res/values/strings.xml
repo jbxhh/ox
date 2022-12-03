@@ -117,4 +117,6 @@
     <string name="wallet_restore_height_label">Restore height</string>
     <string name="block_height">Block Height</string>
     <string name="use_password_as_seed_offset">Use password as seed offset</string>
+    <string name="subbaddress_info_subtitle" translatable="false">#%1$d: %2$s</string>
+    <string name="previous_addresses">Previous addresses</string>
 </resources>

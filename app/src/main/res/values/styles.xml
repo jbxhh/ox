@@ -70,6 +70,10 @@
         <item name="cardElevation">1dp</item>
     </style>
 
+    <style name="MoneroText.Subaddress">
+        <item name="android:background">@color/oled_favouriteColor</item>
+        <item name="android:textColor">?android:colorBackground</item>
+    </style>
 
     <style name="MoneroText.PosAmount">
         <item name="android:textSize">16sp</item>

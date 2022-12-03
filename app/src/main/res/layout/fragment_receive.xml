@@ -53,31 +53,35 @@
     <TextView
         android:id="@+id/address_textview"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
+        android:layout_marginTop="16dp"
         android:textSize="16sp"
         android:textStyle="bold"
         android:ellipsize="middle"
         android:singleLine="true"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
         app:layout_constraintEnd_toStartOf="@id/copy_address_imagebutton"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/copy_address_imagebutton"
+        app:layout_constraintTop_toBottomOf="@id/monero_qr_imageview"
         app:layout_constraintBottom_toTopOf="@id/address_label_textview"
         tools:text="ADDRESS" />
 
     <TextView
         android:id="@+id/address_label_textview"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        style="@style/MoneroText.Subaddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:textSize="14sp"
         android:ellipsize="middle"
         android:singleLine="true"
-        app:layout_constraintEnd_toStartOf="@id/copy_address_imagebutton"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/address_textview"
-        app:layout_constraintBottom_toBottomOf="@id/copy_address_imagebutton"
-        tools:text="ADDRESS" />
+        tools:text="LABEL" />
 
     <ImageButton
         android:id="@+id/copy_address_imagebutton"
@@ -94,13 +98,29 @@
         app:layout_constraintStart_toEndOf="@id/address_textview"
         app:layout_constraintTop_toBottomOf="@id/monero_qr_imageview" />
 
+    <TextView
+        android:id="@+id/address_list_label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:textSize="14sp"
+        android:ellipsize="middle"
+        android:singleLine="true"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/address_list_recyclerview"
+        android:text="@string/previous_addresses" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/address_list_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        android:clipToPadding="false"
-        android:paddingBottom="128dp"
+        android:background="@drawable/round_bg"
+        android:layout_marginTop="64dp"
+        android:paddingTop="8dp"
+        android:clipToPadding="true"
+        android:paddingBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
