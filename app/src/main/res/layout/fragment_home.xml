@@ -72,9 +72,9 @@
             android:src="@drawable/xmrchan_png"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/empty_tx_textview"/>
+            app:layout_constraintEnd_toStartOf="@id/monerochan_empty_tx_textview"/>
         <TextView
-            android:id="@+id/empty_tx_textview"
+            android:id="@+id/monerochan_empty_tx_textview"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/no_history_nget_some_monero_in_here"
@@ -82,6 +82,16 @@
             app:layout_constraintStart_toEndOf="@id/monerochan_imageview"
             app:layout_constraintTop_toTopOf="@id/monerochan_imageview"
             app:layout_constraintBottom_toBottomOf="@id/monerochan_imageview"/>
+        <TextView
+            android:id="@+id/empty_tx_textview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:text="@string/no_history_nget_some_monero_in_here"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ImageView

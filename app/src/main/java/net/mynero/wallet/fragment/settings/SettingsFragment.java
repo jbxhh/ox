@@ -35,6 +35,7 @@ import net.mynero.wallet.model.Wallet;
 import net.mynero.wallet.model.WalletManager;
 import net.mynero.wallet.service.BalanceService;
 import net.mynero.wallet.service.BlockchainService;
+import net.mynero.wallet.service.HistoryService;
 import net.mynero.wallet.service.PrefService;
 import net.mynero.wallet.util.Constants;
 import net.mynero.wallet.util.DayNightMode;
@@ -99,6 +100,7 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
         selectNodeButton = view.findViewById(R.id.select_node_button);
         SwitchCompat nightModeSwitch = view.findViewById(R.id.day_night_switch);
         SwitchCompat streetModeSwitch = view.findViewById(R.id.street_mode_switch);
+        SwitchCompat monerochanSwitch = view.findViewById(R.id.monerochan_switch);
         SwitchCompat torSwitch = view.findViewById(R.id.tor_switch);
         ConstraintLayout proxySettingsLayout = view.findViewById(R.id.wallet_proxy_settings_layout);
         walletProxyAddressEditText = view.findViewById(R.id.wallet_proxy_address_edittext);
@@ -117,6 +119,12 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
         streetModeSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
             PrefService.getInstance().edit().putBoolean(Constants.PREF_STREET_MODE, b).apply();
             BalanceService.getInstance().refreshBalance();
+        });
+
+        monerochanSwitch.setChecked(PrefService.getInstance().getBoolean(Constants.PREF_MONEROCHAN, true));
+        monerochanSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
+            PrefService.getInstance().edit().putBoolean(Constants.PREF_MONEROCHAN, b).apply();
+            HistoryService.getInstance().refreshHistory();
         });
 
         boolean usesProxy = PrefService.getInstance().getBoolean(Constants.PREF_USES_TOR, false);

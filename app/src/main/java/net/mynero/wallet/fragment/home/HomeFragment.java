@@ -31,6 +31,7 @@ import net.mynero.wallet.model.WalletManager;
 import net.mynero.wallet.service.BalanceService;
 import net.mynero.wallet.service.BlockchainService;
 import net.mynero.wallet.service.HistoryService;
+import net.mynero.wallet.service.PrefService;
 import net.mynero.wallet.util.Constants;
 
 import java.util.Collections;
@@ -133,6 +134,7 @@ public class HomeFragment extends Fragment implements TransactionInfoAdapter.TxI
                 if (history.isEmpty()) {
                     txHistoryRecyclerView.setVisibility(View.GONE);
                     noHistoryLayout.setVisibility(View.VISIBLE);
+                    displayEmptyHistory(view);
                 } else {
                     Collections.sort(history);
                     if (history.size() > 100) {
@@ -162,6 +164,19 @@ public class HomeFragment extends Fragment implements TransactionInfoAdapter.TxI
             if (navHostFragment != null) {
                 navHostFragment.getNavController().navigate(destination);
             }
+        }
+    }
+
+    private void displayEmptyHistory(View view) {
+        boolean displayMonerochan = PrefService.getInstance().getBoolean(Constants.PREF_MONEROCHAN, true);
+        if(displayMonerochan) {
+            view.findViewById(R.id.monerochan_imageview).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.monerochan_empty_tx_textview).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.empty_tx_textview).setVisibility(View.GONE);
+        } else {
+            view.findViewById(R.id.monerochan_imageview).setVisibility(View.GONE);
+            view.findViewById(R.id.monerochan_empty_tx_textview).setVisibility(View.GONE);
+            view.findViewById(R.id.empty_tx_textview).setVisibility(View.VISIBLE);
         }
     }
 }

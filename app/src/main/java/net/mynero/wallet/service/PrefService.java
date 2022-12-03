@@ -98,8 +98,9 @@ public class PrefService extends ServiceBase {
     }
 
     public boolean getBoolean(String key, boolean defaultValue) {
+        boolean containsKey = preferences.contains(key);
         boolean value = preferences.getBoolean(key, false);
-        if(!value && defaultValue) {
+        if(!value && defaultValue && !containsKey) {
             edit().putBoolean(key, true).apply();
             return true;
         }
