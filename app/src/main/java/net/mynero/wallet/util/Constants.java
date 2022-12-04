@@ -20,6 +20,10 @@ public class Constants {
     public static final String NAV_ARG_TXINFO = "nav_arg_txinfo";
 
     public static final String STREET_MODE_BALANCE = "#.############";
-    public static final String DONATE_ADDRESS_2 = "89Yym1JTqiM7PMgra3XP1oMtGkiAQHBrFE7VJFAVYU1DTpAqviTsNewM2KoBw5fLLufaNMfJZq9bNhyPmfWq62hy4T9jzQF"; // secondary wallet
+    public static final String[] DONATION_ADDRESSES = new String[] {
+            "87MRtZPrWUCVUgcFHdsVb5MoZUcLtqfD3FvQVGwftFb8eSdMnE39JhAJcbuSW8X2vRaRsB9RQfuCpFciybJFHaz3QYPhCLw", // primary MyNero Donation address
+            "89Yym1JTqiM7PMgra3XP1oMtGkiAQHBrFE7VJFAVYU1DTpAqviTsNewM2KoBw5fLLufaNMfJZq9bNhyPmfWq62hy4T9jzQF", // second MyNero Donation address
+            "8Bv91cxyDjaTdzW6186iwPGrQ2ZNDFVXL4bSw7mnSZ26Pii3cRNniY9K6r5yvg1yDsLtbt9pmiYcKUDTgWB2pmGJ4Fi2jK1" // third MyNero Donation address
+    };
     public static final String DONATE_ADDRESS = "87MRtZPrWUCVUgcFHdsVb5MoZUcLtqfD3FvQVGwftFb8eSdMnE39JhAJcbuSW8X2vRaRsB9RQfuCpFciybJFHaz3QYPhCLw";
 }
