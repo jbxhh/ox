@@ -20,6 +20,6 @@ public class Constants {
     public static final String NAV_ARG_TXINFO = "nav_arg_txinfo";
 
     public static final String STREET_MODE_BALANCE = "#.############";
-    public static final String DONATE_ADDRESS_2 = "89Yym1JTqiM7PMgra3XP1oMtGkiAQHBrFE7VJFAVYU1DTpAqviTsNewM2KoBw5fLLufaNMfJZq9bNhyPmfWq62hy4T9jzQF";
+    public static final String DONATE_ADDRESS_2 = "89Yym1JTqiM7PMgra3XP1oMtGkiAQHBrFE7VJFAVYU1DTpAqviTsNewM2KoBw5fLLufaNMfJZq9bNhyPmfWq62hy4T9jzQF"; // secondary wallet
     public static final String DONATE_ADDRESS = "87MRtZPrWUCVUgcFHdsVb5MoZUcLtqfD3FvQVGwftFb8eSdMnE39JhAJcbuSW8X2vRaRsB9RQfuCpFciybJFHaz3QYPhCLw";
 }
