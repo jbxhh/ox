@@ -288,6 +288,14 @@ public class Wallet {
                 txData.getPreferredInputs());
     }
 
+    public PendingTransaction createSweepTransaction(String dst_addr, PendingTransaction.Priority priority, ArrayList<String> key_images) {
+        disposePendingTransaction();
+        int _priority = priority.getValue();
+        long txHandle = createSweepTransaction(dst_addr, "", 0, _priority, accountIndex, key_images);
+        pendingTransaction = new PendingTransaction(txHandle);
+        return pendingTransaction;
+    }
+
     public PendingTransaction createTransaction(String dst_addr,
                                                 long amount, PendingTransaction.Priority priority, ArrayList<String> key_images) {
         disposePendingTransaction();
@@ -301,6 +309,26 @@ public class Wallet {
         pendingTransaction = new PendingTransaction(txHandle);
         return pendingTransaction;
     }
+
+    public PendingTransaction createTransactionMultDest(ArrayList<TransactionOutput> outputs, PendingTransaction.Priority priority, ArrayList<String> key_images) {
+        disposePendingTransaction();
+        int _priority = priority.getValue();
+        ArrayList<String> destinations = new ArrayList<>();
+        long[] amounts = new long[outputs.size()];
+        for(int i = 0; i < outputs.size(); i++) {
+            TransactionOutput output = outputs.get(i);
+            destinations.add(output.getDestination());
+            amounts[i] = output.getAmount();
+        }
+        long txHandle = createTransactionMultDestJ(destinations, "", amounts, 0, _priority,
+                        accountIndex, key_images);
+        pendingTransaction = new PendingTransaction(txHandle);
+        return pendingTransaction;
+    }
+
+    private native long createTransactionMultDestJ(ArrayList<String> dst_addrs, String payment_id,
+                                           long[] amount, int mixin_count,
+                                           int priority, int accountIndex, ArrayList<String> key_images);
 
     private native long createTransactionJ(String dst_addr, String payment_id,
                                            long amount, int mixin_count,

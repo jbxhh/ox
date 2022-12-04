@@ -233,6 +233,24 @@ std::vector<std::string> java2cpp(JNIEnv *env, jobject arrayList) {
     return result;
 }
 
+jlong getElement(JNIEnv *env, jlongArray arr_j, int element) {
+    jlong result;
+    env->GetLongArrayRegion(arr_j, element,1, &result);
+    return result;
+}
+
+std::vector<std::uint64_t> java2cpp_long(JNIEnv *env, jlongArray longArray) {
+    jint len = env->GetArrayLength(longArray);
+    std::vector<std::uint64_t> result;
+    result.reserve(len);
+    for (jint i = 0; i < len; i++) {
+        jlong amount = getElement(env, longArray, i);
+        result.emplace_back(amount);
+        env->ReleaseLongArrayElements(longArray, reinterpret_cast<jlong *>(amount), i);
+    }
+    return result;
+}
+
 std::set<std::string> java2cpp_set(JNIEnv *env, jobject arrayList) {
 
     jmethodID java_util_ArrayList_size = env->GetMethodID(class_ArrayList, "size", "()I");
@@ -1025,6 +1043,29 @@ Java_net_mynero_wallet_model_Wallet_createTransactionJ(JNIEnv *env, jobject inst
                                                                (uint32_t) accountIndex, {}, _key_images);
 
     env->ReleaseStringUTFChars(dst_addr, _dst_addr);
+    env->ReleaseStringUTFChars(payment_id, _payment_id);
+    return reinterpret_cast<jlong>(tx);
+}
+
+JNIEXPORT jlong JNICALL
+Java_net_mynero_wallet_model_Wallet_createTransactionMultDestJ(JNIEnv *env, jobject instance,
+                                                       jobject dst_addrs, jstring payment_id,
+                                                       jlongArray amounts, jint mixin_count,
+                                                       jint priority,
+                                                       jint accountIndex, jobject key_images) {
+    const std::set<std::string> _key_images = java2cpp_set(env, key_images);
+    const std::vector<std::string> _dst_addrs = java2cpp(env, dst_addrs);
+    const std::vector<std::uint64_t> _dst_amounts = java2cpp_long(env, amounts);
+    const char *_payment_id = env->GetStringUTFChars(payment_id, nullptr);
+    Monero::PendingTransaction::Priority _priority =
+            static_cast<Monero::PendingTransaction::Priority>(priority);
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+
+    Monero::PendingTransaction *tx = wallet->createTransactionMultDest(_dst_addrs, _payment_id,
+                                                                       _dst_amounts, (uint32_t) mixin_count,
+                                                               _priority,
+                                                               (uint32_t) accountIndex, {}, _key_images);
+
     env->ReleaseStringUTFChars(payment_id, _payment_id);
     return reinterpret_cast<jlong>(tx);
 }

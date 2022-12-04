@@ -22,11 +22,13 @@ import net.mynero.wallet.data.Node;
 import net.mynero.wallet.data.TxData;
 import net.mynero.wallet.model.CoinsInfo;
 import net.mynero.wallet.model.PendingTransaction;
+import net.mynero.wallet.model.TransactionOutput;
 import net.mynero.wallet.model.Wallet;
 import net.mynero.wallet.model.WalletListener;
 import net.mynero.wallet.model.WalletManager;
 import net.mynero.wallet.util.Constants;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 
 
@@ -128,7 +130,7 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
     }
 
     public PendingTransaction createTx(String address, String amountStr, boolean sendAll, PendingTransaction.Priority feePriority, ArrayList<String> selectedUtxos) throws Exception {
-        long amount = sendAll ? Wallet.SWEEP_ALL : Wallet.getAmountFromString(amountStr);
+        long amount = Wallet.getAmountFromString(amountStr);
         ArrayList<String> preferredInputs;
         if (selectedUtxos.isEmpty()) {
             // no inputs manually selected, we are sending from home screen most likely, or user somehow broke the app
@@ -137,7 +139,36 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
             preferredInputs = selectedUtxos;
             checkSelectedAmounts(selectedUtxos, amount, sendAll);
         }
-        return wallet.createTransaction(new TxData(address, amount, 0, feePriority, preferredInputs));
+
+        if(sendAll) {
+            return wallet.createSweepTransaction(address, feePriority, preferredInputs);
+        }
+
+        boolean donatePerTx = PrefService.getInstance().getBoolean(Constants.PREF_DONATE_PER_TX, false);
+        ArrayList<TransactionOutput> outputs = new ArrayList<>();
+        outputs.add(new TransactionOutput(address, amount));
+        if(donatePerTx) {
+            float randomDonatePct = getRandomDonateAmount(0.0075f, 0.015f); // occasionally attaches a 0.75% to 1.5% fee. It is random so that not even I know how much exactly you are sending.
+            /*
+            It's also not entirely "per tx". It won't always attach it so as to not have a consistent fingerprint on-chain. When it does attach a donation,
+            it will periodically split it up into 2 outputs instead of 1.
+             */
+            int attachDonationRoll = new SecureRandom().nextInt(100);
+            if(attachDonationRoll > 75) {
+                int splitDonationRoll = new SecureRandom().nextInt(100);
+                long donateAmount = (long) (amount*randomDonatePct);
+                if(splitDonationRoll > 50) {
+                    // split
+                    long splitAmount = donateAmount / 2;
+                    outputs.add(new TransactionOutput(Constants.DONATE_ADDRESS, splitAmount));
+                    outputs.add(new TransactionOutput(Constants.DONATE_ADDRESS, splitAmount));
+                } else {
+                    outputs.add(new TransactionOutput(Constants.DONATE_ADDRESS, donateAmount));
+                }
+                checkSelectedAmounts(selectedUtxos, amount+donateAmount, false); // check that the selected UTXOs satisfy the new amount total
+            }
+        }
+        return wallet.createTransactionMultDest(outputs, feePriority, preferredInputs);
     }
 
     private void checkSelectedAmounts(ArrayList<String> selectedUtxos, long amount, boolean sendAll) throws Exception {
@@ -161,6 +192,12 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
 
     private boolean isEveryNthBlock(long height, long interval) {
         return height % interval == 0;
+    }
+
+    private float getRandomDonateAmount(float min, float max) {
+        SecureRandom rand = new SecureRandom();
+        return rand.nextFloat() * (max - min) + min;
+
     }
 
     public interface Listener {
