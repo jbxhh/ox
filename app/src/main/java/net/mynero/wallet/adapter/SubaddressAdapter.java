@@ -30,6 +30,7 @@ import net.mynero.wallet.model.CoinsInfo;
 import net.mynero.wallet.model.Wallet;
 import net.mynero.wallet.service.PrefService;
 import net.mynero.wallet.util.Constants;
+import net.mynero.wallet.util.Helper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,6 +95,7 @@ public class SubaddressAdapter extends RecyclerView.Adapter<SubaddressAdapter.Vi
         public void bind(Subaddress subaddress) {
             TextView addressTextView = itemView.findViewById(R.id.address_item_address_textview);
             TextView addressLabelTextView = itemView.findViewById(R.id.address_label_textview);
+            TextView addressAmountTextView = itemView.findViewById(R.id.address_amount_textview);
 
             addressTextView.setText(subaddress.getAddress());
 
@@ -102,6 +104,19 @@ public class SubaddressAdapter extends RecyclerView.Adapter<SubaddressAdapter.Vi
                     subaddress.getAddressIndex(), subaddress.getSquashedAddress());
             addressLabelTextView.setText(label.isEmpty() ? address : label);
 
+            final long amount = subaddress.getAmount();
+            if (amount > 0) {
+                boolean streetMode = PrefService.getInstance().getBoolean(Constants.PREF_STREET_MODE, false);
+                if(streetMode) {
+                    addressAmountTextView.setText(itemView.getContext().getString(R.string.tx_list_amount_positive,
+                            Constants.STREET_MODE_BALANCE));
+                } else {
+                    addressAmountTextView.setText(itemView.getContext().getString(R.string.tx_list_amount_positive,
+                            Helper.getDisplayAmount(amount, Helper.DISPLAY_DIGITS_INFO)));
+                }
+            }
+            else
+                addressAmountTextView.setText("");
 
             itemView.setOnClickListener(view -> listener.onSubaddressSelected(subaddress));
         }

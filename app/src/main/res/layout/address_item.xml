@@ -35,4 +35,20 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:singleLine="true" />
+
+    <TextView
+        android:id="@+id/address_amount_textview"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="Amount"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:ellipsize="middle"
+        android:textAlignment="viewEnd"
+        android:textColor="@color/oled_positiveColor"
+        app:layout_constraintTop_toBottomOf="@id/address_item_address_textview"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/address_label_textview"
+        android:singleLine="true" />
 </androidx.constraintlayout.widget.ConstraintLayout>
