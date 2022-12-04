@@ -225,6 +225,10 @@ public class OnboardingFragment extends Fragment {
             long restoreHeight = getNewRestoreHeight();
             File walletFile = new File(mainActivity.getApplicationInfo().dataDir, Constants.WALLET_NAME);
             Wallet wallet = null;
+            if(!offset.isEmpty()) {
+                PrefService.getInstance().edit().putBoolean(Constants.PREF_USES_OFFSET, true).apply();
+            }
+
             if (walletSeed.isEmpty()) {
                 Wallet tmpWallet = createTempWallet(mainActivity.getApplicationInfo().dataDir); //we do this to get seed, then recover wallet so we can use seed offset
                 wallet = WalletManager.getInstance().recoveryWallet(walletFile, walletPassword, tmpWallet.getSeed(""), offset, restoreHeight);
@@ -235,9 +239,6 @@ public class OnboardingFragment extends Fragment {
                 }
                 if (!restoreHeightText.isEmpty()) {
                     restoreHeight = Long.parseLong(restoreHeightText);
-                }
-                if(!offset.isEmpty()) {
-                    PrefService.getInstance().edit().putBoolean(Constants.PREF_USES_OFFSET, true).apply();
                 }
                 wallet = WalletManager.getInstance().recoveryWallet(walletFile, walletPassword, walletSeed, offset, restoreHeight);
             }
