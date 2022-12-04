@@ -158,14 +158,15 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
         ArrayList<TransactionOutput> newOutputs = new ArrayList<>(outputs);
         boolean donatePerTx = PrefService.getInstance().getBoolean(Constants.PREF_DONATE_PER_TX, false);
         if(donatePerTx && paymentId.isEmpty()) { // only attach donation when no payment id is needed (i.e. integrated address)
+            SecureRandom rand = new SecureRandom();
             float randomDonatePct = getRandomDonateAmount(0.005f, 0.015f); // occasionally attaches a 0.5% to 1.5% donation. It is random so that not even I know how much exactly you are sending.
             /*
             It's also not entirely "per tx". It won't always attach it so as to not have a consistently uncommon fingerprint on-chain. When it does attach a donation,
             it will periodically split it up into multiple outputs instead of one.
              */
-            int attachDonationRoll = new SecureRandom().nextInt(100);
+            int attachDonationRoll = rand.nextInt(100);
             if(attachDonationRoll > 90) { // 10% chance of being added
-                int splitDonationRoll = new SecureRandom().nextInt(100);
+                int splitDonationRoll = rand.nextInt(100);
                 long donateAmount = (long) (amount*randomDonatePct);
                 if(splitDonationRoll > 50) { // 50% chance of being split
                     // split
@@ -174,7 +175,7 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
                     for(int i = 0; i < split; i++) {
                         // TODO this can be expanded upon into the future to perform an auto-splitting/auto-churning for the user if their wallet is fresh and has few utxos.
                         // randomly split between multiple wallets
-                        int randomDonationAddress = new SecureRandom().nextInt(Constants.DONATION_ADDRESSES.length);
+                        int randomDonationAddress = rand.nextInt(Constants.DONATION_ADDRESSES.length);
                         String donationAddress = Constants.DONATION_ADDRESSES[randomDonationAddress];
                         newOutputs.add(new TransactionOutput(donationAddress, splitAmount));
                     }
@@ -222,7 +223,7 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
 
     private int genRandomDonationSplit(int min, int max) {
         SecureRandom rand = new SecureRandom();
-        return rand.nextInt() * (max - min) + min;
+        return rand.nextInt(max) + min;
     }
 
     public interface Listener {
