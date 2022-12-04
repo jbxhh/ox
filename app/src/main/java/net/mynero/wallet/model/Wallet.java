@@ -310,7 +310,7 @@ public class Wallet {
         return pendingTransaction;
     }
 
-    public PendingTransaction createTransactionMultDest(ArrayList<TransactionOutput> outputs, PendingTransaction.Priority priority, ArrayList<String> key_images) {
+    public PendingTransaction createTransactionMultDest(List<TransactionOutput> outputs, PendingTransaction.Priority priority, ArrayList<String> key_images) {
         disposePendingTransaction();
         int _priority = priority.getValue();
         ArrayList<String> destinations = new ArrayList<>();

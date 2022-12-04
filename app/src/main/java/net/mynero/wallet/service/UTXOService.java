@@ -63,6 +63,8 @@ public class UTXOService extends ServiceBase {
             }
         }
 
+        System.out.println("AMOUNT WITH BASIC FEE:: " + amountWithBasicFee);
+        System.out.println("AMOUNT SELECTED:: " + amountSelected);
         if (amountSelected < amountWithBasicFee && !sendAll) {
             throw new Exception("insufficient wallet balance");
         }

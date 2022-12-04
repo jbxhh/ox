@@ -246,7 +246,6 @@ std::vector<std::uint64_t> java2cpp_long(JNIEnv *env, jlongArray longArray) {
     for (jint i = 0; i < len; i++) {
         jlong amount = getElement(env, longArray, i);
         result.emplace_back(amount);
-        env->ReleaseLongArrayElements(longArray, reinterpret_cast<jlong *>(amount), i);
     }
     return result;
 }

