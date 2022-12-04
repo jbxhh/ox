@@ -42,6 +42,8 @@
     <string name="night_mode">Night mode</string>
     <string name="street_mode">Street mode (hide balances)</string>
     <string name="option_hide_xmrchan">Show Monerochan</string>
+    <string name="option_donate_per_tx">Add occasional donation</string>
+    <string name="option_donate_per_tx_desc">Randomly adds a 0.75%-1.5% MyNero donation to Txns. It\'s random so Txns don\'t have a consistent fingerprint, and the % is random so I don\'t know the exact Txn amount.</string>
     <string name="display_recovery_phrase">Display wallet keys</string>
     <string name="tor_switch_label">Connect to proxy</string>
     <string name="connection_failed">Connection failed</string>
@@ -121,4 +123,5 @@
     <string name="subbaddress_info_subtitle" translatable="false">#%1$d: %2$s</string>
     <string name="previous_addresses">Previous addresses</string>
     <string name="donate_label">Donate to MyNero</string>
+    <string name="transactions">Transactions</string>
 </resources>

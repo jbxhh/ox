@@ -101,6 +101,7 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
         SwitchCompat nightModeSwitch = view.findViewById(R.id.day_night_switch);
         SwitchCompat streetModeSwitch = view.findViewById(R.id.street_mode_switch);
         SwitchCompat monerochanSwitch = view.findViewById(R.id.monerochan_switch);
+        SwitchCompat donationSwitch = view.findViewById(R.id.donate_per_tx_switch);
         SwitchCompat torSwitch = view.findViewById(R.id.tor_switch);
         ConstraintLayout proxySettingsLayout = view.findViewById(R.id.wallet_proxy_settings_layout);
         walletProxyAddressEditText = view.findViewById(R.id.wallet_proxy_address_edittext);
@@ -126,6 +127,9 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
             PrefService.getInstance().edit().putBoolean(Constants.PREF_MONEROCHAN, b).apply();
             HistoryService.getInstance().refreshHistory();
         });
+
+        donationSwitch.setChecked(PrefService.getInstance().getBoolean(Constants.PREF_DONATE_PER_TX, false));
+        donationSwitch.setOnCheckedChangeListener((compoundButton, b) -> PrefService.getInstance().edit().putBoolean(Constants.PREF_DONATE_PER_TX, b).apply());
 
         boolean usesProxy = PrefService.getInstance().getBoolean(Constants.PREF_USES_TOR, false);
         String proxy = PrefService.getInstance().getString(Constants.PREF_PROXY, "");

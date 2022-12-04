@@ -132,7 +132,6 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
 
     public PendingTransaction createTx(String address, String amountStr, boolean sendAll, PendingTransaction.Priority feePriority, ArrayList<String> selectedUtxos) throws Exception {
         long amount = Wallet.getAmountFromString(amountStr);
-        System.out.println("AMOUNT:: " + amount);
         ArrayList<String> preferredInputs;
         if (selectedUtxos.isEmpty()) {
             // no inputs manually selected, we are sending from home screen most likely, or user somehow broke the app
@@ -153,24 +152,21 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
     }
 
     private List<TransactionOutput> maybeAddDonationOutputs(long amount, List<TransactionOutput> outputs, List<String> preferredInputs) throws Exception {
-        TransactionOutput mainDestination = outputs.get(0); // at this point, for now, we should only have one item in the list
+        TransactionOutput mainDestination = outputs.get(0); // at this point, for now, we should only have one item in the list. TODO: add multi-dest/pay-to-many feature in the UI
         String paymentId = Wallet.getPaymentIdFromAddress(mainDestination.getDestination(), WalletManager.getInstance().getNetworkType().getValue());
-        System.out.println("PAYMENT ID:: " + paymentId + ".");
         ArrayList<TransactionOutput> newOutputs = new ArrayList<>(outputs);
-        boolean donatePerTx = true;
-        if(donatePerTx && paymentId.isEmpty()) {
-            float randomDonatePct = getRandomDonateAmount(0.0075f, 0.015f); // occasionally attaches a 0.75% to 1.5% fee. It is random so that not even I know how much exactly you are sending.
+        boolean donatePerTx = PrefService.getInstance().getBoolean(Constants.PREF_DONATE_PER_TX, false);
+        if(donatePerTx && paymentId.isEmpty()) { // only attach donation when no payment id is needed (i.e. integrated address)
+            float randomDonatePct = getRandomDonateAmount(0.005f, 0.015f); // occasionally attaches a 0.5% to 1.5% donation. It is random so that not even I know how much exactly you are sending.
             /*
             It's also not entirely "per tx". It won't always attach it so as to not have a consistent fingerprint on-chain. When it does attach a donation,
             it will periodically split it up into 2 outputs instead of 1.
              */
-            System.out.println("RANDOM DONATE PCT:: " + randomDonatePct);
             int attachDonationRoll = new SecureRandom().nextInt(100);
-            if(attachDonationRoll > 1) {
+            if(attachDonationRoll > 75) { // 25% chance of being added
                 int splitDonationRoll = new SecureRandom().nextInt(100);
                 long donateAmount = (long) (amount*randomDonatePct);
-                System.out.println("DONATE AMOUNT:: " + donateAmount);
-                if(splitDonationRoll > 50) {
+                if(splitDonationRoll > 50) { // 50% chance of being split
                     // split
                     long splitAmount = donateAmount / 2;
                     newOutputs.add(new TransactionOutput(Constants.DONATE_ADDRESS, splitAmount));
@@ -179,7 +175,6 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
                     newOutputs.add(new TransactionOutput(Constants.DONATE_ADDRESS, donateAmount));
                 }
                 long total = amount + donateAmount;
-                System.out.println("TOTAL:: " + total);
                 checkSelectedAmounts(preferredInputs, total, false); // check that the selected UTXOs satisfy the new amount total
             }
         }
@@ -197,9 +192,6 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
             }
 
             if (amountSelected <= amount) {
-                System.out.println("/////// CHECK");
-                System.out.println("AMOUNT SELECTED:: " + amountSelected);
-                System.out.println("AMOUNT:: " + amount);
                 throw new Exception("insufficient wallet balance");
             }
         }

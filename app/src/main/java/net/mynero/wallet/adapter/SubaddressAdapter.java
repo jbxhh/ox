@@ -48,7 +48,6 @@ public class SubaddressAdapter extends RecyclerView.Adapter<SubaddressAdapter.Vi
     }
 
     public void submitList(List<Subaddress> dataSet) {
-        System.out.println("ADDRESSES: " + dataSet);
         this.localDataSet = dataSet;
         notifyDataSetChanged();
     }
