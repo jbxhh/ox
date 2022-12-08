@@ -25,6 +25,7 @@ public enum DefaultNodes {
     HASHVAULT("nodes.hashvault.pro:18081/mainnet/Hashvault"),
     MONEROWORLD("node.moneroworld.com:18089/mainnet/MoneroWorld"),
     XMRTW("opennode.xmr-tw.org:18089/mainnet/XMRTW"),
+    MYNERO_I2P("ynk3hrwte23asonojqeskoulek2g2cd6tqg4neghnenfyljrvhga.b32.i2p:0/mainnet/node.mynero.i2p"),
     SAMOURAI_ONION("446unwib5vc7pfbzflosy6m6vtyuhddnalr3hutyavwe4esfuu5g6ryd.onion:18089/mainnet/SamouraiWallet.onion"),
     MONERUJO_ONION("monerujods7mbghwe6cobdr6ujih6c22zu5rl7zshmizz2udf7v7fsad.onion:18081/mainnet/monerujo.onion"),
     Criminales78("56wl7y2ebhamkkiza4b7il4mrzwtyvpdym7bm2bkg3jrei2je646k3qd.onion:18089/mainnet/Criminales78.onion"),
