@@ -27,7 +27,18 @@ public class PrefService extends ServiceBase {
 
     public Node getNode() {
         boolean usesProxy = getBoolean(Constants.PREF_USES_TOR, false);
-        DefaultNodes defaultNode = usesProxy ? DefaultNodes.SAMOURAI_ONION : DefaultNodes.SAMOURAI;
+        DefaultNodes defaultNode = DefaultNodes.SAMOURAI;
+        if(usesProxy) {
+            String proxyPort = getProxyPort();
+            if (!proxyPort.isEmpty()) {
+                int port = Integer.parseInt(proxyPort);
+                if(port == 4447) {
+                    defaultNode = DefaultNodes.MYNERO_I2P;
+                } else {
+                    defaultNode = DefaultNodes.SAMOURAI_ONION;
+                }
+            }
+        }
         String nodeString = getString(Constants.PREF_NODE_2, defaultNode.getUri());
         if(!nodeString.isEmpty()) {
             return Node.fromString(nodeString);
@@ -86,6 +97,31 @@ public class PrefService extends ServiceBase {
         } else {
             return Node.fromString(nodeString);
         }
+    }
+
+    public String getProxy() {
+        return PrefService.getInstance().getString(Constants.PREF_PROXY, "");
+    }
+
+    public boolean hasProxySet() {
+        String proxyString = getProxy();
+        return proxyString.contains(":");
+    }
+
+    public String getProxyAddress() {
+        if (hasProxySet()) {
+            String proxyString = getProxy();
+            return proxyString.split(":")[0];
+        }
+        return "";
+    }
+
+    public String getProxyPort() {
+        if (hasProxySet()) {
+            String proxyString = getProxy();
+            return proxyString.split(":")[1];
+        }
+        return "";
     }
 
     public String getString(String key, String defaultValue) {

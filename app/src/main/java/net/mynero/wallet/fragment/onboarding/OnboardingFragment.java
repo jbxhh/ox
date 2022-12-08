@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -30,8 +29,6 @@ import net.mynero.wallet.model.WalletManager;
 import net.mynero.wallet.service.PrefService;
 import net.mynero.wallet.util.Constants;
 import net.mynero.wallet.util.RestoreHeight;
-
-import org.json.JSONObject;
 
 import java.io.File;
 import java.util.Calendar;
@@ -186,12 +183,11 @@ public class OnboardingFragment extends Fragment {
         torSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
             PrefService.getInstance().edit().putBoolean(Constants.PREF_USES_TOR, b).apply();
             if (b) {
-                String proxyString = PrefService.getInstance().getString(Constants.PREF_PROXY, "");
                 removeProxyTextListeners();
 
-                if (proxyString.contains(":")) {
-                    String proxyAddress = proxyString.split(":")[0];
-                    String proxyPort = proxyString.split(":")[1];
+                if (PrefService.getInstance().hasProxySet()) {
+                    String proxyAddress = PrefService.getInstance().getProxyAddress();
+                    String proxyPort = PrefService.getInstance().getProxyPort();
                     initProxyStuff(proxyAddress, proxyPort);
                 } else {
                     initProxyStuff("127.0.0.1", "9050");

@@ -131,11 +131,11 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
         donationSwitch.setChecked(PrefService.getInstance().getBoolean(Constants.PREF_DONATE_PER_TX, false));
         donationSwitch.setOnCheckedChangeListener((compoundButton, b) -> PrefService.getInstance().edit().putBoolean(Constants.PREF_DONATE_PER_TX, b).apply());
 
-        boolean usesProxy = PrefService.getInstance().getBoolean(Constants.PREF_USES_TOR, false);
-        String proxy = PrefService.getInstance().getString(Constants.PREF_PROXY, "");
-        if (proxy.contains(":")) {
-            String proxyAddress = proxy.split(":")[0];
-            String proxyPort = proxy.split(":")[1];
+        PrefService prefService = PrefService.getInstance();
+        boolean usesProxy = prefService.getBoolean(Constants.PREF_USES_TOR, false);
+        if (prefService.hasProxySet()) {
+            String proxyAddress = prefService.getProxyAddress();
+            String proxyPort = prefService.getProxyPort();
             initProxyStuff(proxyAddress, proxyPort);
         }
         torSwitch.setChecked(usesProxy);
@@ -148,14 +148,13 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
         addProxyTextListeners();
 
         torSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
-            PrefService.getInstance().edit().putBoolean(Constants.PREF_USES_TOR, b).apply();
+            prefService.edit().putBoolean(Constants.PREF_USES_TOR, b).apply();
             if (b) {
-                String proxyString = PrefService.getInstance().getString(Constants.PREF_PROXY, "");
-                if (proxyString.contains(":")) {
+                if (prefService.hasProxySet()) {
                     removeProxyTextListeners();
 
-                    String proxyAddress = proxyString.split(":")[0];
-                    String proxyPort = proxyString.split(":")[1];
+                    String proxyAddress = prefService.getProxyAddress();
+                    String proxyPort = prefService.getProxyPort();
                     initProxyStuff(proxyAddress, proxyPort);
 
                     addProxyTextListeners();

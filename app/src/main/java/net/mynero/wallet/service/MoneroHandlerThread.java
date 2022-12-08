@@ -60,12 +60,13 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
 
     @Override
     public void run() {
-        boolean usesTor = PrefService.getInstance().getBoolean(Constants.PREF_USES_TOR, false);
-        String currentNodeString = PrefService.getInstance().getNode().toNodeString();
+        PrefService prefService = PrefService.getInstance();
+        boolean usesTor = prefService.getBoolean(Constants.PREF_USES_TOR, false);
+        String currentNodeString = prefService.getNode().toNodeString();
         Node selectedNode = Node.fromString(currentNodeString);
         boolean isLocalIp = currentNodeString.startsWith("10.") || currentNodeString.startsWith("192.168.") || currentNodeString.equals("localhost") || currentNodeString.equals("127.0.0.1");
         if (usesTor && !isLocalIp) {
-            String proxy = PrefService.getInstance().getString(Constants.PREF_PROXY, "");
+            String proxy = prefService.getProxy();
             WalletManager.getInstance().setProxy(proxy);
             wallet.setProxy(proxy);
         }
