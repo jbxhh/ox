@@ -23,6 +23,6 @@ public class OnionHelper {
     }
 
     public static boolean isI2PHost(String hostname) {
-        return hostname.endsWith(".b32.i2p");
+        return hostname.endsWith(".i2p");
     }
 }

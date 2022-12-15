@@ -105,23 +105,8 @@ public class AddNodeBottomSheetDialog extends BottomSheetDialogFragment {
                     return;
                 }
 
-                String nodesArray = PrefService.getInstance().getString(Constants.PREF_CUSTOM_NODES, "[]");
-                JSONArray jsonArray = new JSONArray(nodesArray);
-                boolean exists = false;
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    String nodeString = jsonArray.getString(i);
-                    if (nodeString.equals(nodeStringBuilder.toString()))
-                        exists = true;
-                }
+                addNodeToSaved(nodeStringBuilder);
 
-                if (!exists) {
-                    jsonArray.put(nodeStringBuilder.toString());
-                } else {
-                    Toast.makeText(getContext(), "Node already exists", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                PrefService.getInstance().edit().putString(Constants.PREF_CUSTOM_NODES, jsonArray.toString()).apply();
                 if (listener != null) {
                     listener.onNodeAdded();
                 }
@@ -129,6 +114,26 @@ public class AddNodeBottomSheetDialog extends BottomSheetDialogFragment {
                 e.printStackTrace();
             }
         });
+    }
+
+    private void addNodeToSaved(StringBuilder nodeStringBuilder) throws JSONException {
+        String nodesArray = PrefService.getInstance().getString(Constants.PREF_CUSTOM_NODES, "[]");
+        JSONArray jsonArray = new JSONArray(nodesArray);
+        boolean exists = false;
+        for (int i = 0; i < jsonArray.length(); i++) {
+            String nodeString = jsonArray.getString(i);
+            if (nodeString.equals(nodeStringBuilder.toString()))
+                exists = true;
+        }
+
+        if (!exists) {
+            jsonArray.put(nodeStringBuilder.toString());
+        } else {
+            Toast.makeText(getContext(), "Node already exists", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        PrefService.getInstance().edit().putString(Constants.PREF_CUSTOM_NODES, jsonArray.toString()).apply();
     }
 
     private void addPasteListener(View root, EditText editText, int layoutId) {
