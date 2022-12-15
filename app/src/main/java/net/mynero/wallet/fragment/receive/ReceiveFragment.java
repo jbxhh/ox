@@ -63,7 +63,7 @@ public class ReceiveFragment extends Fragment {
     }
 
     private void bindListeners(View view) {
-        ImageView freshAddressImageView = view.findViewById(R.id.fresh_address_imageview);
+        ImageButton freshAddressImageView = view.findViewById(R.id.fresh_address_imageview);
         freshAddressImageView.setOnClickListener(view1 -> {
             mViewModel.getFreshSubaddress();
         });

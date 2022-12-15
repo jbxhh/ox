@@ -23,9 +23,11 @@ public class UriData {
             String[] queryParts = queryParams.split("&");
             for (String param : queryParts) {
                 String[] paramParts = param.split("=");
-                String variable = paramParts[0];
-                String value = paramParts[1];
-                params.put(variable, value);
+                if(paramParts.length == 2) {
+                    String variable = paramParts[0];
+                    String value = paramParts[1];
+                    params.put(variable, value);
+                }
             }
         }
         boolean valid = Wallet.isAddressValid(finalAddress);
