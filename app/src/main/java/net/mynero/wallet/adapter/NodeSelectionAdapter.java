@@ -107,8 +107,12 @@ public class NodeSelectionAdapter extends RecyclerView.Adapter<NodeSelectionAdap
             }
             TextView nodeNameTextView = itemView.findViewById(R.id.node_name_textview);
             TextView nodeAddressTextView = itemView.findViewById(R.id.node_uri_textview);
+            TextView authTextView = itemView.findViewById(R.id.authenticated_textview);
             nodeNameTextView.setText(node.getName());
             nodeAddressTextView.setText(node.getAddress());
+            if(!node.getPassword().isEmpty()) {
+                authTextView.setVisibility(View.VISIBLE);
+            }
             ImageView nodeAnonymityNetworkImageView = itemView.findViewById(R.id.anonymity_network_imageview);
 
             if(node.isOnion()) {
