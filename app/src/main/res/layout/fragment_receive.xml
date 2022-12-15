@@ -20,11 +20,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/fresh_address_imageview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
         android:src="@drawable/lb_ic_replay"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/recv_monero_textview"
         app:layout_constraintBottom_toBottomOf="@id/recv_monero_textview"
@@ -89,9 +92,8 @@
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         android:layout_marginTop="16dp"
-        android:minWidth="24dp"
-        android:minHeight="24dp"
-        android:padding="8dp"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
         android:src="@drawable/ic_content_copy_24dp"
         app:layout_constraintBottom_toTopOf="@id/address_list_recyclerview"
         app:layout_constraintEnd_toEndOf="parent"
