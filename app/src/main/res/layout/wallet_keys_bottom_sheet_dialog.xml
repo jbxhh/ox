@@ -47,6 +47,8 @@
             android:textSize="12sp"
             android:textColor="#f00"
             android:text="@string/wallet_seed_desc"
+            app:layout_constraintVertical_bias="0.0"
+            app:layout_constraintBottom_toTopOf="@id/information_textview"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/wallet_seed_label_textview" />
@@ -95,8 +97,10 @@
             android:textSize="12sp"
             android:textColor="#f80"
             android:text="@string/wallet_viewkey_desc"
+            app:layout_constraintVertical_bias="0.0"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/copy_viewkey_imagebutton"
             app:layout_constraintTop_toBottomOf="@id/wallet_viewkey_label_textview" />
 
         <TextView
@@ -121,6 +125,8 @@
             android:padding="8dp"
             android:src="@drawable/ic_content_copy_24dp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintVertical_bias="0.0"
+            app:layout_constraintBottom_toTopOf="@id/wallet_restore_height_label_textview"
             app:layout_constraintStart_toEndOf="@id/viewkey_textview"
             app:layout_constraintTop_toBottomOf="@id/wallet_viewkey_desc_textview" />
         <TextView
