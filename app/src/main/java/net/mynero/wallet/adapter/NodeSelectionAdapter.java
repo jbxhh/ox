@@ -109,7 +109,6 @@ public class NodeSelectionAdapter extends RecyclerView.Adapter<NodeSelectionAdap
             TextView nodeAddressTextView = itemView.findViewById(R.id.node_uri_textview);
             nodeNameTextView.setText(node.getName());
             nodeAddressTextView.setText(node.getAddress());
-
             ImageView nodeAnonymityNetworkImageView = itemView.findViewById(R.id.anonymity_network_imageview);
 
             if(node.isOnion()) {
@@ -125,10 +124,10 @@ public class NodeSelectionAdapter extends RecyclerView.Adapter<NodeSelectionAdap
             itemView.setOnLongClickListener(view -> {
                 if(match) {
                     Toast.makeText(itemView.getContext(), itemView.getResources().getString(R.string.cant_edit_current_node), Toast.LENGTH_SHORT).show();
-                    return false;
+                    return true;
                 } else if(isDefaultNode(node)) {
                     Toast.makeText(itemView.getContext(), itemView.getResources().getString(R.string.cant_edit_default_nodes), Toast.LENGTH_SHORT).show();
-                    return false;
+                    return true;
                 } else {
                     return listener.onSelectEditNode(node);
                 }

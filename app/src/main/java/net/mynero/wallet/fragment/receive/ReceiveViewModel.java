@@ -5,10 +5,12 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import net.mynero.wallet.data.Subaddress;
+import net.mynero.wallet.model.Wallet;
 import net.mynero.wallet.model.WalletManager;
 import net.mynero.wallet.service.AddressService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ReceiveViewModel extends ViewModel {
@@ -23,12 +25,13 @@ public class ReceiveViewModel extends ViewModel {
     }
 
     private List<Subaddress> getSubaddresses() {
+        Wallet wallet = WalletManager.getInstance().getWallet();
         ArrayList<Subaddress> subaddresses = new ArrayList<>();
         int addressesSize = AddressService.getInstance().getLatestAddressIndex();
-        for(int i = 0; i < addressesSize; i++) {
-            subaddresses.add(WalletManager.getInstance().getWallet().getSubaddressObject(i));
+        for(int i = addressesSize - 1; i >= 0; i--) {
+            subaddresses.add(wallet.getSubaddressObject(i));
         }
-        return subaddresses;
+        return Collections.unmodifiableList(subaddresses);
     }
 
     public void getFreshSubaddress() {

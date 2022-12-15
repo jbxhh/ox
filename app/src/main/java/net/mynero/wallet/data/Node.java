@@ -223,7 +223,9 @@ public class Node {
         return (host.equals(anotherNode.host)
                 && (getAddress().equals(anotherNode.getAddress()))
                 && (rpcPort == anotherNode.rpcPort)
-                && (networkType == anotherNode.networkType));
+                && (networkType == anotherNode.networkType))
+                && (username.equals(anotherNode.getUsername()))
+                && (password.equals(anotherNode.getPassword()));
     }
 
     public boolean isOnion() {

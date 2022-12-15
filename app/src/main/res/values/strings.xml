@@ -78,6 +78,8 @@
     <string name="nodes">Nodes</string>
     <string name="node_name_hint">My Monero Node</string>
     <string name="node_address_hint">127.0.0.1:18081</string>
+    <string name="node_username_hint">Username (optional)</string>
+    <string name="node_password_hint">Password</string>
     <string name="transaction">Transaction</string>
     <string name="amount_label">Amount</string>
     <string name="tx_amount_no_prefix">%1$s XMR</string>
