@@ -52,8 +52,8 @@
     <string name="sending_all">SENDING ALL</string>
     <string name="send">Send</string>
     <string name="create">Create</string>
-    <string name="send_monero">Send Monero</string>
-    <string name="recv_monero">Receive Monero</string>
+    <string name="send_monero">Send</string>
+    <string name="recv_monero">Receive</string>
     <string name="more_options">More options</string>
     <string name="recovery_phrase_optional">Recovery phrase (optional)</string>
     <string name="restore_height_optional">Restore height (optional)</string>
