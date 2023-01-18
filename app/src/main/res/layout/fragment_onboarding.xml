@@ -15,10 +15,27 @@
         android:text="@string/create_wallet"
         android:textSize="32sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/wallet_password_edittext"
+        app:layout_constraintBottom_toTopOf="@id/select_node_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/select_node_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        tools:text="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        android:background="@drawable/button_bg"
+        android:ellipsize="middle"
+        android:singleLine="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/create_wallet_textview"
+        tools:ignore="SpeakableTextPresentCheck" />
 
     <EditText
         android:id="@+id/wallet_password_edittext"
@@ -27,10 +44,11 @@
         android:background="@drawable/edittext_bg"
         android:hint="@string/password_optional"
         android:inputType="textPassword"
+        android:layout_marginTop="16dp"
         app:layout_constraintBottom_toTopOf="@id/wallet_password_confirm_edittext"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/create_wallet_textview"
+        app:layout_constraintTop_toBottomOf="@id/select_node_button"
         tools:visibility="visible" />
 
     <EditText
