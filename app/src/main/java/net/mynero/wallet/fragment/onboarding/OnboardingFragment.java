@@ -24,6 +24,9 @@ import androidx.lifecycle.ViewModelProvider;
 import net.mynero.wallet.MainActivity;
 import net.mynero.wallet.MoneroApplication;
 import net.mynero.wallet.R;
+import net.mynero.wallet.data.Node;
+import net.mynero.wallet.fragment.dialog.AddNodeBottomSheetDialog;
+import net.mynero.wallet.fragment.dialog.NodeSelectionBottomSheetDialog;
 import net.mynero.wallet.model.Wallet;
 import net.mynero.wallet.model.WalletManager;
 import net.mynero.wallet.service.PrefService;
@@ -33,7 +36,7 @@ import net.mynero.wallet.util.RestoreHeight;
 import java.io.File;
 import java.util.Calendar;
 
-public class OnboardingFragment extends Fragment {
+public class OnboardingFragment extends Fragment implements NodeSelectionBottomSheetDialog.NodeSelectionDialogListener, AddNodeBottomSheetDialog.AddNodeListener {
     private boolean useOffset = true;
     private OnboardingViewModel mViewModel;
     TextWatcher proxyAddressListener = new TextWatcher() {
@@ -82,6 +85,7 @@ public class OnboardingFragment extends Fragment {
     private ConstraintLayout proxySettingsLayout;
     private ImageView moreOptionsChevronImageView;
     private CheckBox seedOffsetCheckbox;
+    private Button selectNodeButton;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -93,6 +97,7 @@ public class OnboardingFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(OnboardingViewModel.class);
+        selectNodeButton = view.findViewById(R.id.select_node_button);
         walletPasswordEditText = view.findViewById(R.id.wallet_password_edittext);
         walletPasswordConfirmEditText = view.findViewById(R.id.wallet_password_confirm_edittext);
         walletSeedEditText = view.findViewById(R.id.wallet_seed_edittext);
@@ -201,6 +206,14 @@ public class OnboardingFragment extends Fragment {
 
             mViewModel.updateProxy(((MoneroApplication)getActivity().getApplication()));
         });
+
+        Node node = PrefService.getInstance().getNode(); // should be using default here
+        selectNodeButton.setText(getString(R.string.node_button_text, node.getAddress()));
+        selectNodeButton.setOnClickListener(view1 -> {
+            NodeSelectionBottomSheetDialog dialog = new NodeSelectionBottomSheetDialog();
+            dialog.listener = this;
+            dialog.show(getActivity().getSupportFragmentManager(), "node_selection_dialog");
+        });
     }
 
     private void prepareDefaultNode() {
@@ -285,5 +298,29 @@ public class OnboardingFragment extends Fragment {
 
     private boolean checkMnemonic(String seed) {
         return (seed.split("\\s").length == 25);
+    }
+
+    @Override
+    public void onNodeSelected() {
+        Node node = PrefService.getInstance().getNode();
+        selectNodeButton.setText(getString(R.string.node_button_text, node.getAddress()));
+        mViewModel.updateProxy(((MoneroApplication)getActivity().getApplication()));
+    }
+
+    @Override
+    public void onClickedEditNode(String nodeString) { }
+
+    @Override
+    public void onClickedAddNode() {
+        AddNodeBottomSheetDialog addNodeDialog = new AddNodeBottomSheetDialog();
+        addNodeDialog.listener = this;
+        addNodeDialog.show(getActivity().getSupportFragmentManager(), "add_node_dialog");
+    }
+
+    @Override
+    public void onNodeAdded() {
+        NodeSelectionBottomSheetDialog dialog = new NodeSelectionBottomSheetDialog();
+        dialog.listener = this;
+        dialog.show(getActivity().getSupportFragmentManager(), "node_selection_dialog");
     }
 }
