@@ -14,11 +14,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import net.mynero.wallet.MainActivity;
@@ -131,12 +133,19 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
     }
 
     private void bindListeners() {
+        // Disable onBack click
+        OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) { @Override public void handleOnBackPressed() { } };
+        FragmentActivity activity = getActivity();
+        if(activity != null)
+            activity.getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), onBackPressedCallback);
+
         moreOptionsDropdownTextView.setOnClickListener(view12 -> mViewModel.onMoreOptionsClicked());
         moreOptionsChevronImageView.setOnClickListener(view12 -> mViewModel.onMoreOptionsClicked());
         seedOffsetCheckbox.setOnCheckedChangeListener((compoundButton, b) -> useOffset = b);
 
         createWalletButton.setOnClickListener(view1 -> {
             prepareDefaultNode();
+            onBackPressedCallback.setEnabled(false);
             ((MoneroApplication)getActivity().getApplication()).getExecutor().execute(() -> {
                 createOrImportWallet(
                         walletPasswordEditText.getText().toString(),

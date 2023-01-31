@@ -84,7 +84,6 @@ public class HomeFragment extends Fragment implements TransactionInfoAdapter.TxI
         RecyclerView txHistoryRecyclerView = view.findViewById(R.id.transaction_history_recyclerview);
         TextView unlockedBalanceTextView = view.findViewById(R.id.balance_unlocked_textview);
         TextView lockedBalanceTextView = view.findViewById(R.id.balance_locked_textview);
-        ConstraintLayout noHistoryLayout = view.findViewById(R.id.no_history_layout);
 
         BalanceService balanceService = BalanceService.getInstance();
         HistoryService historyService = HistoryService.getInstance();
@@ -132,10 +131,21 @@ public class HomeFragment extends Fragment implements TransactionInfoAdapter.TxI
         if (historyService != null) {
             historyService.history.observe(getViewLifecycleOwner(), history -> {
                 if (history.isEmpty()) {
+                    // DISPLAYING EMPTY WALLET HISTORY
+                    Wallet wallet = WalletManager.getInstance().getWallet();
+                    int textResId, botImgResId = 0;
+                    if(wallet != null && wallet.isSynchronized()) {
+                        textResId = R.string.no_history_nget_some_monero_in_here;
+                        botImgResId = R.drawable.xmrchan_empty; // img for synchronized
+                    } else {
+                        textResId = R.string.no_history_loading;
+                        botImgResId = R.drawable.xmrchan_loading; // img for loading
+                    }
+
                     txHistoryRecyclerView.setVisibility(View.GONE);
-                    noHistoryLayout.setVisibility(View.VISIBLE);
-                    displayEmptyHistory(view);
+                    displayEmptyHistory(true, view, textResId, botImgResId);
                 } else {
+                    // POPULATED WALLET HISTORY
                     Collections.sort(history);
                     if (history.size() > 100) {
                         adapter.submitList(history.subList(0, 99));
@@ -143,7 +153,7 @@ public class HomeFragment extends Fragment implements TransactionInfoAdapter.TxI
                         adapter.submitList(history);
                     }
                     txHistoryRecyclerView.setVisibility(View.VISIBLE);
-                    noHistoryLayout.setVisibility(View.GONE);
+                    displayEmptyHistory(false, view, R.string.no_history_nget_some_monero_in_here, R.drawable.xmrchan_loading);
                 }
             });
         }
@@ -167,16 +177,24 @@ public class HomeFragment extends Fragment implements TransactionInfoAdapter.TxI
         }
     }
 
-    private void displayEmptyHistory(View view) {
+    private void displayEmptyHistory(boolean display, View view, int textResId, int botImgResId) {
+        TextView mnrjTextView = view.findViewById(R.id.monerochan_empty_tx_textview);
+        TextView textView = view.findViewById(R.id.empty_tx_textview);
+        ImageView botImageView = view.findViewById(R.id.monerochan_imageview);
+        view.findViewById(R.id.no_history_layout).setVisibility(display ? View.VISIBLE : View.GONE);
         boolean displayMonerochan = PrefService.getInstance().getBoolean(Constants.PREF_MONEROCHAN, true);
         if(displayMonerochan) {
-            view.findViewById(R.id.monerochan_imageview).setVisibility(View.VISIBLE);
-            view.findViewById(R.id.monerochan_empty_tx_textview).setVisibility(View.VISIBLE);
-            view.findViewById(R.id.empty_tx_textview).setVisibility(View.GONE);
+            botImageView.setVisibility(View.VISIBLE);
+            mnrjTextView.setVisibility(View.VISIBLE);
+            textView.setVisibility(View.GONE);
         } else {
-            view.findViewById(R.id.monerochan_imageview).setVisibility(View.GONE);
-            view.findViewById(R.id.monerochan_empty_tx_textview).setVisibility(View.GONE);
-            view.findViewById(R.id.empty_tx_textview).setVisibility(View.VISIBLE);
+            botImageView.setVisibility(View.GONE);
+            mnrjTextView.setVisibility(View.GONE);
+            textView.setVisibility(View.VISIBLE);
         }
+
+        botImageView.setImageResource(botImgResId);
+        mnrjTextView.setText(textResId);
+        textView.setText(textResId);
     }
 }

@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE resources [<!ENTITY nbsp "&#160;">]>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
-    <string name="app_name" translatable="false">MyNero</string>
-
-    <!--TODO deleteme-->
-    <!--TODO deleteme-->
-    <!--TODO deleteme-->
+    <string name="app_name" translatable="false">Mysu</string>
 
     <string name="bad_password">Incorrect password!</string>
-    <!--TODO deleteme-->
 
     <string name="send_address_invalid">Not a valid address</string>
 
@@ -43,7 +38,7 @@
     <string name="street_mode">Street mode (hide balances)</string>
     <string name="option_hide_xmrchan">Show Monerochan</string>
     <string name="option_donate_per_tx">Add occasional donation</string>
-    <string name="option_donate_per_tx_desc">Randomly adds a 0.5%-1.5% MyNero donation to Txns. It\'s random so Txns don\'t have a consistently uncommon fingerprint, and the % is random so MyNero doesn\'t know the exact Txn amount.</string>
+    <string name="option_donate_per_tx_desc">Randomly adds a 0.5%-1.5% Mysu donation to Txns. It\'s random so Txns don\'t have a consistently uncommon fingerprint, and the % is random so Mysu doesn\'t know the exact Txn amount.</string>
     <string name="display_recovery_phrase">Display wallet keys</string>
     <string name="tor_switch_label">Connect to proxy</string>
     <string name="connection_failed">Connection failed</string>
@@ -86,7 +81,8 @@
 
     <string name="wallet_proxy_address_hint">127.0.0.1</string>
     <string name="wallet_proxy_port_hint">9050</string>
-    <string name="no_history_nget_some_monero_in_here">No history!\nGet some Monero in here!</string>
+    <string name="no_history_loading">Loading your wallet…</string>
+    <string name="no_history_nget_some_monero_in_here">No transactions to display.\nAcquire coins by doing jobs, selling products, mining it, or buying some peer-to-peer.</string>
     <string name="node_button_text">Node: %1$s</string>
     <string name="connected">Connected</string>
     <string name="disconnected">Disconnected</string>
@@ -124,7 +120,7 @@
     <string name="use_password_as_seed_offset">Use password as seed offset</string>
     <string name="subbaddress_info_subtitle" translatable="false">#%1$d: %2$s</string>
     <string name="previous_addresses">Previous addresses</string>
-    <string name="donate_label">Donate to MyNero</string>
+    <string name="donate_label">Donate to Mysu</string>
     <string name="transactions">Transactions</string>
     <string name="auth">[ auth ]</string>
 </resources>
