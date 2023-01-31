@@ -92,9 +92,9 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
 
     @Override
     public void newBlock(long height) {
-        if(isEveryNthBlock(height, 5)) { // refresh services every 5 blocks downloaded
+        if(isEveryNthBlock(height, 1)) { // refresh services every 5 blocks downloaded
             refresh(height);
-        } else if(isEveryNthBlock(height, 720)) { // save wallet every 720 blocks (~1 day), we also save upon finishing sync (in refreshed())
+        } else if(isEveryNthBlock(height, 5)) { // save wallet every 5 blocks (~10 minutes), we also save upon finishing sync (in refreshed())
             wallet.store();
         }
         BlockchainService.getInstance().setDaemonHeight(wallet.isSynchronized() ? height : 0);
