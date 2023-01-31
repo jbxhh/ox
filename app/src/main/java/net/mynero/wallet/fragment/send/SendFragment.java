@@ -1,6 +1,8 @@
 package net.mynero.wallet.fragment.send;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +15,8 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -22,6 +26,10 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.zxing.client.android.Intents;
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
+
 import net.mynero.wallet.MoneroApplication;
 import net.mynero.wallet.R;
 import net.mynero.wallet.model.PendingTransaction;
@@ -29,6 +37,7 @@ import net.mynero.wallet.model.Wallet;
 import net.mynero.wallet.service.BalanceService;
 import net.mynero.wallet.service.TxService;
 import net.mynero.wallet.util.Helper;
+import net.mynero.wallet.util.UriData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +51,7 @@ public class SendFragment extends Fragment {
     private LinearLayout destList;
     private LayoutInflater inflater;
     private Button createButton;
+    private Button sendButton;
     private RadioGroup feeRadioGroup;
     private TextView feeRadioGroupLabelTextView;
 
@@ -50,7 +60,24 @@ public class SendFragment extends Fragment {
     private TextView amountTextView;
 
     public PendingTransaction.Priority priority;
-
+    private int currentEntryIndex = -1;
+    private final ActivityResultLauncher<ScanOptions> qrCodeLauncher = registerForActivityResult(new ScanContract(), result -> {
+        if (result.getContents() != null) {
+            if(currentEntryIndex != -1) {
+                pasteAddress(getDestView(currentEntryIndex), result.getContents());
+                currentEntryIndex = -1;
+            }
+        }
+    });
+    private final ActivityResultLauncher<String> cameraPermissionsLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
+            granted -> {
+                if (granted) {
+                    onScan(currentEntryIndex);
+                } else {
+                    Toast.makeText(getActivity(), getString(R.string.no_camera_permission), Toast.LENGTH_SHORT).show();
+                    currentEntryIndex = -1;
+                }
+            });
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -68,6 +95,7 @@ public class SendFragment extends Fragment {
         createButton = view.findViewById(R.id.create_tx_button);
         feeRadioGroup = view.findViewById(R.id.tx_fee_radiogroup);
         feeTextView = view.findViewById(R.id.fee_textview);
+        sendButton = view.findViewById(R.id.send_tx_button);
         addressTextView = view.findViewById(R.id.address_pending_textview);
         amountTextView = view.findViewById(R.id.amount_pending_textview);
         feeRadioGroup = view.findViewById(R.id.tx_fee_radiogroup);
@@ -101,7 +129,12 @@ public class SendFragment extends Fragment {
 
         addOutputImageView.setOnClickListener(view1 -> {
             sendMaxButton.setVisibility(View.GONE);
-            addOutput();
+            int outputCount = getDestCount();
+            if(outputCount < 8) {
+                addOutput();
+            } else {
+                Toast.makeText(getActivity(), getString(R.string.max_outputs_allowed), Toast.LENGTH_SHORT).show();
+            }
         });
         sendMaxButton.setOnClickListener(view1 -> {
             addOutputImageView.setVisibility(View.INVISIBLE);
@@ -143,6 +176,15 @@ public class SendFragment extends Fragment {
             createButton.setEnabled(false);
             createTx(dests, sendAll, priority);
         });
+
+        sendButton.setOnClickListener(view1 -> {
+            PendingTransaction pendingTx = mViewModel.pendingTransaction.getValue();
+            if (pendingTx != null) {
+                Toast.makeText(getActivity(), getString(R.string.sending_tx), Toast.LENGTH_SHORT).show();
+                sendButton.setEnabled(false);
+                sendTx(pendingTx);
+            }
+        });
     }
 
     private void bindObservers() {
@@ -174,7 +216,20 @@ public class SendFragment extends Fragment {
 
     private void addOutput() {
         if (inflater != null) {
+            int index = getDestCount();
             ConstraintLayout entryView = (ConstraintLayout)inflater.inflate(R.layout.transaction_output_item, null);
+
+
+            entryView.findViewById(R.id.paste_address_imagebutton).setOnClickListener(view1 -> {
+                Context ctx = getContext();
+                if (ctx != null) {
+                    String clipboard = Helper.getClipBoardText(ctx);
+                    if (clipboard != null) {
+                        pasteAddress(entryView, clipboard);
+                    }
+                }
+            });
+            entryView.findViewById(R.id.scan_address_imagebutton).setOnClickListener(view -> onScan(index));
             entryView.findViewById(R.id.remove_output_imagebutton).setOnClickListener(view -> {
                 int currentCount = getDestCount();
                 if(currentCount > 1) {
@@ -218,6 +273,7 @@ public class SendFragment extends Fragment {
             feeRadioGroup.setVisibility(View.GONE);
             feeRadioGroupLabelTextView.setVisibility(View.GONE);
 
+            sendButton.setVisibility(View.VISIBLE);
             feeTextView.setVisibility(View.VISIBLE);
             addressTextView.setVisibility(View.VISIBLE);
             amountTextView.setVisibility(View.VISIBLE);
@@ -229,9 +285,36 @@ public class SendFragment extends Fragment {
             feeRadioGroup.setVisibility(View.VISIBLE);
             feeRadioGroupLabelTextView.setVisibility(View.VISIBLE);
 
+            sendButton.setVisibility(View.GONE);
             feeTextView.setVisibility(View.GONE);
             addressTextView.setVisibility(View.GONE);
             amountTextView.setVisibility(View.GONE);
+        }
+    }
+
+    private void onScan(int index) {
+        currentEntryIndex = index;
+        if (Helper.getCameraPermission(getActivity(), cameraPermissionsLauncher)) {
+            ScanOptions options = new ScanOptions();
+            options.setBeepEnabled(false);
+            options.setOrientationLocked(true);
+            options.setDesiredBarcodeFormats(List.of(Intents.Scan.QR_CODE_MODE));
+            options.addExtra(Intents.Scan.SCAN_TYPE, Intents.Scan.MIXED_SCAN);
+            qrCodeLauncher.launch(options);
+        }
+    }
+
+    private void pasteAddress(ConstraintLayout entryView, String address) {
+        UriData uriData = UriData.parse(address);
+        if (uriData != null) {
+            EditText addressField = entryView.findViewById(R.id.address_edittext);
+            addressField.setText(uriData.getAddress());
+            if (uriData.hasAmount()) {
+                EditText amountField = entryView.findViewById(R.id.amount_edittext);
+                amountField.setText(uriData.getAmount());
+            }
+        } else {
+            Toast.makeText(getActivity(), getString(R.string.send_address_invalid), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -258,6 +341,24 @@ public class SendFragment extends Fragment {
                         Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
                 }
+            }
+        });
+    }
+
+    private void sendTx(PendingTransaction pendingTx) {
+        ((MoneroApplication)getActivity().getApplication()).getExecutor().execute(() -> {
+            boolean success = TxService.getInstance().sendTx(pendingTx);
+            Activity activity = getActivity();
+            if (activity != null) {
+                activity.runOnUiThread(() -> {
+                    if (success) {
+                        Toast.makeText(getActivity(), getString(R.string.sent_tx), Toast.LENGTH_SHORT).show();
+                        getActivity().onBackPressed();
+                    } else {
+                        sendButton.setEnabled(true);
+                        Toast.makeText(getActivity(), getString(R.string.error_sending_tx), Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
     }

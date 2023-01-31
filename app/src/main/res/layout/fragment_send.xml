@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:fitsSystemWindows="true">
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp">
+    android:layout_height="match_parent">
         <TextView
             android:id="@+id/send_monero_textview"
             android:layout_width="0dp"
@@ -61,7 +56,7 @@
             android:layout_marginTop="8dp"
             android:text="@string/selected_utxos_value"
             android:textSize="14sp"
-            android:visibility="visible"
+            android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/send_monero_textview" />
@@ -126,20 +121,27 @@
             app:layout_constraintStart_toStartOf="parent"
             tools:visibility="visible" />
 
-        <LinearLayout
-            android:id="@+id/transaction_destination_list"
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="8dp"
-            android:clickable="false"
-            android:clipToPadding="false"
-            android:orientation="vertical"
+            android:fillViewport="true"
+            android:fitsSystemWindows="true"
             app:layout_constraintBottom_toTopOf="@id/tx_fee_radiogroup"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/selected_utxos_value_textview">
+            <LinearLayout
+                android:id="@+id/transaction_destination_list"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
+                android:clickable="false"
+                android:clipToPadding="false"
+                android:orientation="vertical"
+                >
 
-        </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
         <!-- SEND LAYOUT -->
         <TextView
             android:id="@+id/address_pending_textview"
@@ -195,17 +197,14 @@
             android:id="@+id/send_tx_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="24dp"
+            android:layout_marginTop="24dp"
             android:layout_marginEnd="24dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginBottom="24dp"
             android:background="@drawable/button_bg"
             android:text="@string/send"
             android:visibility="gone"
-            android:layout_marginBottom="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fee_textview"
-            tools:visibility="gone" />
+            tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-</ScrollView>
