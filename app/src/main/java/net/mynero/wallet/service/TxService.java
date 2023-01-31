@@ -3,6 +3,9 @@ package net.mynero.wallet.service;
 import net.mynero.wallet.model.PendingTransaction;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import kotlin.Pair;
 
 public class TxService extends ServiceBase {
     public static TxService instance = null;
@@ -18,6 +21,10 @@ public class TxService extends ServiceBase {
 
     public PendingTransaction createTx(String address, String amount, boolean sendAll, PendingTransaction.Priority feePriority, ArrayList<String> selectedUtxos) throws Exception {
         return this.getThread().createTx(address, amount, sendAll, feePriority, selectedUtxos);
+    }
+
+    public PendingTransaction createTx(List<Pair<String, String>> dests, boolean sendAll, PendingTransaction.Priority feePriority, ArrayList<String> selectedUtxos) throws Exception {
+        return this.getThread().createTx(dests, sendAll, feePriority, selectedUtxos);
     }
 
     public boolean sendTx(PendingTransaction pendingTransaction) {

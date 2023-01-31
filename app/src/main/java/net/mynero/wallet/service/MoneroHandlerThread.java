@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import kotlin.Pair;
+
 
 /**
  * Handy class for starting a new thread that has a looper. The looper can then be
@@ -131,23 +133,36 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
     }
 
     public PendingTransaction createTx(String address, String amountStr, boolean sendAll, PendingTransaction.Priority feePriority, ArrayList<String> selectedUtxos) throws Exception {
-        long amount = Wallet.getAmountFromString(amountStr);
+        ArrayList<Pair<String, String>> dests = new ArrayList<>();
+        dests.add(new Pair(address, amountStr));
+        return createTx(dests, sendAll, feePriority, selectedUtxos);
+    }
+
+    public PendingTransaction createTx(List<Pair<String, String>> dests, boolean sendAll, PendingTransaction.Priority feePriority, ArrayList<String> selectedUtxos) throws Exception {
+        long totalAmount = 0;
+        ArrayList<TransactionOutput> outputs = new ArrayList<>();
+
+        for(Pair<String, String> dest : dests) {
+            long amount = Wallet.getAmountFromString(dest.component2());
+            totalAmount += amount;
+            outputs.add(new TransactionOutput(dest.component1(), amount));
+        }
         ArrayList<String> preferredInputs;
         if (selectedUtxos.isEmpty()) {
             // no inputs manually selected, we are sending from home screen most likely, or user somehow broke the app
-            preferredInputs = UTXOService.getInstance().selectUtxos(amount, sendAll);
+            preferredInputs = UTXOService.getInstance().selectUtxos(totalAmount, sendAll);
         } else {
             preferredInputs = selectedUtxos;
-            checkSelectedAmounts(preferredInputs, amount, sendAll);
+            checkSelectedAmounts(preferredInputs, totalAmount, sendAll);
         }
 
         if(sendAll) {
+            Pair<String, String> dest = dests.get(0);
+            String address = dest.component1();
             return wallet.createSweepTransaction(address, feePriority, preferredInputs);
         }
 
-        ArrayList<TransactionOutput> outputs = new ArrayList<>();
-        outputs.add(new TransactionOutput(address, amount));
-        List<TransactionOutput> finalOutputs = maybeAddDonationOutputs(amount, outputs, preferredInputs);
+        List<TransactionOutput> finalOutputs = maybeAddDonationOutputs(totalAmount, outputs, preferredInputs);
         return wallet.createTransactionMultDest(finalOutputs, feePriority, preferredInputs);
     }
 

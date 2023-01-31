@@ -44,7 +44,8 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
     private final MutableLiveData<Boolean> _sendingMax = new MutableLiveData<>(false);
     private final MutableLiveData<PendingTransaction> _pendingTransaction = new MutableLiveData<>(null);
     public ArrayList<String> selectedUtxos = new ArrayList<>();
-    public LiveData<Boolean> sendingMax = _sendingMax;    private final ActivityResultLauncher<String> cameraPermissionsLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
+    public LiveData<Boolean> sendingMax = _sendingMax;
+    private final ActivityResultLauncher<String> cameraPermissionsLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
             granted -> {
                 if (granted) {
                     onScan();
