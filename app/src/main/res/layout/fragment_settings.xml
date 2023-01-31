@@ -139,28 +139,6 @@
             app:layout_constraintTop_toBottomOf="@id/donate_per_tx_desc_textview" />
 
         <TextView
-            android:id="@+id/day_night_textview"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/night_mode"
-            android:textSize="16sp"
-            android:layout_marginStart="24dp"
-            app:layout_constraintBottom_toBottomOf="@id/day_night_switch"
-            app:layout_constraintEnd_toStartOf="@id/day_night_switch"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/day_night_switch" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/day_night_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="24dp"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/appearance_settings_textview" />
-
-        <TextView
             android:id="@+id/street_mode_label_textview"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -178,8 +156,9 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="24dp"
             android:minHeight="48dp"
+            android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/day_night_switch" />
+            app:layout_constraintTop_toBottomOf="@id/appearance_settings_textview" />
 
         <TextView
             android:id="@+id/monerochan_label_textview"
