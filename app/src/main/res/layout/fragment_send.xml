@@ -13,38 +13,46 @@
             android:layout_marginStart="24dp"
             android:textSize="32sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/add_output_button"
+            app:layout_constraintEnd_toStartOf="@id/top_controls"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
-            android:id="@+id/send_max_button"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/top_controls"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/button_bg"
-            android:text="@string/send_max"
             android:layout_marginEnd="24dp"
             app:layout_constraintBottom_toBottomOf="@id/send_monero_textview"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/add_output_button"
-            app:layout_constraintTop_toTopOf="@id/send_monero_textview"
-            tools:visibility="visible" />
-
-        <ImageButton
-            android:id="@+id/add_output_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:layout_marginEnd="24dp"
-            android:src="@android:drawable/ic_input_add"
-            app:layout_constraintBottom_toBottomOf="@id/send_monero_textview"
-            app:layout_constraintEnd_toStartOf="@id/send_max_button"
             app:layout_constraintStart_toEndOf="@id/send_monero_textview"
-            app:layout_constraintTop_toTopOf="@id/send_monero_textview"
-            tools:ignore="SpeakableTextPresentCheck"
-            tools:visibility="visible" />
+            app:layout_constraintTop_toTopOf="@id/send_monero_textview">
+            <Button
+                android:id="@+id/send_max_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_bg"
+                android:text="@string/send_max"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/add_output_button"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
+
+            <ImageButton
+                android:id="@+id/add_output_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:src="@android:drawable/ic_input_add"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/send_max_button"
+                tools:ignore="SpeakableTextPresentCheck"
+                tools:visibility="visible" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- CREATE LAYOUT -->
         <TextView
