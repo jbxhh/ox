@@ -98,9 +98,8 @@ public class ReceiveFragment extends Fragment {
             int[] pixels = new int[width * height];
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    boolean night = NightmodeHelper.getPreferredNightmode() == DayNightMode.NIGHT;
                     if (bitMatrix.get(j, i)) {
-                        pixels[i * width + j] = night ? 0xffffffff : 0x00000000;
+                        pixels[i * width + j] = 0xffffffff;
                     } else {
                         pixels[i * height + j] = getResources().getColor(R.color.oled_colorBackground);
                     }

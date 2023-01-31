@@ -98,7 +98,6 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
         Button displayUtxosButton = view.findViewById(R.id.display_utxos_button);
 
         selectNodeButton = view.findViewById(R.id.select_node_button);
-        SwitchCompat nightModeSwitch = view.findViewById(R.id.day_night_switch);
         SwitchCompat streetModeSwitch = view.findViewById(R.id.street_mode_switch);
         SwitchCompat monerochanSwitch = view.findViewById(R.id.monerochan_switch);
         SwitchCompat donationSwitch = view.findViewById(R.id.donate_per_tx_switch);
@@ -106,15 +105,6 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
         ConstraintLayout proxySettingsLayout = view.findViewById(R.id.wallet_proxy_settings_layout);
         walletProxyAddressEditText = view.findViewById(R.id.wallet_proxy_address_edittext);
         walletProxyPortEditText = view.findViewById(R.id.wallet_proxy_port_edittext);
-
-        nightModeSwitch.setChecked(NightmodeHelper.getPreferredNightmode() == DayNightMode.NIGHT);
-        nightModeSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
-            if (b) {
-                NightmodeHelper.setAndSavePreferredNightmode(DayNightMode.NIGHT);
-            } else {
-                NightmodeHelper.setAndSavePreferredNightmode(DayNightMode.DAY);
-            }
-        });
 
         streetModeSwitch.setChecked(PrefService.getInstance().getBoolean(Constants.PREF_STREET_MODE, false));
         streetModeSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
