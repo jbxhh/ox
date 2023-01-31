@@ -23,17 +23,8 @@ import androidx.appcompat.app.AppCompatDelegate;
 import net.mynero.wallet.service.PrefService;
 
 public class NightmodeHelper {
-    public static DayNightMode getPreferredNightmode() {
-        return DayNightMode.valueOf(PrefService.getInstance().getString(Constants.PREF_NIGHT_MODE, DayNightMode.NIGHT.name()));
-    }
-
     public static void getAndSetPreferredNightmode() {
-        setNightMode(getPreferredNightmode());
-    }
-
-    public static void setAndSavePreferredNightmode(DayNightMode mode) {
-        PrefService.getInstance().edit().putString(Constants.PREF_NIGHT_MODE, mode.name()).apply();
-        setNightMode(mode);
+        setNightMode(DayNightMode.NIGHT);
     }
 
     @SuppressLint("WrongConstant")

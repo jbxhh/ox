@@ -4,9 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
-    tools:context="net.mynero.wallet.fragment.settings.SettingsFragment">
-
+    android:paddingEnd="24dp"
+    android:paddingStart="24dp"
+    android:paddingTop="24dp">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:scaleType="fitEnd"
+        android:src="@drawable/xmrchan_half"
+        app:layout_constraintBottom_toBottomOf="parent"/>
     <TextView
         android:id="@+id/create_wallet_textview"
         android:layout_width="match_parent"
