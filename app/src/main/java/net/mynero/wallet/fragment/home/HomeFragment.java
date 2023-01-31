@@ -71,8 +71,8 @@ public class HomeFragment extends Fragment implements TransactionInfoAdapter.TxI
         });
 
         sendButton.setOnClickListener(view1 -> {
-            SendBottomSheetDialog sendDialog = new SendBottomSheetDialog();
-            sendDialog.show(getActivity().getSupportFragmentManager(), null);
+            navigate(HomeFragmentDirections.navToSend());
+
         });
 
         receiveButton.setOnClickListener(view1 -> {
