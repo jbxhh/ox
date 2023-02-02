@@ -111,7 +111,7 @@ public class SendFragment extends Fragment {
     }
 
     private void init() {
-        addOutput();
+        addOutput(true);
     }
 
     private void bindListeners() {
@@ -131,7 +131,7 @@ public class SendFragment extends Fragment {
             sendMaxButton.setVisibility(View.GONE);
             int outputCount = getDestCount();
             if(outputCount < 8) {
-                addOutput();
+                addOutput(false);
             } else {
                 Toast.makeText(getActivity(), getString(R.string.max_outputs_allowed), Toast.LENGTH_SHORT).show();
             }
@@ -214,11 +214,11 @@ public class SendFragment extends Fragment {
         });
     }
 
-    private void addOutput() {
+    private void addOutput(boolean initial) {
         if (inflater != null) {
             int index = getDestCount();
             ConstraintLayout entryView = (ConstraintLayout)inflater.inflate(R.layout.transaction_output_item, null);
-
+            ImageButton removeOutputImageButton = entryView.findViewById(R.id.remove_output_imagebutton);
 
             entryView.findViewById(R.id.paste_address_imagebutton).setOnClickListener(view1 -> {
                 Context ctx = getContext();
@@ -230,12 +230,19 @@ public class SendFragment extends Fragment {
                 }
             });
             entryView.findViewById(R.id.scan_address_imagebutton).setOnClickListener(view -> onScan(index));
-            entryView.findViewById(R.id.remove_output_imagebutton).setOnClickListener(view -> {
-                int currentCount = getDestCount();
-                if(currentCount > 1) {
-                    destList.removeView(entryView);
-                }
-            });
+            if(initial) {
+                removeOutputImageButton.setVisibility(View.INVISIBLE);
+            } else {
+                removeOutputImageButton.setOnClickListener(view -> {
+                    int currentCount = getDestCount();
+                    if (currentCount > 1) {
+                        if (currentCount == 2) {
+                            sendMaxButton.setVisibility(View.VISIBLE);
+                        }
+                        destList.removeView(entryView);
+                    }
+                });
+            }
             destList.addView(entryView);
         }
     }
@@ -254,14 +261,14 @@ public class SendFragment extends Fragment {
 
     private void unprepareMaxSend() {
         ConstraintLayout entryView = getDestView(0);
-        entryView.findViewById(R.id.sending_all_textview).setVisibility(View.GONE);
+        entryView.findViewById(R.id.sending_all_textview).setVisibility(View.INVISIBLE);
         entryView.findViewById(R.id.amount_edittext).setVisibility(View.VISIBLE);
     }
 
     private void prepareOutputsForMaxSend() {
         ConstraintLayout entryView = getDestView(0);
         entryView.findViewById(R.id.sending_all_textview).setVisibility(View.VISIBLE);
-        entryView.findViewById(R.id.amount_edittext).setVisibility(View.GONE);
+        entryView.findViewById(R.id.amount_edittext).setVisibility(View.INVISIBLE);
     }
 
     private void showConfirmationLayout(boolean show) {
