@@ -113,10 +113,10 @@ public class MainActivity extends AppCompatActivity implements MoneroHandlerThre
     }
 
     @Override
-    public void onRefresh(long height) {
+    public void onRefresh() {
         this.historyService.refreshHistory();
         this.balanceService.refreshBalance();
-        this.blockchainService.refreshBlockchain(height);
+        this.blockchainService.refreshBlockchain();
         this.addressService.refreshAddresses();
         this.utxoService.refreshUtxos();
     }
