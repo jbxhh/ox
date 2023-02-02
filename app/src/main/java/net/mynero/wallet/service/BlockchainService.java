@@ -14,7 +14,6 @@ public class BlockchainService extends ServiceBase {
     public LiveData<Wallet.ConnectionStatus> connectionStatus = _connectionStatus;
     private long daemonHeight = 0;
     private long lastDaemonHeightUpdateTimeMs = 0;
-    public static long GETHEIGHT_FETCH = -1;
 
     public BlockchainService(MoneroHandlerThread thread) {
         super(thread);
@@ -25,8 +24,8 @@ public class BlockchainService extends ServiceBase {
         return instance;
     }
 
-    public void refreshBlockchain(long height) {
-        _currentHeight.postValue(height == GETHEIGHT_FETCH ? getCurrentHeight() : height);
+    public void refreshBlockchain() {
+        _currentHeight.postValue(getCurrentHeight());
     }
 
     public long getCurrentHeight() {
