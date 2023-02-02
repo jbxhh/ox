@@ -22,14 +22,13 @@
 
     <!-- Strings used for fragments for navigation -->
 
-    <string name="wallet_balance_text">%1$s XMR</string>
     <string name="wallet_locked_balance_text">+ %1$s confirming</string>
     <string name="send_amount_empty">Please enter an amount</string>
     <string name="send_amount_invalid">Please enter a valid amount</string>
     <string name="send_max">Max</string>
     <string name="undo">Undo</string>
-    <string name="error_sending_tx">Error sending tx</string>
-    <string name="error_creating_tx">Error creating tx</string>
+    <string name="error_sending_tx">Error sending transaction</string>
+    <string name="error_creating_tx">Error creating: %1$s</string>
     <string name="create_wallet">Create wallet</string>
     <string name="invalid_mnemonic_code">Invalid mnemonic</string>
     <string name="invalid_confirmed_password">Passwords do not match</string>

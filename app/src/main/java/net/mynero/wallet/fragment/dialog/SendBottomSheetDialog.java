@@ -17,6 +17,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -204,24 +205,27 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
         });
 
         createButton.setOnClickListener(view1 -> {
-            boolean sendAll = sendingMax.getValue() != null ? sendingMax.getValue() : false;
-            String address = addressEditText.getText().toString().trim();
-            String amount = amountEditText.getText().toString().trim();
-            boolean validAddress = Wallet.isAddressValid(address);
-            if (validAddress && (!amount.isEmpty() || sendAll)) {
-                long amountRaw = Wallet.getAmountFromString(amount);
-                long balance = BalanceService.getInstance().getUnlockedBalanceRaw();
-                if ((amountRaw >= balance || amountRaw <= 0) && !sendAll) {
-                    Toast.makeText(getActivity(), getString(R.string.send_amount_invalid), Toast.LENGTH_SHORT).show();
-                    return;
+            FragmentActivity activity = getActivity();
+            if(activity != null) {
+                boolean sendAll = sendingMax.getValue() != null ? sendingMax.getValue() : false;
+                String address = addressEditText.getText().toString().trim();
+                String amount = amountEditText.getText().toString().trim();
+                boolean validAddress = Wallet.isAddressValid(address);
+                if (validAddress && (!amount.isEmpty() || sendAll)) {
+                    long amountRaw = Wallet.getAmountFromString(amount);
+                    long balance = BalanceService.getInstance().getUnlockedBalanceRaw();
+                    if ((amountRaw >= balance || amountRaw <= 0) && !sendAll) {
+                        Toast.makeText(activity, getString(R.string.send_amount_invalid), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    Toast.makeText(activity, getString(R.string.creating_tx), Toast.LENGTH_SHORT).show();
+                    createButton.setEnabled(false);
+                    createTx(address, amount, sendAll, priority);
+                } else if (!validAddress) {
+                    Toast.makeText(activity, getString(R.string.send_address_invalid), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(activity, getString(R.string.send_amount_empty), Toast.LENGTH_SHORT).show();
                 }
-                Toast.makeText(getActivity(), getString(R.string.creating_tx), Toast.LENGTH_SHORT).show();
-                createButton.setEnabled(false);
-                createTx(address, amount, sendAll, priority);
-            } else if (!validAddress) {
-                Toast.makeText(getActivity(), getString(R.string.send_address_invalid), Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(getActivity(), getString(R.string.send_amount_empty), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -247,51 +251,50 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
     }
 
     private void sendTx(PendingTransaction pendingTx) {
-        ((MoneroApplication)getActivity().getApplication()).getExecutor().execute(() -> {
-            boolean success = TxService.getInstance().sendTx(pendingTx);
-            Activity activity = getActivity();
-            if (activity != null) {
+        Activity activity = getActivity();
+        if (activity != null) {
+            ((MoneroApplication) activity.getApplication()).getExecutor().execute(() -> {
+                boolean success = TxService.getInstance().sendTx(pendingTx);
                 activity.runOnUiThread(() -> {
                     if (success) {
-                        Toast.makeText(getActivity(), getString(R.string.sent_tx), Toast.LENGTH_SHORT).show();
-                        if(listener != null) {
+                        Toast.makeText(activity, getString(R.string.sent_tx), Toast.LENGTH_SHORT).show();
+                        if (listener != null) {
                             listener.onSentTransaction();
                         }
                         dismiss();
                     } else {
                         sendButton.setEnabled(true);
-                        Toast.makeText(getActivity(), getString(R.string.error_sending_tx), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity, getString(R.string.error_sending_tx), Toast.LENGTH_SHORT).show();
                     }
                 });
-            }
-        });
+            });
+        }
     }
 
     private void createTx(String address, String amount, boolean sendAll, PendingTransaction.Priority feePriority) {
-        ((MoneroApplication)getActivity().getApplication()).getExecutor().execute(() -> {
-            try {
-                PendingTransaction pendingTx = TxService.getInstance().createTx(address, amount, sendAll, feePriority, selectedUtxos);
-                if (pendingTx != null && pendingTx.getStatus() == PendingTransaction.Status.Status_Ok) {
-                    _pendingTransaction.postValue(pendingTx);
-                } else {
-                    Activity activity = getActivity();
-                    if (activity != null) {
+        Activity activity = getActivity();
+        if (activity != null) {
+            ((MoneroApplication)activity.getApplication()).getExecutor().execute(() -> {
+                try {
+                    PendingTransaction pendingTx = TxService.getInstance().createTx(address, amount, sendAll, feePriority, selectedUtxos);
+                    if (pendingTx != null && pendingTx.getStatus() == PendingTransaction.Status.Status_Ok) {
+                        _pendingTransaction.postValue(pendingTx);
+                    } else {
                         activity.runOnUiThread(() -> {
                             createButton.setEnabled(true);
-                            Toast.makeText(getActivity(), getString(R.string.error_creating_tx), Toast.LENGTH_SHORT).show();
+                            if(pendingTx != null) {
+                                Toast.makeText(activity, getString(R.string.error_creating_tx, pendingTx.getErrorString()), Toast.LENGTH_SHORT).show();
+                            }
                         });
                     }
-                }
-            } catch (Exception e) {
-                Activity activity = getActivity();
-                if (activity != null) {
+                } catch (Exception e) {
                     activity.runOnUiThread(() -> {
                         createButton.setEnabled(true);
-                        Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
                 }
-            }
-        });
+            });
+        }
     }
 
     private void showConfirmationLayout(boolean show) {

@@ -92,7 +92,7 @@ public class HomeFragment extends Fragment implements TransactionInfoAdapter.TxI
         if (balanceService != null) {
             balanceService.balanceInfo.observe(getViewLifecycleOwner(), balanceInfo -> {
                 if(balanceInfo != null) {
-                    unlockedBalanceTextView.setText(getString(R.string.wallet_balance_text, balanceInfo.getUnlockedDisplay()));
+                    unlockedBalanceTextView.setText(balanceInfo.getUnlockedDisplay());
 
                     if (balanceInfo.getLockedDisplay().equals(Constants.STREET_MODE_BALANCE) || balanceInfo.isLockedBalanceZero()) {
                         lockedBalanceTextView.setVisibility(View.INVISIBLE);
