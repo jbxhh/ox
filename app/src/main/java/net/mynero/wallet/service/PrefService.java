@@ -35,7 +35,7 @@ public class PrefService extends ServiceBase {
                 if(port == 4447) {
                     defaultNode = DefaultNodes.MYNERO_I2P;
                 } else {
-                    defaultNode = DefaultNodes.SAMOURAI_ONION;
+                    defaultNode = DefaultNodes.MYNERO_ONION;
                 }
             }
         }
