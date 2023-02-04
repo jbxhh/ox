@@ -174,6 +174,7 @@ public class SendFragment extends Fragment {
 
             Toast.makeText(getActivity(), getString(R.string.creating_tx), Toast.LENGTH_SHORT).show();
             createButton.setEnabled(false);
+            sendMaxButton.setEnabled(false);
             createTx(dests, sendAll, priority);
         });
 
@@ -317,6 +318,7 @@ public class SendFragment extends Fragment {
             EditText addressField = entryView.findViewById(R.id.address_edittext);
             addressField.setText(uriData.getAddress());
             if (uriData.hasAmount()) {
+                sendMaxButton.setEnabled(false);
                 EditText amountField = entryView.findViewById(R.id.amount_edittext);
                 amountField.setText(uriData.getAmount());
             }
@@ -336,6 +338,7 @@ public class SendFragment extends Fragment {
                     if (activity != null) {
                         activity.runOnUiThread(() -> {
                             createButton.setEnabled(true);
+                            sendMaxButton.setEnabled(true);
                             Toast.makeText(getActivity(), getString(R.string.error_creating_tx), Toast.LENGTH_SHORT).show();
                         });
                     }
@@ -345,6 +348,7 @@ public class SendFragment extends Fragment {
                 if (activity != null) {
                     activity.runOnUiThread(() -> {
                         createButton.setEnabled(true);
+                        sendMaxButton.setEnabled(true);
                         Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
                 }
