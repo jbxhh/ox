@@ -51,7 +51,8 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/send_max_button"
                 tools:ignore="SpeakableTextPresentCheck"
-                tools:visibility="visible" />
+                tools:visibility="visible"
+                app:tint="@color/oled_textColorPrimary" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- CREATE LAYOUT -->
