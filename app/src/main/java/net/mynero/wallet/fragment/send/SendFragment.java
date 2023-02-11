@@ -64,7 +64,7 @@ public class SendFragment extends Fragment {
     private final ActivityResultLauncher<ScanOptions> qrCodeLauncher = registerForActivityResult(new ScanContract(), result -> {
         if (result.getContents() != null) {
             if(currentEntryIndex != -1) {
-                pasteAddress(getDestView(currentEntryIndex), result.getContents());
+                pasteAddress(getDestView(currentEntryIndex), result.getContents(), false);
                 currentEntryIndex = -1;
             }
         }
@@ -221,12 +221,21 @@ public class SendFragment extends Fragment {
             ConstraintLayout entryView = (ConstraintLayout)inflater.inflate(R.layout.transaction_output_item, null);
             ImageButton removeOutputImageButton = entryView.findViewById(R.id.remove_output_imagebutton);
 
+            entryView.findViewById(R.id.paste_amount_imagebutton).setOnClickListener(view1 -> {
+                Context ctx = getContext();
+                if (ctx != null) {
+                    String clipboard = Helper.getClipBoardText(ctx);
+                    if (clipboard != null) {
+                        pasteAddress(entryView, clipboard, true);
+                    }
+                }
+            });
             entryView.findViewById(R.id.paste_address_imagebutton).setOnClickListener(view1 -> {
                 Context ctx = getContext();
                 if (ctx != null) {
                     String clipboard = Helper.getClipBoardText(ctx);
                     if (clipboard != null) {
-                        pasteAddress(entryView, clipboard);
+                        pasteAddress(entryView, clipboard, false);
                     }
                 }
             });
@@ -312,8 +321,8 @@ public class SendFragment extends Fragment {
         }
     }
 
-    private void pasteAddress(ConstraintLayout entryView, String address) {
-        UriData uriData = UriData.parse(address);
+    private void pasteAddress(ConstraintLayout entryView, String clipboard, boolean pastingAmount) {
+        UriData uriData = UriData.parse(clipboard);
         if (uriData != null) {
             EditText addressField = entryView.findViewById(R.id.address_edittext);
             addressField.setText(uriData.getAddress());
@@ -323,7 +332,18 @@ public class SendFragment extends Fragment {
                 amountField.setText(uriData.getAmount());
             }
         } else {
-            Toast.makeText(getActivity(), getString(R.string.send_address_invalid), Toast.LENGTH_SHORT).show();
+            if(pastingAmount) {
+                try {
+                    Double.parseDouble(clipboard);
+                    sendMaxButton.setEnabled(false);
+                    EditText amountField = entryView.findViewById(R.id.amount_edittext);
+                    amountField.setText(clipboard);
+                } catch (Exception e) {
+                    Toast.makeText(getActivity(), getString(R.string.send_amount_invalid), Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(getActivity(), getString(R.string.send_address_invalid), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
