@@ -5,7 +5,6 @@
     <string name="bad_password">Incorrect password!</string>
 
     <string name="send_address_invalid">Not a valid address</string>
-    <string name="send_amount_invalid">Not a valid amount</string>
 
     <string name="tx_list_failed_text">failed</string>
     <string name="tx_list_amount_negative">- %1$s</string>
