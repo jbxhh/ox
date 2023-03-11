@@ -125,4 +125,6 @@
     <string name="auth">[ auth ]</string>
     <string name="to">To</string>
     <string name="max_outputs_allowed">Maximum allowed outputs</string>
+    <string name="paymentid_paytomany">Cannot send to integrated addresses in a pay-to-many transaction</string>
+
 </resources>

@@ -137,7 +137,6 @@ public class SendFragment extends Fragment {
             }
         });
         sendMaxButton.setOnClickListener(view1 -> {
-            addOutputImageView.setVisibility(View.INVISIBLE);
             boolean currentValue = mViewModel.sendingMax.getValue() != null ? mViewModel.sendingMax.getValue() : false;
             mViewModel.setSendingMax(!currentValue);
         });
@@ -192,15 +191,17 @@ public class SendFragment extends Fragment {
         mViewModel.sendingMax.observe(getViewLifecycleOwner(), sendingMax -> {
             if (mViewModel.pendingTransaction.getValue() == null) {
                 if (sendingMax) {
-                    addOutputImageView.setVisibility(View.GONE);
                     prepareOutputsForMaxSend();
                     sendMaxButton.setText(getText(R.string.undo));
                 } else {
-                    addOutputImageView.setVisibility(View.VISIBLE);
                     unprepareMaxSend();
                     sendMaxButton.setText(getText(R.string.send_max));
                 }
             }
+        });
+
+        mViewModel.showAddOutputButton.observe(getViewLifecycleOwner(), show -> {
+            setAddOutputButtonVisibility(show ? View.VISIBLE : View.INVISIBLE);
         });
 
         mViewModel.pendingTransaction.observe(getViewLifecycleOwner(), pendingTx -> {
@@ -322,29 +323,39 @@ public class SendFragment extends Fragment {
     }
 
     private void pasteAddress(ConstraintLayout entryView, String clipboard, boolean pastingAmount) {
+        if(pastingAmount) {
+            try {
+                Double.parseDouble(clipboard);
+                setAmount(entryView, clipboard);
+            } catch (Exception e) {
+                Toast.makeText(getActivity(), getString(R.string.send_amount_invalid), Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
         UriData uriData = UriData.parse(clipboard);
         if (uriData != null) {
+            int currentOutputs = getDestCount();
+            if(currentOutputs > 1 && uriData.hasPaymentId()) {
+                Toast.makeText(getActivity(), getString(R.string.paymentid_paytomany), Toast.LENGTH_SHORT).show();
+                return;
+            } else if(currentOutputs == 1 && uriData.hasPaymentId()) {
+                mViewModel.setShowAddOutputButton(false);
+            }
             EditText addressField = entryView.findViewById(R.id.address_edittext);
             addressField.setText(uriData.getAddress());
             if (uriData.hasAmount()) {
-                sendMaxButton.setEnabled(false);
-                EditText amountField = entryView.findViewById(R.id.amount_edittext);
-                amountField.setText(uriData.getAmount());
+                setAmount(entryView, uriData.getAmount());
             }
         } else {
-            if(pastingAmount) {
-                try {
-                    Double.parseDouble(clipboard);
-                    sendMaxButton.setEnabled(false);
-                    EditText amountField = entryView.findViewById(R.id.amount_edittext);
-                    amountField.setText(clipboard);
-                } catch (Exception e) {
-                    Toast.makeText(getActivity(), getString(R.string.send_amount_invalid), Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(getActivity(), getString(R.string.send_address_invalid), Toast.LENGTH_SHORT).show();
-            }
+            Toast.makeText(getActivity(), getString(R.string.send_address_invalid), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void setAmount(ConstraintLayout entryView, String amount) {
+        sendMaxButton.setEnabled(false);
+        EditText amountField = entryView.findViewById(R.id.amount_edittext);
+        amountField.setText(amount);
     }
 
     private void createTx(List<Pair<String, String>> dests, boolean sendAll, PendingTransaction.Priority feePriority) {
@@ -392,5 +403,9 @@ public class SendFragment extends Fragment {
                 });
             }
         });
+    }
+
+    private void setAddOutputButtonVisibility(int visibility) {
+        addOutputImageView.setVisibility(visibility);
     }
 }
