@@ -1,6 +1,7 @@
 package net.mynero.wallet.util;
 
 import net.mynero.wallet.model.Wallet;
+import net.mynero.wallet.model.WalletManager;
 
 import java.util.HashMap;
 
@@ -44,6 +45,10 @@ public class UriData {
 
     public String getAddress() {
         return address;
+    }
+
+    public boolean hasPaymentId() {
+        return !Wallet.getPaymentIdFromAddress(this.address, WalletManager.getInstance().getWallet().nettype()).isEmpty();
     }
 
     public String getAmount() {

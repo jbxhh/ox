@@ -9,11 +9,18 @@ import net.mynero.wallet.model.PendingTransaction;
 public class SendViewModel extends ViewModel {
     private final MutableLiveData<Boolean> _sendingMax = new MutableLiveData<>(false);
     public LiveData<Boolean> sendingMax = _sendingMax;
+    private final MutableLiveData<Boolean> _showAddOutputButton = new MutableLiveData<>(true);
+    public LiveData<Boolean> showAddOutputButton = _showAddOutputButton;
     private final MutableLiveData<PendingTransaction> _pendingTransaction = new MutableLiveData<>(null);
     public LiveData<PendingTransaction> pendingTransaction = _pendingTransaction;
 
     public void setSendingMax(boolean value) {
         _sendingMax.setValue(value);
+        setShowAddOutputButton(!value);
+    }
+
+    public void setShowAddOutputButton(boolean value) {
+        _showAddOutputButton.setValue(value);
     }
 
     public void setPendingTransaction(PendingTransaction pendingTx) {
