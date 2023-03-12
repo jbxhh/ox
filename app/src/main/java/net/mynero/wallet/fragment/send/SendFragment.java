@@ -256,14 +256,18 @@ public class SendFragment extends Fragment {
                     int currentOutputs = getDestCount();
                     UriData uriData = UriData.parse(editable.toString());
                     if(uriData != null) {
+                        // we have valid address
                         boolean hasPaymentId = uriData.hasPaymentId();
                         if(currentOutputs > 1 && hasPaymentId) {
+                            // multiple outputs when pasting/editing in integrated address. this is not allowed
                             Toast.makeText(getActivity(), getString(R.string.paymentid_paytomany), Toast.LENGTH_SHORT).show();
                             addressField.setText(null);
                         } else if(currentOutputs == 1 && hasPaymentId) {
+                            // show add output button: we are sending to integrated address
                             mViewModel.setShowAddOutputButton(false);
                         }
-                    } else if(currentOutputs == 1 && !isSendAll()){
+                    } else if(currentOutputs == 1 && !isSendAll()) {
+                        // when send-all is false and this is our only dest and address is invalid, then show add output button
                         mViewModel.setShowAddOutputButton(true);
                     }
                 }
