@@ -202,6 +202,17 @@ public class SendFragment extends Fragment {
         return true;
     }
 
+    private boolean destsHasPaymentId() {
+        List<Pair<String, String>> dests = getRawDests();
+        for(Pair<String, String> dest : dests) {
+            String address = dest.component1();
+            UriData uriData = UriData.parse(address);
+            if(uriData == null) return false;
+            if(uriData.hasPaymentId()) return true;
+        }
+        return false;
+    }
+
     private void bindObservers() {
         mViewModel.sendingMax.observe(getViewLifecycleOwner(), sendingMax -> {
             if (mViewModel.pendingTransaction.getValue() == null) {
@@ -216,7 +227,7 @@ public class SendFragment extends Fragment {
         });
 
         mViewModel.showAddOutputButton.observe(getViewLifecycleOwner(), show -> {
-            setAddOutputButtonVisibility(show ? View.VISIBLE : View.INVISIBLE);
+            setAddOutputButtonVisibility((show && !destsHasPaymentId()) ? View.VISIBLE : View.INVISIBLE);
         });
 
         mViewModel.pendingTransaction.observe(getViewLifecycleOwner(), pendingTx -> {
