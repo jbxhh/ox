@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -137,44 +139,19 @@ public class SendFragment extends Fragment {
             }
         });
         sendMaxButton.setOnClickListener(view1 -> {
-            boolean currentValue = mViewModel.sendingMax.getValue() != null ? mViewModel.sendingMax.getValue() : false;
-            mViewModel.setSendingMax(!currentValue);
+            mViewModel.setSendingMax(!isSendAll());
         });
         createButton.setOnClickListener(view1 -> {
-            boolean sendAll = mViewModel.sendingMax.getValue() != null ? mViewModel.sendingMax.getValue() : false;
-            ArrayList<Pair<String, String>> dests = new ArrayList<>();
-            for(int i = 0; i < getDestCount(); i++) {
-                ConstraintLayout entryView = getDestView(i);
-                EditText amountField = entryView.findViewById(R.id.amount_edittext);
-                EditText addressField = entryView.findViewById(R.id.address_edittext);
-                String amount = amountField.getText().toString().trim();
-                if(!sendAll) {
-                    if(amount.isEmpty()) {
-                        Toast.makeText(getActivity(), getString(R.string.send_amount_empty), Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+            boolean outputsValid = checkDestsValidity(isSendAll());
 
-                    long amountRaw = Wallet.getAmountFromString(amount);
-                    long balance = BalanceService.getInstance().getUnlockedBalanceRaw();
-                    if (amountRaw >= balance || amountRaw <= 0) {
-                        Toast.makeText(getActivity(), getString(R.string.send_amount_invalid), Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                }
-
-                String address = addressField.getText().toString().trim();
-                boolean isValidAddress = Wallet.isAddressValid(address);
-                if(!isValidAddress) {
-                    Toast.makeText(getActivity(), getString(R.string.send_address_invalid), Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                dests.add(new Pair<>(address, amount));
+            if(outputsValid) {
+                Toast.makeText(getActivity(), getString(R.string.creating_tx), Toast.LENGTH_SHORT).show();
+                createButton.setEnabled(false);
+                sendMaxButton.setEnabled(false);
+                createTx(getRawDests(), isSendAll(), priority);
+            } else {
+                Toast.makeText(getActivity(), getString(R.string.creating_tx_failed_invalid_outputs), Toast.LENGTH_SHORT).show();
             }
-
-            Toast.makeText(getActivity(), getString(R.string.creating_tx), Toast.LENGTH_SHORT).show();
-            createButton.setEnabled(false);
-            sendMaxButton.setEnabled(false);
-            createTx(dests, sendAll, priority);
         });
 
         sendButton.setOnClickListener(view1 -> {
@@ -185,6 +162,44 @@ public class SendFragment extends Fragment {
                 sendTx(pendingTx);
             }
         });
+    }
+
+    private boolean checkDestsValidity(boolean sendAll) {
+        List<Pair<String, String>> dests = getRawDests();
+        for(Pair<String, String> dest : dests) {
+            String address = dest.component1();
+            String amount = dest.component2();
+            if(!sendAll) {
+                if(amount.isEmpty()) {
+                    Toast.makeText(getActivity(), getString(R.string.send_amount_empty), Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+
+                long amountRaw = Wallet.getAmountFromString(amount);
+                long balance = BalanceService.getInstance().getUnlockedBalanceRaw();
+                if (amountRaw >= balance || amountRaw <= 0) {
+                    Toast.makeText(getActivity(), getString(R.string.send_amount_invalid), Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+            } else if(dests.size() > 1) {
+                Toast.makeText(getActivity(), getString(R.string.send_amount_invalid_sendall_paytomany), Toast.LENGTH_SHORT).show();
+                return false;
+            }
+
+            UriData uriData = UriData.parse(address);
+            boolean isValidAddress = uriData != null;
+            if(!isValidAddress) {
+                Toast.makeText(getActivity(), getString(R.string.send_address_invalid), Toast.LENGTH_SHORT).show();
+                return false;
+            }
+
+            if(dests.size() > 1 && uriData.hasPaymentId()) {
+                Toast.makeText(getActivity(), getString(R.string.paymentid_paytomany), Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void bindObservers() {
@@ -221,7 +236,27 @@ public class SendFragment extends Fragment {
             int index = getDestCount();
             ConstraintLayout entryView = (ConstraintLayout)inflater.inflate(R.layout.transaction_output_item, null);
             ImageButton removeOutputImageButton = entryView.findViewById(R.id.remove_output_imagebutton);
-
+            EditText addressField = entryView.findViewById(R.id.address_edittext);
+            addressField.addTextChangedListener(new TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+                @Override public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    int currentOutputs = getDestCount();
+                    UriData uriData = UriData.parse(editable.toString());
+                    if(uriData != null) {
+                        boolean hasPaymentId = uriData.hasPaymentId();
+                        if(currentOutputs > 1 && hasPaymentId) {
+                            Toast.makeText(getActivity(), getString(R.string.paymentid_paytomany), Toast.LENGTH_SHORT).show();
+                            addressField.setText(null);
+                        } else if(currentOutputs == 1 && hasPaymentId) {
+                            mViewModel.setShowAddOutputButton(false);
+                        }
+                    } else if(currentOutputs == 1 && !isSendAll()){
+                        mViewModel.setShowAddOutputButton(true);
+                    }
+                }
+            });
             entryView.findViewById(R.id.paste_amount_imagebutton).setOnClickListener(view1 -> {
                 Context ctx = getContext();
                 if (ctx != null) {
@@ -262,6 +297,24 @@ public class SendFragment extends Fragment {
         return destList.getChildCount();
     }
 
+    private List<Pair<String, String>> getRawDests() {
+        ArrayList<Pair<String, String>> dests = new ArrayList<>();
+        for(int i = 0; i < getDestCount(); i++) {
+            ConstraintLayout entryView = getDestView(i);
+            EditText amountField = entryView.findViewById(R.id.amount_edittext);
+            EditText addressField = entryView.findViewById(R.id.address_edittext);
+            String amount = amountField.getText().toString().trim();
+            String address = addressField.getText().toString().trim();
+            dests.add(new Pair<>(address, amount));
+        }
+
+        return dests;
+    }
+
+    private boolean isSendAll() {
+        return mViewModel.sendingMax.getValue() != null ? mViewModel.sendingMax.getValue() : false;
+    }
+
     private ConstraintLayout getDestView(int pos) {
         return (ConstraintLayout) destList.getChildAt(pos);
     }
@@ -285,7 +338,7 @@ public class SendFragment extends Fragment {
     private void showConfirmationLayout(boolean show) {
         if (show) {
             destList.setVisibility(View.GONE);
-            addOutputImageView.setVisibility(View.GONE);
+            setAddOutputButtonVisibility(View.GONE);
             sendMaxButton.setVisibility(View.GONE);
             createButton.setVisibility(View.GONE);
             feeRadioGroup.setVisibility(View.GONE);
@@ -297,7 +350,7 @@ public class SendFragment extends Fragment {
             amountTextView.setVisibility(View.VISIBLE);
         } else {
             destList.setVisibility(View.VISIBLE);
-            addOutputImageView.setVisibility(View.VISIBLE);
+            setAddOutputButtonVisibility(View.VISIBLE);
             sendMaxButton.setVisibility(View.VISIBLE);
             createButton.setVisibility(View.VISIBLE);
             feeRadioGroup.setVisibility(View.VISIBLE);
