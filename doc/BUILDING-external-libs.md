@@ -13,11 +13,13 @@
 1. Clone the Monero repo required for this app to function. A specific fork for UTXO management is hosted here: http://git.mynero.i2p/pokkst/monero.git
 Clone a specific branch, and shorten I2P download time with `git clone -b release-v0.18.1.2-mynero --single-branch --depth 1 http://git.mynero.i2p/pokkst/monero.git`
 
-2. Update submodules: `git submodule update --init --force`.
+2. Change current directory to the monero repo: `cd monero`
 
-3. Then go to folder with monero-wallet repo, then external-libs. Here you need to create symbol link to `monero` folder:
+3. Update submodules: `git submodule update --init --force`.
 
-Linux: `ln -s ~/monero ~/monero-wallet/external-libs/monero`
+4. Then go into the mynero repo folder, then external-libs. Here you need to create symbol link to `monero` folder:
+
+Linux: `ln -s ~/monero ~/mynero/external-libs/monero`
 
 Windows: `mklink /D "C:\Users\<USERNAME>\monero-wallet\external-libs\monero" "C:\Users\<USERNAME>\monero"`
 
