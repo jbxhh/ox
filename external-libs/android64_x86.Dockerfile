@@ -148,7 +148,7 @@ RUN set -x \
     && make install
 
 # libunbound
-ARG LIBUNBOUND_VERSION=release-1.16.1
+ARG LIBUNBOUND_VERSION=branch-1.16.1
 ARG LIBUNBOUND_HASH=903538c76e1d8eb30d0814bb55c3ef1ea28164e8
 RUN git clone https://github.com/NLnetLabs/unbound.git -b ${LIBUNBOUND_VERSION}
 RUN set -x \
