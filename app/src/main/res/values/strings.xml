@@ -5,6 +5,8 @@
     <string name="bad_password">Incorrect password!</string>
 
     <string name="send_address_invalid">Not a valid address</string>
+    <string name="send_amount_invalid">Not a valid amount</string>
+    <string name="send_amount_invalid_sendall_paytomany">Cannot send-all in pay-to-many</string>
 
     <string name="tx_list_failed_text">failed</string>
     <string name="tx_list_amount_negative">- %1$s</string>
@@ -24,7 +26,6 @@
 
     <string name="wallet_locked_balance_text">+ %1$s confirming</string>
     <string name="send_amount_empty">Please enter an amount</string>
-    <string name="send_amount_invalid">Please enter a valid amount</string>
     <string name="send_max">Max</string>
     <string name="undo">Undo</string>
     <string name="error_sending_tx">Error sending transaction</string>
@@ -61,6 +62,7 @@
     <string name="tx_fee_text">Fee: %1$s XMR</string>
     <string name="receive">Receive</string>
     <string name="creating_tx">Creating transaction…</string>
+    <string name="creating_tx_failed_invalid_outputs">Invalid destination combination</string>
     <string name="sending_tx">Sending transaction…</string>
     <string name="sent_tx">Sent transaction!</string>
     <string name="no_camera_permission">No camera permission</string>
@@ -124,4 +126,6 @@
     <string name="auth">[ auth ]</string>
     <string name="to">To</string>
     <string name="max_outputs_allowed">Maximum allowed outputs</string>
+    <string name="paymentid_paytomany">Cannot send to integrated addresses in a pay-to-many transaction</string>
+
 </resources>
