@@ -1,5 +1,6 @@
 package net.mynero.wallet.fragment.onboarding;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -85,6 +86,7 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
     private TextView moreOptionsDropdownTextView;
     private SwitchCompat torSwitch;
     private ConstraintLayout proxySettingsLayout;
+    private ConstraintLayout advancedOptionsLayout;
     private ImageView moreOptionsChevronImageView;
     private CheckBox seedOffsetCheckbox;
     private Button selectNodeButton;
@@ -113,6 +115,7 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
         walletProxyAddressEditText = view.findViewById(R.id.wallet_proxy_address_edittext);
         walletProxyPortEditText = view.findViewById(R.id.wallet_proxy_port_edittext);
         seedOffsetCheckbox.setChecked(useOffset);
+        advancedOptionsLayout = view.findViewById(R.id.more_options_layout);
 
         bindListeners();
         bindObservers();
@@ -122,13 +125,15 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
         mViewModel.showMoreOptions.observe(getViewLifecycleOwner(), show -> {
             if (show) {
                 moreOptionsChevronImageView.setImageResource(R.drawable.ic_keyboard_arrow_up);
-                walletSeedEditText.setVisibility(View.VISIBLE);
-                walletRestoreHeightEditText.setVisibility(View.VISIBLE);
+                advancedOptionsLayout.setVisibility(View.VISIBLE);
             } else {
                 moreOptionsChevronImageView.setImageResource(R.drawable.ic_keyboard_arrow_down);
-                walletSeedEditText.setVisibility(View.GONE);
-                walletRestoreHeightEditText.setVisibility(View.GONE);
+                advancedOptionsLayout.setVisibility(View.GONE);
             }
+        });
+
+        mViewModel.enableCreateButton.observe(getViewLifecycleOwner(), enable -> {
+            createWalletButton.setEnabled(enable);
         });
     }
 
@@ -230,47 +235,9 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
     }
 
     private void createOrImportWallet(String walletPassword, String confirmedPassword, String walletSeed, String restoreHeightText) {
-        String offset = useOffset ? walletPassword : "";
-        MainActivity mainActivity = (MainActivity) getActivity();
-        if (mainActivity != null) {
-            if (!walletPassword.isEmpty()) {
-                if(!walletPassword.equals(confirmedPassword)) {
-                    mainActivity.runOnUiThread(() -> Toast.makeText(mainActivity, getString(R.string.invalid_confirmed_password), Toast.LENGTH_SHORT).show());
-                    return;
-                }
-                PrefService.getInstance().edit().putBoolean(Constants.PREF_USES_PASSWORD, true).apply();
-            }
-            long restoreHeight = getNewRestoreHeight();
-            File walletFile = new File(mainActivity.getApplicationInfo().dataDir, Constants.WALLET_NAME);
-            Wallet wallet = null;
-            if(!offset.isEmpty()) {
-                PrefService.getInstance().edit().putBoolean(Constants.PREF_USES_OFFSET, true).apply();
-            }
-
-            if (walletSeed.isEmpty()) {
-                Wallet tmpWallet = createTempWallet(mainActivity.getApplicationInfo().dataDir); //we do this to get seed, then recover wallet so we can use seed offset
-                wallet = WalletManager.getInstance().recoveryWallet(walletFile, walletPassword, tmpWallet.getSeed(""), offset, restoreHeight);
-            } else {
-                if (!checkMnemonic(walletSeed)) {
-                    mainActivity.runOnUiThread(() -> Toast.makeText(mainActivity, getString(R.string.invalid_mnemonic_code), Toast.LENGTH_SHORT).show());
-                    return;
-                }
-                if (!restoreHeightText.isEmpty()) {
-                    restoreHeight = Long.parseLong(restoreHeightText);
-                }
-                wallet = WalletManager.getInstance().recoveryWallet(walletFile, walletPassword, walletSeed, offset, restoreHeight);
-            }
-            Wallet.Status walletStatus = wallet.getStatus();
-            wallet.close();
-            boolean ok = walletStatus.isOk();
-            walletFile.delete(); // cache is broken for some reason when recovering wallets. delete the file here. this happens in monerujo too.
-
-            if (ok) {
-                mainActivity.init(walletFile, walletPassword);
-                mainActivity.runOnUiThread(mainActivity::onBackPressed);
-            } else {
-                mainActivity.runOnUiThread(() -> Toast.makeText(mainActivity, getString(R.string.create_wallet_failed, walletStatus.getErrorString()), Toast.LENGTH_SHORT).show());
-            }
+        Activity activity = getActivity();
+        if(activity != null) {
+            mViewModel.createOrImportWallet(activity, walletPassword, confirmedPassword, walletSeed, restoreHeightText, useOffset);
         }
     }
 
@@ -292,21 +259,6 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
             walletProxyAddressEditText.setText(proxyAddress);
             walletProxyPortEditText.setText(proxyPort);
         }
-    }
-
-    private long getNewRestoreHeight() {
-        Calendar restoreDate = Calendar.getInstance();
-        restoreDate.add(Calendar.DAY_OF_MONTH, 0);
-        return RestoreHeight.getInstance().getHeight(restoreDate.getTime());
-    }
-
-    private Wallet createTempWallet(String dir) {
-        File tmpWalletFile = new File(dir, Constants.WALLET_NAME + "_tmp");
-        return WalletManager.getInstance().createWallet(tmpWalletFile, "", Constants.MNEMONIC_LANGUAGE, 0);
-    }
-
-    private boolean checkMnemonic(String seed) {
-        return (seed.split("\\s").length == 25);
     }
 
     @Override
