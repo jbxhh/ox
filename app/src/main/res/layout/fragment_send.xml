@@ -203,18 +203,24 @@
             app:layout_constraintTop_toBottomOf="@id/amount_pending_textview"
             tools:visibility="gone" />
 
-        <Button
-            android:id="@+id/send_tx_button"
+        <com.ncorti.slidetoact.SlideToActView
+            android:id="@+id/send_tx_slider"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:layout_marginEnd="24dp"
-            android:layout_marginStart="24dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
             android:layout_marginBottom="24dp"
-            android:background="@drawable/button_bg"
-            android:text="@string/send"
+            android:elevation="6dp"
             android:visibility="gone"
+            app:area_margin="10dp"
+            app:border_radius="20dp"
+            app:inner_color="@android:color/white"
+            app:outer_color="@color/oled_colorSecondary"
+            app:slider_height="72dp"
+            app:slider_locked="false"
+            app:text="@string/slide_to_send"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            tools:visibility="visible" />
+            app:text_size="18sp"
+            tools:visibility="visible"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
