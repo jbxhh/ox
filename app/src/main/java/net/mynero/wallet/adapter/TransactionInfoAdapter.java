@@ -129,7 +129,6 @@ public class TransactionInfoAdapter extends RecyclerView.Adapter<TransactionInfo
                 confirmationsProgressBar.setVisibility(View.GONE);
             } else if (txInfo.isPending) {
                 setTxColour(pendingColour);
-                confirmationsProgressBar.setVisibility(View.GONE);
                 confirmationsProgressBar.setIndeterminate(true);
                 confirmationsProgressBar.setVisibility(View.VISIBLE);
                 confirmationsTextView.setVisibility(View.GONE);

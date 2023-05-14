@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.zxing.client.android.Intents;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
+import com.ncorti.slidetoact.SlideToActView;
 
 import net.mynero.wallet.MoneroApplication;
 import net.mynero.wallet.R;
@@ -53,7 +54,7 @@ public class SendFragment extends Fragment {
     private LinearLayout destList;
     private LayoutInflater inflater;
     private Button createButton;
-    private Button sendButton;
+    private SlideToActView sendTxSlider;
     private RadioGroup feeRadioGroup;
     private TextView feeRadioGroupLabelTextView;
 
@@ -97,7 +98,7 @@ public class SendFragment extends Fragment {
         createButton = view.findViewById(R.id.create_tx_button);
         feeRadioGroup = view.findViewById(R.id.tx_fee_radiogroup);
         feeTextView = view.findViewById(R.id.fee_textview);
-        sendButton = view.findViewById(R.id.send_tx_button);
+        sendTxSlider = view.findViewById(R.id.send_tx_slider);
         addressTextView = view.findViewById(R.id.address_pending_textview);
         amountTextView = view.findViewById(R.id.amount_pending_textview);
         feeRadioGroup = view.findViewById(R.id.tx_fee_radiogroup);
@@ -154,11 +155,10 @@ public class SendFragment extends Fragment {
             }
         });
 
-        sendButton.setOnClickListener(view1 -> {
+        sendTxSlider.setOnSlideCompleteListener(slideToActView -> {
             PendingTransaction pendingTx = mViewModel.pendingTransaction.getValue();
             if (pendingTx != null) {
                 Toast.makeText(getActivity(), getString(R.string.sending_tx), Toast.LENGTH_SHORT).show();
-                sendButton.setEnabled(false);
                 sendTx(pendingTx);
             }
         });
@@ -359,7 +359,7 @@ public class SendFragment extends Fragment {
             feeRadioGroup.setVisibility(View.GONE);
             feeRadioGroupLabelTextView.setVisibility(View.GONE);
 
-            sendButton.setVisibility(View.VISIBLE);
+            sendTxSlider.setVisibility(View.VISIBLE);
             feeTextView.setVisibility(View.VISIBLE);
             addressTextView.setVisibility(View.VISIBLE);
             amountTextView.setVisibility(View.VISIBLE);
@@ -371,7 +371,7 @@ public class SendFragment extends Fragment {
             feeRadioGroup.setVisibility(View.VISIBLE);
             feeRadioGroupLabelTextView.setVisibility(View.VISIBLE);
 
-            sendButton.setVisibility(View.GONE);
+            sendTxSlider.setVisibility(View.GONE);
             feeTextView.setVisibility(View.GONE);
             addressTextView.setVisibility(View.GONE);
             amountTextView.setVisibility(View.GONE);
@@ -465,7 +465,7 @@ public class SendFragment extends Fragment {
                         Toast.makeText(getActivity(), getString(R.string.sent_tx), Toast.LENGTH_SHORT).show();
                         getActivity().onBackPressed();
                     } else {
-                        sendButton.setEnabled(true);
+                        sendTxSlider.resetSlider();
                         Toast.makeText(getActivity(), getString(R.string.error_sending_tx), Toast.LENGTH_SHORT).show();
                     }
                 });
