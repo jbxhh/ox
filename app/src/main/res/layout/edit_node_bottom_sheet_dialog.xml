@@ -79,7 +79,6 @@
             android:background="@drawable/edittext_bg"
             android:hint="@string/node_username_hint"
             android:inputType="text"
-            android:digits="-QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890.:"
             app:layout_constraintTop_toBottomOf="@id/address_edittext"
             app:layout_constraintEnd_toStartOf="@id/paste_username_imagebutton"
             app:layout_constraintStart_toStartOf="parent" />
@@ -110,7 +109,6 @@
             android:hint="@string/node_password_hint"
             android:inputType="textPassword"
             android:visibility="gone"
-            android:digits="-QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890.:"
             app:layout_constraintTop_toBottomOf="@id/username_edittext"
             app:layout_constraintBottom_toTopOf="@id/delete_node_button"
             app:layout_constraintEnd_toStartOf="@id/paste_password_imagebutton"
