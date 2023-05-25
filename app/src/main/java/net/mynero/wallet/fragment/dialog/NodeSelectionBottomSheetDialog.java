@@ -73,6 +73,7 @@ public class NodeSelectionBottomSheetDialog extends BottomSheetDialogFragment im
                     }
                 }
             } catch (JSONException e) {
+                // if stored node is old string format, try parse and upgrade, if fail then remove
                 try {
                     String nodeString = jsonArray.getString(i);
                     Node node = Node.fromString(nodeString);

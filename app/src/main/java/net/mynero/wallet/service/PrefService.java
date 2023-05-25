@@ -45,12 +45,17 @@ public class PrefService extends ServiceBase {
             JSONObject nodeJson = new JSONObject(nodeString);
             return Node.fromJson(nodeJson);
         } catch (JSONException e) {
-            if(!nodeString.isEmpty()) {
-                Node node = Node.fromString(nodeString);
-                if(node != null) {
-                    edit().putString(Constants.PREF_NODE_2, node.toJson().toString()).apply();
-                    return node;
-                }
+            // stored node is not json format, upgrade if possible
+            return upgradeOldNode(nodeString);
+        }
+    }
+
+    private Node upgradeOldNode(String nodeString) {
+        if(!nodeString.isEmpty()) {
+            Node node = Node.fromString(nodeString);
+            if(node != null) {
+                edit().putString(Constants.PREF_NODE_2, node.toJson().toString()).apply();
+                return node;
             }
         }
         return null;
