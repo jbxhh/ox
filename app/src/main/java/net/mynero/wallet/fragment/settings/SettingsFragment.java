@@ -300,7 +300,7 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
                 JSONObject nodeJsonObject = jsonArray.getJSONObject(i);
                 Node savedNode = Node.fromJson(nodeJsonObject);
                 if (savedNode.toNodeString().equals(oldNode.toNodeString()))
-                    jsonArray.put(i, newNode.toNodeString());
+                    jsonArray.put(i, newNode.toJson());
             }
             saveNodesAndReopen(jsonArray);
         } catch (Exception e) {
