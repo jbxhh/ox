@@ -29,7 +29,6 @@ import net.mynero.wallet.R;
 import net.mynero.wallet.data.DefaultNodes;
 import net.mynero.wallet.data.Node;
 import net.mynero.wallet.service.PrefService;
-import net.mynero.wallet.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -142,7 +141,7 @@ public class NodeSelectionAdapter extends RecyclerView.Adapter<NodeSelectionAdap
         private boolean isDefaultNode(Node currentNode) {
             boolean isDefault = false;
             for(DefaultNodes defaultNode : DefaultNodes.values()) {
-                if(currentNode.toNodeString().equals(defaultNode.getUri()))
+                if(currentNode.toNodeString().equals(defaultNode.getNodeString()))
                     isDefault = true;
             }
 

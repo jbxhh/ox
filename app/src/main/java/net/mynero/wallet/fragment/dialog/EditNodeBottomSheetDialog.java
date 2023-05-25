@@ -26,10 +26,16 @@ import net.mynero.wallet.util.Helper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+import timber.log.Timber;
 
 public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
     public EditNodeListener listener = null;
-    public String nodeString = "";
+    public JSONObject nodeJson = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -47,7 +53,7 @@ public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
         EditText passwordEditText = view.findViewById(R.id.password_edittext);
         ImageButton pastePasswordImageButton = view.findViewById(R.id.paste_password_imagebutton);
 
-        Node node = Node.fromString(nodeString);
+        Node node = Node.fromJson(nodeJson);
         addressEditText.setText(node.getAddress());
         nodeNameEditText.setText(node.getName());
         usernameEditText.setText(node.getUsername());
@@ -78,7 +84,7 @@ public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
         addPasteListener(view, passwordEditText, R.id.paste_password_imagebutton);
 
         deleteNodeButton.setOnClickListener(view1 -> {
-            listener.onNodeDeleted(Node.fromString(nodeString));
+            listener.onNodeDeleted(Node.fromJson(nodeJson));
             dismiss();
         });
         doneEditingButton.setOnClickListener(view1 -> {
@@ -87,39 +93,32 @@ public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
             String user = usernameEditText.getText().toString();
             String pass = passwordEditText.getText().toString();
 
-            String auth = "";
-            if(!user.isEmpty() && !pass.isEmpty()) {
-                auth = user + ":" + pass + "@";
-            } else if(!user.isEmpty()) {
+            if(nodeName.isEmpty()) {
+                Toast.makeText(getContext(), "Enter node name", Toast.LENGTH_SHORT).show();
+                return;
+            } else if(nodeAddress.isEmpty()) {
+                Toast.makeText(getContext(), "Enter node address", Toast.LENGTH_SHORT).show();
+                return;
+            } else if(!user.isEmpty() && pass.isEmpty()) {
                 Toast.makeText(getContext(), "Enter password", Toast.LENGTH_SHORT).show();
                 return;
             }
-
-            StringBuilder nodeStringBuilder = new StringBuilder();
-            nodeStringBuilder.append(auth);
-
-            if(!nodeName.isEmpty()) {
-                if(!nodeAddress.isEmpty()) {
-                    if (nodeAddress.contains(":")) {
-                        String[] nodeParts = nodeAddress.split(":");
-                        if (nodeParts.length == 2) {
-                            String address = nodeParts[0];
-                            int port = Integer.parseInt(nodeParts[1]);
-                            nodeStringBuilder.append(address).append(":").append(port);
-                        }
-                    } else {
-                        nodeStringBuilder.append(nodeAddress);
-                    }
-
-                    nodeStringBuilder.append("/mainnet/").append(nodeName);
-                    listener.onNodeEdited(Node.fromString(nodeString), Node.fromString(nodeStringBuilder.toString()));
-                } else {
-                    Toast.makeText(getContext(), "Enter node address", Toast.LENGTH_SHORT).show();
-                    return;
+            JSONObject jsonObject = new JSONObject();
+            try {
+                if (!user.isEmpty() && !pass.isEmpty()) {
+                    jsonObject.put("username", user);
+                    jsonObject.put("password", pass);
                 }
-            } else {
-                Toast.makeText(getContext(), "Enter node name", Toast.LENGTH_SHORT).show();
-                return;
+                String[] nodeParts = nodeAddress.split(":");
+
+                jsonObject.put("host", nodeParts[0]);
+                jsonObject.put("rpcPort", nodeParts[1]);
+                jsonObject.put("network", "mainnet");
+                jsonObject.put("name", nodeName);
+
+                listener.onNodeEdited(Node.fromJson(nodeJson), Node.fromJson(jsonObject));
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
             }
             dismiss();
         });

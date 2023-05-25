@@ -25,6 +25,7 @@ import net.mynero.wallet.util.Constants;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -55,22 +56,40 @@ public class NodeSelectionBottomSheetDialog extends BottomSheetDialogFragment im
             dismiss();
         });
 
+        String nodesArray = PrefService.getInstance().getString(Constants.PREF_CUSTOM_NODES, "[]");
+        JSONArray jsonArray = null;
         try {
-            String nodesArray = PrefService.getInstance().getString(Constants.PREF_CUSTOM_NODES, "[]");
-            JSONArray jsonArray = new JSONArray(nodesArray);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                String nodeString = jsonArray.getString(i);
-                Node node = Node.fromString(nodeString);
-                if (node != null) {
-                    nodes.add(node);
+            jsonArray = new JSONArray(nodesArray);
+        } catch (JSONException e) { throw new RuntimeException(e); }
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject nodeJsonObject = null;
+            try {
+                nodeJsonObject = jsonArray.getJSONObject(i);
+                if (nodeJsonObject != null) {
+                    Node node = Node.fromJson(nodeJsonObject);
+                    if (node != null) {
+                        nodes.add(node);
+                    }
+                }
+            } catch (JSONException e) {
+                try {
+                    String nodeString = jsonArray.getString(i);
+                    Node node = Node.fromString(nodeString);
+                    if (node != null) {
+                        nodes.add(node);
+                        jsonArray.put(i, node.toJson().toString());
+                    }
+                } catch (JSONException ex) {
+                    throw new RuntimeException(ex);
                 }
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
 
+        PrefService.getInstance().edit().putString(Constants.PREF_CUSTOM_NODES, jsonArray.toString()).apply();
+
         for (DefaultNodes defaultNode : DefaultNodes.values()) {
-            nodes.add(Node.fromString(defaultNode.getUri()));
+            nodes.add(Node.fromJson(defaultNode.getJson()));
         }
         adapter.submitList(nodes);
     }
@@ -83,7 +102,7 @@ public class NodeSelectionBottomSheetDialog extends BottomSheetDialogFragment im
                 Toast.makeText(activity, getString(R.string.node_selected), Toast.LENGTH_SHORT).show();
             });
         }
-        PrefService.getInstance().edit().putString(Constants.PREF_NODE_2, node.toNodeString()).apply();
+        PrefService.getInstance().edit().putString(Constants.PREF_NODE_2, node.toJson().toString()).apply();
         WalletManager.getInstance().setDaemon(node);
         adapter.updateSelectedNode();
         listener.onNodeSelected();
@@ -92,7 +111,7 @@ public class NodeSelectionBottomSheetDialog extends BottomSheetDialogFragment im
     @Override
     public boolean onSelectEditNode(Node node) {
         if (listener != null) {
-            listener.onClickedEditNode(node.toNodeString());
+            listener.onClickedEditNode(node.toJson());
         }
         dismiss();
         return true;
@@ -100,7 +119,7 @@ public class NodeSelectionBottomSheetDialog extends BottomSheetDialogFragment im
 
     public interface NodeSelectionDialogListener {
         void onNodeSelected();
-        void onClickedEditNode(String nodeString);
+        void onClickedEditNode(JSONObject nodeJson);
         void onClickedAddNode();
     }
 }

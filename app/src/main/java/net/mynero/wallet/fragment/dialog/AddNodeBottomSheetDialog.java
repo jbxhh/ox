@@ -26,6 +26,7 @@ import net.mynero.wallet.util.Helper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public class AddNodeBottomSheetDialog extends BottomSheetDialogFragment {
     public AddNodeListener listener = null;
@@ -70,64 +71,56 @@ public class AddNodeBottomSheetDialog extends BottomSheetDialogFragment {
             String name = nodeNameEditText.getText().toString();
             String user = usernameEditText.getText().toString();
             String pass = passwordEditText.getText().toString();
+            if(name.isEmpty()) {
+                Toast.makeText(getContext(), "Enter node name", Toast.LENGTH_SHORT).show();
+                return;
+            } else if(node.isEmpty()) {
+                Toast.makeText(getContext(), "Enter node address", Toast.LENGTH_SHORT).show();
+                return;
+            } else if(!user.isEmpty() && pass.isEmpty()) {
+                Toast.makeText(getContext(), "Enter password", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            JSONObject jsonObject = new JSONObject();
             try {
-                String auth = "";
-                if(!user.isEmpty() && !pass.isEmpty()) {
-                    auth = user + ":" + pass + "@";
-                } else if(!user.isEmpty()) {
-                    Toast.makeText(getContext(), "Enter password", Toast.LENGTH_SHORT).show();
-                    return;
+                if (!user.isEmpty() && !pass.isEmpty()) {
+                    jsonObject.put("username", user);
+                    jsonObject.put("password", pass);
                 }
+                String[] nodeParts = node.split(":");
 
-                StringBuilder nodeStringBuilder = new StringBuilder();
-                nodeStringBuilder.append(auth);
+                jsonObject.put("host", nodeParts[0]);
+                jsonObject.put("rpcPort", nodeParts[1]);
+                jsonObject.put("network", "mainnet");
+                jsonObject.put("name", name);
 
-                if(!name.isEmpty()) {
-                    if(!node.isEmpty()) {
-                        if (node.contains(":")) {
-                            String[] nodeParts = node.split(":");
-                            if (nodeParts.length == 2) {
-                                String address = nodeParts[0];
-                                int port = Integer.parseInt(nodeParts[1]);
-                                nodeStringBuilder.append(address).append(":").append(port);
-                            }
-                        } else {
-                            nodeStringBuilder.append(node);
-                        }
-
-                        nodeStringBuilder.append("/mainnet/").append(name);
-                    } else {
-                        Toast.makeText(getContext(), "Enter node address", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                } else {
-                    Toast.makeText(getContext(), "Enter node name", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                addNodeToSaved(nodeStringBuilder);
+                addNodeToSaved(jsonObject);
 
                 if (listener != null) {
                     listener.onNodeAdded();
                 }
-            } catch (NumberFormatException | JSONException e) {
-                e.printStackTrace();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
             }
         });
     }
 
-    private void addNodeToSaved(StringBuilder nodeStringBuilder) throws JSONException {
+    private void addNodeToSaved(JSONObject newNodeJsonObject) throws JSONException {
+        Node newNode = Node.fromJson(newNodeJsonObject);
+
         String nodesArray = PrefService.getInstance().getString(Constants.PREF_CUSTOM_NODES, "[]");
         JSONArray jsonArray = new JSONArray(nodesArray);
         boolean exists = false;
         for (int i = 0; i < jsonArray.length(); i++) {
-            String nodeString = jsonArray.getString(i);
-            if (nodeString.equals(nodeStringBuilder.toString()))
+            JSONObject nodeJsonObject = jsonArray.getJSONObject(i);
+            Node node = Node.fromJson(nodeJsonObject);
+            if (node.toNodeString().equals(newNode.toNodeString()))
                 exists = true;
         }
 
         if (!exists) {
-            jsonArray.put(nodeStringBuilder.toString());
+            jsonArray.put(newNodeJsonObject);
         } else {
             Toast.makeText(getContext(), "Node already exists", Toast.LENGTH_SHORT).show();
             return;

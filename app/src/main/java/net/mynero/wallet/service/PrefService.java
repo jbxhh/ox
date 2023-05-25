@@ -10,6 +10,7 @@ import net.mynero.wallet.util.Constants;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public class PrefService extends ServiceBase {
     private static SharedPreferences preferences = null;
@@ -39,64 +40,20 @@ public class PrefService extends ServiceBase {
                 }
             }
         }
-        String nodeString = getString(Constants.PREF_NODE_2, defaultNode.getUri());
-        if(!nodeString.isEmpty()) {
-            return Node.fromString(nodeString);
-        } else {
-            return null;
-        }
-    }
-
-    public void upgradeNodePrefs() {
-        String oldNodeString = getString("pref_node", "");
-        if(!oldNodeString.isEmpty()) {
-            //upgrade old node pref to new node pref
-            try {
-                Node oldNode = getNode(oldNodeString);
-                if(oldNode != null) {
-                    SharedPreferences.Editor editor = edit();
-                    editor.putString(Constants.PREF_NODE_2, oldNode.toNodeString());
-                    editor.putString("pref_node", "");
-                    editor.apply();
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private Node getNode(String oldNodeString) throws JSONException {
-        String nodeString = "";
-        String nodesArray = PrefService.getInstance().getString(Constants.PREF_CUSTOM_NODES, "[]");
-        JSONArray jsonArray = new JSONArray(nodesArray);
-        for (int i = 0; i < jsonArray.length(); i++) {
-            //check custom nodes
-            String jsonNodeString = jsonArray.getString(i);
-            Node savedNode = Node.fromString(jsonNodeString);
-            if(savedNode != null) {
-                if (savedNode.getAddress().equals(oldNodeString)) {
-                    nodeString = savedNode.toNodeString();
-                    break;
-                }
-            }
-        }
-        if(nodeString.isEmpty()) {
-            //not in custom nodes, maybe in default nodes?
-            for (DefaultNodes defaultNode : DefaultNodes.values()) {
-                Node node = Node.fromString(defaultNode.getUri());
+        String nodeString = getString(Constants.PREF_NODE_2, defaultNode.getNodeString());
+        try {
+            JSONObject nodeJson = new JSONObject(nodeString);
+            return Node.fromJson(nodeJson);
+        } catch (JSONException e) {
+            if(!nodeString.isEmpty()) {
+                Node node = Node.fromString(nodeString);
                 if(node != null) {
-                    if(node.getAddress().equals(oldNodeString)) {
-                        nodeString = node.toNodeString();
-                        break;
-                    }
+                    edit().putString(Constants.PREF_NODE_2, node.toJson().toString()).apply();
+                    return node;
                 }
             }
         }
-        if(nodeString.isEmpty()) {
-            return null;
-        } else {
-            return Node.fromString(nodeString);
-        }
+        return null;
     }
 
     public String getProxy() {
