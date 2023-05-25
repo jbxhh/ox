@@ -99,6 +99,7 @@ public class AddNodeBottomSheetDialog extends BottomSheetDialogFragment {
 
                 if (listener != null) {
                     listener.onNodeAdded();
+                    dismiss();
                 }
             } catch (JSONException e) {
                 throw new RuntimeException(e);
