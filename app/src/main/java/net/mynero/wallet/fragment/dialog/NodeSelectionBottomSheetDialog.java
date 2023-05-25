@@ -79,6 +79,8 @@ public class NodeSelectionBottomSheetDialog extends BottomSheetDialogFragment im
                     if (node != null) {
                         nodes.add(node);
                         jsonArray.put(i, node.toJson().toString());
+                    } else {
+                        jsonArray.remove(i);
                     }
                 } catch (JSONException ex) {
                     throw new RuntimeException(ex);

@@ -117,10 +117,10 @@ public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
                 jsonObject.put("name", nodeName);
 
                 listener.onNodeEdited(Node.fromJson(nodeJson), Node.fromJson(jsonObject));
+                dismiss();
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
-            dismiss();
         });
     }
 
