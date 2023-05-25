@@ -96,7 +96,6 @@ public class MainActivity extends AppCompatActivity implements MoneroHandlerThre
     }
 
     public void init(File walletFile, String password) {
-        upgradeOldNodePrefs();
         Wallet wallet = WalletManager.getInstance().openWallet(walletFile.getAbsolutePath(), password);
         thread = new MoneroHandlerThread("WalletService", this, wallet);
         new TxService(thread);
@@ -106,10 +105,6 @@ public class MainActivity extends AppCompatActivity implements MoneroHandlerThre
         this.blockchainService = new BlockchainService(thread);
         this.utxoService = new UTXOService(thread);
         thread.start();
-    }
-
-    private void upgradeOldNodePrefs() {
-        PrefService.getInstance().upgradeNodePrefs();
     }
 
     @Override

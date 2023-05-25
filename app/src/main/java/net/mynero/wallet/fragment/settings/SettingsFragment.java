@@ -42,6 +42,7 @@ import net.mynero.wallet.util.DayNightMode;
 import net.mynero.wallet.util.NightmodeHelper;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class SettingsFragment extends Fragment implements PasswordBottomSheetDialog.PasswordListener, NodeSelectionBottomSheetDialog.NodeSelectionDialogListener, AddNodeBottomSheetDialog.AddNodeListener, EditNodeBottomSheetDialog.EditNodeListener {
 
@@ -247,10 +248,10 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
     }
 
     @Override
-    public void onClickedEditNode(String nodeString) {
+    public void onClickedEditNode(JSONObject nodeJson) {
         EditNodeBottomSheetDialog editNodeDialog = new EditNodeBottomSheetDialog();
         editNodeDialog.listener = this;
-        editNodeDialog.nodeString = nodeString;
+        editNodeDialog.nodeJson = nodeJson;
         editNodeDialog.show(getActivity().getSupportFragmentManager(), "edit_node_dialog");
     }
 
@@ -279,8 +280,8 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
             String nodesArray = PrefService.getInstance().getString(Constants.PREF_CUSTOM_NODES, "[]");
             JSONArray jsonArray = new JSONArray(nodesArray);
             for (int i = 0; i < jsonArray.length(); i++) {
-                String jsonNodeString = jsonArray.getString(i);
-                Node savedNode = Node.fromString(jsonNodeString);
+                JSONObject nodeJsonObject = jsonArray.getJSONObject(i);
+                Node savedNode = Node.fromJson(nodeJsonObject);
                 if (savedNode.toNodeString().equals(node.toNodeString()))
                     jsonArray.remove(i);
             }
@@ -296,8 +297,8 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
             String nodesArray = PrefService.getInstance().getString(Constants.PREF_CUSTOM_NODES, "[]");
             JSONArray jsonArray = new JSONArray(nodesArray);
             for (int i = 0; i < jsonArray.length(); i++) {
-                String jsonNodeString = jsonArray.getString(i);
-                Node savedNode = Node.fromString(jsonNodeString);
+                JSONObject nodeJsonObject = jsonArray.getJSONObject(i);
+                Node savedNode = Node.fromJson(nodeJsonObject);
                 if (savedNode.toNodeString().equals(oldNode.toNodeString()))
                     jsonArray.put(i, newNode.toNodeString());
             }

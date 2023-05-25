@@ -36,6 +36,8 @@ import net.mynero.wallet.service.PrefService;
 import net.mynero.wallet.util.Constants;
 import net.mynero.wallet.util.RestoreHeight;
 
+import org.json.JSONObject;
+
 import java.io.File;
 import java.util.Calendar;
 
@@ -269,7 +271,7 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
     }
 
     @Override
-    public void onClickedEditNode(String nodeString) { }
+    public void onClickedEditNode(JSONObject nodeJson) { }
 
     @Override
     public void onClickedAddNode() {

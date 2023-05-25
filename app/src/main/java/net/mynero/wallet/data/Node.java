@@ -20,6 +20,9 @@ import net.mynero.wallet.model.NetworkType;
 import net.mynero.wallet.model.WalletManager;
 import net.mynero.wallet.util.OnionHelper;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
@@ -34,7 +37,7 @@ public class Node {
     static public final String TESTNET = "testnet";
     static private int DEFAULT_LEVIN_PORT = 0;
     static private int DEFAULT_RPC_PORT = 0;
-    final private NetworkType networkType;
+    private NetworkType networkType;
     private final boolean selected = false;
     int rpcPort = 0;
     private String name = null;
@@ -144,6 +147,47 @@ public class Node {
         this.levinPort = getDefaultLevinPort();
     }
 
+    Node(JSONObject jsonObject) throws JSONException, UnknownHostException {
+        if (jsonObject == null)
+            throw new IllegalArgumentException("daemon is empty");
+        if(jsonObject.has("username")) {
+            username = jsonObject.getString("username");
+        }
+        if(jsonObject.has("password")) {
+            password = jsonObject.getString("password");
+        }
+        if(jsonObject.has("host")) {
+            setHost(jsonObject.getString("host"));
+        }
+        if(jsonObject.has("rpcPort")) {
+            this.rpcPort = jsonObject.getInt("rpcPort");
+        } else {
+            this.rpcPort = getDefaultRpcPort();
+        }
+        if(jsonObject.has("name")) {
+            this.name = jsonObject.getString("name");
+        }
+
+        if(jsonObject.has("network")) {
+            switch (jsonObject.getString("network")) {
+                case MAINNET:
+                    networkType = NetworkType.NetworkType_Mainnet;
+                    break;
+                case STAGENET:
+                    networkType = NetworkType.NetworkType_Stagenet;
+                    break;
+                case TESTNET:
+                    networkType = NetworkType.NetworkType_Testnet;
+                    break;
+                default:
+                    throw new IllegalArgumentException("invalid net: " + jsonObject.getString("network"));
+            }
+
+            if (networkType != WalletManager.getInstance().getNetworkType())
+                throw new IllegalArgumentException("wrong net: " + networkType);
+        }
+    }
+
     public Node() {
         this.networkType = WalletManager.getInstance().getNetworkType();
     }
@@ -167,6 +211,15 @@ public class Node {
         try {
             return new Node(nodeString);
         } catch (IllegalArgumentException ex) {
+            Timber.w(ex);
+            return null;
+        }
+    }
+
+    static public Node fromJson(JSONObject jsonObject) {
+        try {
+            return new Node(jsonObject);
+        } catch (IllegalArgumentException | UnknownHostException | JSONException ex) {
             Timber.w(ex);
             return null;
         }
@@ -238,6 +291,35 @@ public class Node {
 
     public String toNodeString() {
         return toString();
+    }
+
+    public JSONObject toJson() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            if (!username.isEmpty() && !password.isEmpty()) {
+                jsonObject.put("username", username);
+                jsonObject.put("password", password);
+            }
+            jsonObject.put("host", host);
+            jsonObject.put("rpcPort", rpcPort);
+            switch (networkType) {
+                case NetworkType_Mainnet:
+                    jsonObject.put("network", MAINNET);
+                    break;
+                case NetworkType_Stagenet:
+                    jsonObject.put("network", STAGENET);
+                    break;
+                case NetworkType_Testnet:
+                    jsonObject.put("network", TESTNET);
+                    break;
+            }
+            if (!name.isEmpty())
+                jsonObject.put("name", name);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+
+        return jsonObject;
     }
 
     @Override
