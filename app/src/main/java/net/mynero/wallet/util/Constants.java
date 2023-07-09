@@ -20,9 +20,9 @@ public class Constants {
 
     public static final String STREET_MODE_BALANCE = "#.############";
     public static final String[] DONATION_ADDRESSES = new String[] {
-            "87MRtZPrWUCVUgcFHdsVb5MoZUcLtqfD3FvQVGwftFb8eSdMnE39JhAJcbuSW8X2vRaRsB9RQfuCpFciybJFHaz3QYPhCLw", // primary MyNero Donation address
-            "89Yym1JTqiM7PMgra3XP1oMtGkiAQHBrFE7VJFAVYU1DTpAqviTsNewM2KoBw5fLLufaNMfJZq9bNhyPmfWq62hy4T9jzQF", // second MyNero Donation address
-            "8Bv91cxyDjaTdzW6186iwPGrQ2ZNDFVXL4bSw7mnSZ26Pii3cRNniY9K6r5yvg1yDsLtbt9pmiYcKUDTgWB2pmGJ4Fi2jK1" // third MyNero Donation address
+            "87BqQYkugEzh6Tuyotm2uc3DzJzKM6MuZaC161e6u1TsQxxPmXVPHpdNRyK47JY4d1hhbe25YVz4e9vTXCLDxvHkRXEAeBC", // primary Mysu Donation address
+            "89QoPxs4cQSGbJrJddwzV3Ca7s2gVYHE1Xd1hGZafuVJVyNKt2LCQhxUdBF57PemxQiX3dmGUZLRRAzfeYyh9pq3GiWsDVo", // second Mysu Donation address
+            "855acibBehTQJdC1f41BHWGq1FiQ5ztiAU7LiJgDUmmyJfDtRpJoo6Mc1en73duUScdeUYjLirACnZpv2C6pPbcZKgumdCS" // third Mysu Donation address
     };
-    public static final String DONATE_ADDRESS = "87MRtZPrWUCVUgcFHdsVb5MoZUcLtqfD3FvQVGwftFb8eSdMnE39JhAJcbuSW8X2vRaRsB9RQfuCpFciybJFHaz3QYPhCLw";
+    public static final String DONATE_ADDRESS = "87BqQYkugEzh6Tuyotm2uc3DzJzKM6MuZaC161e6u1TsQxxPmXVPHpdNRyK47JY4d1hhbe25YVz4e9vTXCLDxvHkRXEAeBC";
 }
