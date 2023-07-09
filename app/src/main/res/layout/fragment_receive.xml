@@ -25,7 +25,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        android:src="@drawable/lb_ic_replay"
+        android:src="@drawable/ic_refresh"
         android:minWidth="48dp"
         android:minHeight="48dp"
         app:layout_constraintEnd_toEndOf="parent"

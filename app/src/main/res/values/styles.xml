@@ -87,12 +87,6 @@
         <item name="android:textStyle">normal</item>
     </style>
 
-    <style name="MoneroText.PosNote">
-        <item name="android:textSize">12sp</item>
-        <!--item name="android:textColor">#FF4A4A4A</item-->
-        <item name="android:textStyle">italic</item>
-    </style>
-
     <style name="MoneroText.PosDate">
         <item name="android:textSize">10sp</item>
         <!--item name="android:textColor">#FF616161</item-->
