@@ -14,8 +14,6 @@
 
     <!--note: as in "Test a network connection"-->
 
-    <string name="tx_details_notes" translatable="false">&lt;span style=\"background-color: #%1$s; color: #%2$s;\"&gt;&nbsp;%3$s&nbsp;&lt;/span&gt;%4$s</string>
-
     <string name="menu_restore">Import wallet</string>
 
     <string name="preferred_theme" translatable="false">preferred_theme</string>
@@ -34,7 +32,6 @@
     <string name="invalid_mnemonic_code">Invalid mnemonic</string>
     <string name="invalid_confirmed_password">Passwords do not match</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
-    <string name="night_mode">Night mode</string>
     <string name="street_mode">Street mode (hide balances)</string>
     <string name="option_hide_xmrchan">Show Monerochan</string>
     <string name="option_donate_per_tx">Add occasional donation</string>
@@ -105,7 +102,6 @@
     <string name="create_wallet_failed">Create wallet failed: %1$s</string>
     <string name="churn">Churn</string>
     <string name="wallet_keys_label">Wallet Keys</string>
-    <string name="max_subaddresses_warning">Max subaddresses. Please receive funds first.</string>
     <string name="done">Done</string>
     <string name="delete">Delete</string>
     <string name="cant_edit_current_node">Cannot edit current node.</string>
