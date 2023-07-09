@@ -46,5 +46,7 @@ public class Coins {
         coins = transactionInfos;
     }
 
+    public native void setFrozen(String publicKey, boolean frozen);
+
     private native List<CoinsInfo> refreshJ();
 }

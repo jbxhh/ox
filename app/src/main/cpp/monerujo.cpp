@@ -1135,7 +1135,7 @@ Java_net_mynero_wallet_model_Wallet_getCoinsJ(JNIEnv *env, jobject instance) {
 
 jobject newCoinsInfo(JNIEnv *env, Monero::CoinsInfo *info) {
     jmethodID c = env->GetMethodID(class_CoinsInfo, "<init>",
-                                   "(JZLjava/lang/String;JLjava/lang/String;Ljava/lang/String;ZJ)V");
+                                   "(JZLjava/lang/String;JLjava/lang/String;Ljava/lang/String;ZJZ)V");
     jstring _key_image = env->NewStringUTF(info->keyImage().c_str());
     jstring _pub_key = env->NewStringUTF(info->pubKey().c_str());
     jstring _hash = env->NewStringUTF(info->hash().c_str());
@@ -1147,7 +1147,8 @@ jobject newCoinsInfo(JNIEnv *env, Monero::CoinsInfo *info) {
                                     _hash,
                                     _pub_key,
                                     info->unlocked(),
-                                    static_cast<jlong> (info->internalOutputIndex()));
+                                    static_cast<jlong> (info->internalOutputIndex()),
+                                    info->frozen());
     env->DeleteLocalRef(_key_image);
     env->DeleteLocalRef(_hash);
     env->DeleteLocalRef(_pub_key);
@@ -1181,6 +1182,18 @@ Java_net_mynero_wallet_model_Coins_refreshJ(JNIEnv *env, jobject instance) {
     Monero::Coins *coins = getHandle<Monero::Coins>(env, instance);
     coins->refresh();
     return coins_cpp2java(env, coins->getAll());
+}
+
+JNIEXPORT void JNICALL
+Java_net_mynero_wallet_model_Coins_setFrozen(JNIEnv *env, jobject instance, jstring publicKey, jboolean frozen) {
+    Monero::Coins *coins = getHandle<Monero::Coins>(env, instance);
+    const char *_publicKey = env->GetStringUTFChars(publicKey, nullptr);
+    if (frozen) {
+        coins->setFrozen(_publicKey);
+    } else {
+        coins->thaw(_publicKey);
+    }
+    env->ReleaseStringUTFChars(publicKey, _publicKey);
 }
 
 //virtual TransactionHistory * history() const = 0;

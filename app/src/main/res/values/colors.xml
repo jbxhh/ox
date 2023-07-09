@@ -34,6 +34,7 @@
     <color name="oled_txBackgroundColor">#FBFBFB</color>
     <color name="oled_dialogBackgroundColor">#E8E8E8</color>
     <color name="oled_addressListColor">#bbbbbb</color>
+    <color name="oled_frozen_utxo">#437895</color>
 
     <!-- CLASSIC -->
 

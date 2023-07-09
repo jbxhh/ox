@@ -5,6 +5,7 @@ import android.util.Pair;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import net.mynero.wallet.model.Coins;
 import net.mynero.wallet.model.CoinsInfo;
 import net.mynero.wallet.model.PendingTransaction;
 import net.mynero.wallet.model.Wallet;
@@ -36,6 +37,14 @@ public class UTXOService extends ServiceBase {
         return WalletManager.getInstance().getWallet().getCoins().getAll();
     }
 
+    public void toggleFrozen(List<CoinsInfo> selectedCoins) {
+        Coins coins = WalletManager.getInstance().getWallet().getCoins();
+        for(CoinsInfo coin : selectedCoins) {
+            coins.setFrozen(coin.getPubKey(), !coin.isFrozen());
+        }
+        refreshUtxos();
+    }
+
     public ArrayList<String> selectUtxos(long amount, boolean sendAll) throws Exception {
         final long basicFeeEstimate = calculateBasicFee(amount);
         final long amountWithBasicFee = amount + basicFeeEstimate;
@@ -46,7 +55,7 @@ public class UTXOService extends ServiceBase {
         Collections.sort(utxos);
         //loop through each utxo
         for (CoinsInfo coinsInfo : utxos) {
-            if (!coinsInfo.isSpent() && coinsInfo.isUnlocked()) { //filter out spent and locked outputs
+            if (!coinsInfo.isSpent() && coinsInfo.isUnlocked() && !coinsInfo.isFrozen()) { //filter out spent, locked, and frozen outputs
                 if (sendAll) {
                     // if send all, add all utxos and set amount to send all
                     selectedUtxos.add(coinsInfo.getKeyImage());

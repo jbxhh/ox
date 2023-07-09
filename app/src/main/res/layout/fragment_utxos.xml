@@ -47,15 +47,25 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <Button
-            android:id="@+id/churn_utxos_button"
+            android:id="@+id/freeze_utxos_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="@drawable/button_bg_left"
             android:layout_marginEnd="1dp"
+            android:text="@string/freeze"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/churn_utxos_button"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/churn_utxos_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_bg_center"
             android:text="@string/churn"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/send_utxos_button"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toEndOf="@id/freeze_utxos_button" />
 
         <Button
             android:id="@+id/send_utxos_button"

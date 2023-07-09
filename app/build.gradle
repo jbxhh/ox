@@ -2,15 +2,15 @@ apply plugin: 'com.android.application'
 apply plugin: "androidx.navigation.safeargs"
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
     buildToolsVersion '30.0.3'
     ndkVersion '17.2.4988734'
     defaultConfig {
         applicationId "net.mynero.wallet"
         minSdkVersion 21
-        targetSdkVersion 33
-        versionCode 40302
-        versionName "0.4.3.2 'Fluorine Fermi'"
+        targetSdkVersion 34
+        versionCode 40400
+        versionName "0.4.4 'Fluorine Fermi'"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
