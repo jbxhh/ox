@@ -1,6 +1,6 @@
 FROM debian:stable
 
-RUN set -x && apt-get update && apt-get install -y unzip automake build-essential curl file pkg-config git python libtool libtinfo5
+RUN set -x && apt-get update && apt-get install -y unzip automake build-essential curl file pkg-config git python-is-python3 libtool libtinfo5
 
 WORKDIR /opt/android
 ## INSTALL ANDROID SDK
