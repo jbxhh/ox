@@ -32,11 +32,12 @@ import net.mynero.wallet.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.ViewHolder> {
 
     private List<CoinsInfo> localDataSet;
-    private List<String> selectedUtxos;
+    private List<CoinsInfo> selectedUtxos;
     private CoinsInfoAdapterListener listener = null;
 
     /**
@@ -48,13 +49,13 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
         this.selectedUtxos = new ArrayList<>();
     }
 
-    public void submitList(List<CoinsInfo> dataSet, List<String> selectedUtxos) {
+    public void submitList(List<CoinsInfo> dataSet, List<CoinsInfo> selectedUtxos) {
         this.localDataSet = dataSet;
         this.selectedUtxos = selectedUtxos;
         notifyDataSetChanged();
     }
 
-    public void updateSelectedUtxos(List<String> selectedUtxos) {
+    public void updateSelectedUtxos(List<CoinsInfo> selectedUtxos) {
         this.selectedUtxos = selectedUtxos;
         notifyDataSetChanged();
     }
@@ -98,8 +99,14 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
             this.listener = listener;
         }
 
-        public void bind(CoinsInfo coinsInfo, List<String> selectedUtxos) {
-            boolean selected = selectedUtxos.contains(coinsInfo.getKeyImage());
+        public void bind(CoinsInfo coinsInfo, List<CoinsInfo> selectedUtxos) {
+            boolean selected = false;
+            for(CoinsInfo selectedUtxo : selectedUtxos) {
+                if (Objects.equals(selectedUtxo.getKeyImage(), coinsInfo.getKeyImage())) {
+                    selected = true;
+                    break;
+                }
+            }
             TextView pubKeyTextView = itemView.findViewById(R.id.utxo_pub_key_textview);
             TextView amountTextView = itemView.findViewById(R.id.utxo_amount_textview);
             TextView globalIdxTextView = itemView.findViewById(R.id.utxo_global_index_textview);
@@ -119,10 +126,12 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
                 return unlocked;
             });
 
-            if (!coinsInfo.isUnlocked()) {
-                itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.oled_locked_utxo));
-            } else if (selected) {
+            if (selected) {
                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.oled_colorSecondary));
+            } else if(coinsInfo.isFrozen()) {
+                itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.oled_frozen_utxo));
+            } else if (!coinsInfo.isUnlocked()) {
+                itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.oled_locked_utxo));
             } else {
                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), android.R.color.transparent));
             }

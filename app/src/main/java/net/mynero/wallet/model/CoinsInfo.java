@@ -46,8 +46,9 @@ public class CoinsInfo implements Parcelable, Comparable<CoinsInfo> {
     String pubKey;
     boolean unlocked;
     long localOutputIndex;
+    boolean frozen;
 
-    public CoinsInfo(long globalOutputIndex, boolean spent, String keyImage, long amount, String hash, String pubKey, boolean unlocked, long localOutputIndex) {
+    public CoinsInfo(long globalOutputIndex, boolean spent, String keyImage, long amount, String hash, String pubKey, boolean unlocked, long localOutputIndex, boolean frozen) {
         this.globalOutputIndex = globalOutputIndex;
         this.spent = spent;
         this.keyImage = keyImage;
@@ -56,6 +57,7 @@ public class CoinsInfo implements Parcelable, Comparable<CoinsInfo> {
         this.pubKey = pubKey;
         this.unlocked = unlocked;
         this.localOutputIndex = localOutputIndex;
+        this.frozen = frozen;
     }
 
     protected CoinsInfo(Parcel in) {
@@ -92,6 +94,10 @@ public class CoinsInfo implements Parcelable, Comparable<CoinsInfo> {
 
     public long getLocalOutputIndex() {
         return localOutputIndex;
+    }
+
+    public boolean isFrozen() {
+        return frozen;
     }
 
     @Override
