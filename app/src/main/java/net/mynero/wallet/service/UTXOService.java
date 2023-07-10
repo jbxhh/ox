@@ -13,6 +13,7 @@ import net.mynero.wallet.model.WalletManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class UTXOService extends ServiceBase {
@@ -37,9 +38,9 @@ public class UTXOService extends ServiceBase {
         return WalletManager.getInstance().getWallet().getCoins().getAll();
     }
 
-    public void toggleFrozen(List<CoinsInfo> selectedCoins) {
+    public void toggleFrozen(HashMap<String, CoinsInfo> selectedCoins) {
         Coins coins = WalletManager.getInstance().getWallet().getCoins();
-        for(CoinsInfo coin : selectedCoins) {
+        for(CoinsInfo coin : selectedCoins.values()) {
             coins.setFrozen(coin.getPubKey(), !coin.isFrozen());
         }
         refreshUtxos();
