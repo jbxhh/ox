@@ -31,13 +31,14 @@ import net.mynero.wallet.service.PrefService;
 import net.mynero.wallet.util.Constants;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.ViewHolder> {
 
     private List<CoinsInfo> localDataSet;
-    private ArrayList<CoinsInfo> selectedUtxos;
+    private final ArrayList<CoinsInfo> selectedUtxos;
     private CoinsInfoAdapterListener listener = null;
 
     /**
@@ -91,7 +92,7 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
         CoinsInfo tx = localDataSet.get(position);
-        viewHolder.bind(listener, tx, selectedUtxos);
+        viewHolder.bind(listener, tx, Collections.unmodifiableList(selectedUtxos));
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -121,7 +122,6 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
                     break;
                 }
             }
-            boolean alreadyEditing = selectedUtxos.size() > 0 || selected;
 
             TextView pubKeyTextView = itemView.findViewById(R.id.utxo_pub_key_textview);
             TextView amountTextView = itemView.findViewById(R.id.utxo_amount_textview);
@@ -134,15 +134,7 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
             globalIdxTextView.setText(itemView.getResources().getString(R.string.global_index_text, coinsInfo.getGlobalOutputIndex()));
             outpointTextView.setText(itemView.getResources().getString(R.string.outpoint_text, coinsInfo.getHash() + ":" + coinsInfo.getLocalOutputIndex()));
 
-            itemView.setOnClickListener(view -> {
-                if(!alreadyEditing) return;
-                boolean unlocked = coinsInfo.isUnlocked();
-                if (unlocked) {
-                    listener.onUtxoSelected(coinsInfo);
-                }
-            });
             itemView.setOnLongClickListener(view -> {
-                if(alreadyEditing) return false;
                 boolean unlocked = coinsInfo.isUnlocked();
                 if (unlocked) {
                     listener.onUtxoSelected(coinsInfo);
