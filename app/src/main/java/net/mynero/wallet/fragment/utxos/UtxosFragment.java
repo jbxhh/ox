@@ -30,16 +30,10 @@ import java.util.List;
 public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInfoAdapterListener, SendBottomSheetDialog.Listener {
 
     private UtxosViewModel mViewModel;
-    private final ArrayList<CoinsInfo> selectedUtxos = new ArrayList<>();
     private final CoinsInfoAdapter adapter = new CoinsInfoAdapter(this);
     private Button sendUtxosButton;
     private Button churnUtxosButton;
     private Button freezeUtxosButton;
-    enum FreezeActionType {
-        FREEZE,
-        UNFREEZE,
-        TOGGLE_FREEZE
-    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -65,10 +59,9 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
         freezeUtxosButton.setOnClickListener(view1 -> {
             Toast.makeText(getContext(), "Toggling freeze status, please wait.", Toast.LENGTH_SHORT).show();
             MoneroThreadPoolExecutor.MONERO_THREAD_POOL_EXECUTOR.execute(() -> {
-                UTXOService.getInstance().toggleFrozen(selectedUtxos);
+                UTXOService.getInstance().toggleFrozen(adapter.getSelectedUtxos());
                 getActivity().runOnUiThread(() -> {
-                    selectedUtxos.clear();
-                    adapter.updateSelectedUtxos(new ArrayList<>());
+                    adapter.clear();
                     sendUtxosButton.setVisibility(View.GONE);
                     churnUtxosButton.setVisibility(View.GONE);
                     freezeUtxosButton.setVisibility(View.GONE);
@@ -77,7 +70,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
         });
         sendUtxosButton.setOnClickListener(view1 -> {
             ArrayList<String> selectedKeyImages = new ArrayList<>();
-            for(CoinsInfo coinsInfo : selectedUtxos) {
+            for(CoinsInfo coinsInfo : adapter.getSelectedUtxos()) {
                 selectedKeyImages.add(coinsInfo.getKeyImage());
             }
             SendBottomSheetDialog sendDialog = new SendBottomSheetDialog();
@@ -87,7 +80,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
         });
         churnUtxosButton.setOnClickListener(view1 -> {
             ArrayList<String> selectedKeyImages = new ArrayList<>();
-            for(CoinsInfo coinsInfo : selectedUtxos) {
+            for(CoinsInfo coinsInfo : adapter.getSelectedUtxos()) {
                 selectedKeyImages.add(coinsInfo.getKeyImage());
             }
             SendBottomSheetDialog sendDialog = new SendBottomSheetDialog();
@@ -116,7 +109,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
                 if (filteredUtxos.isEmpty()) {
                     utxosRecyclerView.setVisibility(View.GONE);
                 } else {
-                    adapter.submitList(filteredUtxos, selectedUtxos);
+                    adapter.submitList(filteredUtxos);
                     utxosRecyclerView.setVisibility(View.VISIBLE);
                 }
             });
@@ -125,15 +118,15 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
 
     @Override
     public void onUtxoSelected(CoinsInfo coinsInfo) {
-        boolean selected = selectedUtxos.contains(coinsInfo);
+        boolean selected = adapter.contains(coinsInfo);
         if (selected) {
-            selectedUtxos.remove(coinsInfo);
+            adapter.deselectUtxo(coinsInfo);
         } else {
-            selectedUtxos.add(coinsInfo);
+            adapter.selectUtxo(coinsInfo);
         }
 
         boolean frozenExists = false, unfrozenExists = false, bothExist = false;
-        for(CoinsInfo selectedUtxo : selectedUtxos) {
+        for(CoinsInfo selectedUtxo : adapter.getSelectedUtxos()) {
             if(selectedUtxo.isFrozen())
                 frozenExists = true;
             else {
@@ -142,22 +135,23 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
         }
         bothExist = frozenExists && unfrozenExists;
 
-        if (selectedUtxos.isEmpty()) {
+        if (adapter.getSelectedUtxos().isEmpty()) {
             sendUtxosButton.setVisibility(View.GONE);
             churnUtxosButton.setVisibility(View.GONE);
             freezeUtxosButton.setVisibility(View.GONE);
+            freezeUtxosButton.setBackgroundResource(R.drawable.button_bg_left);
         } else {
             if(frozenExists) {
+                freezeUtxosButton.setBackgroundResource(R.drawable.button_bg);
                 sendUtxosButton.setVisibility(View.GONE);
                 churnUtxosButton.setVisibility(View.GONE);
             } else {
+                freezeUtxosButton.setBackgroundResource(R.drawable.button_bg_left);
                 sendUtxosButton.setVisibility(View.VISIBLE);
                 churnUtxosButton.setVisibility(View.VISIBLE);
             }
             freezeUtxosButton.setVisibility(View.VISIBLE);
         }
-
-        adapter.updateSelectedUtxos(selectedUtxos);
 
         if(bothExist) {
             freezeUtxosButton.setText(R.string.toggle_freeze);
@@ -170,7 +164,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
 
     @Override
     public void onSentTransaction() {
-        selectedUtxos.clear();
+        adapter.clear();
         churnUtxosButton.setVisibility(View.GONE);
         sendUtxosButton.setVisibility(View.GONE);
         freezeUtxosButton.setVisibility(View.GONE);

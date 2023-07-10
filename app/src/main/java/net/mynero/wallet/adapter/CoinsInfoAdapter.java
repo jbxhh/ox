@@ -37,7 +37,7 @@ import java.util.Objects;
 public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.ViewHolder> {
 
     private List<CoinsInfo> localDataSet;
-    private List<CoinsInfo> selectedUtxos;
+    private ArrayList<CoinsInfo> selectedUtxos;
     private CoinsInfoAdapterListener listener = null;
 
     /**
@@ -49,15 +49,32 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
         this.selectedUtxos = new ArrayList<>();
     }
 
-    public void submitList(List<CoinsInfo> dataSet, List<CoinsInfo> selectedUtxos) {
+    public void submitList(List<CoinsInfo> dataSet) {
         this.localDataSet = dataSet;
-        this.selectedUtxos = selectedUtxos;
         notifyDataSetChanged();
     }
 
-    public void updateSelectedUtxos(List<CoinsInfo> selectedUtxos) {
-        this.selectedUtxos = selectedUtxos;
+    public void deselectUtxo(CoinsInfo coinsInfo) {
+        this.selectedUtxos.remove(coinsInfo);
         notifyDataSetChanged();
+    }
+
+    public void selectUtxo(CoinsInfo coinsInfo) {
+        this.selectedUtxos.add(coinsInfo);
+        notifyDataSetChanged();
+    }
+
+    public boolean contains(CoinsInfo coinsInfo) {
+        return this.selectedUtxos.contains(coinsInfo);
+    }
+
+    public void clear() {
+        this.selectedUtxos.clear();
+        notifyDataSetChanged();
+    }
+
+    public List<CoinsInfo> getSelectedUtxos() {
+        return selectedUtxos;
     }
 
     // Create new views (invoked by the layout manager)
@@ -67,14 +84,14 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
         View view = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.utxo_selection_item, viewGroup, false);
 
-        return new ViewHolder(listener, view);
+        return new ViewHolder(view);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
         CoinsInfo tx = localDataSet.get(position);
-        viewHolder.bind(tx, selectedUtxos);
+        viewHolder.bind(listener, tx, selectedUtxos);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -92,15 +109,11 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
      * (custom ViewHolder).
      */
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private CoinsInfoAdapterListener listener = null;
-
-        public ViewHolder(CoinsInfoAdapterListener listener, View view) {
+        public ViewHolder(View view) {
             super(view);
-            this.listener = listener;
         }
 
-        public void bind(CoinsInfo coinsInfo, List<CoinsInfo> selectedUtxos) {
-            boolean alreadyEditing = selectedUtxos.size() > 0;
+        public void bind(CoinsInfoAdapterListener listener, CoinsInfo coinsInfo, List<CoinsInfo> selectedUtxos) {
             boolean selected = false;
             for(CoinsInfo selectedUtxo : selectedUtxos) {
                 if (Objects.equals(selectedUtxo.getKeyImage(), coinsInfo.getKeyImage())) {
@@ -108,6 +121,8 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
                     break;
                 }
             }
+            boolean alreadyEditing = selectedUtxos.size() > 0 || selected;
+
             TextView pubKeyTextView = itemView.findViewById(R.id.utxo_pub_key_textview);
             TextView amountTextView = itemView.findViewById(R.id.utxo_amount_textview);
             TextView globalIdxTextView = itemView.findViewById(R.id.utxo_global_index_textview);
@@ -119,24 +134,21 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
             globalIdxTextView.setText(itemView.getResources().getString(R.string.global_index_text, coinsInfo.getGlobalOutputIndex()));
             outpointTextView.setText(itemView.getResources().getString(R.string.outpoint_text, coinsInfo.getHash() + ":" + coinsInfo.getLocalOutputIndex()));
 
-            if(alreadyEditing) {
-                itemView.setOnClickListener(view -> {
-                    boolean unlocked = coinsInfo.isUnlocked();
-                    if (unlocked) {
-                        listener.onUtxoSelected(coinsInfo);
-                    }
-                });
-                itemView.setOnLongClickListener(null);
-            } else {
-                itemView.setOnLongClickListener(view -> {
-                    boolean unlocked = coinsInfo.isUnlocked();
-                    if (unlocked) {
-                        listener.onUtxoSelected(coinsInfo);
-                    }
-                    return unlocked;
-                });
-                itemView.setOnClickListener(null);
-            }
+            itemView.setOnClickListener(view -> {
+                if(!alreadyEditing) return;
+                boolean unlocked = coinsInfo.isUnlocked();
+                if (unlocked) {
+                    listener.onUtxoSelected(coinsInfo);
+                }
+            });
+            itemView.setOnLongClickListener(view -> {
+                if(alreadyEditing) return false;
+                boolean unlocked = coinsInfo.isUnlocked();
+                if (unlocked) {
+                    listener.onUtxoSelected(coinsInfo);
+                }
+                return unlocked;
+            });
 
             if (selected) {
                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.oled_colorSecondary));
