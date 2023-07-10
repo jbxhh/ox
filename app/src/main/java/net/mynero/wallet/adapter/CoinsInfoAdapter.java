@@ -138,22 +138,24 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
 
             TextView pubKeyTextView = itemView.findViewById(R.id.utxo_pub_key_textview);
             TextView amountTextView = itemView.findViewById(R.id.utxo_amount_textview);
+            TextView addressTextView = itemView.findViewById(R.id.utxo_address_textview);
             TextView globalIdxTextView = itemView.findViewById(R.id.utxo_global_index_textview);
             TextView outpointTextView = itemView.findViewById(R.id.utxo_outpoint_textview);
             boolean streetModeEnabled = PrefService.getInstance().getBoolean(Constants.PREF_STREET_MODE, false);
             String balanceString = streetModeEnabled ? Constants.STREET_MODE_BALANCE : Wallet.getDisplayAmount(coinsInfo.getAmount());
             amountTextView.setText(itemView.getResources().getString(R.string.tx_amount_no_prefix, balanceString));
             pubKeyTextView.setText(coinsInfo.getPubKey());
+            addressTextView.setText(coinsInfo.getAddress());
             globalIdxTextView.setText(itemView.getResources().getString(R.string.global_index_text, coinsInfo.getGlobalOutputIndex()));
             outpointTextView.setText(itemView.getResources().getString(R.string.outpoint_text, coinsInfo.getHash() + ":" + coinsInfo.getLocalOutputIndex()));
             if (selected) {
-                itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.oled_colorSecondary));
+                itemView.setBackgroundTintList(ContextCompat.getColorStateList(itemView.getContext(), R.color.oled_colorSecondary));
             } else if(coinsInfo.isFrozen()) {
-                itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.oled_frozen_utxo));
+                itemView.setBackgroundTintList(ContextCompat.getColorStateList(itemView.getContext(), R.color.oled_frozen_utxo));
             } else if (!coinsInfo.isUnlocked()) {
-                itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.oled_locked_utxo));
+                itemView.setBackgroundTintList(ContextCompat.getColorStateList(itemView.getContext(), R.color.oled_locked_utxo));
             } else {
-                itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), android.R.color.transparent));
+                itemView.setBackgroundTintList(ContextCompat.getColorStateList(itemView.getContext(), R.color.oled_dialogBackgroundColor));
             }
         }
 
