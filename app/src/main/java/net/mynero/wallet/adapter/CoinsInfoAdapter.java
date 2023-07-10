@@ -100,6 +100,7 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
         }
 
         public void bind(CoinsInfo coinsInfo, List<CoinsInfo> selectedUtxos) {
+            boolean alreadyEditing = selectedUtxos.size() > 0;
             boolean selected = false;
             for(CoinsInfo selectedUtxo : selectedUtxos) {
                 if (Objects.equals(selectedUtxo.getKeyImage(), coinsInfo.getKeyImage())) {
@@ -118,13 +119,22 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
             globalIdxTextView.setText(itemView.getResources().getString(R.string.global_index_text, coinsInfo.getGlobalOutputIndex()));
             outpointTextView.setText(itemView.getResources().getString(R.string.outpoint_text, coinsInfo.getHash() + ":" + coinsInfo.getLocalOutputIndex()));
 
-            itemView.setOnLongClickListener(view -> {
-                boolean unlocked = coinsInfo.isUnlocked();
-                if (unlocked) {
-                    listener.onUtxoSelected(coinsInfo);
-                }
-                return unlocked;
-            });
+            if(alreadyEditing) {
+                itemView.setOnClickListener(view -> {
+                    boolean unlocked = coinsInfo.isUnlocked();
+                    if (unlocked) {
+                        listener.onUtxoSelected(coinsInfo);
+                    }
+                });
+            } else {
+                itemView.setOnLongClickListener(view -> {
+                    boolean unlocked = coinsInfo.isUnlocked();
+                    if (unlocked) {
+                        listener.onUtxoSelected(coinsInfo);
+                    }
+                    return unlocked;
+                });
+            }
 
             if (selected) {
                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.oled_colorSecondary));

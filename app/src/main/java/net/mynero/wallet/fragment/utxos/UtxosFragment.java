@@ -40,7 +40,6 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
         UNFREEZE,
         TOGGLE_FREEZE
     }
-    private FreezeActionType freezeActionType = FreezeActionType.FREEZE;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -147,10 +146,14 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
             sendUtxosButton.setVisibility(View.GONE);
             churnUtxosButton.setVisibility(View.GONE);
             freezeUtxosButton.setVisibility(View.GONE);
-            freezeActionType = FreezeActionType.FREEZE;
         } else {
-            sendUtxosButton.setVisibility(View.VISIBLE);
-            churnUtxosButton.setVisibility(View.VISIBLE);
+            if(frozenExists) {
+                sendUtxosButton.setVisibility(View.GONE);
+                churnUtxosButton.setVisibility(View.GONE);
+            } else {
+                sendUtxosButton.setVisibility(View.VISIBLE);
+                churnUtxosButton.setVisibility(View.VISIBLE);
+            }
             freezeUtxosButton.setVisibility(View.VISIBLE);
         }
 
@@ -167,7 +170,9 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
 
     @Override
     public void onSentTransaction() {
+        selectedUtxos.clear();
         churnUtxosButton.setVisibility(View.GONE);
         sendUtxosButton.setVisibility(View.GONE);
+        freezeUtxosButton.setVisibility(View.GONE);
     }
 }
