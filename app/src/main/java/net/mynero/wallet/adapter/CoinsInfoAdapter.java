@@ -126,6 +126,7 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
                         listener.onUtxoSelected(coinsInfo);
                     }
                 });
+                itemView.setOnLongClickListener(null);
             } else {
                 itemView.setOnLongClickListener(view -> {
                     boolean unlocked = coinsInfo.isUnlocked();
@@ -134,6 +135,7 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
                     }
                     return unlocked;
                 });
+                itemView.setOnClickListener(null);
             }
 
             if (selected) {
