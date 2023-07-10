@@ -25,6 +25,7 @@ import net.mynero.wallet.util.UriData;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInfoAdapterListener, SendBottomSheetDialog.Listener {
@@ -70,7 +71,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
         });
         sendUtxosButton.setOnClickListener(view1 -> {
             ArrayList<String> selectedKeyImages = new ArrayList<>();
-            for(CoinsInfo coinsInfo : adapter.getSelectedUtxos()) {
+            for(CoinsInfo coinsInfo : adapter.getSelectedUtxos().values()) {
                 selectedKeyImages.add(coinsInfo.getKeyImage());
             }
             SendBottomSheetDialog sendDialog = new SendBottomSheetDialog();
@@ -80,7 +81,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
         });
         churnUtxosButton.setOnClickListener(view1 -> {
             ArrayList<String> selectedKeyImages = new ArrayList<>();
-            for(CoinsInfo coinsInfo : adapter.getSelectedUtxos()) {
+            for(CoinsInfo coinsInfo : adapter.getSelectedUtxos().values()) {
                 selectedKeyImages.add(coinsInfo.getKeyImage());
             }
             SendBottomSheetDialog sendDialog = new SendBottomSheetDialog();
@@ -99,13 +100,12 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
         utxosRecyclerView.setAdapter(adapter);
         if (utxoService != null) {
             utxoService.utxos.observe(getViewLifecycleOwner(), utxos -> {
-                ArrayList<CoinsInfo> filteredUtxos = new ArrayList<>();
+                HashMap<String, CoinsInfo> filteredUtxos = new HashMap<>();
                 for (CoinsInfo coinsInfo : utxos) {
                     if (!coinsInfo.isSpent()) {
-                        filteredUtxos.add(coinsInfo);
+                        filteredUtxos.put(coinsInfo.getPubKey(), coinsInfo);
                     }
                 }
-                Collections.sort(filteredUtxos);
                 if (filteredUtxos.isEmpty()) {
                     utxosRecyclerView.setVisibility(View.GONE);
                 } else {
@@ -126,7 +126,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
         }
 
         boolean frozenExists = false, unfrozenExists = false, bothExist = false;
-        for(CoinsInfo selectedUtxo : adapter.getSelectedUtxos()) {
+        for(CoinsInfo selectedUtxo : adapter.getSelectedUtxos().values()) {
             if(selectedUtxo.isFrozen())
                 frozenExists = true;
             else {

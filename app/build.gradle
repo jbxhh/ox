@@ -9,8 +9,8 @@ android {
         applicationId "net.mynero.wallet"
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 40403
-        versionName "0.4.4.3 'Fluorine Fermi'"
+        versionCode 40404
+        versionName "0.4.4.4 'Fluorine Fermi'"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {

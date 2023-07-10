@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,14 +33,16 @@ import net.mynero.wallet.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
 public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.ViewHolder> {
 
-    private List<CoinsInfo> localDataSet;
-    private final ArrayList<CoinsInfo> selectedUtxos;
+    private List<CoinsInfo> localDataSet; // <public-key, coinsinfo>
+    private final HashMap<String, CoinsInfo> selectedUtxos; // <public-key, coinsinfo>
     private CoinsInfoAdapterListener listener = null;
+    private boolean editing = false;
 
     /**
      * Initialize the dataset of the Adapter.
@@ -47,34 +50,41 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
     public CoinsInfoAdapter(CoinsInfoAdapterListener listener) {
         this.listener = listener;
         this.localDataSet = new ArrayList<>();
-        this.selectedUtxos = new ArrayList<>();
+        this.selectedUtxos = new HashMap<>();
     }
 
-    public void submitList(List<CoinsInfo> dataSet) {
-        this.localDataSet = dataSet;
+    public void submitList(HashMap<String, CoinsInfo> dataSet) {
+        this.localDataSet = new ArrayList<>(dataSet.values());
         notifyDataSetChanged();
     }
 
     public void deselectUtxo(CoinsInfo coinsInfo) {
-        this.selectedUtxos.remove(coinsInfo);
+        this.selectedUtxos.remove(coinsInfo.getPubKey());
+
+        if(this.selectedUtxos.size() == 0) {
+            editing = false;
+        }
+
         notifyDataSetChanged();
     }
 
     public void selectUtxo(CoinsInfo coinsInfo) {
-        this.selectedUtxos.add(coinsInfo);
+        editing = true;
+        this.selectedUtxos.put(coinsInfo.getPubKey(), coinsInfo);
         notifyDataSetChanged();
     }
 
     public boolean contains(CoinsInfo coinsInfo) {
-        return this.selectedUtxos.contains(coinsInfo);
+        return selectedUtxos.containsKey(coinsInfo.getPubKey());
     }
 
     public void clear() {
         this.selectedUtxos.clear();
+        editing = false;
         notifyDataSetChanged();
     }
 
-    public List<CoinsInfo> getSelectedUtxos() {
+    public HashMap<String, CoinsInfo> getSelectedUtxos() {
         return selectedUtxos;
     }
 
@@ -85,14 +95,14 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
         View view = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.utxo_selection_item, viewGroup, false);
 
-        return new ViewHolder(view);
+        return new ViewHolder(listener, view);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
         CoinsInfo tx = localDataSet.get(position);
-        viewHolder.bind(listener, tx, Collections.unmodifiableList(selectedUtxos));
+        viewHolder.bind(editing, tx, selectedUtxos);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -109,19 +119,22 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder).
      */
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        public ViewHolder(View view) {
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+        private CoinsInfo coinsInfo;
+        private boolean editing = false;
+        private final CoinsInfoAdapterListener listener;
+
+        public ViewHolder(CoinsInfoAdapterListener listener, View view) {
             super(view);
+            this.listener = listener;
+            view.setOnClickListener(this);
+            view.setOnLongClickListener(this);
         }
 
-        public void bind(CoinsInfoAdapterListener listener, CoinsInfo coinsInfo, List<CoinsInfo> selectedUtxos) {
-            boolean selected = false;
-            for(CoinsInfo selectedUtxo : selectedUtxos) {
-                if (Objects.equals(selectedUtxo.getKeyImage(), coinsInfo.getKeyImage())) {
-                    selected = true;
-                    break;
-                }
-            }
+        public void bind(boolean editing, CoinsInfo coinsInfo, HashMap<String, CoinsInfo> selectedUtxos) {
+            this.editing = editing;
+            this.coinsInfo = coinsInfo;
+            boolean selected = selectedUtxos.containsKey(coinsInfo.getPubKey());
 
             TextView pubKeyTextView = itemView.findViewById(R.id.utxo_pub_key_textview);
             TextView amountTextView = itemView.findViewById(R.id.utxo_amount_textview);
@@ -133,15 +146,6 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
             pubKeyTextView.setText(coinsInfo.getPubKey());
             globalIdxTextView.setText(itemView.getResources().getString(R.string.global_index_text, coinsInfo.getGlobalOutputIndex()));
             outpointTextView.setText(itemView.getResources().getString(R.string.outpoint_text, coinsInfo.getHash() + ":" + coinsInfo.getLocalOutputIndex()));
-
-            itemView.setOnLongClickListener(view -> {
-                boolean unlocked = coinsInfo.isUnlocked();
-                if (unlocked) {
-                    listener.onUtxoSelected(coinsInfo);
-                }
-                return unlocked;
-            });
-
             if (selected) {
                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.oled_colorSecondary));
             } else if(coinsInfo.isFrozen()) {
@@ -151,6 +155,30 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
             } else {
                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), android.R.color.transparent));
             }
+        }
+
+        @Override
+        public void onClick(View view) {
+            if(!editing) return;
+            boolean unlocked = coinsInfo.isUnlocked();
+            if (unlocked) {
+                listener.onUtxoSelected(coinsInfo);
+            }
+        }
+
+        @Override
+        public boolean onLongClick(View view) {
+            if(editing) return false;
+            boolean unlocked = coinsInfo.isUnlocked();
+            if (unlocked) {
+                listener.onUtxoSelected(coinsInfo);
+            }
+            return unlocked;
+        }
+
+        @Override
+        public boolean onLongClickUseDefaultHapticFeedback(@NonNull View v) {
+            return View.OnLongClickListener.super.onLongClickUseDefaultHapticFeedback(v);
         }
     }
 }
