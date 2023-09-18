@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import net.mynero.wallet.model.BalanceInfo;
+import net.mynero.wallet.model.CoinsInfo;
 import net.mynero.wallet.model.Wallet;
 import net.mynero.wallet.model.WalletManager;
 import net.mynero.wallet.util.Constants;
@@ -29,11 +30,23 @@ public class BalanceService extends ServiceBase {
     }
 
     public long getUnlockedBalanceRaw() {
-        return WalletManager.getInstance().getWallet().getUnlockedBalance();
+        long unlocked = 0;
+        for(CoinsInfo coinsInfo : UTXOService.getInstance().getUtxos()) {
+            if(!coinsInfo.isSpent() && !coinsInfo.isFrozen() && coinsInfo.isUnlocked() && !UTXOService.getInstance().isCoinFrozen(coinsInfo)) {
+                unlocked += coinsInfo.getAmount();
+            }
+        }
+        return unlocked;
     }
 
     public long getTotalBalanceRaw() {
-        return WalletManager.getInstance().getWallet().getBalance();
+        long total = 0;
+        for(CoinsInfo coinsInfo : UTXOService.getInstance().getUtxos()) {
+            if(!coinsInfo.isSpent() && !coinsInfo.isFrozen() && !UTXOService.getInstance().isCoinFrozen(coinsInfo)) {
+                total += coinsInfo.getAmount();
+            }
+        }
+        return total;
     }
 
     public long getLockedBalanceRaw() {

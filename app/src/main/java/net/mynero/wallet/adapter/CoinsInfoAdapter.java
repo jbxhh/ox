@@ -29,6 +29,7 @@ import net.mynero.wallet.R;
 import net.mynero.wallet.model.CoinsInfo;
 import net.mynero.wallet.model.Wallet;
 import net.mynero.wallet.service.PrefService;
+import net.mynero.wallet.service.UTXOService;
 import net.mynero.wallet.util.Constants;
 
 import java.util.ArrayList;
@@ -150,7 +151,7 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
             outpointTextView.setText(itemView.getResources().getString(R.string.outpoint_text, coinsInfo.getHash() + ":" + coinsInfo.getLocalOutputIndex()));
             if (selected) {
                 itemView.setBackgroundTintList(ContextCompat.getColorStateList(itemView.getContext(), R.color.oled_colorSecondary));
-            } else if(coinsInfo.isFrozen()) {
+            } else if(coinsInfo.isFrozen() || UTXOService.instance.isCoinFrozen(coinsInfo)) {
                 itemView.setBackgroundTintList(ContextCompat.getColorStateList(itemView.getContext(), R.color.oled_frozen_utxo));
             } else if (!coinsInfo.isUnlocked()) {
                 itemView.setBackgroundTintList(ContextCompat.getColorStateList(itemView.getContext(), R.color.oled_locked_utxo));
