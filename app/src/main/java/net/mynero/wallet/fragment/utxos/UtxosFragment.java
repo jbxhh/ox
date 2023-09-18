@@ -127,7 +127,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
 
         boolean frozenExists = false, unfrozenExists = false, bothExist = false;
         for(CoinsInfo selectedUtxo : adapter.getSelectedUtxos().values()) {
-            if(selectedUtxo.isFrozen())
+            if(selectedUtxo.isFrozen() || UTXOService.getInstance().isCoinFrozen(selectedUtxo))
                 frozenExists = true;
             else {
                 unfrozenExists = true;
