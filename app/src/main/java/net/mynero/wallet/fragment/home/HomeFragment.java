@@ -105,6 +105,7 @@ public class HomeFragment extends Fragment implements TransactionInfoAdapter.TxI
         }
 
         ProgressBar progressBar = view.findViewById(R.id.sync_progress_bar);
+        TextView progressBarText = view.findViewById(R.id.sync_progress_text);
         if (blockchainService != null) {
             blockchainService.height.observe(getViewLifecycleOwner(), height -> {
                 Wallet wallet = WalletManager.getInstance().getWallet();
@@ -118,9 +119,14 @@ public class HomeFragment extends Fragment implements TransactionInfoAdapter.TxI
                     progressBar.setIndeterminate(height <= 1 || daemonHeight <= 0);
                     if (height > 1 && daemonHeight > 1) {
                         progressBar.setProgress(x);
+                        progressBarText.setVisibility(View.VISIBLE);
+                        progressBarText.setText("Syncing... " + height + " / " + daemonHeight);
+                    } else {
+                        progressBarText.setVisibility(View.GONE);
                     }
                 } else {
                     progressBar.setVisibility(View.INVISIBLE);
+                    progressBarText.setVisibility(View.GONE);
                 }
             });
         }
