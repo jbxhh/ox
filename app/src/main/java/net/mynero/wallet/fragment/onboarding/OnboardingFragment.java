@@ -92,6 +92,8 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
     private ImageView moreOptionsChevronImageView;
     private CheckBox seedOffsetCheckbox;
     private Button selectNodeButton;
+    private SwitchCompat showXmrchanSwitch;
+    private ImageView xmrchanOnboardingImage;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -118,6 +120,8 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
         walletProxyPortEditText = view.findViewById(R.id.wallet_proxy_port_edittext);
         seedOffsetCheckbox.setChecked(useOffset);
         advancedOptionsLayout = view.findViewById(R.id.more_options_layout);
+        showXmrchanSwitch = view.findViewById(R.id.show_xmrchan_switch);
+        xmrchanOnboardingImage = view.findViewById(R.id.xmrchan_onboarding_imageview);
 
         bindListeners();
         bindObservers();
@@ -221,6 +225,16 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
             }
 
             mViewModel.updateProxy(((MoneroApplication)getActivity().getApplication()));
+        });
+
+        showXmrchanSwitch.setChecked(PrefService.getInstance().getBoolean(Constants.PREF_MONEROCHAN, true));
+        showXmrchanSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
+            PrefService.getInstance().edit().putBoolean(Constants.PREF_MONEROCHAN, b).apply();
+            if(b) {
+                xmrchanOnboardingImage.setVisibility(View.VISIBLE);
+            } else {
+                xmrchanOnboardingImage.setVisibility(View.GONE);
+            }
         });
 
         Node node = PrefService.getInstance().getNode(); // should be using default here

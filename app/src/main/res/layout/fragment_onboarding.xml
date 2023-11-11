@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <ImageView
+        android:id="@+id/xmrchan_onboarding_imageview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:scaleType="fitEnd"
@@ -104,11 +105,31 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/advanced_settings_dropdown_textview">
+                <TextView
+                    android:id="@+id/disable_xmrchan_textview"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/option_hide_xmrchan"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="@id/show_xmrchan_switch"
+                    app:layout_constraintEnd_toStartOf="@id/show_xmrchan_switch"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/show_xmrchan_switch" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/show_xmrchan_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:minWidth="48dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
                 <Button
                     android:id="@+id/select_node_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="8dp"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
                     tools:text="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -118,7 +139,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/show_xmrchan_switch"
                     tools:ignore="SpeakableTextPresentCheck" />
 
                 <EditText

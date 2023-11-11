@@ -27,4 +27,4 @@ See [the instructions](doc/BUILDING-external-libs.md)
 Then, fire up Android Studio and build the APK.
 
 ### Donations
-- Address: 87MRtZPrWUCVUgcFHdsVb5MoZUcLtqfD3FvQVGwftFb8eSdMnE39JhAJcbuSW8X2vRaRsB9RQfuCpFciybJFHaz3QYPhCLw
+- Address: 87BqQYkugEzh6Tuyotm2uc3DzJzKM6MuZaC161e6u1TsQxxPmXVPHpdNRyK47JY4d1hhbe25YVz4e9vTXCLDxvHkRXEAeBC
