@@ -1,4 +1,4 @@
-# MyNero
+# Mysu
 A no-bullshit, pure Monero wallet suitable for both newcomers and experienced users.
 	**(not
     Monero Classic,
@@ -9,7 +9,7 @@ A no-bullshit, pure Monero wallet suitable for both newcomers and experienced us
     Monero V)**
 
 ### QUICKSTART
-- Download the APK for the most current release [here](https://github.com/pokkst/monero-wallet/releases) and install it
+- Download the APK for the most current release [here](http://4hsesnr6mjb4qrflgf5gezjaszzoqnnisin7ywzbsv6pgcxysiaq.b32.i2p/pokkst/mysu/releases) and install it
 - Run the app, enter a password (optional), recovery seed (optional), and restore height (optional) to create a wallet.
 - See the [FAQ](doc/FAQ.md)
 
