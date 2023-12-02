@@ -78,6 +78,8 @@ public class SubaddressAdapter extends RecyclerView.Adapter<SubaddressAdapter.Vi
 
     public interface SubaddressAdapterListener {
         void onSubaddressSelected(Subaddress subaddress);
+
+        void onSubaddressEditLabel(Subaddress subaddress);
     }
 
     /**
@@ -119,6 +121,10 @@ public class SubaddressAdapter extends RecyclerView.Adapter<SubaddressAdapter.Vi
                 addressAmountTextView.setText("");
 
             itemView.setOnClickListener(view -> listener.onSubaddressSelected(subaddress));
+            itemView.setOnLongClickListener(v -> {
+                listener.onSubaddressEditLabel(subaddress);
+                return true;
+            });
         }
     }
 }
