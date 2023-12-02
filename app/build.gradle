@@ -25,25 +25,12 @@ android {
         }
     }
 
-    flavorDimensions 'type', 'net'
+    flavorDimensions 'type'
     productFlavors {
-        mainnet {
-            dimension 'net'
-        }
         beta {
-            dimension 'net'
+            dimension 'type'
             applicationIdSuffix '.beta'
             versionNameSuffix ' (beta)'
-        }
-        devnet {
-            dimension 'net'
-            applicationIdSuffix '.test'
-            versionNameSuffix ' (test)'
-        }
-        alpha {
-            dimension 'type'
-            applicationIdSuffix '.alpha'
-            versionNameSuffix ' (alpha)'
         }
         prod {
             dimension 'type'
