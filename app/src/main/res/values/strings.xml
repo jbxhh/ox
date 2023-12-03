@@ -140,5 +140,16 @@
     <string name="max_outputs_allowed">Maximum allowed outputs</string>
     <string name="paymentid_paytomany">Cannot send to integrated addresses in a pay-to-many transaction</string>
     <string name="slide_to_send">Slide to send</string>
+    <string name="display_advanced_wallet_creation_options">Display advanced wallet creation options</string>
+    <string name="generate_fresh_wallet_address">Generate fresh wallet address</string>
+    <string name="copy_selected_wallet_address">Copy selected wallet address</string>
+    <string name="add_recipient_to_transaction">Add recipient to transaction</string>
+    <string name="copy_wallet_s_private_view_key">Copy wallet\'s private view-key</string>
+    <string name="paste_clipboard_into_amount_field">Paste clipboard into amount field</string>
+    <string name="paste_clipboard_into_address_field">Paste clipboard into address field</string>
+    <string name="remove_recipient_from_transaction">Remove recipient from transaction</string>
+    <string name="scan_qr_code_for_address_field">Scan QR code for address field</string>
+    <string name="copy_transaction_hash">Copy transaction hash</string>
+    <string name="copy_transaction_addr">Copy transaction address</string>
 
 </resources>
