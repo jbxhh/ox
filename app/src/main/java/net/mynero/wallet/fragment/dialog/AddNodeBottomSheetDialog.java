@@ -41,6 +41,7 @@ public class AddNodeBottomSheetDialog extends BottomSheetDialogFragment {
         super.onViewCreated(view, savedInstanceState);
         Button addNodeButton = view.findViewById(R.id.add_node_button);
         EditText addressEditText = view.findViewById(R.id.address_edittext);
+        EditText portEditText = view.findViewById(R.id.node_port_edittext);
         EditText nodeNameEditText = view.findViewById(R.id.node_name_edittext);
         EditText usernameEditText = view.findViewById(R.id.username_edittext);
         EditText passwordEditText = view.findViewById(R.id.password_edittext);
@@ -67,14 +68,15 @@ public class AddNodeBottomSheetDialog extends BottomSheetDialogFragment {
         addPasteListener(view, passwordEditText, R.id.paste_password_imagebutton);
 
         addNodeButton.setOnClickListener(view1 -> {
-            String node = addressEditText.getText().toString();
+            String nodeAddr = addressEditText.getText().toString();
+            String portString = portEditText.getText().toString();
             String name = nodeNameEditText.getText().toString();
             String user = usernameEditText.getText().toString();
             String pass = passwordEditText.getText().toString();
             if(name.isEmpty()) {
                 Toast.makeText(getContext(), "Enter node name", Toast.LENGTH_SHORT).show();
                 return;
-            } else if(node.isEmpty()) {
+            } else if(nodeAddr.isEmpty() || portString.isEmpty()) {
                 Toast.makeText(getContext(), "Enter node address", Toast.LENGTH_SHORT).show();
                 return;
             } else if(!user.isEmpty() && pass.isEmpty()) {
@@ -84,14 +86,16 @@ public class AddNodeBottomSheetDialog extends BottomSheetDialogFragment {
 
             JSONObject jsonObject = new JSONObject();
             try {
-                if (!user.isEmpty() && !pass.isEmpty()) {
+                if (!user.isEmpty()) {
                     jsonObject.put("username", user);
                     jsonObject.put("password", pass);
                 }
-                String[] nodeParts = node.split(":");
 
-                jsonObject.put("host", nodeParts[0]);
-                jsonObject.put("rpcPort", nodeParts[1]);
+                if (nodeAddr.contains(":") && !nodeAddr.startsWith("[") && !nodeAddr.endsWith("]"))
+                    nodeAddr = "[" + nodeAddr + "]";
+
+                jsonObject.put("host", nodeAddr);
+                jsonObject.put("rpcPort", Integer.parseInt(portString));
                 jsonObject.put("network", "mainnet");
                 jsonObject.put("name", name);
 

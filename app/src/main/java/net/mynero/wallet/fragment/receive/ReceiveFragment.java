@@ -26,6 +26,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import net.mynero.wallet.R;
 import net.mynero.wallet.adapter.SubaddressAdapter;
 import net.mynero.wallet.data.Subaddress;
+import net.mynero.wallet.fragment.dialog.EditAddressLabelBottomSheetDialog;
 import net.mynero.wallet.util.DayNightMode;
 import net.mynero.wallet.util.Helper;
 import net.mynero.wallet.util.NightmodeHelper;
@@ -70,12 +71,29 @@ public class ReceiveFragment extends Fragment {
     }
 
     private void bindObservers(View view) {
-        SubaddressAdapter adapter = new SubaddressAdapter(mViewModel::selectAddress);
+        SubaddressAdapter adapter = new SubaddressAdapter(new SubaddressAdapter.SubaddressAdapterListener() {
+            @Override
+            public void onSubaddressSelected(Subaddress subaddress) {
+                mViewModel.selectAddress(subaddress);
+            }
+
+            @Override
+            public void onSubaddressEditLabel(Subaddress subaddress) {
+                editAddressLabel(subaddress);
+            }
+        });
         RecyclerView recyclerView = view.findViewById(R.id.address_list_recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(adapter);
         mViewModel.address.observe(getViewLifecycleOwner(), this::setAddress);
         mViewModel.addresses.observe(getViewLifecycleOwner(), adapter::submitList);
+    }
+
+    private void editAddressLabel(Subaddress subaddress) {
+        EditAddressLabelBottomSheetDialog dialog = new EditAddressLabelBottomSheetDialog();
+        dialog.addressIndex = subaddress.getAddressIndex();
+        dialog.listener = () -> mViewModel.init();
+        dialog.show(getParentFragmentManager(), "edit_address_dialog");
     }
 
     private void setAddress(Subaddress subaddress) {
@@ -86,6 +104,14 @@ public class ReceiveFragment extends Fragment {
         addressTextView.setText(subaddress.getAddress());
         addressImageView.setImageBitmap(generate(subaddress.getAddress(), 256, 256));
         copyAddressImageButton.setOnClickListener(view1 -> Helper.clipBoardCopy(getContext(), "address", subaddress.getAddress()));
+        addressLabelTextView.setOnLongClickListener(v -> {
+            editAddressLabel(subaddress);
+            return true;
+        });
+        addressTextView.setOnLongClickListener(v -> {
+            editAddressLabel(subaddress);
+            return true;
+        });
     }
 
     private Bitmap generate(String text, int width, int height) {

@@ -9,8 +9,8 @@ android {
         applicationId "net.mynero.wallet"
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 40500
-        versionName "0.4.5 'Fluorine Fermi'"
+        versionCode 40701
+        versionName "0.4.7.1 'Fluorine Fermi'"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -25,25 +25,12 @@ android {
         }
     }
 
-    flavorDimensions 'type', 'net'
+    flavorDimensions 'type'
     productFlavors {
-        mainnet {
-            dimension 'net'
-        }
         beta {
-            dimension 'net'
+            dimension 'type'
             applicationIdSuffix '.beta'
             versionNameSuffix ' (beta)'
-        }
-        devnet {
-            dimension 'net'
-            applicationIdSuffix '.test'
-            versionNameSuffix ' (test)'
-        }
-        alpha {
-            dimension 'type'
-            applicationIdSuffix '.alpha'
-            versionNameSuffix ' (alpha)'
         }
         prod {
             dimension 'type'

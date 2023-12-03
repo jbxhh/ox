@@ -351,11 +351,15 @@ public class Node {
     }
 
     public String getAddress() {
-        return getHost() + ":" + rpcPort;
+        return getHost() + ":" + getRpcPort();
     }
 
     public String getHost() {
         return host;
+    }
+
+    public int getRpcPort() {
+        return rpcPort;
     }
 
     public void setHost(String host) throws UnknownHostException {

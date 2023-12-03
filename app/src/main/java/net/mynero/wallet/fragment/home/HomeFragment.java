@@ -120,7 +120,7 @@ public class HomeFragment extends Fragment implements TransactionInfoAdapter.TxI
                     if (height > 1 && daemonHeight > 1) {
                         progressBar.setProgress(x);
                         progressBarText.setVisibility(View.VISIBLE);
-                        progressBarText.setText("Syncing... " + height + " / " + daemonHeight);
+                        progressBarText.setText("Syncing... " + n + " blocks remaining");
                     } else {
                         progressBarText.setVisibility(View.GONE);
                     }

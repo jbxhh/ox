@@ -285,7 +285,7 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
     }
 
     @Override
-    public void onClickedEditNode(JSONObject nodeJson) { }
+    public void onClickedEditNode(Node node) { }
 
     @Override
     public void onClickedAddNode() {
