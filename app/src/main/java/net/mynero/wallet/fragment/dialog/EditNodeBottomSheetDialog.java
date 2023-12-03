@@ -48,13 +48,16 @@ public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
         Button deleteNodeButton = view.findViewById(R.id.delete_node_button);
         Button doneEditingButton = view.findViewById(R.id.done_editing_button);
         EditText addressEditText = view.findViewById(R.id.address_edittext);
+        EditText portEditText = view.findViewById(R.id.node_port_edittext);
         EditText nodeNameEditText = view.findViewById(R.id.node_name_edittext);
         EditText usernameEditText = view.findViewById(R.id.username_edittext);
         EditText passwordEditText = view.findViewById(R.id.password_edittext);
         ImageButton pastePasswordImageButton = view.findViewById(R.id.paste_password_imagebutton);
 
         Node node = Node.fromJson(nodeJson);
-        addressEditText.setText(node.getAddress());
+        if(node == null) return;
+        addressEditText.setText(node.getHost());
+        portEditText.setText(node.getRpcPort());
         nodeNameEditText.setText(node.getName());
         usernameEditText.setText(node.getUsername());
         if(!node.getPassword().isEmpty()) {

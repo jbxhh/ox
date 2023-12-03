@@ -17,9 +17,7 @@
 
 package net.mynero.wallet.service;
 
-import net.mynero.wallet.data.DefaultNodes;
 import net.mynero.wallet.data.Node;
-import net.mynero.wallet.data.TxData;
 import net.mynero.wallet.model.CoinsInfo;
 import net.mynero.wallet.model.PendingTransaction;
 import net.mynero.wallet.model.TransactionOutput;
@@ -57,7 +55,7 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
     @Override
     public synchronized void start() {
         super.start();
-        this.listener.onRefresh();
+        this.listener.onRefresh(false);
     }
 
     @Override
@@ -120,12 +118,12 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
         BlockchainService.getInstance().setConnectionStatus(status);
     }
 
-    private void refresh(boolean refreshCoins) {
+    private void refresh(boolean walletSynced) {
         wallet.refreshHistory();
-        if(refreshCoins) {
+        if(walletSynced) {
             wallet.refreshCoins();
         }
-        listener.onRefresh();
+        listener.onRefresh(walletSynced);
     }
 
     public PendingTransaction createTx(String address, String amountStr, boolean sendAll, PendingTransaction.Priority feePriority, ArrayList<String> selectedUtxos) throws Exception {
@@ -146,7 +144,7 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
         ArrayList<String> preferredInputs;
         if (selectedUtxos.isEmpty()) {
             // no inputs manually selected, we are sending from home screen most likely, or user somehow broke the app
-            preferredInputs = UTXOService.getInstance().selectUtxos(totalAmount, sendAll);
+            preferredInputs = UTXOService.getInstance().selectUtxos(totalAmount, sendAll, feePriority);
         } else {
             preferredInputs = selectedUtxos;
             checkSelectedAmounts(preferredInputs, totalAmount, sendAll);
@@ -233,7 +231,7 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
     }
 
     public interface Listener {
-        void onRefresh();
+        void onRefresh(boolean walletSynced);
         void onConnectionFail();
     }
 }

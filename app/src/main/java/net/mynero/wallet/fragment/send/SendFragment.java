@@ -434,21 +434,23 @@ public class SendFragment extends Fragment {
                     mViewModel.setPendingTransaction(pendingTx);
                 } else {
                     Activity activity = getActivity();
-                    if (activity != null) {
+                    if (activity != null && pendingTx != null) {
                         activity.runOnUiThread(() -> {
                             createButton.setEnabled(true);
                             sendMaxButton.setEnabled(true);
-                            Toast.makeText(getActivity(), getString(R.string.error_creating_tx), Toast.LENGTH_SHORT).show();
+                            if(pendingTx.getErrorString() != null)
+                                Toast.makeText(activity, getString(R.string.error_creating_tx, pendingTx.getErrorString()), Toast.LENGTH_SHORT).show();
                         });
                     }
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 Activity activity = getActivity();
                 if (activity != null) {
                     activity.runOnUiThread(() -> {
                         createButton.setEnabled(true);
                         sendMaxButton.setEnabled(true);
-                        Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity, getString(R.string.error_creating_tx, e.getMessage()), Toast.LENGTH_SHORT).show();
                     });
                 }
             }

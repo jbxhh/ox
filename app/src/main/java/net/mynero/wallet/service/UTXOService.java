@@ -5,7 +5,6 @@ import android.util.Pair;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import net.mynero.wallet.model.Coins;
 import net.mynero.wallet.model.CoinsInfo;
 import net.mynero.wallet.model.PendingTransaction;
 import net.mynero.wallet.model.Wallet;
@@ -22,6 +21,7 @@ import java.util.List;
 
 public class UTXOService extends ServiceBase {
     public static UTXOService instance = null;
+    private List<CoinsInfo> internalCachedUtxos = new ArrayList<>();
     private final MutableLiveData<List<CoinsInfo>> _utxos = new MutableLiveData<>();
     public LiveData<List<CoinsInfo>> utxos = _utxos;
     private ArrayList<String> frozenCoins = new ArrayList<>();
@@ -41,12 +41,13 @@ public class UTXOService extends ServiceBase {
     }
 
     public void refreshUtxos() {
-        _utxos.postValue(getUtxosInternal());
+        List<CoinsInfo> coinsInfos = getUtxosInternal();
+        _utxos.postValue(coinsInfos);
+        internalCachedUtxos = coinsInfos;
     }
 
     public List<CoinsInfo> getUtxos() {
-        List<CoinsInfo> value = utxos.getValue();
-        return value != null ? value : List.of();
+        return Collections.unmodifiableList(internalCachedUtxos);
     }
 
     private List<CoinsInfo> getUtxosInternal() {
@@ -93,12 +94,12 @@ public class UTXOService extends ServiceBase {
         prefService.edit().putString(Constants.PREF_FROZEN_COINS, jsonArray.toString()).apply();
     }
 
-    public ArrayList<String> selectUtxos(long amount, boolean sendAll) throws Exception {
-        final long basicFeeEstimate = calculateBasicFee(amount);
+    public ArrayList<String> selectUtxos(long amount, boolean sendAll, PendingTransaction.Priority feePriority) throws Exception {
+        final long basicFeeEstimate = calculateBasicFee(amount, feePriority);
         final long amountWithBasicFee = amount + basicFeeEstimate;
         ArrayList<String> selectedUtxos = new ArrayList<>();
         ArrayList<String> seenTxs = new ArrayList<>();
-        List<CoinsInfo> utxos = getUtxos();
+        List<CoinsInfo> utxos = new ArrayList<>(getUtxos());
         long amountSelected = 0;
         Collections.sort(utxos);
         //loop through each utxo
@@ -127,11 +128,10 @@ public class UTXOService extends ServiceBase {
         return selectedUtxos;
     }
 
-    private long calculateBasicFee(long amount) {
+    private long calculateBasicFee(long amount, PendingTransaction.Priority feePriority) {
         ArrayList<Pair<String, Long>> destinations = new ArrayList<>();
         destinations.add(new Pair<>("87MRtZPrWUCVUgcFHdsVb5MoZUcLtqfD3FvQVGwftFb8eSdMnE39JhAJcbuSW8X2vRaRsB9RQfuCpFciybJFHaz3QYPhCLw", amount));
         // destination string doesn't actually matter here, so i'm using the donation address. amount also technically doesn't matter
-        // priority also isn't accounted for in the Monero C++ code. maybe this is a bug by the core Monero team, or i'm using an outdated method.
-        return WalletManager.getInstance().getWallet().estimateTransactionFee(destinations, PendingTransaction.Priority.Priority_Low);
+        return WalletManager.getInstance().getWallet().estimateTransactionFee(destinations, feePriority);
     }
 }

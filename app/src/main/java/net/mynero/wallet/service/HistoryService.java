@@ -9,7 +9,7 @@ import net.mynero.wallet.model.WalletManager;
 import java.util.List;
 
 public class HistoryService extends ServiceBase {
-    public static HistoryService instance = null;
+    private static HistoryService instance = null;
     private final MutableLiveData<List<TransactionInfo>> _history = new MutableLiveData<>();
     public LiveData<List<TransactionInfo>> history = _history;
 
@@ -26,7 +26,7 @@ public class HistoryService extends ServiceBase {
         _history.postValue(getHistory());
     }
 
-    public List<TransactionInfo> getHistory() {
+    private List<TransactionInfo> getHistory() {
         return WalletManager.getInstance().getWallet().getHistory().getAll();
     }
 }
