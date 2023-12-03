@@ -86,7 +86,7 @@ public class AddNodeBottomSheetDialog extends BottomSheetDialogFragment {
 
             JSONObject jsonObject = new JSONObject();
             try {
-                if (!user.isEmpty() && !pass.isEmpty()) {
+                if (!user.isEmpty()) {
                     jsonObject.put("username", user);
                     jsonObject.put("password", pass);
                 }
