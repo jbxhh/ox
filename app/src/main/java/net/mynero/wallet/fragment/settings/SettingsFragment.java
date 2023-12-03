@@ -248,10 +248,10 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
     }
 
     @Override
-    public void onClickedEditNode(JSONObject nodeJson) {
+    public void onClickedEditNode(Node node) {
         EditNodeBottomSheetDialog editNodeDialog = new EditNodeBottomSheetDialog();
         editNodeDialog.listener = this;
-        editNodeDialog.nodeJson = nodeJson;
+        editNodeDialog.node = node;
         editNodeDialog.show(getActivity().getSupportFragmentManager(), "edit_node_dialog");
     }
 

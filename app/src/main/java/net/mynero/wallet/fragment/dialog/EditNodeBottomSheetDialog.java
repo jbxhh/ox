@@ -35,7 +35,7 @@ import timber.log.Timber;
 
 public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
     public EditNodeListener listener = null;
-    public JSONObject nodeJson = null;
+    public Node node = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -48,13 +48,15 @@ public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
         Button deleteNodeButton = view.findViewById(R.id.delete_node_button);
         Button doneEditingButton = view.findViewById(R.id.done_editing_button);
         EditText addressEditText = view.findViewById(R.id.address_edittext);
+        EditText portEditText = view.findViewById(R.id.node_port_edittext);
         EditText nodeNameEditText = view.findViewById(R.id.node_name_edittext);
         EditText usernameEditText = view.findViewById(R.id.username_edittext);
         EditText passwordEditText = view.findViewById(R.id.password_edittext);
         ImageButton pastePasswordImageButton = view.findViewById(R.id.paste_password_imagebutton);
 
-        Node node = Node.fromJson(nodeJson);
-        addressEditText.setText(node.getAddress());
+        if(node == null) return;
+        addressEditText.setText(node.getHost());
+        portEditText.setText(""+node.getRpcPort());
         nodeNameEditText.setText(node.getName());
         usernameEditText.setText(node.getUsername());
         if(!node.getPassword().isEmpty()) {
@@ -84,11 +86,12 @@ public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
         addPasteListener(view, passwordEditText, R.id.paste_password_imagebutton);
 
         deleteNodeButton.setOnClickListener(view1 -> {
-            listener.onNodeDeleted(Node.fromJson(nodeJson));
+            listener.onNodeDeleted(node);
             dismiss();
         });
         doneEditingButton.setOnClickListener(view1 -> {
-            String nodeAddress = addressEditText.getText().toString();
+            String nodeAddr = addressEditText.getText().toString();
+            String portString = portEditText.getText().toString();
             String nodeName = nodeNameEditText.getText().toString();
             String user = usernameEditText.getText().toString();
             String pass = passwordEditText.getText().toString();
@@ -96,7 +99,7 @@ public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
             if(nodeName.isEmpty()) {
                 Toast.makeText(getContext(), "Enter node name", Toast.LENGTH_SHORT).show();
                 return;
-            } else if(nodeAddress.isEmpty()) {
+            } else if(nodeAddr.isEmpty() || portString.isEmpty()) {
                 Toast.makeText(getContext(), "Enter node address", Toast.LENGTH_SHORT).show();
                 return;
             } else if(!user.isEmpty() && pass.isEmpty()) {
@@ -105,18 +108,20 @@ public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
             }
             JSONObject jsonObject = new JSONObject();
             try {
-                if (!user.isEmpty() && !pass.isEmpty()) {
+                if (!user.isEmpty()) {
                     jsonObject.put("username", user);
                     jsonObject.put("password", pass);
                 }
-                String[] nodeParts = nodeAddress.split(":");
 
-                jsonObject.put("host", nodeParts[0]);
-                jsonObject.put("rpcPort", nodeParts[1]);
+                if (nodeAddr.contains(":") && !nodeAddr.startsWith("[") && !nodeAddr.endsWith("]"))
+                    nodeAddr = "[" + nodeAddr + "]";
+
+                jsonObject.put("host", nodeAddr);
+                jsonObject.put("rpcPort", Integer.parseInt(portString));
                 jsonObject.put("network", "mainnet");
                 jsonObject.put("name", nodeName);
 
-                listener.onNodeEdited(Node.fromJson(nodeJson), Node.fromJson(jsonObject));
+                listener.onNodeEdited(node, Node.fromJson(jsonObject));
                 dismiss();
             } catch (JSONException e) {
                 throw new RuntimeException(e);

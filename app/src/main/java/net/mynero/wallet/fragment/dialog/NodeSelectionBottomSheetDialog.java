@@ -114,7 +114,7 @@ public class NodeSelectionBottomSheetDialog extends BottomSheetDialogFragment im
     @Override
     public boolean onSelectEditNode(Node node) {
         if (listener != null) {
-            listener.onClickedEditNode(node.toJson());
+            listener.onClickedEditNode(node);
         }
         dismiss();
         return true;
@@ -122,7 +122,7 @@ public class NodeSelectionBottomSheetDialog extends BottomSheetDialogFragment im
 
     public interface NodeSelectionDialogListener {
         void onNodeSelected();
-        void onClickedEditNode(JSONObject nodeJson);
+        void onClickedEditNode(Node node);
         void onClickedAddNode();
     }
 }
