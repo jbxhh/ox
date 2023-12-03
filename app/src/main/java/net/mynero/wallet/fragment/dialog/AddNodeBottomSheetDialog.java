@@ -91,6 +91,9 @@ public class AddNodeBottomSheetDialog extends BottomSheetDialogFragment {
                     jsonObject.put("password", pass);
                 }
 
+                if (nodeAddr.contains(":") && !nodeAddr.startsWith("[") && !nodeAddr.endsWith("]"))
+                    nodeAddr = "[" + nodeAddr + "]";
+
                 jsonObject.put("host", nodeAddr);
                 jsonObject.put("rpcPort", Integer.parseInt(portString));
                 jsonObject.put("network", "mainnet");

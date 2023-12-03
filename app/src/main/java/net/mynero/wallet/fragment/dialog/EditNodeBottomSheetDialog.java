@@ -35,7 +35,7 @@ import timber.log.Timber;
 
 public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
     public EditNodeListener listener = null;
-    public JSONObject nodeJson = null;
+    public Node node = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -54,7 +54,6 @@ public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
         EditText passwordEditText = view.findViewById(R.id.password_edittext);
         ImageButton pastePasswordImageButton = view.findViewById(R.id.paste_password_imagebutton);
 
-        Node node = Node.fromJson(nodeJson);
         if(node == null) return;
         addressEditText.setText(node.getHost());
         portEditText.setText(""+node.getRpcPort());
@@ -87,7 +86,7 @@ public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
         addPasteListener(view, passwordEditText, R.id.paste_password_imagebutton);
 
         deleteNodeButton.setOnClickListener(view1 -> {
-            listener.onNodeDeleted(Node.fromJson(nodeJson));
+            listener.onNodeDeleted(node);
             dismiss();
         });
         doneEditingButton.setOnClickListener(view1 -> {
@@ -114,12 +113,15 @@ public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
                     jsonObject.put("password", pass);
                 }
 
+                if (nodeAddr.contains(":") && !nodeAddr.startsWith("[") && !nodeAddr.endsWith("]"))
+                    nodeAddr = "[" + nodeAddr + "]";
+
                 jsonObject.put("host", nodeAddr);
                 jsonObject.put("rpcPort", Integer.parseInt(portString));
                 jsonObject.put("network", "mainnet");
                 jsonObject.put("name", nodeName);
 
-                listener.onNodeEdited(Node.fromJson(nodeJson), Node.fromJson(jsonObject));
+                listener.onNodeEdited(node, Node.fromJson(jsonObject));
                 dismiss();
             } catch (JSONException e) {
                 throw new RuntimeException(e);
