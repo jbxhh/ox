@@ -165,6 +165,7 @@
         android:minWidth="48dp"
         android:minHeight="48dp"
         android:padding="8dp"
+        android:contentDescription="@string/settings"
         android:src="@drawable/ic_settings"
         app:layout_constraintBottom_toBottomOf="@id/balance_unlocked_textview"
         app:layout_constraintEnd_toEndOf="parent"

@@ -93,6 +93,7 @@
                 android:layout_height="wrap_content"
                 android:minWidth="24dp"
                 android:minHeight="24dp"
+                android:contentDescription="@string/display_advanced_wallet_creation_options"
                 android:src="@drawable/ic_keyboard_arrow_down"
                 app:layout_constraintBottom_toBottomOf="@id/advanced_settings_dropdown_textview"
                 app:layout_constraintStart_toEndOf="@id/advanced_settings_dropdown_textview"

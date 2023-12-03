@@ -122,6 +122,7 @@
             android:background="@android:color/transparent"
             android:minWidth="48dp"
             android:minHeight="48dp"
+            android:contentDescription="@string/copy_wallet_s_private_view_key"
             android:src="@drawable/ic_content_copy_24dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintVertical_bias="0.0"
