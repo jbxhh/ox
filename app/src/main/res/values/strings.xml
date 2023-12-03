@@ -73,13 +73,16 @@
     <string name="add_node">Add Node</string>
     <string name="nodes">Nodes</string>
     <string name="node_name_hint">My Monero Node</string>
-    <string name="node_address_hint">127.0.0.1:18081</string>
+    <string name="node_address_hint">127.0.0.1</string>
+    <string name="node_port_hint">18081</string>
     <string name="node_username_hint">Username (optional)</string>
     <string name="node_password_hint">Password</string>
     <string name="transaction">Transaction</string>
+    <string name="transaction_action_sent">You sent</string>
+    <string name="transaction_action_recv">You received</string>
     <string name="amount_label">Amount</string>
     <string name="tx_amount_no_prefix">%1$s XMR</string>
-
+    <string name="tx_amount_no_prefix2">999.99999999999</string>
     <string name="wallet_proxy_address_hint">127.0.0.1</string>
     <string name="wallet_proxy_port_hint">9050</string>
     <string name="no_history_loading">Loading your wallet…</string>
@@ -89,9 +92,16 @@
     <string name="disconnected">Disconnected</string>
     <string name="version_mismatch">Version mismatch</string>
     <string name="transaction_hash">Transaction Hash</string>
+    <string name="transaction_hash_desc">in a transaction with id</string>
     <string name="transaction_destination">Destination</string>
+    <string name="transaction_destination_desc">to address</string>
     <string name="confirmations">Confirmations</string>
+    <string name="transaction_conf_desc">It has been confirmed</string>
+    <string name="transaction_conf_desc2_confirmed">times, and was mined in block</string>
+    <string name="transaction_conf_desc2_unconfirmed">times, and is currently in the mempool</string>
+    <string name="transaction_conf_1_desc2_confirmed">time, and was mined in block</string>
     <string name="date">Date</string>
+    <string name="transaction_on_date_label">on</string>
     <string name="node_selected">Node has been selected</string>
     <string name="fee_priority">Fee priority:</string>
     <string name="low">Low</string>
