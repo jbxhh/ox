@@ -16,6 +16,7 @@
 
 package net.mynero.wallet.model;
 
+import android.util.Log;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
@@ -93,6 +94,10 @@ public class Wallet {
     }
 
     public native String getSeed(String offset);
+
+    public native String getLegacySeed(String offset);
+
+    public native boolean isPolyseedSupported(String offset);
 
     public native String getSeedLanguage();
 
@@ -189,10 +194,42 @@ public class Wallet {
 
     //    virtual std::string keysFilename() const = 0;
     public boolean init(long upper_transaction_size_limit) {
-        return initJ(WalletManager.getInstance().getDaemonAddress(), upper_transaction_size_limit,
-                WalletManager.getInstance().getDaemonUsername(),
-                WalletManager.getInstance().getDaemonPassword(), WalletManager.getInstance().getProxy());
+        String daemon_address = WalletManager.getInstance().getDaemonAddress();
+        String daemon_username = WalletManager.getInstance().getDaemonUsername();
+        String daemon_password = WalletManager.getInstance().getDaemonPassword();
+        String proxy_address = WalletManager.getInstance().getProxy();
+        Log.d("Wallet.java", "init(");
+        if (daemon_address != null) {
+            Log.d("Wallet.java", daemon_address.toString());
+        } else {
+            Log.d("Wallet.java", "daemon_address == null");
+            daemon_address = "";
+        }
+        Log.d("Wallet.java", "upper_transaction_size_limit = 0 (probably)");
+        if (daemon_username != null) {
+            Log.d("Wallet.java", daemon_username.toString());
+        } else {
+            Log.d("Wallet.java", "daemon_username == null");
+            daemon_username = "";
+        }
+        if (daemon_password != null) {
+            Log.d("Wallet.java", daemon_password.toString());
+        } else {
+            Log.d("Wallet.java", "daemon_password == null");
+            daemon_password = "";
+        }
+        if (proxy_address != null) {
+            Log.d("Wallet.java", proxy_address.toString());
+        } else {
+            Log.d("Wallet.java", "proxy_address == null");
+            proxy_address = "";
+        }
+        Log.d("Wallet.java", ");");
+        return initJ(daemon_address, upper_transaction_size_limit,
+                daemon_username, daemon_password,
+                proxy_address);
     }
+
 
     private native boolean initJ(String daemon_address, long upper_transaction_size_limit,
                                  String daemon_username, String daemon_password, String proxy);

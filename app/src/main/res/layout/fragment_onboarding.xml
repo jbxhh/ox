@@ -38,7 +38,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/edittext_bg"
-                android:hint="@string/password_optional"
+                android:hint="@string/password_non_optional"
                 android:inputType="textPassword"
                 android:minHeight="48dp"
                 app:layout_constraintBottom_toTopOf="@id/wallet_password_confirm_edittext"
@@ -56,20 +56,11 @@
                 android:hint="@string/password_confirm"
                 android:inputType="textPassword"
                 android:visibility="gone"
-                app:layout_constraintBottom_toTopOf="@id/seed_offset_checkbox"
+                app:layout_constraintBottom_toTopOf="@id/advanced_settings_dropdown_textview"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/wallet_password_edittext"
                 tools:visibility="gone" />
-
-            <CheckBox
-                android:id="@+id/seed_offset_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:minHeight="48dp"
-                android:text="@string/use_password_as_seed_offset"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/wallet_password_confirm_edittext"/>
 
             <TextView
                 android:id="@+id/advanced_settings_dropdown_textview"
@@ -85,7 +76,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/seed_offset_checkbox" />
+                app:layout_constraintTop_toBottomOf="@id/wallet_password_confirm_edittext" />
 
             <ImageView
                 android:id="@+id/advanced_settings_chevron_imageview"
@@ -131,6 +122,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
+                    android:layout_marginBottom="16dp"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
                     tools:text="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -140,6 +132,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/wallet_seed_edittext"
                     app:layout_constraintTop_toBottomOf="@id/show_xmrchan_switch"
                     tools:ignore="SpeakableTextPresentCheck" />
 
@@ -148,7 +141,6 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:layout_marginTop="32dp"
                     android:background="@drawable/edittext_bg"
                     android:hint="@string/recovery_phrase_optional"
                     android:minHeight="48dp"
@@ -165,10 +157,22 @@
                     android:hint="@string/restore_height_optional"
                     android:inputType="number"
                     android:minHeight="48dp"
-                    app:layout_constraintBottom_toTopOf="@id/tor_onboarding_switch"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toTopOf="@id/seed_offset_checkbox"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/wallet_seed_edittext" />
+
+                <CheckBox
+                    android:id="@+id/seed_offset_checkbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:text="@string/use_password_as_seed_offset"
+                    android:visibility="gone"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/tor_onboarding_switch"
+                    app:layout_constraintTop_toBottomOf="@id/wallet_restore_height_edittext"/>
 
                 <TextView
                     android:id="@+id/tor_onboarding_switch_label"
@@ -189,7 +193,7 @@
                     android:minWidth="48dp"
                     android:layout_marginTop="16dp"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/wallet_restore_height_edittext" />
+                    app:layout_constraintTop_toBottomOf="@id/seed_offset_checkbox" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/wallet_proxy_settings_layout"
