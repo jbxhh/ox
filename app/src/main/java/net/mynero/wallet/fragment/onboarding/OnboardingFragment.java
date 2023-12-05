@@ -13,7 +13,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -24,22 +23,13 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
-import net.mynero.wallet.MainActivity;
 import net.mynero.wallet.MoneroApplication;
 import net.mynero.wallet.R;
 import net.mynero.wallet.data.Node;
 import net.mynero.wallet.fragment.dialog.AddNodeBottomSheetDialog;
 import net.mynero.wallet.fragment.dialog.NodeSelectionBottomSheetDialog;
-import net.mynero.wallet.model.Wallet;
-import net.mynero.wallet.model.WalletManager;
 import net.mynero.wallet.service.PrefService;
 import net.mynero.wallet.util.Constants;
-import net.mynero.wallet.util.RestoreHeight;
-
-import org.json.JSONObject;
-
-import java.io.File;
-import java.util.Calendar;
 
 public class OnboardingFragment extends Fragment implements NodeSelectionBottomSheetDialog.NodeSelectionDialogListener, AddNodeBottomSheetDialog.AddNodeListener {
     private boolean useOffset = true;
@@ -87,15 +77,13 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
     private Button createWalletButton;
     private TextView moreOptionsDropdownTextView;
     private SwitchCompat torSwitch;
-    private ConstraintLayout proxySettingsLayout;
     private ConstraintLayout advancedOptionsLayout;
     private ImageView moreOptionsChevronImageView;
     private CheckBox seedOffsetCheckbox;
     private Button selectNodeButton;
     private SwitchCompat showXmrchanSwitch;
     private ImageView xmrchanOnboardingImage;
-    private TextView seedTypeLabelTextView;
-    private TextView seedTypeTextView;
+    private Button seedTypeButton;
     private TextView seedTypeDescTextView;
 
     @Override
@@ -117,16 +105,13 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
         moreOptionsDropdownTextView = view.findViewById(R.id.advanced_settings_dropdown_textview);
         moreOptionsChevronImageView = view.findViewById(R.id.advanced_settings_chevron_imageview);
         torSwitch = view.findViewById(R.id.tor_onboarding_switch);
-        proxySettingsLayout = view.findViewById(R.id.wallet_proxy_settings_layout);
         seedOffsetCheckbox = view.findViewById(R.id.seed_offset_checkbox);
         walletProxyAddressEditText = view.findViewById(R.id.wallet_proxy_address_edittext);
         walletProxyPortEditText = view.findViewById(R.id.wallet_proxy_port_edittext);
-        seedOffsetCheckbox.setChecked(useOffset);
         advancedOptionsLayout = view.findViewById(R.id.more_options_layout);
         showXmrchanSwitch = view.findViewById(R.id.show_xmrchan_switch);
         xmrchanOnboardingImage = view.findViewById(R.id.xmrchan_onboarding_imageview);
-        seedTypeLabelTextView = view.findViewById(R.id.seed_type_label_textview);
-        seedTypeTextView = view.findViewById(R.id.seed_type_name_textview);
+        seedTypeButton = view.findViewById(R.id.seed_type_button);
         seedTypeDescTextView = view.findViewById(R.id.seed_type_desc_textview);
 
         bindListeners();
@@ -149,7 +134,7 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
         });
 
         mViewModel.seedType.observe(getViewLifecycleOwner(), seedType -> {
-            seedTypeTextView.setText(seedType.toString());
+            seedTypeButton.setText(seedType.toString());
             seedTypeDescTextView.setText(getText(seedType.getDescResId()));
             if(seedType == OnboardingViewModel.SeedType.LEGACY) {
                 seedOffsetCheckbox.setVisibility(View.VISIBLE);
@@ -164,6 +149,7 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
     }
 
     private void bindListeners() {
+        seedOffsetCheckbox.setChecked(useOffset);
         // Disable onBack click
         OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) { @Override public void handleOnBackPressed() { } };
         FragmentActivity activity = getActivity();
@@ -227,15 +213,12 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
             }
         });
 
-        seedTypeLabelTextView.setOnClickListener(v -> toggleSeedType());
-        seedTypeTextView.setOnClickListener(v -> toggleSeedType());
-        seedTypeDescTextView.setOnClickListener(v -> toggleSeedType());
+        seedTypeButton.setOnClickListener(v -> toggleSeedType());
 
         torSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
             PrefService.getInstance().edit().putBoolean(Constants.PREF_USES_TOR, b).apply();
+            removeProxyTextListeners();
             if (b) {
-                removeProxyTextListeners();
-
                 if (PrefService.getInstance().hasProxySet()) {
                     String proxyAddress = PrefService.getInstance().getProxyAddress();
                     String proxyPort = PrefService.getInstance().getProxyPort();
@@ -244,10 +227,6 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
                     initProxyStuff("127.0.0.1", "9050");
                 }
                 addProxyTextListeners();
-
-                proxySettingsLayout.setVisibility(View.VISIBLE);
-            } else {
-                proxySettingsLayout.setVisibility(View.GONE);
             }
 
             mViewModel.updateProxy(((MoneroApplication)getActivity().getApplication()));

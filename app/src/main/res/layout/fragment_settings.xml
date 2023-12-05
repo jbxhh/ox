@@ -121,6 +121,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="24dp"
             android:minHeight="48dp"
+            android:minWidth="48dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/transaction_settings_textview" />
 
@@ -156,6 +157,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="24dp"
             android:minHeight="48dp"
+            android:minWidth="48dp"
             android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/appearance_settings_textview" />
@@ -178,6 +180,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="24dp"
             android:minHeight="48dp"
+            android:minWidth="48dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/street_mode_switch" />
 
@@ -233,6 +236,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="24dp"
             android:minHeight="48dp"
+            android:minWidth="48dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/select_node_button" />
 
@@ -248,12 +252,12 @@
                 android:id="@+id/wallet_proxy_address_edittext"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="24dp"
                 android:layout_marginStart="24dp"
                 android:background="@drawable/edittext_bg"
                 android:hint="@string/wallet_proxy_address_hint"
+                android:minHeight="48dp"
                 app:layout_constraintBottom_toTopOf="@id/wallet_proxy_port_edittext"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -267,7 +271,9 @@
                 android:hint="@string/wallet_proxy_port_hint"
                 android:layout_marginEnd="24dp"
                 android:layout_marginStart="24dp"
+                android:layout_marginTop="8dp"
                 android:inputType="number"
+                android:minHeight="48dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
