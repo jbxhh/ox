@@ -136,6 +136,18 @@ public class WalletManager {
 
     private native long createWalletJ(String path, String password, String language, int networkType);
 
+    public Wallet createWalletPolyseed(File aFile, String password, String passphrase, String language) {
+        long walletHandle = createWalletPolyseedJ(aFile.getAbsolutePath(), password, passphrase, language, getNetworkType().getValue());
+        Wallet wallet = new Wallet(walletHandle);
+        manageWallet(wallet);
+        if (wallet.getStatus().isOk()) {
+            wallet.setPassword(password); // this rewrites the keys file (which contains the restore height)
+        } else
+            Timber.e(wallet.getStatus().toString());
+        return wallet;
+    }
+    private native long createWalletPolyseedJ(String path, String password, String passphrase, String language, int networkType);
+
     public Wallet openAccount(String path, int accountIndex, String password) {
         long walletHandle = openWalletJ(path, password, getNetworkType().getValue());
         Wallet wallet = new Wallet(walletHandle, accountIndex);
@@ -168,6 +180,20 @@ public class WalletManager {
     private native long recoveryWalletJ(String path, String password,
                                         String mnemonic, String offset,
                                         int networkType, long restoreHeight);
+
+    public Wallet recoveryWalletPolyseed(File aFile, String password,
+                                 String mnemonic, String offset) {
+        long walletHandle = recoveryWalletPolyseedJ(aFile.getAbsolutePath(), password,
+                mnemonic, offset,
+                getNetworkType().getValue());
+        Wallet wallet = new Wallet(walletHandle);
+        manageWallet(wallet);
+        return wallet;
+    }
+
+    private native long recoveryWalletPolyseedJ(String path, String password,
+                                        String mnemonic, String offset,
+                                        int networkType);
 
     public Wallet createWalletWithKeys(File aFile, String password, String language, long restoreHeight,
                                        String addressString, String viewKeyString, String spendKeyString) {

@@ -198,6 +198,17 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
             @Override
             public void afterTextChanged(Editable editable) {
                 String text = editable.toString();
+                OnboardingViewModel.SeedType seedType = mViewModel.getMnemonicType(text);
+                if(seedType == OnboardingViewModel.SeedType.LEGACY) {
+                    seedOffsetCheckbox.setVisibility(View.VISIBLE);
+                    walletRestoreHeightEditText.setVisibility(View.VISIBLE);
+                    walletPasswordEditText.setHint(getString(R.string.password_optional));
+                } else {
+                    seedOffsetCheckbox.setVisibility(View.GONE);
+                    walletRestoreHeightEditText.setVisibility(View.GONE);
+                    walletPasswordEditText.setHint(getString(R.string.password_non_optional));
+                }
+
                 if (text.isEmpty()) {
                     createWalletButton.setText(R.string.create_wallet);
                 } else {

@@ -158,6 +158,27 @@ RUN set -x \
     && make  -j${NPROC} \
     && make install
 
+# polyseed
+RUN git clone https://github.com/tevador/polyseed.git
+RUN set -x \
+    && cd polyseed \
+    && git reset --hard b7c35bb3c6b91e481ecb04fc235eaff69c507fa1 \
+    && CC=clang CXX=clang++ cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} . \
+    && make \
+    && make install
+
+# utf8proc
+RUN git clone https://github.com/JuliaStrings/utf8proc -b v2.8.0
+RUN set -x \
+    && cd utf8proc \
+    && git reset --hard 1cb28a66ca79a0845e99433fd1056257456cef8b \
+    && mkdir build \
+    && cd build \
+    && rm -rf ../CMakeCache.txt ../CMakeFiles/ \
+    && CC=clang CXX=clang++ cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} .. \
+    && make \
+    && make install
+
 COPY . /src
 RUN set -x \
     && cd /src \

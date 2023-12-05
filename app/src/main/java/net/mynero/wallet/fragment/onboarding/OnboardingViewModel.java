@@ -71,6 +71,7 @@ public class OnboardingViewModel extends ViewModel {
             String offset = useOffset ? walletPassword : "";
             if (!walletPassword.isEmpty()) {
                 if(!walletPassword.equals(confirmedPassword)) {
+                    _enableCreateButton.setValue(true);
                     mainActivity.runOnUiThread(() -> Toast.makeText(mainActivity, application.getString(R.string.invalid_confirmed_password), Toast.LENGTH_SHORT).show());
                     return;
                 }
@@ -84,11 +85,21 @@ public class OnboardingViewModel extends ViewModel {
             }
 
             if (walletSeed.isEmpty()) {
-                Wallet tmpWallet = createTempWallet(mainActivity.getApplicationInfo().dataDir); //we do this to get seed, then recover wallet so we can use seed offset
-                wallet = WalletManager.getInstance().recoveryWallet(walletFile, walletPassword, tmpWallet.getSeed(""), offset, restoreHeight);
+                if(offset.isEmpty()) {
+                    mainActivity.runOnUiThread(() -> {
+                        _enableCreateButton.setValue(true);
+                        Toast.makeText(mainActivity, application.getString(R.string.invalid_empty_passphrase), Toast.LENGTH_SHORT).show();
+                    });
+                    return;
+                } else {
+                    wallet = WalletManager.getInstance().createWalletPolyseed(walletFile, walletPassword, offset, Constants.MNEMONIC_LANGUAGE);
+                }
             } else {
-                if (!checkMnemonic(walletSeed)) {
-                    mainActivity.runOnUiThread(() -> Toast.makeText(mainActivity, application.getString(R.string.invalid_mnemonic_code), Toast.LENGTH_SHORT).show());
+                if (getMnemonicType(walletSeed) == SeedType.UNKNOWN) {
+                    mainActivity.runOnUiThread(() -> {
+                        _enableCreateButton.setValue(true);
+                        Toast.makeText(mainActivity, application.getString(R.string.invalid_mnemonic_code), Toast.LENGTH_SHORT).show();
+                    });
                     return;
                 }
                 if (!restoreHeightText.isEmpty()) {
@@ -99,7 +110,7 @@ public class OnboardingViewModel extends ViewModel {
             Wallet.Status walletStatus = wallet.getStatus();
             wallet.close();
             boolean ok = walletStatus.isOk();
-            walletFile.delete(); // cache is broken for some reason when recovering wallets. delete the file here. this happens in monerujo too.
+            //walletFile.delete(); // cache is broken for some reason when recovering wallets. delete the file here. this happens in monerujo too.
 
             if (ok) {
                 ((MainActivity)mainActivity).init(walletFile, walletPassword);
@@ -119,12 +130,20 @@ public class OnboardingViewModel extends ViewModel {
         return RestoreHeight.getInstance().getHeight(restoreDate.getTime());
     }
 
-    private Wallet createTempWallet(String dir) {
-        File tmpWalletFile = new File(dir, Constants.WALLET_NAME + "_tmp");
-        return WalletManager.getInstance().createWallet(tmpWalletFile, "", Constants.MNEMONIC_LANGUAGE, 0);
+    public SeedType getMnemonicType(String seed) {
+        String[] words = seed.split("\\s");
+        if(words.length == 16) {
+            return SeedType.POLYSEED;
+        } else if (words.length == 25){
+            return SeedType.LEGACY;
+        } else {
+            return SeedType.UNKNOWN;
+        }
     }
 
-    private boolean checkMnemonic(String seed) {
-        return (seed.split("\\s").length == 25);
+    public enum SeedType {
+        LEGACY,
+        POLYSEED,
+        UNKNOWN
     }
 }
