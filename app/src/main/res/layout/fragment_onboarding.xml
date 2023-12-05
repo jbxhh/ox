@@ -7,8 +7,9 @@
     <ImageView
         android:id="@+id/xmrchan_onboarding_imageview"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         android:scaleType="fitEnd"
+        android:adjustViewBounds="false"
         android:src="@drawable/xmrchan_half"
         app:layout_constraintBottom_toBottomOf="parent"/>
     <ScrollView
@@ -67,11 +68,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 android:text="@string/more_options"
                 android:textStyle="bold"
                 android:paddingTop="4dp"
                 android:paddingBottom="4dp"
+                android:textSize="18sp"
                 app:layout_constraintBottom_toTopOf="@id/more_options_layout"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -132,9 +134,38 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintBottom_toTopOf="@id/wallet_seed_edittext"
+                    app:layout_constraintBottom_toTopOf="@id/seed_type_label_textview"
                     app:layout_constraintTop_toBottomOf="@id/show_xmrchan_switch"
                     tools:ignore="SpeakableTextPresentCheck" />
+
+                <TextView
+                    android:id="@+id/seed_type_label_textview"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Seed version"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/seed_type_name_textview"
+                    app:layout_constraintTop_toBottomOf="@id/select_node_button"
+                    app:layout_constraintBottom_toTopOf="@id/seed_type_name_textview"/>
+                <TextView
+                    android:id="@+id/seed_type_name_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="POLYSEED"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/seed_type_label_textview"
+                    app:layout_constraintBottom_toBottomOf="@id/seed_type_label_textview"/>
+                <TextView
+                    android:id="@+id/seed_type_desc_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/oled_addressListColor"
+                    android:paddingBottom="16dp"
+                    android:paddingTop="8dp"
+                    android:text="16 words instead of 25; just as secure."
+                    app:layout_constraintTop_toBottomOf="@id/seed_type_label_textview"
+                    app:layout_constraintBottom_toTopOf="@id/wallet_seed_edittext"/>
 
                 <EditText
                     android:id="@+id/wallet_seed_edittext"
@@ -147,7 +178,7 @@
                     app:layout_constraintBottom_toTopOf="@id/wallet_restore_height_edittext"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/select_node_button" />
+                    app:layout_constraintTop_toBottomOf="@id/seed_type_desc_textview" />
 
                 <EditText
                     android:id="@+id/wallet_restore_height_edittext"

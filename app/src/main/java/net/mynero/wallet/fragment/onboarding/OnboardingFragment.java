@@ -94,6 +94,9 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
     private Button selectNodeButton;
     private SwitchCompat showXmrchanSwitch;
     private ImageView xmrchanOnboardingImage;
+    private TextView seedTypeLabelTextView;
+    private TextView seedTypeTextView;
+    private TextView seedTypeDescTextView;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -122,6 +125,9 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
         advancedOptionsLayout = view.findViewById(R.id.more_options_layout);
         showXmrchanSwitch = view.findViewById(R.id.show_xmrchan_switch);
         xmrchanOnboardingImage = view.findViewById(R.id.xmrchan_onboarding_imageview);
+        seedTypeLabelTextView = view.findViewById(R.id.seed_type_label_textview);
+        seedTypeTextView = view.findViewById(R.id.seed_type_name_textview);
+        seedTypeDescTextView = view.findViewById(R.id.seed_type_desc_textview);
 
         bindListeners();
         bindObservers();
@@ -140,6 +146,20 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
 
         mViewModel.enableCreateButton.observe(getViewLifecycleOwner(), enable -> {
             createWalletButton.setEnabled(enable);
+        });
+
+        mViewModel.seedType.observe(getViewLifecycleOwner(), seedType -> {
+            seedTypeTextView.setText(seedType.toString());
+            seedTypeDescTextView.setText(getText(seedType.getDescResId()));
+            if(seedType == OnboardingViewModel.SeedType.LEGACY) {
+                seedOffsetCheckbox.setVisibility(View.VISIBLE);
+                walletRestoreHeightEditText.setVisibility(View.VISIBLE);
+                walletPasswordEditText.setHint(getString(R.string.password_optional));
+            } else {
+                seedOffsetCheckbox.setVisibility(View.GONE);
+                walletRestoreHeightEditText.setVisibility(View.GONE);
+                walletPasswordEditText.setHint(getString(R.string.password_non_optional));
+            }
         });
     }
 
@@ -198,16 +218,6 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
             @Override
             public void afterTextChanged(Editable editable) {
                 String text = editable.toString();
-                OnboardingViewModel.SeedType seedType = mViewModel.getMnemonicType(text);
-                if(seedType == OnboardingViewModel.SeedType.LEGACY) {
-                    seedOffsetCheckbox.setVisibility(View.VISIBLE);
-                    walletRestoreHeightEditText.setVisibility(View.VISIBLE);
-                    walletPasswordEditText.setHint(getString(R.string.password_optional));
-                } else {
-                    seedOffsetCheckbox.setVisibility(View.GONE);
-                    walletRestoreHeightEditText.setVisibility(View.GONE);
-                    walletPasswordEditText.setHint(getString(R.string.password_non_optional));
-                }
 
                 if (text.isEmpty()) {
                     createWalletButton.setText(R.string.create_wallet);
@@ -216,6 +226,11 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
                 }
             }
         });
+
+        seedTypeLabelTextView.setOnClickListener(v -> toggleSeedType());
+        seedTypeTextView.setOnClickListener(v -> toggleSeedType());
+        seedTypeDescTextView.setOnClickListener(v -> toggleSeedType());
+
         torSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
             PrefService.getInstance().edit().putBoolean(Constants.PREF_USES_TOR, b).apply();
             if (b) {
@@ -255,6 +270,19 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
             dialog.listener = this;
             dialog.show(getActivity().getSupportFragmentManager(), "node_selection_dialog");
         });
+    }
+
+    private void toggleSeedType() {
+        OnboardingViewModel.SeedType seedType = mViewModel.seedType.getValue();
+        if(seedType == null) return;
+        OnboardingViewModel.SeedType newSeedType = OnboardingViewModel.SeedType.UNKNOWN;
+        if(seedType == OnboardingViewModel.SeedType.POLYSEED) {
+            newSeedType = OnboardingViewModel.SeedType.LEGACY;
+        } else if(seedType == OnboardingViewModel.SeedType.LEGACY) {
+            newSeedType = OnboardingViewModel.SeedType.POLYSEED;
+        }
+
+        mViewModel.setSeedType(newSeedType);
     }
 
     private void prepareDefaultNode() {
