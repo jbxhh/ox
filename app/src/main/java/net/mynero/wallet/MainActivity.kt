@@ -23,7 +23,6 @@ import net.mynero.wallet.util.UriData
 import java.io.File
 
 class MainActivity : AppCompatActivity(), MoneroHandlerThread.Listener, PasswordListener {
-    @JvmField
     val restartEvents: SingleLiveEvent<*> = SingleLiveEvent<Any?>()
     var thread: MoneroHandlerThread? = null
         private set

@@ -6,8 +6,6 @@ import net.mynero.wallet.model.BalanceInfo
 
 class BalanceService(thread: MoneroHandlerThread) : ServiceBase(thread) {
     private val _balanceInfo = MutableLiveData<BalanceInfo?>(null)
-
-    @JvmField
     var balanceInfo: LiveData<BalanceInfo?> = _balanceInfo
 
     init {

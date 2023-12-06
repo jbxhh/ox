@@ -21,6 +21,7 @@ import org.json.JSONObject
 class EditNodeBottomSheetDialog : BottomSheetDialogFragment() {
     @JvmField
     var listener: EditNodeListener? = null
+
     @JvmField
     var node: Node? = null
     override fun onCreateView(
@@ -95,8 +96,9 @@ class EditNodeBottomSheetDialog : BottomSheetDialogFragment() {
                     jsonObject.put("username", user)
                     jsonObject.put("password", pass)
                 }
-                if (nodeAddr.contains(":") && !nodeAddr.startsWith("[") && !nodeAddr.endsWith("]")) nodeAddr =
-                    "[$nodeAddr]"
+                if (nodeAddr.contains(":") && !nodeAddr.startsWith("[") && !nodeAddr.endsWith("]"))
+                    nodeAddr = "[$nodeAddr]"
+
                 jsonObject.put("host", nodeAddr)
                 jsonObject.put("rpcPort", portString.toInt())
                 jsonObject.put("network", "mainnet")

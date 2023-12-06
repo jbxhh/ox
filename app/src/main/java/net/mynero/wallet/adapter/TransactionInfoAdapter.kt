@@ -27,8 +27,7 @@ import net.mynero.wallet.service.PrefService
 import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.DateHelper.DATETIME_FORMATTER
 import net.mynero.wallet.util.Helper
-import net.mynero.wallet.util.Helper.getDisplayAmount
-import net.mynero.wallet.util.ThemeHelper.getThemedColor
+import net.mynero.wallet.util.ThemeHelper
 import java.util.Calendar
 import java.util.Date
 
@@ -84,10 +83,10 @@ class TransactionInfoAdapter(val listener: TxInfoAdapterListener?) :
         private var amountTextView: TextView? = null
 
         init {
-            inboundColour = getThemedColor(view.context, R.attr.positiveColor)
-            outboundColour = getThemedColor(view.context, R.attr.negativeColor)
-            pendingColour = getThemedColor(view.context, R.attr.neutralColor)
-            failedColour = getThemedColor(view.context, R.attr.neutralColor)
+            inboundColour = ThemeHelper.getThemedColor(view.context, R.attr.positiveColor)
+            outboundColour = ThemeHelper.getThemedColor(view.context, R.attr.negativeColor)
+            pendingColour = ThemeHelper.getThemedColor(view.context, R.attr.neutralColor)
+            failedColour = ThemeHelper.getThemedColor(view.context, R.attr.neutralColor)
             val cal = Calendar.getInstance()
             val tz = cal.timeZone //get the local time zone.
             DATETIME_FORMATTER.timeZone = tz
@@ -97,7 +96,7 @@ class TransactionInfoAdapter(val listener: TxInfoAdapterListener?) :
             val streetModeEnabled =
                 PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false)
             val displayAmount =
-                if (streetModeEnabled == true) Constants.STREET_MODE_BALANCE else getDisplayAmount(
+                if (streetModeEnabled == true) Constants.STREET_MODE_BALANCE else Helper.getDisplayAmount(
                     txInfo.amount,
                     Helper.DISPLAY_DIGITS_INFO
                 )
@@ -108,7 +107,7 @@ class TransactionInfoAdapter(val listener: TxInfoAdapterListener?) :
             amountTextView = itemView.findViewById(R.id.tx_amount)
             itemView.findViewById<View>(R.id.tx_failed).visibility = View.GONE
             if (txInfo.isFailed) {
-                (itemView.findViewById<View>(R.id.tx_amount) as TextView).text =
+                amountTextView?.text =
                     itemView.context.getString(R.string.tx_list_amount_negative, displayAmount)
                 itemView.findViewById<View>(R.id.tx_failed).visibility = View.VISIBLE
                 setTxColour(failedColour)
@@ -140,10 +139,10 @@ class TransactionInfoAdapter(val listener: TxInfoAdapterListener?) :
                 confirmationsTextView.visibility = View.GONE
             }
             if (txInfo.direction == TransactionInfo.Direction.Direction_Out) {
-                (itemView.findViewById<View>(R.id.tx_amount) as TextView).text =
+                amountTextView?.text =
                     itemView.context.getString(R.string.tx_list_amount_negative, displayAmount)
             } else {
-                (itemView.findViewById<View>(R.id.tx_amount) as TextView).text =
+                amountTextView?.text =
                     itemView.context.getString(R.string.tx_list_amount_positive, displayAmount)
             }
             (itemView.findViewById<View>(R.id.tx_datetime) as TextView).text =

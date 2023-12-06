@@ -82,7 +82,8 @@ class NodeSelectionBottomSheetDialog : BottomSheetDialogFragment(), NodeSelectio
                 }
             }
         }
-        PrefService.instance?.edit()?.putString(Constants.PREF_CUSTOM_NODES, jsonArray.toString())?.apply()
+        PrefService.instance?.edit()?.putString(Constants.PREF_CUSTOM_NODES, jsonArray.toString())
+            ?.apply()
         for (defaultNode in DefaultNodes.values()) {
             fromJson(defaultNode.json)?.let { nodes.add(it) }
         }
@@ -98,7 +99,8 @@ class NodeSelectionBottomSheetDialog : BottomSheetDialogFragment(), NodeSelectio
                 Toast.LENGTH_SHORT
             ).show()
         }
-        PrefService.instance?.edit()?.putString(Constants.PREF_NODE_2, node?.toJson().toString())?.apply()
+        PrefService.instance?.edit()?.putString(Constants.PREF_NODE_2, node?.toJson().toString())
+            ?.apply()
         WalletManager.instance?.setDaemon(node)
         adapter?.updateSelectedNode()
         listener?.onNodeSelected()

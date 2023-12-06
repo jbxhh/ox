@@ -114,7 +114,8 @@ class AddNodeBottomSheetDialog : BottomSheetDialogFragment() {
             Toast.makeText(context, "Node already exists", Toast.LENGTH_SHORT).show()
             return
         }
-        PrefService.instance?.edit()?.putString(Constants.PREF_CUSTOM_NODES, jsonArray.toString())?.apply()
+        PrefService.instance?.edit()?.putString(Constants.PREF_CUSTOM_NODES, jsonArray.toString())
+            ?.apply()
     }
 
     private fun addPasteListener(root: View, editText: EditText, layoutId: Int) {

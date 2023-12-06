@@ -34,7 +34,6 @@ object ThemeHelper {
         ) typedValue.resourceId else 0
     }
 
-    @JvmStatic
     @ColorInt
     fun getThemedColor(ctx: Context, attrId: Int): Int {
         val typedValue = TypedValue()

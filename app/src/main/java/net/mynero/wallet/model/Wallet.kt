@@ -430,8 +430,6 @@ class Wallet {
 
     class Status internal constructor(status: Int, @JvmField val errorString: String) {
         val status: StatusEnum
-
-        @JvmField
         var connectionStatus: ConnectionStatus? = null // optional
 
         init {
@@ -470,7 +468,6 @@ class Wallet {
         @JvmStatic
         external fun isPaymentIdValid(payment_id: String): Boolean
 
-        @JvmStatic
         fun isAddressValid(address: String): Boolean {
             return WalletManager.instance?.networkType?.value?.let {
                 isAddressValid(

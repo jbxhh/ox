@@ -13,177 +13,188 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package net.mynero.wallet.model
 
-package net.mynero.wallet.model;
+import android.os.Build
+import android.os.Parcel
+import android.os.Parcelable
+import android.os.Parcelable.Creator
+import net.mynero.wallet.data.Subaddress
 
-import android.os.Parcel;
-import android.os.Parcelable;
+class TransactionInfo : Parcelable, Comparable<TransactionInfo> {
+    @JvmField
+    var direction: Direction
+    var isPending: Boolean
+    var isFailed: Boolean
 
-import androidx.annotation.NonNull;
+    @JvmField
+    var amount: Long
+    var fee: Long
 
-import net.mynero.wallet.data.Subaddress;
+    @JvmField
+    var blockheight: Long
 
-import java.util.List;
+    @JvmField
+    var hash: String?
 
-// this is not the TransactionInfo from the API as that is owned by the TransactionHistory
-// this is a POJO for the TransactionInfoAdapter
-public class TransactionInfo implements Parcelable, Comparable<TransactionInfo> {
-    public static final int CONFIRMATION = 10; // blocks
-    public static final Parcelable.Creator<TransactionInfo> CREATOR = new Parcelable.Creator<TransactionInfo>() {
-        public TransactionInfo createFromParcel(Parcel in) {
-            return new TransactionInfo(in);
+    @JvmField
+    var timestamp: Long
+    var paymentId: String?
+
+    @JvmField
+    var accountIndex: Int
+
+    @JvmField
+    var addressIndex: Int
+
+    @JvmField
+    var confirmations: Long
+    var subaddressLabel: String?
+
+    @JvmField
+    var transfers: List<Transfer>? = listOf()
+
+    @JvmField
+    var txKey: String? = null
+    var notes: String? = null
+
+    @JvmField
+    var address: String? = null
+
+    constructor(
+        direction: Int,
+        isPending: Boolean,
+        isFailed: Boolean,
+        amount: Long,
+        fee: Long,
+        blockheight: Long,
+        hash: String?,
+        timestamp: Long,
+        paymentId: String?,
+        accountIndex: Int,
+        addressIndex: Int,
+        confirmations: Long,
+        subaddressLabel: String?,
+        transfers: List<Transfer>?
+    ) {
+        this.direction = Direction.values()[direction]
+        this.isPending = isPending
+        this.isFailed = isFailed
+        this.amount = amount
+        this.fee = fee
+        this.blockheight = blockheight
+        this.hash = hash
+        this.timestamp = timestamp
+        this.paymentId = paymentId
+        this.accountIndex = accountIndex
+        this.addressIndex = addressIndex
+        this.confirmations = confirmations
+        this.subaddressLabel = subaddressLabel
+        this.transfers = transfers
+    }
+
+    private constructor(`in`: Parcel) {
+        direction = Direction.fromInteger(`in`.readInt())
+        isPending = `in`.readByte().toInt() != 0
+        isFailed = `in`.readByte().toInt() != 0
+        amount = `in`.readLong()
+        fee = `in`.readLong()
+        blockheight = `in`.readLong()
+        hash = `in`.readString()
+        timestamp = `in`.readLong()
+        paymentId = `in`.readString()
+        accountIndex = `in`.readInt()
+        addressIndex = `in`.readInt()
+        confirmations = `in`.readLong()
+        subaddressLabel = `in`.readString()
+        transfers?.toMutableList()?.let { transfers ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                `in`.readList(transfers, Transfer::class.java.classLoader, Transfer::class.java)
+            } else {
+                `in`.readList(transfers, Transfer::class.java.classLoader)
+            }
         }
 
-        public TransactionInfo[] newArray(int size) {
-            return new TransactionInfo[size];
+        txKey = `in`.readString()
+        notes = `in`.readString()
+        address = `in`.readString()
+    }
+
+    val isConfirmed: Boolean
+        get() = confirmations >= CONFIRMATION
+    val displayLabel: String?
+        get() = if (subaddressLabel?.isEmpty() == true || Subaddress.DEFAULT_LABEL_FORMATTER.matcher(
+                subaddressLabel.toString()
+            ).matches()
+        ) "#$addressIndex" else subaddressLabel
+
+    override fun toString(): String {
+        return "$direction@$blockheight $amount"
+    }
+
+    override fun writeToParcel(out: Parcel, flags: Int) {
+        out.writeInt(direction.value)
+        out.writeByte((if (isPending) 1 else 0).toByte())
+        out.writeByte((if (isFailed) 1 else 0).toByte())
+        out.writeLong(amount)
+        out.writeLong(fee)
+        out.writeLong(blockheight)
+        out.writeString(hash)
+        out.writeLong(timestamp)
+        out.writeString(paymentId)
+        out.writeInt(accountIndex)
+        out.writeInt(addressIndex)
+        out.writeLong(confirmations)
+        out.writeString(subaddressLabel)
+        transfers?.let {
+            out.writeList(transfers)
         }
-    };
-    public Direction direction;
-    public boolean isPending;
-    public boolean isFailed;
-    public long amount;
-    public long fee;
-    public long blockheight;
-    public String hash;
-    public long timestamp;
-    public String paymentId;
-    public int accountIndex;
-    public int addressIndex;
-    public long confirmations;
-    public String subaddressLabel;
-    public List<Transfer> transfers;
-
-    public String txKey = null;
-    public String notes = null;
-    public String address = null;
-
-    public TransactionInfo(
-            int direction,
-            boolean isPending,
-            boolean isFailed,
-            long amount,
-            long fee,
-            long blockheight,
-            String hash,
-            long timestamp,
-            String paymentId,
-            int accountIndex,
-            int addressIndex,
-            long confirmations,
-            String subaddressLabel,
-            List<Transfer> transfers) {
-        this.direction = Direction.values()[direction];
-        this.isPending = isPending;
-        this.isFailed = isFailed;
-        this.amount = amount;
-        this.fee = fee;
-        this.blockheight = blockheight;
-        this.hash = hash;
-        this.timestamp = timestamp;
-        this.paymentId = paymentId;
-        this.accountIndex = accountIndex;
-        this.addressIndex = addressIndex;
-        this.confirmations = confirmations;
-        this.subaddressLabel = subaddressLabel;
-        this.transfers = transfers;
+        out.writeString(txKey)
+        out.writeString(notes)
+        out.writeString(address)
     }
 
-    private TransactionInfo(Parcel in) {
-        direction = Direction.fromInteger(in.readInt());
-        isPending = in.readByte() != 0;
-        isFailed = in.readByte() != 0;
-        amount = in.readLong();
-        fee = in.readLong();
-        blockheight = in.readLong();
-        hash = in.readString();
-        timestamp = in.readLong();
-        paymentId = in.readString();
-        accountIndex = in.readInt();
-        addressIndex = in.readInt();
-        confirmations = in.readLong();
-        subaddressLabel = in.readString();
-        in.readList(transfers, Transfer.class.getClassLoader());
-        txKey = in.readString();
-        notes = in.readString();
-        address = in.readString();
+    override fun describeContents(): Int {
+        return 0
     }
 
-    public boolean isConfirmed() {
-        return confirmations >= CONFIRMATION;
-    }
-
-    public String getDisplayLabel() {
-        if (subaddressLabel.isEmpty() || (Subaddress.DEFAULT_LABEL_FORMATTER.matcher(subaddressLabel).matches()))
-            return ("#" + addressIndex);
-        else
-            return subaddressLabel;
-    }
-
-    @Override
-    @NonNull
-    public String toString() {
-        return direction + "@" + blockheight + " " + amount;
-    }
-
-    @Override
-    public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(direction.getValue());
-        out.writeByte((byte) (isPending ? 1 : 0));
-        out.writeByte((byte) (isFailed ? 1 : 0));
-        out.writeLong(amount);
-        out.writeLong(fee);
-        out.writeLong(blockheight);
-        out.writeString(hash);
-        out.writeLong(timestamp);
-        out.writeString(paymentId);
-        out.writeInt(accountIndex);
-        out.writeInt(addressIndex);
-        out.writeLong(confirmations);
-        out.writeString(subaddressLabel);
-        out.writeList(transfers);
-        out.writeString(txKey);
-        out.writeString(notes);
-        out.writeString(address);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public int compareTo(TransactionInfo another) {
-        long b1 = this.timestamp;
-        long b2 = another.timestamp;
-        if (b1 > b2) {
-            return -1;
+    override fun compareTo(other: TransactionInfo): Int {
+        val b1 = timestamp
+        val b2 = other.timestamp
+        return if (b1 > b2) {
+            -1
         } else if (b1 < b2) {
-            return 1;
+            1
         } else {
-            return this.hash.compareTo(another.hash);
+            hash?.let { other.hash?.compareTo(it) } ?: 0
         }
     }
 
-    public enum Direction {
-        Direction_In(0),
-        Direction_Out(1);
+    enum class Direction(val value: Int) {
+        Direction_In(0), Direction_Out(1);
 
-        private final int value;
-
-        Direction(int value) {
-            this.value = value;
+        companion object {
+            fun fromInteger(n: Int): Direction {
+                return when (n) {
+                    0 -> Direction_In
+                    else -> Direction_Out
+                }
+            }
         }
+    }
 
-        public static Direction fromInteger(int n) {
-            return switch (n) {
-                case 0 -> Direction_In;
-                case 1 -> Direction_Out;
-                default -> null;
-            };
-        }
+    companion object {
+        const val CONFIRMATION = 10 // blocks
 
-        public int getValue() {
-            return value;
+        @JvmField
+        val CREATOR: Creator<TransactionInfo> = object : Creator<TransactionInfo> {
+            override fun createFromParcel(`in`: Parcel): TransactionInfo {
+                return TransactionInfo(`in`)
+            }
+
+            override fun newArray(size: Int): Array<TransactionInfo?> {
+                return arrayOfNulls(size)
+            }
         }
     }
 }
