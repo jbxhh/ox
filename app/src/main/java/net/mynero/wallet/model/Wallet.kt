@@ -13,566 +13,464 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package net.mynero.wallet.model
 
-package net.mynero.wallet.model;
+import android.util.Pair
+import net.mynero.wallet.data.Subaddress
+import net.mynero.wallet.model.NetworkType.Companion.fromInteger
+import net.mynero.wallet.model.WalletManager.Companion.instance
+import timber.log.Timber
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-import android.util.Log;
-import android.util.Pair;
+class Wallet {
+    var isSynchronized = false
+    private var accountIndex = 0
+    private var handle: Long = 0
+    private var listenerHandle: Long = 0
+    private var pendingTransaction: PendingTransaction? = null
+    var history: TransactionHistory? = null
+        get() {
+            if (field == null) {
+                field = TransactionHistory(getHistoryJ(), accountIndex)
+            }
+            return field
+        }
+        private set
+    var coins: Coins? = null
+        get() {
+            if (field == null) {
+                field = Coins(getCoinsJ())
+            }
+            return field
+        }
+        private set
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import net.mynero.wallet.data.Subaddress;
-import net.mynero.wallet.data.TxData;
-
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
-import timber.log.Timber;
-
-public class Wallet {
-    final static public long SWEEP_ALL = Long.MAX_VALUE;
-    private static final String NEW_ACCOUNT_NAME = "Untitled account"; // src/wallet/wallet2.cpp:941
-
-    static {
-        System.loadLibrary("monerujo");
+    internal constructor(handle: Long) {
+        this.handle = handle
     }
 
-    boolean synced = false;
-    private int accountIndex = 0;
-    private long handle = 0;
-    private long listenerHandle = 0;
-    private PendingTransaction pendingTransaction = null;
-    private TransactionHistory history = null;
-    private Coins coins = null;
-
-    Wallet(long handle) {
-        this.handle = handle;
+    internal constructor(handle: Long, accountIndex: Int) {
+        this.handle = handle
+        this.accountIndex = accountIndex
     }
 
-    Wallet(long handle, int accountIndex) {
-        this.handle = handle;
-        this.accountIndex = accountIndex;
+    fun getAccountIndex(): Int {
+        return accountIndex
     }
 
-    public static native String getDisplayAmount(long amount);
-
-    public static native long getAmountFromString(String amount);
-
-    public static native long getAmountFromDouble(double amount);
-
-    public static native String generatePaymentId();
-
-    public static native boolean isPaymentIdValid(String payment_id);
-
-    public static boolean isAddressValid(String address) {
-        return isAddressValid(address, WalletManager.getInstance().getNetworkType().getValue());
+    fun setAccountIndex(accountIndex: Int) {
+        Timber.d("setAccountIndex(%d)", accountIndex)
+        this.accountIndex = accountIndex
+        history?.setAccountFor(this)
     }
 
-    public static native boolean isAddressValid(String address, int networkType);
+    val name: String
+        get() = getPath()?.let { File(it).name }.toString()
 
-    public static native String getPaymentIdFromAddress(String address, int networkType);
+    external fun getSeed(offset: String?): String?
+    external fun getLegacySeed(offset: String?): String?
+    external fun isPolyseedSupported(offset: String?): Boolean
+    external fun getSeedLanguage(): String?
 
-    public static native long getMaximumAllowedAmount();
+    val status: Status
+        get() = statusWithErrorString()
+    val fullStatus: Status
+        get() {
+            val walletStatus = statusWithErrorString()
+            walletStatus.connectionStatus = connectionStatus
+            return walletStatus
+        }
 
-    public int getAccountIndex() {
-        return accountIndex;
+    private external fun statusWithErrorString(): Status
+    @Synchronized
+    external fun setPassword(password: String?): Boolean
+    val address: String
+        get() = getAddress(accountIndex)
+
+    //TODO virtual void hardForkInfo(uint8_t &version, uint64_t &earliest_height) const = 0;
+    //TODO virtual bool useForkRules(uint8_t version, int64_t early_blocks) const = 0;
+    fun getAddress(accountIndex: Int): String {
+        return getAddressJ(accountIndex, 0)
     }
 
-    public void setAccountIndex(int accountIndex) {
-        Timber.d("setAccountIndex(%d)", accountIndex);
-        this.accountIndex = accountIndex;
-        getHistory().setAccountFor(this);
+    private fun getSubaddress(addressIndex: Int): String {
+        return getAddressJ(accountIndex, addressIndex)
     }
 
-    public String getName() {
-        return new File(getPath()).getName();
+    fun getSubaddress(accountIndex: Int, addressIndex: Int): String {
+        return getAddressJ(accountIndex, addressIndex)
     }
 
-    public native String getSeed(String offset);
-
-    public native String getLegacySeed(String offset);
-
-    public native boolean isPolyseedSupported(String offset);
-
-    public native String getSeedLanguage();
-
-    public native void setSeedLanguage(String language);
-
-    public Status getStatus() {
-        return statusWithErrorString();
+    private external fun getAddressJ(accountIndex: Int, addressIndex: Int): String
+    private fun getSubaddressObject(accountIndex: Int, subAddressIndex: Int): Subaddress {
+        return Subaddress(
+            accountIndex, subAddressIndex,
+            getSubaddress(subAddressIndex), getSubaddressLabel(subAddressIndex)
+        )
     }
 
-    public Status getFullStatus() {
-        Wallet.Status walletStatus = statusWithErrorString();
-        walletStatus.setConnectionStatus(getConnectionStatus());
-        return walletStatus;
-    }
-
-    private native Status statusWithErrorString();
-
-    public native synchronized boolean setPassword(String password);
-
-    public String getAddress() {
-        return getAddress(accountIndex);
-    }
-
-//TODO virtual void hardForkInfo(uint8_t &version, uint64_t &earliest_height) const = 0;
-//TODO virtual bool useForkRules(uint8_t version, int64_t early_blocks) const = 0;
-
-    public String getAddress(int accountIndex) {
-        return getAddressJ(accountIndex, 0);
-    }
-
-    public String getSubaddress(int addressIndex) {
-        return getAddressJ(accountIndex, addressIndex);
-    }
-
-    public String getSubaddress(int accountIndex, int addressIndex) {
-        return getAddressJ(accountIndex, addressIndex);
-    }
-
-    private native String getAddressJ(int accountIndex, int addressIndex);
-
-    public Subaddress getSubaddressObject(int accountIndex, int subAddressIndex) {
-        return new Subaddress(accountIndex, subAddressIndex,
-                getSubaddress(subAddressIndex), getSubaddressLabel(subAddressIndex));
-    }
-
-    public Subaddress getSubaddressObject(int subAddressIndex) {
-        Subaddress subaddress = getSubaddressObject(accountIndex, subAddressIndex);
-        long amount = 0;
-        for (TransactionInfo info : getHistory().getAll()) {
-            if ((info.addressIndex == subAddressIndex)
-                    && (info.direction == TransactionInfo.Direction.Direction_In)) {
-                amount += info.amount;
+    fun getSubaddressObject(subAddressIndex: Int): Subaddress {
+        val subaddress = getSubaddressObject(accountIndex, subAddressIndex)
+        var amount: Long = 0
+        history?.let { history ->
+            for (info in history.all) {
+                if (info.addressIndex == subAddressIndex && info.direction == TransactionInfo.Direction.Direction_In) {
+                    amount += info.amount
+                }
             }
         }
-        subaddress.setAmount(amount);
-        return subaddress;
+
+        subaddress.amount = amount
+        return subaddress
+    }
+    external fun getPath(): String?
+    val networkType: NetworkType?
+        get() = fromInteger(nettype())
+
+    external fun nettype(): Int
+
+    //    virtual bool createWatchOnly(const std::string &path, const std::string &password, const std::string &language) const = 0;
+    //    virtual void setRefreshFromBlockHeight(uint64_t refresh_from_block_height) = 0;
+    external fun getIntegratedAddress(paymentId: String?): String?
+    external fun getSecretViewKey(): String
+    external fun getSecretSpendKey(): String
+
+    fun store(): Boolean {
+        return store("")
     }
 
-    public native String getPath();
-
-    public NetworkType getNetworkType() {
-        return NetworkType.fromInteger(nettype());
+    //TODO virtual void setTrustedDaemon(bool arg) = 0;
+    //TODO virtual bool trustedDaemon() const = 0;
+    @Synchronized
+    external fun store(path: String?): Boolean
+    fun close(): Boolean {
+        disposePendingTransaction()
+        return instance?.close(this) == true
     }
 
-    public native int nettype();
-
-//    virtual bool createWatchOnly(const std::string &path, const std::string &password, const std::string &language) const = 0;
-//    virtual void setRefreshFromBlockHeight(uint64_t refresh_from_block_height) = 0;
-
-    public native String getIntegratedAddress(String payment_id);
-
-    public native String getSecretViewKey();
-
-    //    virtual void setRecoveringFromSeed(bool recoveringFromSeed) = 0;
-//    virtual bool connectToDaemon() = 0;
-
-    public native String getSecretSpendKey();
-
-    public boolean store() {
-        return store("");
-    }
-
-//TODO virtual void setTrustedDaemon(bool arg) = 0;
-//TODO virtual bool trustedDaemon() const = 0;
-
-    public native synchronized boolean store(String path);
-
-    public boolean close() {
-        disposePendingTransaction();
-        return WalletManager.getInstance().close(this);
-    }
-
-    public native String getFilename();
+    external fun getFilename(): String
 
     //    virtual std::string keysFilename() const = 0;
-    public boolean init(long upper_transaction_size_limit) {
-        String daemon_address = WalletManager.getInstance().getDaemonAddress();
-        String daemon_username = WalletManager.getInstance().getDaemonUsername();
-        String daemon_password = WalletManager.getInstance().getDaemonPassword();
-        String proxy_address = WalletManager.getInstance().getProxy();
-        Log.d("Wallet.java", "init(");
-        if (daemon_address != null) {
-            Log.d("Wallet.java", daemon_address.toString());
+    fun init(upperTransactionSizeLimit: Long): Boolean {
+        var daemonAddress = instance?.getDaemonAddress()
+        var daemonUsername = instance?.daemonUsername
+        var daemonPassword = instance?.daemonPassword
+        var proxyAddress = instance?.proxy
+        Timber.d("init(")
+        if (daemonAddress != null) {
+            Timber.d(daemonAddress.toString())
         } else {
-            Log.d("Wallet.java", "daemon_address == null");
-            daemon_address = "";
+            Timber.d("daemon_address == null")
+            daemonAddress = ""
         }
-        Log.d("Wallet.java", "upper_transaction_size_limit = 0 (probably)");
-        if (daemon_username != null) {
-            Log.d("Wallet.java", daemon_username.toString());
+        Timber.d("upper_transaction_size_limit = 0 (probably)")
+        if (daemonUsername != null) {
+            Timber.d(daemonUsername)
         } else {
-            Log.d("Wallet.java", "daemon_username == null");
-            daemon_username = "";
+            Timber.d("daemon_username == null")
+            daemonUsername = ""
         }
-        if (daemon_password != null) {
-            Log.d("Wallet.java", daemon_password.toString());
+        if (daemonPassword != null) {
+            Timber.d(daemonPassword)
         } else {
-            Log.d("Wallet.java", "daemon_password == null");
-            daemon_password = "";
+            Timber.d("daemon_password == null")
+            daemonPassword = ""
         }
-        if (proxy_address != null) {
-            Log.d("Wallet.java", proxy_address.toString());
+        if (proxyAddress != null) {
+            Timber.d(proxyAddress)
         } else {
-            Log.d("Wallet.java", "proxy_address == null");
-            proxy_address = "";
+            Timber.d("proxy_address == null")
+            proxyAddress = ""
         }
-        Log.d("Wallet.java", ");");
-        return initJ(daemon_address, upper_transaction_size_limit,
-                daemon_username, daemon_password,
-                proxy_address);
+        Timber.d(");")
+        return initJ(
+            daemonAddress, upperTransactionSizeLimit,
+            daemonUsername, daemonPassword,
+            proxyAddress
+        )
     }
 
+    private external fun initJ(
+        daemonAddress: String, upperTransactionSizeLimit: Long,
+        daemonUsername: String, daemonPassword: String, proxyAddress: String
+    ): Boolean
 
-    private native boolean initJ(String daemon_address, long upper_transaction_size_limit,
-                                 String daemon_username, String daemon_password, String proxy);
+    external fun getRestoreHeight(): Long
+    external fun setRestoreHeight(height: Long)
 
-    public native long getRestoreHeight();
+    private val connectionStatus: ConnectionStatus
+        get() {
+            val s = getConnectionStatusJ()
+            return ConnectionStatus.values()[s]
+        }
 
-    public native void setRestoreHeight(long height);
+    private external fun getConnectionStatusJ(): Int
 
-    public ConnectionStatus getConnectionStatus() {
-        int s = getConnectionStatusJ();
-        return Wallet.ConnectionStatus.values()[s];
+    external fun setProxy(address: String?): Boolean
+    val balance: Long
+        get() = getBalance(accountIndex)
+
+    private external fun getBalance(accountIndex: Int): Long
+    external fun getBalanceAll(): Long
+    val unlockedBalance: Long
+        get() = getUnlockedBalance(accountIndex)
+    external fun getUnlockedBalanceAll(): Long
+
+    external fun getUnlockedBalance(accountIndex: Int): Long
+    external fun isWatchOnly(): Boolean
+    external fun getBlockChainHeight(): Long
+    external fun getApproximateBlockChainHeight(): Long
+    external fun getDaemonBlockChainHeight(): Long
+    external fun getDaemonBlockChainTargetHeight(): Long
+
+    fun setSynchronized() {
+        isSynchronized = true
     }
 
-    private native int getConnectionStatusJ();
-
-    public native boolean setProxy(String address);
-
-    public long getBalance() {
-        return getBalance(accountIndex);
+    external fun startRefresh()
+    external fun pauseRefresh()
+    external fun refresh(): Boolean
+    external fun refreshAsync()
+    private external fun rescanBlockchainAsyncJ()
+    fun rescanBlockchainAsync() {
+        isSynchronized = false
+        rescanBlockchainAsyncJ()
     }
 
-    public native long getBalance(int accountIndex);
-
-    public native long getBalanceAll();
-
-    public long getUnlockedBalance() {
-        return getUnlockedBalance(accountIndex);
-    }
-
-    public native long getUnlockedBalanceAll();
-
-    public native long getUnlockedBalance(int accountIndex);
-
-    public native boolean isWatchOnly();
-
-    public native long getBlockChainHeight();
-
-    public native long getApproximateBlockChainHeight();
-
-    public native long getDaemonBlockChainHeight();
-
-    public native long getDaemonBlockChainTargetHeight();
-
-    public boolean isSynchronized() {
-        return synced;
-    }
-
-    public void setSynchronized() {
-        this.synced = true;
-    }
-
-    public native void startRefresh();
-
-    public native void pauseRefresh();
-
-    public native boolean refresh();
-
-    public native void refreshAsync();
-
-    public native void rescanBlockchainAsyncJ();
-
-    public void rescanBlockchainAsync() {
-        synced = false;
-        rescanBlockchainAsyncJ();
-    }
-
-    public PendingTransaction getPendingTransaction() {
-        return pendingTransaction;
-    }
-
-//TODO virtual void setAutoRefreshInterval(int millis) = 0;
-//TODO virtual int autoRefreshInterval() const = 0;
-
-    public void disposePendingTransaction() {
+    //TODO virtual void setAutoRefreshInterval(int millis) = 0;
+    //TODO virtual int autoRefreshInterval() const = 0;
+    private fun disposePendingTransaction() {
         if (pendingTransaction != null) {
-            disposeTransaction(pendingTransaction);
-            pendingTransaction = null;
+            disposeTransaction(pendingTransaction)
+            pendingTransaction = null
         }
     }
 
-    public long estimateTransactionFee(List<Pair<String, Long>> destinations, PendingTransaction.Priority priority) {
-        int _priority = priority.getValue();
-        return estimateTransactionFee(destinations, _priority);
+    fun estimateTransactionFee(
+        destinations: List<Pair<String, Long>>,
+        priority: PendingTransaction.Priority
+    ): Long {
+        val _priority = priority.value
+        return estimateTransactionFee(destinations, _priority)
     }
 
-    private native long estimateTransactionFee(List<Pair<String, Long>> destinations, int priority);
+    private external fun estimateTransactionFee(
+        destinations: List<Pair<String, Long>>,
+        priority: Int
+    ): Long
 
-    public PendingTransaction createSweepTransaction(String dst_addr, PendingTransaction.Priority priority, ArrayList<String> key_images) {
-        disposePendingTransaction();
-        int _priority = priority.getValue();
-        long txHandle = createSweepTransaction(dst_addr, "", 0, _priority, accountIndex, key_images);
-        pendingTransaction = new PendingTransaction(txHandle);
-        return pendingTransaction;
+    fun createSweepTransaction(
+        dstAddr: String,
+        priority: PendingTransaction.Priority,
+        keyImages: ArrayList<String>
+    ): PendingTransaction? {
+        disposePendingTransaction()
+        val _priority = priority.value
+        val txHandle = createSweepTransaction(dstAddr, "", 0, _priority, accountIndex, keyImages)
+        pendingTransaction = PendingTransaction(txHandle)
+        return pendingTransaction
     }
 
-    public PendingTransaction createTransactionMultDest(List<TransactionOutput> outputs, PendingTransaction.Priority priority, ArrayList<String> key_images) {
-        disposePendingTransaction();
-        int _priority = priority.getValue();
-        ArrayList<String> destinations = new ArrayList<>();
-        long[] amounts = new long[outputs.size()];
-        for(int i = 0; i < outputs.size(); i++) {
-            TransactionOutput output = outputs.get(i);
-            destinations.add(output.getDestination());
-            amounts[i] = output.getAmount();
+    fun createTransactionMultDest(
+        outputs: List<TransactionOutput>,
+        priority: PendingTransaction.Priority,
+        keyImages: ArrayList<String>
+    ): PendingTransaction? {
+        disposePendingTransaction()
+        val _priority = priority.value
+        val destinations = ArrayList<String>()
+        val amounts = LongArray(outputs.size)
+        for (i in outputs.indices) {
+            val output = outputs[i]
+            destinations.add(output.destination)
+            amounts[i] = output.amount
         }
-        long txHandle = createTransactionMultDestJ(destinations, "", amounts, 0, _priority,
-                        accountIndex, key_images);
-        pendingTransaction = new PendingTransaction(txHandle);
-        return pendingTransaction;
+        val txHandle = createTransactionMultDestJ(
+            destinations, "", amounts, 0, _priority,
+            accountIndex, keyImages
+        )
+        pendingTransaction = PendingTransaction(txHandle)
+        return pendingTransaction
     }
 
-    private native long createTransactionMultDestJ(ArrayList<String> dst_addrs, String payment_id,
-                                           long[] amount, int mixin_count,
-                                           int priority, int accountIndex, ArrayList<String> key_images);
+    private external fun createTransactionMultDestJ(
+        dstAddrs: ArrayList<String>, paymentId: String,
+        amount: LongArray, mixinCount: Int,
+        priority: Int, accountIndex: Int, keyImages: ArrayList<String>
+    ): Long
 
-    private native long createTransactionJ(String dst_addr, String payment_id,
-                                           long amount, int mixin_count,
-                                           int priority, int accountIndex, ArrayList<String> key_images);
+    private external fun createTransactionJ(
+        dstAddr: String, paymentId: String,
+        amount: Long, mixinCount: Int,
+        priority: Int, accountIndex: Int, keyImages: ArrayList<String>
+    ): Long
 
-    private native long createSweepTransaction(String dst_addr, String payment_id,
-                                               int mixin_count,
-                                               int priority, int accountIndex, ArrayList<String> key_images);
+    private external fun createSweepTransaction(
+        dstAddr: String, paymentId: String,
+        mixinCount: Int,
+        priority: Int, accountIndex: Int, keyImages: ArrayList<String>
+    ): Long
 
-    public PendingTransaction createSweepUnmixableTransaction() {
-        disposePendingTransaction();
-        long txHandle = createSweepUnmixableTransactionJ();
-        pendingTransaction = new PendingTransaction(txHandle);
-        return pendingTransaction;
+    fun createSweepUnmixableTransaction(): PendingTransaction? {
+        disposePendingTransaction()
+        val txHandle = createSweepUnmixableTransactionJ()
+        pendingTransaction = PendingTransaction(txHandle)
+        return pendingTransaction
     }
 
-    private native long createSweepUnmixableTransactionJ();
+    private external fun createSweepUnmixableTransactionJ(): Long
+    private external fun disposeTransaction(pendingTransaction: PendingTransaction?)
+    private external fun getHistoryJ(): Long
+    private external fun getCoinsJ(): Long
 
-    public native void disposeTransaction(PendingTransaction pendingTransaction);
-
-    public TransactionHistory getHistory() {
-        if (history == null) {
-            history = new TransactionHistory(getHistoryJ(), accountIndex);
-        }
-        return history;
+    //virtual bool exportKeyImages(const std::string &filename) = 0;
+    //virtual bool importKeyImages(const std::string &filename) = 0;
+    //virtual TransactionHistory * history() const = 0;
+    fun refreshHistory() {
+        history?.refreshWithNotes(this)
     }
 
-//virtual UnsignedTransaction * loadUnsignedTx(const std::string &unsigned_filename) = 0;
-//virtual bool submitTransaction(const std::string &fileName) = 0;
-
-    private native long getHistoryJ();
-
-    public Coins getCoins() {
-        if (coins == null) {
-            coins = new Coins(getCoinsJ());
-        }
-        return coins;
-    }
-
-    private native long getCoinsJ();
-
-//virtual bool exportKeyImages(const std::string &filename) = 0;
-//virtual bool importKeyImages(const std::string &filename) = 0;
-
-
-//virtual TransactionHistory * history() const = 0;
-
-    public void refreshHistory() {
-        getHistory().refreshWithNotes(this);
-    }
-
-    public void refreshCoins() {
-        if (this.isSynchronized()) {
-            getCoins().refresh();
+    fun refreshCoins() {
+        if (isSynchronized) {
+            coins?.refresh()
         }
     }
 
-    private native long setListenerJ(WalletListener listener);
-
-    public void setListener(WalletListener listener) {
-        this.listenerHandle = setListenerJ(listener);
+    private external fun setListenerJ(listener: WalletListener): Long
+    fun setListener(listener: WalletListener) {
+        listenerHandle = setListenerJ(listener)
     }
 
-    public native int getDefaultMixin();
+    external fun getDefaultMixin(): Int
+    external fun setDefaultMixin(mixin: Int)
+    external fun setUserNote(txid: String?, note: String?): Boolean
+    external fun getUserNote(txid: String?): String?
+    external fun getTxKey(txid: String?): String?
+    @JvmOverloads
+    external fun addAccount(label: String? = NEW_ACCOUNT_NAME)
+    var accountLabel: String?
+        get() = getAccountLabel(accountIndex)
+        //virtual std::string signMessage(const std::string &message) = 0;
+        set(label) {
+            setAccountLabel(accountIndex, label)
+        }
 
-//virtual AddressBook * addressBook() const = 0;
-//virtual void setListener(WalletListener *) = 0;
-
-    public native void setDefaultMixin(int mixin);
-
-    public native boolean setUserNote(String txid, String note);
-
-    public native String getUserNote(String txid);
-
-    public native String getTxKey(String txid);
-
-    public void addAccount() {
-        addAccount(NEW_ACCOUNT_NAME);
-    }
-
-    public native void addAccount(String label);
-
-    public String getAccountLabel() {
-        return getAccountLabel(accountIndex);
-    }
-
-//virtual std::string signMessage(const std::string &message) = 0;
-//virtual bool verifySignedMessage(const std::string &message, const std::string &addres, const std::string &signature) const = 0;
-
-//virtual bool parse_uri(const std::string &uri, std::string &address, std::string &payment_id, uint64_t &tvAmount, std::string &tx_description, std::string &recipient_name, std::vector<std::string> &unknown_parameters, std::string &error) = 0;
-//virtual bool rescanSpent() = 0;
-
-    public void setAccountLabel(String label) {
-        setAccountLabel(accountIndex, label);
-    }
-
-    public String getAccountLabel(int accountIndex) {
-        String label = getSubaddressLabel(accountIndex, 0);
-        if (label.equals(NEW_ACCOUNT_NAME)) {
-            String address = getAddress(accountIndex);
-            int len = address.length();
+    private fun getAccountLabel(accountIndex: Int): String {
+        var label = getSubaddressLabel(accountIndex, 0)
+        if (label == NEW_ACCOUNT_NAME) {
+            val address = getAddress(accountIndex)
+            val len = address.length
             label = address.substring(0, 6) +
-                    "\u2026" + address.substring(len - 6, len);
+                    "\u2026" + address.substring(len - 6, len)
         }
-        return label;
+        return label
     }
 
-    public String getSubaddressLabel(int addressIndex) {
-        return getSubaddressLabel(accountIndex, addressIndex);
+    fun getSubaddressLabel(addressIndex: Int): String {
+        return getSubaddressLabel(accountIndex, addressIndex)
     }
 
-    public native String getSubaddressLabel(int accountIndex, int addressIndex);
-
-    public void setAccountLabel(int accountIndex, String label) {
-        setSubaddressLabel(accountIndex, 0, label);
+    private external fun getSubaddressLabel(accountIndex: Int, addressIndex: Int): String
+    private fun setAccountLabel(accountIndex: Int, label: String?) {
+        setSubaddressLabel(accountIndex, 0, label)
     }
 
-    public void setSubaddressLabel(int addressIndex, String label) {
-        setSubaddressLabel(accountIndex, addressIndex, label);
-        refreshHistory();
+    fun setSubaddressLabel(addressIndex: Int, label: String?) {
+        setSubaddressLabel(accountIndex, addressIndex, label)
+        refreshHistory()
     }
 
-    public native void setSubaddressLabel(int accountIndex, int addressIndex, String label);
+    private external fun setSubaddressLabel(accountIndex: Int, addressIndex: Int, label: String?)
+    external fun getNumAccounts(): Int
+    val numSubaddresses: Int
+        get() = getNumSubaddresses(accountIndex)
 
-    public native int getNumAccounts();
+    private external fun getNumSubaddresses(accountIndex: Int): Int
+    val newSubaddress: String
+        get() = getNewSubaddress(accountIndex)
 
-    public int getNumSubaddresses() {
-        return getNumSubaddresses(accountIndex);
+    private fun getNewSubaddress(accountIndex: Int): String {
+        val timeStamp = SimpleDateFormat("yyyy-MM-dd-HH:mm:ss", Locale.US).format(Date())
+        addSubaddress(accountIndex, timeStamp)
+        val subaddress = getLastSubaddress(accountIndex)
+        Timber.d("%d: %s", getNumSubaddresses(accountIndex) - 1, subaddress)
+        return subaddress
     }
 
-    public native int getNumSubaddresses(int accountIndex);
-
-    public String getNewSubaddress() {
-        return getNewSubaddress(accountIndex);
+    external fun addSubaddress(accountIndex: Int, label: String?)
+    private fun getLastSubaddress(accountIndex: Int): String {
+        return getSubaddress(accountIndex, getNumSubaddresses(accountIndex) - 1)
     }
 
-    public String getNewSubaddress(int accountIndex) {
-        String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss", Locale.US).format(new Date());
-        addSubaddress(accountIndex, timeStamp);
-        String subaddress = getLastSubaddress(accountIndex);
-        Timber.d("%d: %s", getNumSubaddresses(accountIndex) - 1, subaddress);
-        return subaddress;
-    }
-
-    public native void addSubaddress(int accountIndex, String label);
-
-    public String getLastSubaddress(int accountIndex) {
-        return getSubaddress(accountIndex, getNumSubaddresses(accountIndex) - 1);
-    }
-
-    public Wallet.Device getDeviceType() {
-        int device = getDeviceTypeJ();
-        return Wallet.Device.values()[device + 1]; // mapping is monero+1=android
-    }
-
-    private native int getDeviceTypeJ();
-
-    public enum Device {
-        Device_Undefined(0, 0),
-        Device_Software(50, 200),
-        Device_Ledger(5, 20);
-        private final int accountLookahead;
-        private final int subaddressLookahead;
-
-        Device(int accountLookahead, int subaddressLookahead) {
-            this.accountLookahead = accountLookahead;
-            this.subaddressLookahead = subaddressLookahead;
+    val deviceType: Device
+        get() {
+            val device = getDeviceTypeJ()
+            return Device.values()[device + 1] // mapping is monero+1=android
         }
 
-        public int getAccountLookahead() {
-            return accountLookahead;
-        }
+    private external fun getDeviceTypeJ(): Int
 
-        public int getSubaddressLookahead() {
-            return subaddressLookahead;
-        }
+    enum class Device(val accountLookahead: Int, val subaddressLookahead: Int) {
+        Device_Undefined(0, 0), Device_Software(50, 200), Device_Ledger(5, 20)
+
     }
 
-    public enum StatusEnum {
-        Status_Ok,
-        Status_Error,
-        Status_Critical
+    enum class StatusEnum {
+        Status_Ok, Status_Error, Status_Critical
     }
 
-    public enum ConnectionStatus {
-        ConnectionStatus_Disconnected,
-        ConnectionStatus_Connected,
-        ConnectionStatus_WrongVersion
+    enum class ConnectionStatus {
+        ConnectionStatus_Disconnected, ConnectionStatus_Connected, ConnectionStatus_WrongVersion
     }
 
-    static public class Status {
-        final private StatusEnum status;
-        final private String errorString;
-        @Nullable
-        private ConnectionStatus connectionStatus; // optional
+    class Status internal constructor(status: Int, @JvmField val errorString: String) {
+        val status: StatusEnum
+        @JvmField
+        var connectionStatus: ConnectionStatus? = null // optional
 
-        Status(int status, String errorString) {
-            this.status = StatusEnum.values()[status];
-            this.errorString = errorString;
+        init {
+            this.status = StatusEnum.values()[status]
         }
 
-        public StatusEnum getStatus() {
-            return status;
-        }
+        val isOk: Boolean
+            get() = (status == StatusEnum.Status_Ok
+                    && (connectionStatus == null || connectionStatus == ConnectionStatus.ConnectionStatus_Connected))
 
-        public String getErrorString() {
-            return errorString;
-        }
-
-        @Nullable
-        public ConnectionStatus getConnectionStatus() {
-            return connectionStatus;
-        }
-
-        public void setConnectionStatus(@Nullable ConnectionStatus connectionStatus) {
-            this.connectionStatus = connectionStatus;
-        }
-
-        public boolean isOk() {
-            return (getStatus() == StatusEnum.Status_Ok)
-                    && ((getConnectionStatus() == null) ||
-                    (getConnectionStatus() == ConnectionStatus.ConnectionStatus_Connected));
-        }
-
-        @Override
-        @NonNull
-        public String toString() {
-            return "Wallet.Status: " + status + "/" + errorString + "/" + connectionStatus;
+        override fun toString(): String {
+            return "Wallet.Status: $status/$errorString/$connectionStatus"
         }
     }
 
+    companion object {
+        const val SWEEP_ALL = Long.MAX_VALUE
+        private const val NEW_ACCOUNT_NAME = "Untitled account" // src/wallet/wallet2.cpp:941
+
+        init {
+            System.loadLibrary("monerujo")
+        }
+
+        @JvmStatic
+        external fun getDisplayAmount(amount: Long): String
+        @JvmStatic
+        external fun getAmountFromString(amount: String?): Long
+        @JvmStatic
+        external fun getAmountFromDouble(amount: Double): Long
+        @JvmStatic
+        external fun generatePaymentId(): String
+        @JvmStatic
+        external fun isPaymentIdValid(payment_id: String): Boolean
+        @JvmStatic
+        fun isAddressValid(address: String): Boolean {
+            return instance?.networkType?.value?.let { isAddressValid(address, it) } == true
+        }
+        @JvmStatic
+        external fun isAddressValid(address: String?, networkType: Int): Boolean
+        @JvmStatic
+        external fun getPaymentIdFromAddress(address: String?, networkType: Int): String?
+        @JvmStatic
+        external fun getMaximumAllowedAmount(): Long
+    }
 }

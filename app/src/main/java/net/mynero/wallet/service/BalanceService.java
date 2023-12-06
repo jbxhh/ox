@@ -33,7 +33,7 @@ public class BalanceService extends ServiceBase {
         long unlocked = 0;
         for(CoinsInfo coinsInfo : UTXOService.getInstance().getUtxos()) {
             if(!coinsInfo.isSpent() && !coinsInfo.isFrozen() && coinsInfo.isUnlocked() && !UTXOService.getInstance().isCoinFrozen(coinsInfo)) {
-                unlocked += coinsInfo.getAmount();
+                unlocked += coinsInfo.amount;
             }
         }
         return unlocked;
@@ -43,7 +43,7 @@ public class BalanceService extends ServiceBase {
         long total = 0;
         for(CoinsInfo coinsInfo : UTXOService.getInstance().getUtxos()) {
             if(!coinsInfo.isSpent() && !coinsInfo.isFrozen() && !UTXOService.getInstance().isCoinFrozen(coinsInfo)) {
-                total += coinsInfo.getAmount();
+                total += coinsInfo.amount;
             }
         }
         return total;

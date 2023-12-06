@@ -91,7 +91,7 @@ public class ReceiveFragment extends Fragment {
 
     private void editAddressLabel(Subaddress subaddress) {
         EditAddressLabelBottomSheetDialog dialog = new EditAddressLabelBottomSheetDialog();
-        dialog.addressIndex = subaddress.getAddressIndex();
+        dialog.addressIndex = subaddress.addressIndex;
         dialog.listener = () -> mViewModel.init();
         dialog.show(getParentFragmentManager(), "edit_address_dialog");
     }
@@ -99,11 +99,11 @@ public class ReceiveFragment extends Fragment {
     private void setAddress(Subaddress subaddress) {
         final String label = subaddress.getDisplayLabel();
         final String address = getContext().getString(R.string.subbaddress_info_subtitle,
-                subaddress.getAddressIndex(), subaddress.getSquashedAddress());
+                subaddress.addressIndex, subaddress.getSquashedAddress());
         addressLabelTextView.setText(label.isEmpty() ? address : label);
-        addressTextView.setText(subaddress.getAddress());
-        addressImageView.setImageBitmap(generate(subaddress.getAddress(), 256, 256));
-        copyAddressImageButton.setOnClickListener(view1 -> Helper.clipBoardCopy(getContext(), "address", subaddress.getAddress()));
+        addressTextView.setText(subaddress.address);
+        addressImageView.setImageBitmap(generate(subaddress.address, 256, 256));
+        copyAddressImageButton.setOnClickListener(view1 -> Helper.clipBoardCopy(getContext(), "address", subaddress.address));
         addressLabelTextView.setOnLongClickListener(v -> {
             editAddressLabel(subaddress);
             return true;

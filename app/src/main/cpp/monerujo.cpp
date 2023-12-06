@@ -1004,33 +1004,6 @@ Java_net_mynero_wallet_model_Wallet_getDeviceTypeJ(JNIEnv *env, jobject instance
     return static_cast<jint>(device_type);
 }
 
-//void cn_slow_hash(const void *data, size_t length, char *hash); // from crypto/hash-ops.h
-JNIEXPORT jbyteArray JNICALL
-Java_net_mynero_wallet_util_KeyStoreHelper_slowHash(JNIEnv *env, jclass clazz,
-                                                       jbyteArray data, jint brokenVariant) {
-    char hash[HASH_SIZE];
-    jsize size = env->GetArrayLength(data);
-    if ((brokenVariant > 0) && (size < 200 /*sizeof(union hash_state)*/)) {
-        return nullptr;
-    }
-
-    jbyte *buffer = env->GetByteArrayElements(data, nullptr);
-    switch (brokenVariant) {
-        case 1:
-            slow_hash_broken(buffer, hash, 1);
-            break;
-        case 2:
-            slow_hash_broken(buffer, hash, 0);
-            break;
-        default: // not broken
-            slow_hash(buffer, (size_t) size, hash);
-    }
-    env->ReleaseByteArrayElements(data, buffer, JNI_ABORT); // do not update java byte[]
-    jbyteArray result = env->NewByteArray(HASH_SIZE);
-    env->SetByteArrayRegion(result, 0, HASH_SIZE, (jbyte *) hash);
-    return result;
-}
-
 JNIEXPORT jstring JNICALL
 Java_net_mynero_wallet_model_Wallet_getDisplayAmount(JNIEnv *env, jclass clazz,
                                                         jlong amount) {

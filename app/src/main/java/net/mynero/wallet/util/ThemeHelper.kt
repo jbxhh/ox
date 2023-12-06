@@ -13,46 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package net.mynero.wallet.util
 
-package net.mynero.wallet.util;
+import android.app.Activity
+import android.content.Context
+import android.graphics.Color
+import android.preference.PreferenceManager
+import android.util.TypedValue
+import androidx.annotation.ColorInt
+import net.mynero.wallet.R
 
-import android.app.Activity;
-import android.content.Context;
-import android.graphics.Color;
-import android.preference.PreferenceManager;
-import android.util.TypedValue;
-
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-
-import net.mynero.wallet.R;
-
-public class ThemeHelper {
-    static public int getThemedResourceId(Context ctx, int attrId) {
-        final TypedValue typedValue = new TypedValue();
-        if (ctx.getTheme().resolveAttribute(attrId, typedValue, true))
-            return typedValue.resourceId;
-        else
-            return 0;
+object ThemeHelper {
+    fun getThemedResourceId(ctx: Context, attrId: Int): Int {
+        val typedValue = TypedValue()
+        return if (ctx.theme.resolveAttribute(
+                attrId,
+                typedValue,
+                true
+            )
+        ) typedValue.resourceId else 0
     }
 
+    @JvmStatic
     @ColorInt
-    static public int getThemedColor(Context ctx, int attrId) {
-        final TypedValue typedValue = new TypedValue();
-        if (ctx.getTheme().resolveAttribute(attrId, typedValue, true))
-            return typedValue.data;
-        else
-            return Color.BLACK;
+    fun getThemedColor(ctx: Context, attrId: Int): Int {
+        val typedValue = TypedValue()
+        return if (ctx.theme.resolveAttribute(
+                attrId,
+                typedValue,
+                true
+            )
+        ) typedValue.data else Color.BLACK
     }
 
-    public static void setTheme(@NonNull Activity activity, @NonNull String theme) {
-        activity.setTheme(R.style.MyMaterialThemeOled);
+    fun setTheme(activity: Activity, theme: String) {
+        activity.setTheme(R.style.MyMaterialThemeOled)
     }
 
-    public static void setPreferred(Activity activity) {
-        final String theme = PreferenceManager.getDefaultSharedPreferences(activity)
-                .getString(activity.getString(R.string.preferred_theme), "Classic");
-        setTheme(activity, theme);
+    fun setPreferred(activity: Activity) {
+        val theme = PreferenceManager.getDefaultSharedPreferences(activity)
+            .getString(activity.getString(R.string.preferred_theme), "Classic")
+        theme?.let { setTheme(activity, it) }
     }
-
 }

@@ -106,7 +106,7 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
         donateTextView = view.findViewById(R.id.donate_label_textview);
         donateTextView.setOnClickListener(view1 -> addressEditText.setText(Constants.DONATE_ADDRESS));
         if (uriData != null) {
-            addressEditText.setText(uriData.getAddress());
+            addressEditText.setText(uriData.address);
             if (uriData.hasAmount()) {
                 amountEditText.setText(uriData.getAmount());
             }
@@ -116,8 +116,8 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
             long selectedValue = 0;
 
             for (CoinsInfo coinsInfo : UTXOService.getInstance().getUtxos()) {
-                if (selectedUtxos.contains(coinsInfo.getKeyImage())) {
-                    selectedValue += coinsInfo.getAmount();
+                if (selectedUtxos.contains(coinsInfo.keyImage)) {
+                    selectedValue += coinsInfo.amount;
                 }
             }
 
@@ -338,7 +338,7 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
     private void pasteAddress(String address) {
         UriData uriData = UriData.parse(address);
         if (uriData != null) {
-            addressEditText.setText(uriData.getAddress());
+            addressEditText.setText(uriData.address);
             if (uriData.hasAmount()) {
                 amountEditText.setText(uriData.getAmount());
             }

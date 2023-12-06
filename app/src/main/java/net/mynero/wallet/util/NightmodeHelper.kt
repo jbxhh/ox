@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package net.mynero.wallet.util
 
-package net.mynero.wallet.util;
+import android.annotation.SuppressLint
+import androidx.appcompat.app.AppCompatDelegate
 
-import android.annotation.SuppressLint;
-
-import androidx.appcompat.app.AppCompatDelegate;
-
-import net.mynero.wallet.service.PrefService;
-
-public class NightmodeHelper {
-    public static void getAndSetPreferredNightmode() {
-        setNightMode(DayNightMode.NIGHT);
-    }
+object NightmodeHelper {
+    val preferredNightmode: Unit
+        get() {
+            setNightMode(DayNightMode.NIGHT)
+        }
 
     @SuppressLint("WrongConstant")
-    public static void setNightMode(DayNightMode mode) {
-        AppCompatDelegate.setDefaultNightMode(mode.getNightMode());
+    fun setNightMode(mode: DayNightMode) {
+        AppCompatDelegate.setDefaultNightMode(mode.nightMode)
     }
 }

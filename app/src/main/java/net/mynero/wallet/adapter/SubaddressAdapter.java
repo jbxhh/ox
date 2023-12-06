@@ -99,14 +99,14 @@ public class SubaddressAdapter extends RecyclerView.Adapter<SubaddressAdapter.Vi
             TextView addressLabelTextView = itemView.findViewById(R.id.address_label_textview);
             TextView addressAmountTextView = itemView.findViewById(R.id.address_amount_textview);
 
-            addressTextView.setText(subaddress.getAddress());
+            addressTextView.setText(subaddress.address);
 
             final String label = subaddress.getDisplayLabel();
             final String address = itemView.getContext().getString(R.string.subbaddress_info_subtitle,
-                    subaddress.getAddressIndex(), subaddress.getSquashedAddress());
+                    subaddress.addressIndex, subaddress.getSquashedAddress());
             addressLabelTextView.setText(label.isEmpty() ? address : label);
 
-            final long amount = subaddress.getAmount();
+            final long amount = subaddress.amount;
             if (amount > 0) {
                 boolean streetMode = PrefService.getInstance().getBoolean(Constants.PREF_STREET_MODE, false);
                 if(streetMode) {

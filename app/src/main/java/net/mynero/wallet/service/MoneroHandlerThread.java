@@ -100,7 +100,7 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
 
     @Override
     public void refreshed() {
-        Wallet.ConnectionStatus status = wallet.getFullStatus().getConnectionStatus();
+        Wallet.ConnectionStatus status = wallet.getFullStatus().connectionStatus;
         if (status == Wallet.ConnectionStatus.ConnectionStatus_Disconnected || status == null) {
             if (triesLeft > 0) {
                 wallet.startRefresh();
@@ -162,7 +162,7 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
 
     private List<TransactionOutput> maybeAddDonationOutputs(long amount, List<TransactionOutput> outputs, List<String> preferredInputs) throws Exception {
         TransactionOutput mainDestination = outputs.get(0); // at this point, for now, we should only have one item in the list. TODO: add multi-dest/pay-to-many feature in the UI
-        String paymentId = Wallet.getPaymentIdFromAddress(mainDestination.getDestination(), WalletManager.getInstance().getNetworkType().getValue());
+        String paymentId = Wallet.getPaymentIdFromAddress(mainDestination.destination, WalletManager.getInstance().networkType.value);
         ArrayList<TransactionOutput> newOutputs = new ArrayList<>(outputs);
         boolean donatePerTx = PrefService.getInstance().getBoolean(Constants.PREF_DONATE_PER_TX, false);
         if(donatePerTx && paymentId.isEmpty()) { // only attach donation when no payment id is needed (i.e. integrated address)
@@ -205,8 +205,8 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
         if (!sendAll) {
             long amountSelected = 0;
             for (CoinsInfo coinsInfo : UTXOService.getInstance().getUtxos()) {
-                if (selectedUtxos.contains(coinsInfo.getKeyImage())) {
-                    amountSelected += coinsInfo.getAmount();
+                if (selectedUtxos.contains(coinsInfo.keyImage)) {
+                    amountSelected += coinsInfo.amount;
                 }
             }
 

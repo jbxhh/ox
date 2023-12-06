@@ -30,9 +30,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 import net.mynero.wallet.R;
-import net.mynero.wallet.data.UserNotes;
 import net.mynero.wallet.model.TransactionInfo;
-import net.mynero.wallet.model.Wallet;
 import net.mynero.wallet.service.PrefService;
 import net.mynero.wallet.util.Constants;
 import net.mynero.wallet.util.Helper;
