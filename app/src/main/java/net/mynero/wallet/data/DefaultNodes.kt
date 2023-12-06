@@ -85,13 +85,13 @@ enum class DefaultNodes(
         "mainnet",
         "Criminales78.onion"
     ),
-    xmrfail(
+    Xmrfail(
         "mxcd4577fldb3ppzy7obmmhnu3tf57gbcbd4qhwr2kxyjj2qi3dnbfqd.onion",
         18081,
         "mainnet",
         "xmrfail.onion"
     ),
-    boldsuck(
+    Boldsuck(
         "6dsdenp6vjkvqzy4wzsnzn6wixkdzihx3khiumyzieauxuxslmcaeiad.onion",
         18081,
         "mainnet",

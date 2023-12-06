@@ -38,8 +38,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import net.mynero.wallet.R
 import net.mynero.wallet.model.WalletManager
-import net.mynero.wallet.model.WalletManager.Companion.initLogger
-import net.mynero.wallet.model.WalletManager.Companion.setLogLevel
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
@@ -62,8 +60,6 @@ object Helper {
     private const val MONERO_DIR = "monero"
     private val HexArray = "0123456789ABCDEF".toCharArray()
     var ALLOW_SHIFT = false
-
-    @JvmField
     var DISPLAY_DIGITS_INFO = 5
     private var ShakeAnimation: Animation? = null
     fun getWalletRoot(context: Context): File {
@@ -104,7 +100,6 @@ object Helper {
         }
     }
 
-    @JvmStatic
     fun getCameraPermission(context: Activity, launcher: ActivityResultLauncher<String?>): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (context.checkSelfPermission(Manifest.permission.CAMERA)
@@ -161,7 +156,6 @@ object Helper {
         return BigDecimal(amount).scaleByPowerOfTen(-XMR_DECIMALS)
     }
 
-    @JvmStatic
     fun getDisplayAmount(amount: Long): String {
         return getDisplayAmount(amount, XMR_DECIMALS)
     }
@@ -203,13 +197,10 @@ object Helper {
     }
 
     fun getBitmap(context: Context, drawableId: Int): Bitmap {
-        val drawable = ContextCompat.getDrawable(context, drawableId)
-        return if (drawable is BitmapDrawable) {
-            BitmapFactory.decodeResource(context.resources, drawableId)
-        } else if (drawable is VectorDrawable) {
-            getBitmap(drawable)
-        } else {
-            throw IllegalArgumentException("unsupported drawable type")
+        return when (val drawable = ContextCompat.getDrawable(context, drawableId)) {
+            is BitmapDrawable -> BitmapFactory.decodeResource(context.resources, drawableId)
+            is VectorDrawable -> getBitmap(drawable)
+            else -> throw IllegalArgumentException("unsupported drawable type")
         }
     }
 
@@ -268,7 +259,6 @@ object Helper {
         }
     }
 
-    @JvmStatic
     fun getClipBoardText(context: Context): String? {
         val clipboardManager =
             context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -300,7 +290,7 @@ object Helper {
     // TODO make the log levels refer to the  WalletManagerFactory::LogLevel enum ?
     fun initLogger(context: Context, level: Int) {
         val home = getStorage(context, MONERO_DIR).absolutePath
-        initLogger("$home/monerujo", "monerujo.log")
-        if (level >= WalletManager.LOGLEVEL_SILENT) setLogLevel(level)
+        WalletManager.initLogger("$home/monerujo", "monerujo.log")
+        if (level >= WalletManager.LOGLEVEL_SILENT) WalletManager.setLogLevel(level)
     }
 }

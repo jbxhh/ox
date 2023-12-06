@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -120,7 +121,8 @@ class ReceiveFragment : Fragment() {
 
     private fun generate(text: String, width: Int, height: Int): Bitmap? {
         if (width <= 0 || height <= 0) return null
-        val hints: MutableMap<EncodeHintType, Any?> = EnumMap(com.google.zxing.EncodeHintType::class.java)
+        val hints: MutableMap<EncodeHintType, Any?> =
+            EnumMap(com.google.zxing.EncodeHintType::class.java)
         hints[EncodeHintType.CHARACTER_SET] = StandardCharsets.UTF_8
         hints[EncodeHintType.ERROR_CORRECTION] = ErrorCorrectionLevel.M
         try {
@@ -131,7 +133,10 @@ class ReceiveFragment : Fragment() {
                     if (bitMatrix[j, i]) {
                         pixels[i * width + j] = -0x1
                     } else {
-                        pixels[i * height + j] = resources.getColor(R.color.oled_colorBackground)
+                        context?.let { ctx ->
+                            pixels[i * height + j] =
+                                ContextCompat.getColor(ctx, R.color.oled_colorBackground)
+                        }
                     }
                 }
             }

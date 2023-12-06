@@ -38,7 +38,6 @@ class Subaddress(
         ) "#$addressIndex" else label
 
     companion object {
-        @JvmField
         val DEFAULT_LABEL_FORMATTER: Pattern =
             Pattern.compile("^[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}:[0-9]{2}$")
     }

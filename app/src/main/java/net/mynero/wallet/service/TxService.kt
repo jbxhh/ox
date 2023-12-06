@@ -33,7 +33,6 @@ class TxService(thread: MoneroHandlerThread) : ServiceBase(thread) {
     }
 
     companion object {
-        @JvmField
         var instance: TxService? = null
     }
 }

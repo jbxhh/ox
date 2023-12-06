@@ -14,7 +14,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.zxing.client.android.Intents
 import com.journeyapps.barcodescanner.ScanContract
@@ -22,7 +21,6 @@ import com.journeyapps.barcodescanner.ScanIntentResult
 import com.journeyapps.barcodescanner.ScanOptions
 import net.mynero.wallet.MoneroApplication
 import net.mynero.wallet.R
-import net.mynero.wallet.model.BalanceInfo
 import net.mynero.wallet.model.PendingTransaction
 import net.mynero.wallet.model.Wallet
 import net.mynero.wallet.model.Wallet.Companion.getAmountFromString
@@ -40,10 +38,12 @@ import net.mynero.wallet.util.UriData.Companion.parse
 class SendBottomSheetDialog : BottomSheetDialogFragment() {
     private val _sendingMax = MutableLiveData(false)
     private val _pendingTransaction = MutableLiveData<PendingTransaction?>(null)
+
     @JvmField
     var selectedUtxos = ArrayList<String>()
     private var sendingMax: LiveData<Boolean?> = _sendingMax
     private var pendingTransaction: LiveData<PendingTransaction?> = _pendingTransaction
+
     @JvmField
     var uriData: UriData? = null
     private val cameraPermissionsLauncher = registerForActivityResult(
@@ -56,8 +56,10 @@ class SendBottomSheetDialog : BottomSheetDialogFragment() {
                 .show()
         }
     }
+
     @JvmField
     var isChurning = false
+
     @JvmField
     var listener: Listener? = null
     var priority: PendingTransaction.Priority = PendingTransaction.Priority.Priority_Low

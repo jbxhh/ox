@@ -25,7 +25,6 @@ import net.mynero.wallet.service.BlockchainService
 import net.mynero.wallet.service.HistoryService
 import net.mynero.wallet.service.PrefService
 import net.mynero.wallet.util.Constants
-import kotlin.math.roundToInt
 
 class HomeFragment : Fragment(), TxInfoAdapterListener {
     private var startHeight: Long = 0
@@ -124,11 +123,11 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
                 displayEmptyHistory(true, view, textResId, botImgResId)
             } else {
                 // POPULATED WALLET HISTORY
-                history.sorted()
-                if (history.size > 100) {
-                    adapter.submitList(history.subList(0, 99))
+                val sortedHistory = history.sortedByDescending { it.timestamp }
+                if (sortedHistory.size > 100) {
+                    adapter.submitList(sortedHistory.subList(0, 99))
                 } else {
-                    adapter.submitList(history)
+                    adapter.submitList(sortedHistory)
                 }
                 txHistoryRecyclerView.visibility = View.VISIBLE
                 displayEmptyHistory(

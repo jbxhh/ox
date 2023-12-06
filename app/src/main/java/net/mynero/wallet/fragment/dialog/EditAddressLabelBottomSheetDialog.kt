@@ -17,9 +17,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class EditAddressLabelBottomSheetDialog : BottomSheetDialogFragment() {
-    @JvmField
     var listener: LabelListener? = null
-    @JvmField
     var addressIndex = 0
     override fun onCreateView(
         inflater: LayoutInflater,

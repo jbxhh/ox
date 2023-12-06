@@ -21,6 +21,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import net.mynero.wallet.R
 import net.mynero.wallet.data.DefaultNodes
@@ -83,9 +84,19 @@ class NodeSelectionAdapter(val listener: NodeSelectionAdapterListener?) :
             val currentNode = PrefService.instance?.node
             val match = node == currentNode
             if (match) {
-                itemView.setBackgroundColor(itemView.resources.getColor(R.color.oled_colorSecondary))
+                itemView.setBackgroundColor(
+                    ContextCompat.getColor(
+                        itemView.context,
+                        R.color.oled_colorSecondary
+                    )
+                )
             } else {
-                itemView.setBackgroundColor(itemView.resources.getColor(android.R.color.transparent))
+                itemView.setBackgroundColor(
+                    ContextCompat.getColor(
+                        itemView.context,
+                        android.R.color.transparent
+                    )
+                )
             }
             val nodeNameTextView = itemView.findViewById<TextView>(R.id.node_name_textview)
             val nodeAddressTextView = itemView.findViewById<TextView>(R.id.node_uri_textview)

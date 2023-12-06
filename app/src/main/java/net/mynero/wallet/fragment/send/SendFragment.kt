@@ -1,485 +1,520 @@
-package net.mynero.wallet.fragment.send;
+package net.mynero.wallet.fragment.send
 
-import android.app.Activity;
-import android.content.Context;
-import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.RadioGroup;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.app.Activity
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.RadioGroup
+import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import com.google.zxing.client.android.Intents
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanIntentResult
+import com.journeyapps.barcodescanner.ScanOptions
+import com.ncorti.slidetoact.SlideToActView
+import com.ncorti.slidetoact.SlideToActView.OnSlideCompleteListener
+import net.mynero.wallet.MoneroApplication
+import net.mynero.wallet.R
+import net.mynero.wallet.model.PendingTransaction
+import net.mynero.wallet.model.Wallet
+import net.mynero.wallet.service.BalanceService
+import net.mynero.wallet.service.TxService
+import net.mynero.wallet.util.Helper
+import net.mynero.wallet.util.UriData
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.ViewModelProvider;
-
-import com.google.zxing.client.android.Intents;
-import com.journeyapps.barcodescanner.ScanContract;
-import com.journeyapps.barcodescanner.ScanOptions;
-import com.ncorti.slidetoact.SlideToActView;
-
-import net.mynero.wallet.MoneroApplication;
-import net.mynero.wallet.R;
-import net.mynero.wallet.model.PendingTransaction;
-import net.mynero.wallet.model.Wallet;
-import net.mynero.wallet.service.BalanceService;
-import net.mynero.wallet.service.TxService;
-import net.mynero.wallet.util.Helper;
-import net.mynero.wallet.util.UriData;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import kotlin.Pair;
-
-public class SendFragment extends Fragment {
-    public PendingTransaction.Priority priority;
-    private SendViewModel mViewModel;
-    private Button sendMaxButton;
-    private ImageButton addOutputImageView;
-    private LinearLayout destList;
-    private LayoutInflater inflater;
-    private Button createButton;
-    private SlideToActView sendTxSlider;
-    private RadioGroup feeRadioGroup;
-    private TextView feeRadioGroupLabelTextView;
-    private TextView feeTextView;
-    private TextView addressTextView;
-    private TextView amountTextView;
-    private int currentEntryIndex = -1;
-    private final ActivityResultLauncher<ScanOptions> qrCodeLauncher = registerForActivityResult(new ScanContract(), result -> {
-        if (result.getContents() != null) {
-            if (currentEntryIndex != -1) {
-                pasteAddress(getDestView(currentEntryIndex), result.getContents(), false);
-                currentEntryIndex = -1;
-            }
-        }
-    });
-
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_send, container, false);
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        mViewModel = new ViewModelProvider(this).get(SendViewModel.class);
-        sendMaxButton = view.findViewById(R.id.send_max_button);
-        addOutputImageView = view.findViewById(R.id.add_output_button);
-        destList = view.findViewById(R.id.transaction_destination_list);
-        createButton = view.findViewById(R.id.create_tx_button);
-        feeRadioGroup = view.findViewById(R.id.tx_fee_radiogroup);
-        feeTextView = view.findViewById(R.id.fee_textview);
-        sendTxSlider = view.findViewById(R.id.send_tx_slider);
-        addressTextView = view.findViewById(R.id.address_pending_textview);
-        amountTextView = view.findViewById(R.id.amount_pending_textview);
-        feeRadioGroup = view.findViewById(R.id.tx_fee_radiogroup);
-        feeRadioGroupLabelTextView = view.findViewById(R.id.tx_fee_radiogroup_label_textview);
-
-        FragmentActivity activity = getActivity();
-        if (activity != null) {
-            inflater = activity.getLayoutInflater();
-        }
-        bindListeners();
-        bindObservers();
-        init();
-    }    private final ActivityResultLauncher<String> cameraPermissionsLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
-            granted -> {
-                if (granted) {
-                    onScan(currentEntryIndex);
-                } else {
-                    Toast.makeText(getActivity(), getString(R.string.no_camera_permission), Toast.LENGTH_SHORT).show();
-                    currentEntryIndex = -1;
+class SendFragment : Fragment() {
+    var priority: PendingTransaction.Priority = PendingTransaction.Priority.Priority_Low
+    private var mViewModel: SendViewModel? = null
+    private var sendMaxButton: Button? = null
+    private var addOutputImageView: ImageButton? = null
+    private var destList: LinearLayout? = null
+    private var inflater: LayoutInflater? = null
+    private var createButton: Button? = null
+    private var sendTxSlider: SlideToActView? = null
+    private var feeRadioGroup: RadioGroup? = null
+    private var feeRadioGroupLabelTextView: TextView? = null
+    private var feeTextView: TextView? = null
+    private var addressTextView: TextView? = null
+    private var amountTextView: TextView? = null
+    private var currentEntryIndex = -1
+    private val qrCodeLauncher =
+        registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
+            if (result.contents != null) {
+                if (currentEntryIndex != -1) {
+                    pasteAddress(getDestView(currentEntryIndex), result.contents, false)
+                    currentEntryIndex = -1
                 }
-            });
-
-    private void init() {
-        addOutput(true);
+            }
+        }
+    private val cameraPermissionsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted: Boolean ->
+        if (granted) {
+            onScan(currentEntryIndex)
+        } else {
+            Toast.makeText(activity, getString(R.string.no_camera_permission), Toast.LENGTH_SHORT)
+                .show()
+            currentEntryIndex = -1
+        }
     }
 
-    private void bindListeners() {
-        feeRadioGroup.check(R.id.low_fee_radiobutton);
-        priority = PendingTransaction.Priority.Priority_Low;
-        feeRadioGroup.setOnCheckedChangeListener((radioGroup, i) -> {
-            if (i == R.id.low_fee_radiobutton) {
-                priority = PendingTransaction.Priority.Priority_Low;
-            } else if (i == R.id.med_fee_radiobutton) {
-                priority = PendingTransaction.Priority.Priority_Medium;
-            } else if (i == R.id.high_fee_radiobutton) {
-                priority = PendingTransaction.Priority.Priority_High;
-            }
-        });
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_send, container, false)
+    }
 
-        addOutputImageView.setOnClickListener(view1 -> {
-            sendMaxButton.setVisibility(View.GONE);
-            int outputCount = getDestCount();
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        mViewModel = ViewModelProvider(this)[SendViewModel::class.java]
+        sendMaxButton = view.findViewById(R.id.send_max_button)
+        addOutputImageView = view.findViewById(R.id.add_output_button)
+        destList = view.findViewById(R.id.transaction_destination_list)
+        createButton = view.findViewById(R.id.create_tx_button)
+        feeRadioGroup = view.findViewById(R.id.tx_fee_radiogroup)
+        feeTextView = view.findViewById(R.id.fee_textview)
+        sendTxSlider = view.findViewById(R.id.send_tx_slider)
+        addressTextView = view.findViewById(R.id.address_pending_textview)
+        amountTextView = view.findViewById(R.id.amount_pending_textview)
+        feeRadioGroup = view.findViewById(R.id.tx_fee_radiogroup)
+        feeRadioGroupLabelTextView = view.findViewById(R.id.tx_fee_radiogroup_label_textview)
+        inflater = activity?.layoutInflater
+        bindListeners()
+        bindObservers()
+        init()
+    }
+
+    private fun init() {
+        addOutput(true)
+    }
+
+    private fun bindListeners() {
+        feeRadioGroup?.check(R.id.low_fee_radiobutton)
+        priority = PendingTransaction.Priority.Priority_Low
+        feeRadioGroup?.setOnCheckedChangeListener { _: RadioGroup?, i: Int ->
+            when (i) {
+                R.id.low_fee_radiobutton -> priority = PendingTransaction.Priority.Priority_Low
+                R.id.med_fee_radiobutton -> priority = PendingTransaction.Priority.Priority_Medium
+                R.id.high_fee_radiobutton -> priority = PendingTransaction.Priority.Priority_High
+            }
+        }
+        addOutputImageView?.setOnClickListener {
+            sendMaxButton?.visibility = View.GONE
+            val outputCount = destCount
             if (outputCount < 8) {
-                addOutput(false);
+                addOutput(false)
             } else {
-                Toast.makeText(getActivity(), getString(R.string.max_outputs_allowed), Toast.LENGTH_SHORT).show();
+                Toast.makeText(
+                    activity,
+                    getString(R.string.max_outputs_allowed),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
-        });
-        sendMaxButton.setOnClickListener(view1 -> {
-            mViewModel.setSendingMax(!isSendAll());
-        });
-        createButton.setOnClickListener(view1 -> {
-            boolean outputsValid = checkDestsValidity(isSendAll());
-
+        }
+        sendMaxButton?.setOnClickListener { mViewModel?.setSendingMax(!isSendAll) }
+        createButton?.setOnClickListener {
+            val outputsValid = checkDestsValidity(isSendAll)
             if (outputsValid) {
-                Toast.makeText(getActivity(), getString(R.string.creating_tx), Toast.LENGTH_SHORT).show();
-                createButton.setEnabled(false);
-                sendMaxButton.setEnabled(false);
-                createTx(getRawDests(), isSendAll(), priority);
+                Toast.makeText(activity, getString(R.string.creating_tx), Toast.LENGTH_SHORT).show()
+                createButton?.isEnabled = false
+                sendMaxButton?.isEnabled = false
+                createTx(rawDests, isSendAll, priority)
             } else {
-                Toast.makeText(getActivity(), getString(R.string.creating_tx_failed_invalid_outputs), Toast.LENGTH_SHORT).show();
+                Toast.makeText(
+                    activity,
+                    getString(R.string.creating_tx_failed_invalid_outputs),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
-        });
-
-        sendTxSlider.setOnSlideCompleteListener(slideToActView -> {
-            PendingTransaction pendingTx = mViewModel.pendingTransaction.getValue();
-            if (pendingTx != null) {
-                Toast.makeText(getActivity(), getString(R.string.sending_tx), Toast.LENGTH_SHORT).show();
-                sendTx(pendingTx);
+        }
+        sendTxSlider?.onSlideCompleteListener =
+            object : OnSlideCompleteListener {
+                override fun onSlideComplete(view: SlideToActView) {
+                    val pendingTx = mViewModel?.pendingTransaction?.value ?: return
+                    Toast.makeText(activity, getString(R.string.sending_tx), Toast.LENGTH_SHORT)
+                        .show()
+                    sendTx(pendingTx)
+                }
             }
-        });
     }
 
-    private boolean checkDestsValidity(boolean sendAll) {
-        List<Pair<String, String>> dests = getRawDests();
-        for (Pair<String, String> dest : dests) {
-            String address = dest.component1();
-            String amount = dest.component2();
+    private fun checkDestsValidity(sendAll: Boolean): Boolean {
+        val dests = rawDests
+        for (dest in dests) {
+            val address = dest.component1()
+            val amount = dest.component2()
             if (!sendAll) {
                 if (amount.isEmpty()) {
-                    Toast.makeText(getActivity(), getString(R.string.send_amount_empty), Toast.LENGTH_SHORT).show();
-                    return false;
+                    Toast.makeText(
+                        activity,
+                        getString(R.string.send_amount_empty),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return false
                 }
-
-                long amountRaw = Wallet.getAmountFromString(amount);
-                long balance = BalanceService.instance.getUnlockedBalanceRaw();
+                val amountRaw = Wallet.getAmountFromString(amount)
+                val balance = BalanceService.instance?.unlockedBalanceRaw ?: 0
                 if (amountRaw >= balance || amountRaw <= 0) {
-                    Toast.makeText(getActivity(), getString(R.string.send_amount_invalid), Toast.LENGTH_SHORT).show();
-                    return false;
+                    Toast.makeText(
+                        activity,
+                        getString(R.string.send_amount_invalid),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return false
                 }
-            } else if (dests.size() > 1) {
-                Toast.makeText(getActivity(), getString(R.string.send_amount_invalid_sendall_paytomany), Toast.LENGTH_SHORT).show();
-                return false;
+            } else if (dests.size > 1) {
+                Toast.makeText(
+                    activity,
+                    getString(R.string.send_amount_invalid_sendall_paytomany),
+                    Toast.LENGTH_SHORT
+                ).show()
+                return false
             }
-
-            UriData uriData = UriData.parse(address);
-            boolean isValidAddress = uriData != null;
+            val uriData = UriData.parse(address)
+            val isValidAddress = uriData != null
             if (!isValidAddress) {
-                Toast.makeText(getActivity(), getString(R.string.send_address_invalid), Toast.LENGTH_SHORT).show();
-                return false;
+                Toast.makeText(
+                    activity,
+                    getString(R.string.send_address_invalid),
+                    Toast.LENGTH_SHORT
+                ).show()
+                return false
             }
-
-            if (dests.size() > 1 && uriData.hasPaymentId()) {
-                Toast.makeText(getActivity(), getString(R.string.paymentid_paytomany), Toast.LENGTH_SHORT).show();
-                return false;
+            if (dests.size > 1 && uriData?.hasPaymentId() == true) {
+                Toast.makeText(
+                    activity,
+                    getString(R.string.paymentid_paytomany),
+                    Toast.LENGTH_SHORT
+                ).show()
+                return false
             }
         }
-
-        return true;
+        return true
     }
 
-    private boolean destsHasPaymentId() {
-        List<Pair<String, String>> dests = getRawDests();
-        for (Pair<String, String> dest : dests) {
-            String address = dest.component1();
-            UriData uriData = UriData.parse(address);
-            if (uriData == null) return false;
-            if (uriData.hasPaymentId()) return true;
+    private fun destsHasPaymentId(): Boolean {
+        val dests = rawDests
+        for (dest in dests) {
+            val address = dest.component1()
+            val uriData = UriData.parse(address) ?: return false
+            if (uriData.hasPaymentId()) return true
         }
-        return false;
+        return false
     }
 
-    private void bindObservers() {
-        mViewModel.sendingMax.observe(getViewLifecycleOwner(), sendingMax -> {
-            if (mViewModel.pendingTransaction.getValue() == null) {
-                if (sendingMax) {
-                    prepareOutputsForMaxSend();
-                    sendMaxButton.setText(getText(R.string.undo));
+    private fun bindObservers() {
+        mViewModel?.sendingMax?.observe(viewLifecycleOwner) { sendingMax: Boolean? ->
+            if (mViewModel?.pendingTransaction?.value == null) {
+                if (sendingMax == true) {
+                    prepareOutputsForMaxSend()
+                    sendMaxButton?.text = getText(R.string.undo)
                 } else {
-                    unprepareMaxSend();
-                    sendMaxButton.setText(getText(R.string.send_max));
+                    unprepareMaxSend()
+                    sendMaxButton?.text = getText(R.string.send_max)
                 }
             }
-        });
-
-        mViewModel.showAddOutputButton.observe(getViewLifecycleOwner(), show -> {
-            setAddOutputButtonVisibility((show && !destsHasPaymentId()) ? View.VISIBLE : View.INVISIBLE);
-        });
-
-        mViewModel.pendingTransaction.observe(getViewLifecycleOwner(), pendingTx -> {
-            showConfirmationLayout(pendingTx != null);
-
+        }
+        mViewModel?.showAddOutputButton?.observe(viewLifecycleOwner) { show: Boolean? ->
+            setAddOutputButtonVisibility(
+                if (show == true && !destsHasPaymentId()) View.VISIBLE else View.INVISIBLE
+            )
+        }
+        mViewModel?.pendingTransaction?.observe(viewLifecycleOwner) { pendingTx: PendingTransaction? ->
+            showConfirmationLayout(pendingTx != null)
             if (pendingTx != null) {
-                String address = getDestCount() == 1 ? getAddressField(0).getText().toString() : "Multiple";
-                addressTextView.setText(getString(R.string.tx_address_text, address));
-                amountTextView.setText(getString(R.string.tx_amount_text, Helper.getDisplayAmount(pendingTx.getAmount())));
-                feeTextView.setText(getString(R.string.tx_fee_text, Helper.getDisplayAmount(pendingTx.getFee())));
+                val address = if (destCount == 1) getAddressField(0).text.toString() else "Multiple"
+                addressTextView?.text = getString(R.string.tx_address_text, address)
+                amountTextView?.text =
+                    getString(R.string.tx_amount_text, Helper.getDisplayAmount(pendingTx.getAmount()))
+                feeTextView?.text =
+                    getString(R.string.tx_fee_text, Helper.getDisplayAmount(pendingTx.getFee()))
             }
-        });
+        }
     }
 
-    private void addOutput(boolean initial) {
+    private fun addOutput(initial: Boolean) {
         if (inflater != null) {
-            int index = getDestCount();
-            ConstraintLayout entryView = (ConstraintLayout) inflater.inflate(R.layout.transaction_output_item, null);
-            ImageButton removeOutputImageButton = entryView.findViewById(R.id.remove_output_imagebutton);
-            EditText addressField = entryView.findViewById(R.id.address_edittext);
-            addressField.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            val index = destCount
+            val entryView =
+                inflater?.inflate(R.layout.transaction_output_item, null) as ConstraintLayout
+            val removeOutputImageButton =
+                entryView.findViewById<ImageButton>(R.id.remove_output_imagebutton)
+            val addressField = entryView.findViewById<EditText>(R.id.address_edittext)
+            addressField.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(
+                    charSequence: CharSequence,
+                    i: Int,
+                    i1: Int,
+                    i2: Int
+                ) {
                 }
 
-                @Override
-                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                }
-
-                @Override
-                public void afterTextChanged(Editable editable) {
-                    int currentOutputs = getDestCount();
-                    UriData uriData = UriData.parse(editable.toString());
+                override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+                override fun afterTextChanged(editable: Editable) {
+                    val currentOutputs: Int = destCount
+                    val uriData = UriData.parse(editable.toString())
                     if (uriData != null) {
                         // we have valid address
-                        boolean hasPaymentId = uriData.hasPaymentId();
+                        val hasPaymentId = uriData.hasPaymentId()
                         if (currentOutputs > 1 && hasPaymentId) {
                             // multiple outputs when pasting/editing in integrated address. this is not allowed
-                            Toast.makeText(getActivity(), getString(R.string.paymentid_paytomany), Toast.LENGTH_SHORT).show();
-                            addressField.setText(null);
+                            Toast.makeText(
+                                activity,
+                                getString(R.string.paymentid_paytomany),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            addressField.text = null
                         } else if (currentOutputs == 1 && hasPaymentId) {
                             // show add output button: we are sending to integrated address
-                            mViewModel.setShowAddOutputButton(false);
+                            mViewModel?.setShowAddOutputButton(false)
                         }
-                    } else if (currentOutputs == 1 && !isSendAll()) {
+                    } else if (currentOutputs == 1 && !isSendAll) {
                         // when send-all is false and this is our only dest and address is invalid, then show add output button
-                        mViewModel.setShowAddOutputButton(true);
+                        mViewModel?.setShowAddOutputButton(true)
                     }
                 }
-            });
-            entryView.findViewById(R.id.paste_amount_imagebutton).setOnClickListener(view1 -> {
-                Context ctx = getContext();
-                if (ctx != null) {
-                    String clipboard = Helper.getClipBoardText(ctx);
-                    if (clipboard != null) {
-                        pasteAddress(entryView, clipboard, true);
+            })
+            entryView.findViewById<View>(R.id.paste_amount_imagebutton)
+                .setOnClickListener {
+                    val ctx = context
+                    if (ctx != null) {
+                        val clipboard = Helper.getClipBoardText(ctx)
+                        if (clipboard != null) {
+                            pasteAddress(entryView, clipboard, true)
+                        }
                     }
                 }
-            });
-            entryView.findViewById(R.id.paste_address_imagebutton).setOnClickListener(view1 -> {
-                Context ctx = getContext();
-                if (ctx != null) {
-                    String clipboard = Helper.getClipBoardText(ctx);
-                    if (clipboard != null) {
-                        pasteAddress(entryView, clipboard, false);
+            entryView.findViewById<View>(R.id.paste_address_imagebutton)
+                .setOnClickListener {
+                    val ctx = context
+                    if (ctx != null) {
+                        val clipboard = Helper.getClipBoardText(ctx)
+                        if (clipboard != null) {
+                            pasteAddress(entryView, clipboard, false)
+                        }
                     }
                 }
-            });
-            entryView.findViewById(R.id.scan_address_imagebutton).setOnClickListener(view -> onScan(index));
+            entryView.findViewById<View>(R.id.scan_address_imagebutton)
+                .setOnClickListener { onScan(index) }
             if (initial) {
-                removeOutputImageButton.setVisibility(View.INVISIBLE);
+                removeOutputImageButton.visibility = View.INVISIBLE
             } else {
-                removeOutputImageButton.setOnClickListener(view -> {
-                    int currentCount = getDestCount();
+                removeOutputImageButton.setOnClickListener {
+                    val currentCount = destCount
                     if (currentCount > 1) {
                         if (currentCount == 2) {
-                            sendMaxButton.setVisibility(View.VISIBLE);
+                            sendMaxButton?.visibility = View.VISIBLE
                         }
-                        destList.removeView(entryView);
+                        destList?.removeView(entryView)
                     }
-                });
+                }
             }
-            destList.addView(entryView);
+            destList?.addView(entryView)
         }
     }
 
-    private int getDestCount() {
-        return destList.getChildCount();
-    }
-
-    private List<Pair<String, String>> getRawDests() {
-        ArrayList<Pair<String, String>> dests = new ArrayList<>();
-        for (int i = 0; i < getDestCount(); i++) {
-            ConstraintLayout entryView = getDestView(i);
-            EditText amountField = entryView.findViewById(R.id.amount_edittext);
-            EditText addressField = entryView.findViewById(R.id.address_edittext);
-            String amount = amountField.getText().toString().trim();
-            String address = addressField.getText().toString().trim();
-            dests.add(new Pair<>(address, amount));
+    private val destCount: Int
+        get() = destList?.childCount ?: -1
+    private val rawDests: List<Pair<String, String>>
+        get() {
+            val dests = ArrayList<Pair<String, String>>()
+            for (i in 0 until destCount) {
+                val entryView = getDestView(i)
+                val amountField = entryView.findViewById<EditText>(R.id.amount_edittext)
+                val addressField = entryView.findViewById<EditText>(R.id.address_edittext)
+                val amount = amountField.text.toString().trim { it <= ' ' }
+                val address = addressField.text.toString().trim { it <= ' ' }
+                dests.add(Pair(address, amount))
+            }
+            return dests
         }
+    private val isSendAll: Boolean
+        get() = mViewModel?.sendingMax?.value ?: false
 
-        return dests;
+    private fun getDestView(pos: Int): ConstraintLayout {
+        return destList?.getChildAt(pos) as ConstraintLayout
     }
 
-    private boolean isSendAll() {
-        return mViewModel.sendingMax.getValue() != null ? mViewModel.sendingMax.getValue() : false;
+    private fun getAddressField(pos: Int): EditText {
+        return getDestView(pos).findViewById<View>(R.id.address_edittext) as EditText
     }
 
-    private ConstraintLayout getDestView(int pos) {
-        return (ConstraintLayout) destList.getChildAt(pos);
+    private fun unprepareMaxSend() {
+        val entryView = getDestView(0)
+        entryView.findViewById<View>(R.id.sending_all_textview).visibility = View.INVISIBLE
+        entryView.findViewById<View>(R.id.amount_edittext).visibility =
+            View.VISIBLE
     }
 
-    private EditText getAddressField(int pos) {
-        return (EditText) getDestView(pos).findViewById(R.id.address_edittext);
+    private fun prepareOutputsForMaxSend() {
+        val entryView = getDestView(0)
+        entryView.findViewById<View>(R.id.sending_all_textview).visibility = View.VISIBLE
+        entryView.findViewById<View>(R.id.amount_edittext).visibility =
+            View.INVISIBLE
     }
 
-    private void unprepareMaxSend() {
-        ConstraintLayout entryView = getDestView(0);
-        entryView.findViewById(R.id.sending_all_textview).setVisibility(View.INVISIBLE);
-        entryView.findViewById(R.id.amount_edittext).setVisibility(View.VISIBLE);
-    }
-
-    private void prepareOutputsForMaxSend() {
-        ConstraintLayout entryView = getDestView(0);
-        entryView.findViewById(R.id.sending_all_textview).setVisibility(View.VISIBLE);
-        entryView.findViewById(R.id.amount_edittext).setVisibility(View.INVISIBLE);
-    }
-
-    private void showConfirmationLayout(boolean show) {
+    private fun showConfirmationLayout(show: Boolean) {
         if (show) {
-            destList.setVisibility(View.GONE);
-            setAddOutputButtonVisibility(View.GONE);
-            sendMaxButton.setVisibility(View.GONE);
-            createButton.setVisibility(View.GONE);
-            feeRadioGroup.setVisibility(View.GONE);
-            feeRadioGroupLabelTextView.setVisibility(View.GONE);
-
-            sendTxSlider.setVisibility(View.VISIBLE);
-            feeTextView.setVisibility(View.VISIBLE);
-            addressTextView.setVisibility(View.VISIBLE);
-            amountTextView.setVisibility(View.VISIBLE);
+            destList?.visibility = View.GONE
+            setAddOutputButtonVisibility(View.GONE)
+            sendMaxButton?.visibility = View.GONE
+            createButton?.visibility = View.GONE
+            feeRadioGroup?.visibility = View.GONE
+            feeRadioGroupLabelTextView?.visibility = View.GONE
+            sendTxSlider?.visibility = View.VISIBLE
+            feeTextView?.visibility = View.VISIBLE
+            addressTextView?.visibility = View.VISIBLE
+            amountTextView?.visibility = View.VISIBLE
         } else {
-            destList.setVisibility(View.VISIBLE);
-            setAddOutputButtonVisibility(View.VISIBLE);
-            sendMaxButton.setVisibility(View.VISIBLE);
-            createButton.setVisibility(View.VISIBLE);
-            feeRadioGroup.setVisibility(View.VISIBLE);
-            feeRadioGroupLabelTextView.setVisibility(View.VISIBLE);
-
-            sendTxSlider.setVisibility(View.GONE);
-            feeTextView.setVisibility(View.GONE);
-            addressTextView.setVisibility(View.GONE);
-            amountTextView.setVisibility(View.GONE);
+            destList?.visibility = View.VISIBLE
+            setAddOutputButtonVisibility(View.VISIBLE)
+            sendMaxButton?.visibility = View.VISIBLE
+            createButton?.visibility = View.VISIBLE
+            feeRadioGroup?.visibility = View.VISIBLE
+            feeRadioGroupLabelTextView?.visibility = View.VISIBLE
+            sendTxSlider?.visibility = View.GONE
+            feeTextView?.visibility = View.GONE
+            addressTextView?.visibility = View.GONE
+            amountTextView?.visibility = View.GONE
         }
     }
 
-    private void onScan(int index) {
-        currentEntryIndex = index;
-        if (Helper.getCameraPermission(getActivity(), cameraPermissionsLauncher)) {
-            ScanOptions options = new ScanOptions();
-            options.setBeepEnabled(false);
-            options.setOrientationLocked(true);
-            options.setDesiredBarcodeFormats(List.of(Intents.Scan.QR_CODE_MODE));
-            options.addExtra(Intents.Scan.SCAN_TYPE, Intents.Scan.MIXED_SCAN);
-            qrCodeLauncher.launch(options);
+    private fun onScan(index: Int) {
+        currentEntryIndex = index
+        if (activity?.let { Helper.getCameraPermission(it, cameraPermissionsLauncher) } == true) {
+            val options = ScanOptions()
+            options.setBeepEnabled(false)
+            options.setOrientationLocked(true)
+            options.setDesiredBarcodeFormats(listOf(Intents.Scan.QR_CODE_MODE))
+            options.addExtra(Intents.Scan.SCAN_TYPE, Intents.Scan.MIXED_SCAN)
+            qrCodeLauncher.launch(options)
         }
     }
 
-    private void pasteAddress(ConstraintLayout entryView, String clipboard, boolean pastingAmount) {
+    private fun pasteAddress(
+        entryView: ConstraintLayout,
+        clipboard: String,
+        pastingAmount: Boolean
+    ) {
         if (pastingAmount) {
             try {
-                Double.parseDouble(clipboard);
-                setAmount(entryView, clipboard);
-            } catch (Exception e) {
-                Toast.makeText(getActivity(), getString(R.string.send_amount_invalid), Toast.LENGTH_SHORT).show();
-                return;
+                clipboard.toDouble()
+                setAmount(entryView, clipboard)
+            } catch (e: Exception) {
+                Toast.makeText(
+                    activity,
+                    getString(R.string.send_amount_invalid),
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
             }
         }
-
-        UriData uriData = UriData.parse(clipboard);
+        val uriData = UriData.parse(clipboard)
         if (uriData != null) {
-            int currentOutputs = getDestCount();
+            val currentOutputs = destCount
             if (currentOutputs > 1 && uriData.hasPaymentId()) {
-                Toast.makeText(getActivity(), getString(R.string.paymentid_paytomany), Toast.LENGTH_SHORT).show();
-                return;
+                Toast.makeText(
+                    activity,
+                    getString(R.string.paymentid_paytomany),
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
             } else if (currentOutputs == 1 && uriData.hasPaymentId()) {
-                mViewModel.setShowAddOutputButton(false);
+                mViewModel?.setShowAddOutputButton(false)
             }
-            EditText addressField = entryView.findViewById(R.id.address_edittext);
-            addressField.setText(uriData.address);
+            val addressField = entryView.findViewById<EditText>(R.id.address_edittext)
+            addressField.setText(uriData.address)
             if (uriData.hasAmount()) {
-                setAmount(entryView, uriData.getAmount());
+                setAmount(entryView, uriData.amount)
             }
         } else {
-            Toast.makeText(getActivity(), getString(R.string.send_address_invalid), Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, getString(R.string.send_address_invalid), Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
-    private void setAmount(ConstraintLayout entryView, String amount) {
-        sendMaxButton.setEnabled(false);
-        EditText amountField = entryView.findViewById(R.id.amount_edittext);
-        amountField.setText(amount);
+    private fun setAmount(entryView: ConstraintLayout, amount: String?) {
+        sendMaxButton?.isEnabled = false
+        val amountField = entryView.findViewById<EditText>(R.id.amount_edittext)
+        amountField.setText(amount)
     }
 
-    private void createTx(List<Pair<String, String>> dests, boolean sendAll, PendingTransaction.Priority feePriority) {
-        ((MoneroApplication) getActivity().getApplication()).getExecutor().execute(() -> {
+    private fun createTx(
+        dests: List<Pair<String, String>>,
+        sendAll: Boolean,
+        feePriority: PendingTransaction.Priority
+    ) {
+        (activity?.application as MoneroApplication).executor?.execute {
             try {
-                PendingTransaction pendingTx = TxService.instance.createTx(dests, sendAll, feePriority, new ArrayList<>());
-                if (pendingTx != null && pendingTx.getStatus() == PendingTransaction.Status.Status_Ok) {
-                    mViewModel.setPendingTransaction(pendingTx);
+                val pendingTx =
+                    TxService.instance?.createTx(dests, sendAll, feePriority, ArrayList())
+                if (pendingTx != null && pendingTx.status === PendingTransaction.Status.Status_Ok) {
+                    mViewModel?.setPendingTransaction(pendingTx)
                 } else {
-                    Activity activity = getActivity();
+                    val activity: Activity? = activity
                     if (activity != null && pendingTx != null) {
-                        activity.runOnUiThread(() -> {
-                            createButton.setEnabled(true);
-                            sendMaxButton.setEnabled(true);
-                            if (pendingTx.getErrorString() != null)
-                                Toast.makeText(activity, getString(R.string.error_creating_tx, pendingTx.getErrorString()), Toast.LENGTH_SHORT).show();
-                        });
+                        activity.runOnUiThread(Runnable {
+                            createButton?.isEnabled = true
+                            sendMaxButton?.isEnabled = true
+                            if (pendingTx.getErrorString() != null) Toast.makeText(
+                                activity,
+                                getString(R.string.error_creating_tx, pendingTx.getErrorString()),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        })
                     }
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Activity activity = getActivity();
-                if (activity != null) {
-                    activity.runOnUiThread(() -> {
-                        createButton.setEnabled(true);
-                        sendMaxButton.setEnabled(true);
-                        Toast.makeText(activity, getString(R.string.error_creating_tx, e.getMessage()), Toast.LENGTH_SHORT).show();
-                    });
+            } catch (e: Exception) {
+                e.printStackTrace()
+                val activity: Activity? = activity
+                activity?.runOnUiThread {
+                    createButton?.isEnabled = true
+                    sendMaxButton?.isEnabled = true
+                    Toast.makeText(
+                        activity,
+                        getString(R.string.error_creating_tx, e.message),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
-        });
+        }
     }
 
-    private void sendTx(PendingTransaction pendingTx) {
-        ((MoneroApplication) getActivity().getApplication()).getExecutor().execute(() -> {
-            boolean success = TxService.instance.sendTx(pendingTx);
-            Activity activity = getActivity();
-            if (activity != null) {
-                activity.runOnUiThread(() -> {
-                    if (success) {
-                        Toast.makeText(getActivity(), getString(R.string.sent_tx), Toast.LENGTH_SHORT).show();
-                        getActivity().onBackPressed();
-                    } else {
-                        sendTxSlider.resetSlider();
-                        Toast.makeText(getActivity(), getString(R.string.error_sending_tx), Toast.LENGTH_SHORT).show();
-                    }
-                });
+    private fun sendTx(pendingTx: PendingTransaction) {
+        (activity?.application as MoneroApplication).executor?.execute {
+            val success = TxService.instance?.sendTx(pendingTx)
+            val activity: Activity? = activity
+            activity?.runOnUiThread {
+                if (success == true) {
+                    Toast.makeText(getActivity(), getString(R.string.sent_tx), Toast.LENGTH_SHORT)
+                        .show()
+                    activity.onBackPressed()
+                } else {
+                    sendTxSlider?.resetSlider()
+                    Toast.makeText(
+                        getActivity(),
+                        getString(R.string.error_sending_tx),
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                }
             }
-        });
+        }
     }
 
-    private void setAddOutputButtonVisibility(int visibility) {
-        addOutputImageView.setVisibility(visibility);
+    private fun setAddOutputButtonVisibility(visibility: Int) {
+        addOutputImageView?.visibility = visibility
     }
-
-
-
-
 }

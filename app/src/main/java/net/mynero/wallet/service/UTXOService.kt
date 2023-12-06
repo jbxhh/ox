@@ -96,9 +96,9 @@ class UTXOService(thread: MoneroHandlerThread?) : ServiceBase(thread) {
         val seenTxs = ArrayList<String>()
         val utxos: List<CoinsInfo> = ArrayList(getUtxos())
         var amountSelected: Long = 0
-        utxos.sorted()
+        val sortedUtxos = utxos.sorted()
         //loop through each utxo
-        for (coinsInfo in utxos) {
+        for (coinsInfo in sortedUtxos) {
             if (!coinsInfo.isSpent && coinsInfo.isUnlocked && !coinsInfo.isFrozen && !frozenCoins.contains(
                     coinsInfo.pubKey
                 )

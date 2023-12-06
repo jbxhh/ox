@@ -25,7 +25,6 @@ import net.mynero.wallet.data.Subaddress
 import net.mynero.wallet.service.PrefService
 import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.Helper
-import net.mynero.wallet.util.Helper.getDisplayAmount
 
 class SubaddressAdapter(val listener: SubaddressAdapterListener?) :
     RecyclerView.Adapter<SubaddressAdapter.ViewHolder>() {
@@ -101,7 +100,7 @@ class SubaddressAdapter(val listener: SubaddressAdapterListener?) :
                 } else {
                     addressAmountTextView.text = itemView.context.getString(
                         R.string.tx_list_amount_positive,
-                        getDisplayAmount(amount, Helper.DISPLAY_DIGITS_INFO)
+                        Helper.getDisplayAmount(amount, Helper.DISPLAY_DIGITS_INFO)
                     )
                 }
             } else addressAmountTextView.text = ""

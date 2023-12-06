@@ -17,6 +17,7 @@ import java.io.File
 class PasswordBottomSheetDialog : BottomSheetDialogFragment() {
     @JvmField
     var listener: PasswordListener? = null
+
     @JvmField
     var cancelable = false
     override fun onCreateView(
