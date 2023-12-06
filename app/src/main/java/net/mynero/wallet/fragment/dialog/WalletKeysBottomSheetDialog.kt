@@ -30,17 +30,17 @@ class WalletKeysBottomSheetDialog : BottomSheetDialogFragment() {
         val informationTextView = view.findViewById<TextView>(R.id.information_textview) // seed
         val viewKeyTextView = view.findViewById<TextView>(R.id.viewkey_textview)
         val restoreHeightTextView = view.findViewById<TextView>(R.id.restore_height_textview)
-        val wallet = WalletManager.instance!!.wallet
-        var seed = wallet!!.getSeed("")
-        val usesOffset = PrefService.instance!!.getBoolean(Constants.PREF_USES_OFFSET, false)
+        val wallet = WalletManager.instance?.wallet
+        var seed = wallet?.getSeed("")
+        val usesOffset = PrefService.instance?.getBoolean(Constants.PREF_USES_OFFSET, false) == true
         if (usesOffset) {
-            seed = wallet.getSeed(password)
+            seed = wallet?.getSeed(password)
             view.findViewById<View>(R.id.wallet_seed_offset_textview).visibility = View.VISIBLE
         }
-        val privateViewKey = wallet.getSecretViewKey()
+        val privateViewKey = wallet?.getSecretViewKey()
         informationTextView.text = seed
         viewKeyTextView.text = privateViewKey
-        restoreHeightTextView.text = "${wallet.getRestoreHeight()}"
+        restoreHeightTextView.text = "${wallet?.getRestoreHeight()}"
         copyViewKeyImageButton.setOnClickListener {
             clipBoardCopy(
                 context, "private view-key", privateViewKey

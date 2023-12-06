@@ -40,8 +40,8 @@ class MainActivity : AppCompatActivity(), MoneroHandlerThread.Listener, Password
         val walletKeysFile = File(applicationInfo.dataDir, Constants.WALLET_NAME + ".keys")
         if (walletKeysFile.exists()) {
             val promptPassword =
-                PrefService.instance?.getBoolean(Constants.PREF_USES_PASSWORD, false)
-            if (promptPassword == false) {
+                PrefService.instance?.getBoolean(Constants.PREF_USES_PASSWORD, false) == true
+            if (!promptPassword) {
                 init(walletFile, "")
             } else {
                 val passwordDialog = PasswordBottomSheetDialog()

@@ -91,8 +91,8 @@ class SubaddressAdapter(val listener: SubaddressAdapterListener?) :
             val amount = subaddress.amount
             if (amount > 0) {
                 val streetMode =
-                    PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false)
-                if (streetMode == true) {
+                    PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false) == true
+                if (streetMode) {
                     addressAmountTextView.text = itemView.context.getString(
                         R.string.tx_list_amount_positive,
                         Constants.STREET_MODE_BALANCE

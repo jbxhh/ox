@@ -237,7 +237,10 @@ class SendFragment : Fragment() {
                 val address = if (destCount == 1) getAddressField(0).text.toString() else "Multiple"
                 addressTextView?.text = getString(R.string.tx_address_text, address)
                 amountTextView?.text =
-                    getString(R.string.tx_amount_text, Helper.getDisplayAmount(pendingTx.getAmount()))
+                    getString(
+                        R.string.tx_amount_text,
+                        Helper.getDisplayAmount(pendingTx.getAmount())
+                    )
                 feeTextView?.text =
                     getString(R.string.tx_fee_text, Helper.getDisplayAmount(pendingTx.getFee()))
             }

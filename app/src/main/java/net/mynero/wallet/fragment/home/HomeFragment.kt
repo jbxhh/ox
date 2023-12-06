@@ -165,8 +165,9 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
         val botImageView = view.findViewById<ImageView>(R.id.monerochan_imageview)
         view.findViewById<View>(R.id.no_history_layout).visibility =
             if (display) View.VISIBLE else View.GONE
-        val displayMonerochan = PrefService.instance?.getBoolean(Constants.PREF_MONEROCHAN, true)
-        if (displayMonerochan == true) {
+        val displayMonerochan =
+            PrefService.instance?.getBoolean(Constants.PREF_MONEROCHAN, true) == true
+        if (displayMonerochan) {
             botImageView.visibility = View.VISIBLE
             mnrjTextView.visibility = View.VISIBLE
             textView.visibility = View.GONE

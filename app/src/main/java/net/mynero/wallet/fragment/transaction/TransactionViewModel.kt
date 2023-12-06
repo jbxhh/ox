@@ -1,6 +1,5 @@
-package net.mynero.wallet.fragment.transaction;
+package net.mynero.wallet.fragment.transaction
 
-import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModel
 
-public class TransactionViewModel extends ViewModel {
-}
+class TransactionViewModel : ViewModel()
