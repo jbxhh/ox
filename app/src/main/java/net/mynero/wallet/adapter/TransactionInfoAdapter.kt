@@ -75,7 +75,8 @@ class TransactionInfoAdapter(val listener: TxInfoAdapterListener?) :
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder).
      */
-    class ViewHolder(val listener: TxInfoAdapterListener?, view: View) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(val listener: TxInfoAdapterListener?, view: View) :
+        RecyclerView.ViewHolder(view) {
         private val outboundColour: Int
         private val inboundColour: Int
         private val pendingColour: Int

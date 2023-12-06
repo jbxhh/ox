@@ -47,7 +47,7 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
         public void afterTextChanged(Editable editable) {
             if (mViewModel != null) {
                 mViewModel.setProxyAddress(editable.toString());
-                mViewModel.updateProxy(((MoneroApplication)getActivity().getApplication()));
+                mViewModel.updateProxy(((MoneroApplication) getActivity().getApplication()));
             }
         }
     };
@@ -64,7 +64,7 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
         public void afterTextChanged(Editable editable) {
             if (mViewModel != null) {
                 mViewModel.setProxyPort(editable.toString());
-                mViewModel.updateProxy(((MoneroApplication)getActivity().getApplication()));
+                mViewModel.updateProxy(((MoneroApplication) getActivity().getApplication()));
             }
         }
     };
@@ -136,7 +136,7 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
         mViewModel.seedType.observe(getViewLifecycleOwner(), seedType -> {
             seedTypeButton.setText(seedType.toString());
             seedTypeDescTextView.setText(getText(seedType.getDescResId()));
-            if(seedType == OnboardingViewModel.SeedType.LEGACY) {
+            if (seedType == OnboardingViewModel.SeedType.LEGACY) {
                 seedOffsetCheckbox.setVisibility(View.VISIBLE);
                 walletRestoreHeightEditText.setVisibility(View.VISIBLE);
                 walletPasswordEditText.setHint(getString(R.string.password_optional));
@@ -151,9 +151,13 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
     private void bindListeners() {
         seedOffsetCheckbox.setChecked(useOffset);
         // Disable onBack click
-        OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) { @Override public void handleOnBackPressed() { } };
+        OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+            }
+        };
         FragmentActivity activity = getActivity();
-        if(activity != null)
+        if (activity != null)
             activity.getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), onBackPressedCallback);
 
         moreOptionsDropdownTextView.setOnClickListener(view12 -> mViewModel.onMoreOptionsClicked());
@@ -163,7 +167,7 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
         createWalletButton.setOnClickListener(view1 -> {
             prepareDefaultNode();
             onBackPressedCallback.setEnabled(false);
-            ((MoneroApplication)getActivity().getApplication()).getExecutor().execute(() -> {
+            ((MoneroApplication) getActivity().getApplication()).getExecutor().execute(() -> {
                 createOrImportWallet(
                         walletPasswordEditText.getText().toString(),
                         walletPasswordConfirmEditText.getText().toString(),
@@ -229,13 +233,13 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
                 addProxyTextListeners();
             }
 
-            mViewModel.updateProxy(((MoneroApplication)getActivity().getApplication()));
+            mViewModel.updateProxy(((MoneroApplication) getActivity().getApplication()));
         });
 
         showXmrchanSwitch.setChecked(PrefService.getInstance().getBoolean(Constants.PREF_MONEROCHAN, true));
         showXmrchanSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
             PrefService.getInstance().edit().putBoolean(Constants.PREF_MONEROCHAN, b).apply();
-            if(b) {
+            if (b) {
                 xmrchanOnboardingImage.setVisibility(View.VISIBLE);
             } else {
                 xmrchanOnboardingImage.setVisibility(View.GONE);
@@ -253,11 +257,11 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
 
     private void toggleSeedType() {
         OnboardingViewModel.SeedType seedType = mViewModel.seedType.getValue();
-        if(seedType == null) return;
+        if (seedType == null) return;
         OnboardingViewModel.SeedType newSeedType = OnboardingViewModel.SeedType.UNKNOWN;
-        if(seedType == OnboardingViewModel.SeedType.POLYSEED) {
+        if (seedType == OnboardingViewModel.SeedType.POLYSEED) {
             newSeedType = OnboardingViewModel.SeedType.LEGACY;
-        } else if(seedType == OnboardingViewModel.SeedType.LEGACY) {
+        } else if (seedType == OnboardingViewModel.SeedType.LEGACY) {
             newSeedType = OnboardingViewModel.SeedType.POLYSEED;
         }
 
@@ -270,7 +274,7 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
 
     private void createOrImportWallet(String walletPassword, String confirmedPassword, String walletSeed, String restoreHeightText) {
         Activity activity = getActivity();
-        if(activity != null) {
+        if (activity != null) {
             mViewModel.createOrImportWallet(activity, walletPassword, confirmedPassword, walletSeed, restoreHeightText, useOffset);
         }
     }
@@ -299,11 +303,12 @@ public class OnboardingFragment extends Fragment implements NodeSelectionBottomS
     public void onNodeSelected() {
         Node node = PrefService.getInstance().getNode();
         selectNodeButton.setText(getString(R.string.node_button_text, node.getAddress()));
-        mViewModel.updateProxy(((MoneroApplication)getActivity().getApplication()));
+        mViewModel.updateProxy(((MoneroApplication) getActivity().getApplication()));
     }
 
     @Override
-    public void onClickedEditNode(Node node) { }
+    public void onClickedEditNode(Node node) {
+    }
 
     @Override
     public void onClickedAddNode() {

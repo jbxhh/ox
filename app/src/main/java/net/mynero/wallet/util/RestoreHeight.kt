@@ -194,6 +194,7 @@ class RestoreHeight internal constructor() {
     companion object {
         const val DIFFICULTY_TARGET = 120 // seconds
         private var Singleton: RestoreHeight? = null
+
         @JvmStatic
         val instance: RestoreHeight?
             get() {

@@ -18,6 +18,7 @@ object Constants {
     const val URI_ARG_AMOUNT2 = "amount"
     const val NAV_ARG_TXINFO = "nav_arg_txinfo"
     const val STREET_MODE_BALANCE = "#.############"
+
     @JvmField
     val DONATION_ADDRESSES = arrayOf(
         "87BqQYkugEzh6Tuyotm2uc3DzJzKM6MuZaC161e6u1TsQxxPmXVPHpdNRyK47JY4d1hhbe25YVz4e9vTXCLDxvHkRXEAeBC",  // primary Mysu Donation address

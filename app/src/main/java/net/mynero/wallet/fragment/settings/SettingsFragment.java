@@ -24,13 +24,12 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import net.mynero.wallet.MoneroApplication;
 import net.mynero.wallet.R;
-import net.mynero.wallet.data.DefaultNodes;
 import net.mynero.wallet.data.Node;
 import net.mynero.wallet.fragment.dialog.AddNodeBottomSheetDialog;
 import net.mynero.wallet.fragment.dialog.EditNodeBottomSheetDialog;
-import net.mynero.wallet.fragment.dialog.WalletKeysBottomSheetDialog;
 import net.mynero.wallet.fragment.dialog.NodeSelectionBottomSheetDialog;
 import net.mynero.wallet.fragment.dialog.PasswordBottomSheetDialog;
+import net.mynero.wallet.fragment.dialog.WalletKeysBottomSheetDialog;
 import net.mynero.wallet.model.Wallet;
 import net.mynero.wallet.model.WalletManager;
 import net.mynero.wallet.service.BalanceService;
@@ -38,8 +37,6 @@ import net.mynero.wallet.service.BlockchainService;
 import net.mynero.wallet.service.HistoryService;
 import net.mynero.wallet.service.PrefService;
 import net.mynero.wallet.util.Constants;
-import net.mynero.wallet.util.DayNightMode;
-import net.mynero.wallet.util.NightmodeHelper;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -60,7 +57,7 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
         public void afterTextChanged(Editable editable) {
             if (mViewModel != null) {
                 mViewModel.setProxyAddress(editable.toString());
-                mViewModel.updateProxy(((MoneroApplication)getActivity().getApplication()));
+                mViewModel.updateProxy(((MoneroApplication) getActivity().getApplication()));
             }
         }
     };
@@ -77,7 +74,7 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
         public void afterTextChanged(Editable editable) {
             if (mViewModel != null) {
                 mViewModel.setProxyPort(editable.toString());
-                mViewModel.updateProxy(((MoneroApplication)getActivity().getApplication()));
+                mViewModel.updateProxy(((MoneroApplication) getActivity().getApplication()));
             }
         }
     };
@@ -155,7 +152,7 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
                 proxySettingsLayout.setVisibility(View.GONE);
             }
 
-            mViewModel.updateProxy(((MoneroApplication)getActivity().getApplication()));
+            mViewModel.updateProxy(((MoneroApplication) getActivity().getApplication()));
         });
 
         displaySeedButton.setOnClickListener(view1 -> {
@@ -233,8 +230,8 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
     public void onNodeSelected() {
         Node node = PrefService.getInstance().getNode();
         selectNodeButton.setText(getString(R.string.node_button_text, node.getAddress()));
-        mViewModel.updateProxy(((MoneroApplication)getActivity().getApplication()));
-        ((MoneroApplication)getActivity().getApplication()).getExecutor().execute(() -> {
+        mViewModel.updateProxy(((MoneroApplication) getActivity().getApplication()));
+        ((MoneroApplication) getActivity().getApplication()).getExecutor().execute(() -> {
             WalletManager.getInstance().getWallet().init(0);
             WalletManager.getInstance().getWallet().startRefresh();
         });

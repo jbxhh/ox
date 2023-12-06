@@ -22,10 +22,10 @@ import java.util.Calendar;
 
 public class OnboardingViewModel extends ViewModel {
     private final MutableLiveData<Boolean> _showMoreOptions = new MutableLiveData<>(false);
-    public LiveData<Boolean> showMoreOptions = _showMoreOptions;
     private final MutableLiveData<Boolean> _enableCreateButton = new MutableLiveData<>(true);
-    public LiveData<Boolean> enableCreateButton = _enableCreateButton;
     private final MutableLiveData<SeedType> _seedType = new MutableLiveData<>(SeedType.POLYSEED);
+    public LiveData<Boolean> showMoreOptions = _showMoreOptions;
+    public LiveData<Boolean> enableCreateButton = _enableCreateButton;
     public LiveData<SeedType> seedType = _seedType;
     private String proxyAddress = "";
     private String proxyPort = "";
@@ -69,12 +69,12 @@ public class OnboardingViewModel extends ViewModel {
     }
 
     public void createOrImportWallet(Activity mainActivity, String walletPassword, String confirmedPassword, String walletSeed, String restoreHeightText, boolean useOffset) {
-        MoneroApplication application = (MoneroApplication)mainActivity.getApplication();
+        MoneroApplication application = (MoneroApplication) mainActivity.getApplication();
         application.getExecutor().execute(() -> {
             _enableCreateButton.postValue(false);
             String offset = useOffset ? walletPassword : "";
             if (!walletPassword.isEmpty()) {
-                if(!walletPassword.equals(confirmedPassword)) {
+                if (!walletPassword.equals(confirmedPassword)) {
                     _enableCreateButton.postValue(true);
                     mainActivity.runOnUiThread(() -> Toast.makeText(mainActivity, application.getString(R.string.invalid_confirmed_password), Toast.LENGTH_SHORT).show());
                     return;
@@ -84,16 +84,16 @@ public class OnboardingViewModel extends ViewModel {
             long restoreHeight = getNewRestoreHeight();
             File walletFile = new File(mainActivity.getApplicationInfo().dataDir, Constants.WALLET_NAME);
             Wallet wallet = null;
-            if(!offset.isEmpty()) {
+            if (!offset.isEmpty()) {
                 PrefService.getInstance().edit().putBoolean(Constants.PREF_USES_OFFSET, true).apply();
             }
 
             if (walletSeed.isEmpty()) {
                 SeedType seedTypeValue = seedType.getValue();
-                if(seedTypeValue == null) return;
+                if (seedTypeValue == null) return;
 
-                if(seedTypeValue == SeedType.POLYSEED) {
-                    if(offset.isEmpty()) {
+                if (seedTypeValue == SeedType.POLYSEED) {
+                    if (offset.isEmpty()) {
                         mainActivity.runOnUiThread(() -> {
                             _enableCreateButton.postValue(true);
                             Toast.makeText(mainActivity, application.getString(R.string.invalid_empty_passphrase), Toast.LENGTH_SHORT).show();
@@ -102,7 +102,7 @@ public class OnboardingViewModel extends ViewModel {
                     } else {
                         wallet = WalletManager.getInstance().createWalletPolyseed(walletFile, walletPassword, offset, Constants.MNEMONIC_LANGUAGE);
                     }
-                } else if(seedTypeValue == SeedType.LEGACY) {
+                } else if (seedTypeValue == SeedType.LEGACY) {
                     File tmpWalletFile = new File(mainActivity.getApplicationInfo().dataDir, Constants.WALLET_NAME + "_tmp");
                     Wallet tmpWallet = createTempWallet(tmpWalletFile); //we do this to get seed, then recover wallet so we can use seed offset
                     wallet = WalletManager.getInstance().recoveryWallet(walletFile, walletPassword, tmpWallet.getSeed(""), offset, restoreHeight);
@@ -127,7 +127,7 @@ public class OnboardingViewModel extends ViewModel {
             walletFile.delete(); // cache is broken for some reason when recovering wallets. delete the file here. this happens in monerujo too.
 
             if (ok) {
-                ((MainActivity)mainActivity).init(walletFile, walletPassword);
+                ((MainActivity) mainActivity).init(walletFile, walletPassword);
                 mainActivity.runOnUiThread(mainActivity::onBackPressed);
             } else {
                 mainActivity.runOnUiThread(() -> {
@@ -147,10 +147,10 @@ public class OnboardingViewModel extends ViewModel {
     public SeedType getMnemonicType(String seed) {
         String[] words = seed.split("\\s");
         SeedType seedTypeValue = seedType.getValue();
-        if(seedTypeValue == null) return SeedType.LEGACY;
-        if(words.length == 16 && seedTypeValue == SeedType.POLYSEED) {
+        if (seedTypeValue == null) return SeedType.LEGACY;
+        if (words.length == 16 && seedTypeValue == SeedType.POLYSEED) {
             return SeedType.POLYSEED;
-        } else if (words.length == 25 && seedTypeValue == SeedType.LEGACY){
+        } else if (words.length == 25 && seedTypeValue == SeedType.LEGACY) {
             return SeedType.LEGACY;
         } else {
             return SeedType.UNKNOWN;
@@ -166,7 +166,7 @@ public class OnboardingViewModel extends ViewModel {
         POLYSEED(R.string.seed_desc_polyseed),
         UNKNOWN(0);
 
-        private int descResId;
+        private final int descResId;
 
         SeedType(int descResId) {
             this.descResId = descResId;

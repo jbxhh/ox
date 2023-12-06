@@ -7,7 +7,8 @@ import net.mynero.wallet.model.WalletManager.Companion.instance
 class UriData(@JvmField val address: String, val params: HashMap<String, String>) {
 
     fun hasPaymentId(): Boolean {
-        return instance?.wallet?.nettype()?.let { getPaymentIdFromAddress(address, it) }?.isNotEmpty() == true
+        return instance?.wallet?.nettype()?.let { getPaymentIdFromAddress(address, it) }
+            ?.isNotEmpty() == true
     }
 
     val amount: String?
@@ -21,13 +22,13 @@ class UriData(@JvmField val address: String, val params: HashMap<String, String>
     companion object {
         @JvmStatic
         fun parse(uri: String): UriData? {
-            if(uri.isEmpty()) return null
+            if (uri.isEmpty()) return null
             val params = HashMap<String, String>()
             val uriParts = uri.replace(Constants.URI_PREFIX, "").split("\\?".toRegex())
                 .dropLastWhile { it.isEmpty() }
                 .toTypedArray()
 
-            if(uriParts.isEmpty()) return null
+            if (uriParts.isEmpty()) return null
             val finalAddress = uriParts[0]
             var queryParams = ""
             if (uriParts.size > 1) {

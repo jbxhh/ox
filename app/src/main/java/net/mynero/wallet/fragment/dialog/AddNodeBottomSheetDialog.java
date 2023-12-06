@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,11 +47,17 @@ public class AddNodeBottomSheetDialog extends BottomSheetDialogFragment {
         ImageButton pastePasswordImageButton = view.findViewById(R.id.paste_password_imagebutton);
 
         usernameEditText.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-            @Override public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
             @Override
             public void afterTextChanged(Editable editable) {
-                if(editable.toString().isEmpty()) {
+                if (editable.toString().isEmpty()) {
                     passwordEditText.setText(null);
                     passwordEditText.setVisibility(View.GONE);
                     pastePasswordImageButton.setVisibility(View.GONE);
@@ -73,13 +78,13 @@ public class AddNodeBottomSheetDialog extends BottomSheetDialogFragment {
             String name = nodeNameEditText.getText().toString();
             String user = usernameEditText.getText().toString();
             String pass = passwordEditText.getText().toString();
-            if(name.isEmpty()) {
+            if (name.isEmpty()) {
                 Toast.makeText(getContext(), "Enter node name", Toast.LENGTH_SHORT).show();
                 return;
-            } else if(nodeAddr.isEmpty() || portString.isEmpty()) {
+            } else if (nodeAddr.isEmpty() || portString.isEmpty()) {
                 Toast.makeText(getContext(), "Enter node address", Toast.LENGTH_SHORT).show();
                 return;
-            } else if(!user.isEmpty() && pass.isEmpty()) {
+            } else if (!user.isEmpty() && pass.isEmpty()) {
                 Toast.makeText(getContext(), "Enter password", Toast.LENGTH_SHORT).show();
                 return;
             }

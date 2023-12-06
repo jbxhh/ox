@@ -17,7 +17,12 @@ package net.mynero.wallet.data
 
 import java.util.regex.Pattern
 
-class Subaddress(private val accountIndex: Int, @JvmField val addressIndex: Int, @JvmField val address: String, val label: String) : Comparable<Subaddress> {
+class Subaddress(
+    private val accountIndex: Int,
+    @JvmField val addressIndex: Int,
+    @JvmField val address: String,
+    val label: String
+) : Comparable<Subaddress> {
     @JvmField
     var amount: Long = 0
 
@@ -29,10 +34,13 @@ class Subaddress(private val accountIndex: Int, @JvmField val addressIndex: Int,
     val squashedAddress: String
         get() = address.substring(0, 8) + "…" + address.substring(address.length - 8)
     val displayLabel: String
-        get() = if (label.isEmpty() || DEFAULT_LABEL_FORMATTER.matcher(label).matches()) "#$addressIndex" else label
+        get() = if (label.isEmpty() || DEFAULT_LABEL_FORMATTER.matcher(label)
+                .matches()
+        ) "#$addressIndex" else label
 
     companion object {
         @JvmField
-        val DEFAULT_LABEL_FORMATTER: Pattern = Pattern.compile("^[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}:[0-9]{2}$")
+        val DEFAULT_LABEL_FORMATTER: Pattern =
+            Pattern.compile("^[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}:[0-9]{2}$")
     }
 }

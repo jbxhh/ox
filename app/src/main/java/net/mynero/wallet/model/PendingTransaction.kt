@@ -18,6 +18,7 @@ package net.mynero.wallet.model
 class PendingTransaction internal constructor(var handle: Long) {
     val status: Status
         get() = Status.values()[getStatusJ()]
+
     external fun getStatusJ(): Int
     external fun getErrorString(): String?
 
@@ -29,6 +30,7 @@ class PendingTransaction internal constructor(var handle: Long) {
     external fun getFee(): Long
     val firstTxId: String
         get() = getFirstTxIdJ() ?: throw IndexOutOfBoundsException()
+
     external fun getFirstTxIdJ(): String?
     external fun getTxCount(): Long
 

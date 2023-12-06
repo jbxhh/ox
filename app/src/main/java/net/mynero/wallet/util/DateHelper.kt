@@ -22,6 +22,7 @@ import java.util.Date
 object DateHelper {
     @JvmField
     val DATETIME_FORMATTER = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+
     @Throws(ParseException::class)
     fun parse(dateString: String): Date {
         return DATETIME_FORMATTER.parse(dateString.replace("Z$".toRegex(), "+0000"))

@@ -19,10 +19,8 @@ import net.mynero.wallet.model.WalletManager;
 import net.mynero.wallet.service.AddressService;
 import net.mynero.wallet.util.Helper;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
 
 public class EditAddressLabelBottomSheetDialog extends BottomSheetDialogFragment {
@@ -47,18 +45,19 @@ public class EditAddressLabelBottomSheetDialog extends BottomSheetDialogFragment
         try {
             new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss", Locale.US).parse(wallet.getSubaddressLabel(addressIndex));
             isDate = true;
-        } catch (ParseException ignored) { }
+        } catch (ParseException ignored) {
+        }
 
         labelEditText.setText(isDate ? null : wallet.getSubaddressLabel(addressIndex));
         pasteButton.setOnClickListener(view1 -> labelEditText.setText(Helper.getClipBoardText(view.getContext())));
         saveLabelButton.setOnClickListener(view1 -> {
             String label = labelEditText.getText().toString();
-            if(addressService.getLatestAddressIndex() == addressIndex) {
+            if (addressService.getLatestAddressIndex() == addressIndex) {
                 addressService.freshSubaddress();
             }
             wallet.setSubaddressLabel(addressIndex, label);
             wallet.store();
-            if(listener != null) {
+            if (listener != null) {
                 listener.onDismiss();
             }
             dismiss();

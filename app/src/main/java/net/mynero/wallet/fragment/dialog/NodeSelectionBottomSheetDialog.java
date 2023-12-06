@@ -60,7 +60,9 @@ public class NodeSelectionBottomSheetDialog extends BottomSheetDialogFragment im
         JSONArray jsonArray = null;
         try {
             jsonArray = new JSONArray(nodesArray);
-        } catch (JSONException e) { throw new RuntimeException(e); }
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
 
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject nodeJsonObject = null;
@@ -122,7 +124,9 @@ public class NodeSelectionBottomSheetDialog extends BottomSheetDialogFragment im
 
     public interface NodeSelectionDialogListener {
         void onNodeSelected();
+
         void onClickedEditNode(Node node);
+
         void onClickedAddNode();
     }
 }

@@ -71,9 +71,10 @@ class SubaddressAdapter(val listener: SubaddressAdapterListener?) :
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder).
      */
-    class ViewHolder(view: View, val listener: SubaddressAdapterListener?) : RecyclerView.ViewHolder(
-        view
-    ) {
+    class ViewHolder(view: View, val listener: SubaddressAdapterListener?) :
+        RecyclerView.ViewHolder(
+            view
+        ) {
 
         fun bind(subaddress: Subaddress) {
             val addressTextView =

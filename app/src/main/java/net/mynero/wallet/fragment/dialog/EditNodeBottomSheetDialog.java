@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,18 +19,10 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import net.mynero.wallet.R;
 import net.mynero.wallet.data.Node;
-import net.mynero.wallet.service.PrefService;
-import net.mynero.wallet.util.Constants;
 import net.mynero.wallet.util.Helper;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
-import timber.log.Timber;
 
 public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
     public EditNodeListener listener = null;
@@ -54,23 +45,29 @@ public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
         EditText passwordEditText = view.findViewById(R.id.password_edittext);
         ImageButton pastePasswordImageButton = view.findViewById(R.id.paste_password_imagebutton);
 
-        if(node == null) return;
+        if (node == null) return;
         addressEditText.setText(node.getHost());
-        portEditText.setText(""+node.getRpcPort());
+        portEditText.setText("" + node.getRpcPort());
         nodeNameEditText.setText(node.getName());
         usernameEditText.setText(node.getUsername());
-        if(!node.getPassword().isEmpty()) {
+        if (!node.getPassword().isEmpty()) {
             passwordEditText.setText(node.getPassword());
             passwordEditText.setVisibility(View.VISIBLE);
             pastePasswordImageButton.setVisibility(View.VISIBLE);
         }
 
         usernameEditText.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-            @Override public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
             @Override
             public void afterTextChanged(Editable editable) {
-                if(editable.toString().isEmpty()) {
+                if (editable.toString().isEmpty()) {
                     passwordEditText.setText(null);
                     passwordEditText.setVisibility(View.GONE);
                     pastePasswordImageButton.setVisibility(View.GONE);
@@ -96,13 +93,13 @@ public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
             String user = usernameEditText.getText().toString();
             String pass = passwordEditText.getText().toString();
 
-            if(nodeName.isEmpty()) {
+            if (nodeName.isEmpty()) {
                 Toast.makeText(getContext(), "Enter node name", Toast.LENGTH_SHORT).show();
                 return;
-            } else if(nodeAddr.isEmpty() || portString.isEmpty()) {
+            } else if (nodeAddr.isEmpty() || portString.isEmpty()) {
                 Toast.makeText(getContext(), "Enter node address", Toast.LENGTH_SHORT).show();
                 return;
-            } else if(!user.isEmpty() && pass.isEmpty()) {
+            } else if (!user.isEmpty() && pass.isEmpty()) {
                 Toast.makeText(getContext(), "Enter password", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -141,6 +138,7 @@ public class EditNodeBottomSheetDialog extends BottomSheetDialogFragment {
 
     public interface EditNodeListener {
         void onNodeDeleted(Node node);
+
         void onNodeEdited(Node oldNode, Node newNode);
     }
 }

@@ -21,6 +21,7 @@ import android.os.Parcelable.Creator
 
 class Transfer : Parcelable {
     var amount: Long
+
     @JvmField
     var address: String?
 

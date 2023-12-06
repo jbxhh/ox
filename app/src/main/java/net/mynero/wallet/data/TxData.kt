@@ -41,11 +41,13 @@ class TxData : Parcelable {
         preferredInputs = txData.preferredInputs
     }
 
-    constructor(dstAddr: String?,
-                amount: Long,
-                mixin: Int,
-                priority: PendingTransaction.Priority?,
-                preferredInputs: ArrayList<String>?) {
+    constructor(
+        dstAddr: String?,
+        amount: Long,
+        mixin: Int,
+        priority: PendingTransaction.Priority?,
+        preferredInputs: ArrayList<String>?
+    ) {
         destinationAddress = dstAddr
         this.amount = amount
         this.mixin = mixin

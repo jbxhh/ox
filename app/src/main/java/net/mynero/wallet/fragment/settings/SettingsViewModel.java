@@ -5,7 +5,6 @@ import android.util.Patterns;
 import androidx.lifecycle.ViewModel;
 
 import net.mynero.wallet.MoneroApplication;
-import net.mynero.wallet.data.DefaultNodes;
 import net.mynero.wallet.data.Node;
 import net.mynero.wallet.model.WalletManager;
 import net.mynero.wallet.service.PrefService;

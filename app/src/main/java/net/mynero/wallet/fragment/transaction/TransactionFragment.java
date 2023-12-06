@@ -92,16 +92,16 @@ public class TransactionFragment extends Fragment {
 
         HistoryService.getInstance().history.observe(getViewLifecycleOwner(), transactionInfos -> {
             TransactionInfo newTransactionInfo = findNewestVersionOfTransaction(this.transactionInfo, transactionInfos);
-            if(newTransactionInfo == null) return;
+            if (newTransactionInfo == null) return;
 
             txHashTextView.setText(newTransactionInfo.hash);
             txConfTextView.setText("" + newTransactionInfo.confirmations);
             txDateTextView.setText(getDateTime(newTransactionInfo.timestamp));
-            if(newTransactionInfo.confirmations > 1) {
+            if (newTransactionInfo.confirmations > 1) {
                 confLabel2.setText(getString(R.string.transaction_conf_desc2_confirmed));
                 blockHeightTextView.setText("" + newTransactionInfo.blockheight);
                 blockHeightTextView.setVisibility(View.VISIBLE);
-            } else if(newTransactionInfo.confirmations == 1) {
+            } else if (newTransactionInfo.confirmations == 1) {
                 confLabel2.setText(getString(R.string.transaction_conf_1_desc2_confirmed));
                 blockHeightTextView.setText("" + newTransactionInfo.blockheight);
                 blockHeightTextView.setVisibility(View.VISIBLE);
@@ -111,7 +111,7 @@ public class TransactionFragment extends Fragment {
             }
 
             Context ctx = getContext();
-            if(ctx != null) {
+            if (ctx != null) {
                 boolean streetModeEnabled = PrefService.getInstance().getBoolean(Constants.PREF_STREET_MODE, false);
                 String balanceString = streetModeEnabled ? Constants.STREET_MODE_BALANCE : Helper.getDisplayAmount(newTransactionInfo.amount, 12);
                 if (newTransactionInfo.direction == TransactionInfo.Direction.Direction_In) {
@@ -147,8 +147,8 @@ public class TransactionFragment extends Fragment {
     }
 
     private TransactionInfo findNewestVersionOfTransaction(TransactionInfo oldTransactionInfo, List<TransactionInfo> transactionInfoList) {
-        for(TransactionInfo transactionInfo : transactionInfoList) {
-            if(transactionInfo.hash.equals(oldTransactionInfo.hash)) {
+        for (TransactionInfo transactionInfo : transactionInfoList) {
+            if (transactionInfo.hash.equals(oldTransactionInfo.hash)) {
                 this.transactionInfo = transactionInfo;
                 return this.transactionInfo;
             }

@@ -8,7 +8,6 @@ import net.mynero.wallet.data.DefaultNodes;
 import net.mynero.wallet.data.Node;
 import net.mynero.wallet.util.Constants;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -22,6 +21,10 @@ public class PrefService extends ServiceBase {
         instance = this;
     }
 
+    public static PrefService getInstance() {
+        return instance;
+    }
+
     public SharedPreferences.Editor edit() {
         return preferences.edit();
     }
@@ -29,11 +32,11 @@ public class PrefService extends ServiceBase {
     public Node getNode() {
         boolean usesProxy = getBoolean(Constants.PREF_USES_TOR, false);
         DefaultNodes defaultNode = DefaultNodes.SAMOURAI;
-        if(usesProxy) {
+        if (usesProxy) {
             String proxyPort = getProxyPort();
             if (!proxyPort.isEmpty()) {
                 int port = Integer.parseInt(proxyPort);
-                if(port == 4447) {
+                if (port == 4447) {
                     defaultNode = DefaultNodes.MYNERO_I2P;
                 } else {
                     defaultNode = DefaultNodes.MYNERO_ONION;
@@ -51,9 +54,9 @@ public class PrefService extends ServiceBase {
     }
 
     private Node upgradeOldNode(String nodeString) {
-        if(!nodeString.isEmpty()) {
+        if (!nodeString.isEmpty()) {
             Node node = Node.fromString(nodeString);
-            if(node != null) {
+            if (node != null) {
                 edit().putString(Constants.PREF_NODE_2, node.toJson().toString()).apply();
                 return node;
             }
@@ -88,7 +91,7 @@ public class PrefService extends ServiceBase {
 
     public String getString(String key, String defaultValue) {
         String value = preferences.getString(key, "");
-        if(value.isEmpty() && !defaultValue.isEmpty()) {
+        if (value.isEmpty() && !defaultValue.isEmpty()) {
             edit().putString(key, defaultValue).apply();
             return defaultValue;
         }
@@ -98,14 +101,10 @@ public class PrefService extends ServiceBase {
     public boolean getBoolean(String key, boolean defaultValue) {
         boolean containsKey = preferences.contains(key);
         boolean value = preferences.getBoolean(key, false);
-        if(!value && defaultValue && !containsKey) {
+        if (!value && defaultValue && !containsKey) {
             edit().putBoolean(key, true).apply();
             return true;
         }
         return value;
-    }
-
-    public static PrefService getInstance() {
-        return instance;
     }
 }

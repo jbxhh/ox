@@ -33,6 +33,7 @@ class CoinsInfoAdapter(val listener: CoinsInfoAdapterListener?) :
     RecyclerView.Adapter<CoinsInfoAdapter.ViewHolder>() {
     private var localDataSet // <public-key, coinsinfo>
             : List<CoinsInfo>
+
     @JvmField
     val selectedUtxos // <public-key, coinsinfo>
             : HashMap<String?, CoinsInfo>

@@ -27,9 +27,7 @@ import net.mynero.wallet.R;
 import net.mynero.wallet.adapter.SubaddressAdapter;
 import net.mynero.wallet.data.Subaddress;
 import net.mynero.wallet.fragment.dialog.EditAddressLabelBottomSheetDialog;
-import net.mynero.wallet.util.DayNightMode;
 import net.mynero.wallet.util.Helper;
-import net.mynero.wallet.util.NightmodeHelper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;

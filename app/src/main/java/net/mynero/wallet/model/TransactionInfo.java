@@ -170,10 +170,6 @@ public class TransactionInfo implements Parcelable, Comparable<TransactionInfo> 
             this.value = value;
         }
 
-        public int getValue() {
-            return value;
-        }
-
         public static Direction fromInteger(int n) {
             switch (n) {
                 case 0:
@@ -182,6 +178,10 @@ public class TransactionInfo implements Parcelable, Comparable<TransactionInfo> 
                     return Direction_Out;
             }
             return null;
+        }
+
+        public int getValue() {
+            return value;
         }
     }
 }

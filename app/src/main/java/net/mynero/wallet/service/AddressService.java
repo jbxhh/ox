@@ -1,15 +1,11 @@
 package net.mynero.wallet.service;
 
-import net.mynero.wallet.MoneroApplication;
 import net.mynero.wallet.data.Subaddress;
-import net.mynero.wallet.model.TransactionInfo;
 import net.mynero.wallet.model.Wallet;
 import net.mynero.wallet.model.WalletManager;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 public class AddressService extends ServiceBase {

@@ -38,7 +38,7 @@ public class WalletKeysBottomSheetDialog extends BottomSheetDialogFragment {
         Wallet wallet = WalletManager.getInstance().getWallet();
         String seed = wallet.getSeed("");
         boolean usesOffset = PrefService.getInstance().getBoolean(Constants.PREF_USES_OFFSET, false);
-        if(usesOffset) {
+        if (usesOffset) {
             seed = wallet.getSeed(password);
             view.findViewById(R.id.wallet_seed_offset_textview).setVisibility(View.VISIBLE);
         }
@@ -46,7 +46,7 @@ public class WalletKeysBottomSheetDialog extends BottomSheetDialogFragment {
 
         informationTextView.setText(seed);
         viewKeyTextView.setText(privateViewKey);
-        restoreHeightTextView.setText(wallet.getRestoreHeight()+"");
+        restoreHeightTextView.setText(wallet.getRestoreHeight() + "");
 
         copyViewKeyImageButton.setOnClickListener(view1 -> Helper.clipBoardCopy(getContext(), "private view-key", privateViewKey));
     }

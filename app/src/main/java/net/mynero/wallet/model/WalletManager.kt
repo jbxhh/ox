@@ -245,7 +245,8 @@ class WalletManager {
     fun findWallets(path: File): List<WalletInfo> {
         val wallets: MutableList<WalletInfo> = ArrayList()
         Timber.d("Scanning: %s", path.absolutePath)
-        val found = path.listFiles { dir, filename -> filename.endsWith(".keys") } ?: return emptyList()
+        val found =
+            path.listFiles { dir, filename -> filename.endsWith(".keys") } ?: return emptyList()
         for (i in found.indices) {
             val filename = found[i].name
             val f = File(
@@ -354,16 +355,22 @@ class WalletManager {
 
         @JvmStatic
         external fun initLogger(argv0: String?, defaultLogBaseName: String?)
+
         @JvmStatic
         external fun setLogLevel(level: Int)
+
         @JvmStatic
         external fun logDebug(category: String?, message: String?)
+
         @JvmStatic
         external fun logInfo(category: String?, message: String?)
+
         @JvmStatic
         external fun logWarning(category: String?, message: String?)
+
         @JvmStatic
         external fun logError(category: String?, message: String?)
+
         @JvmStatic
         external fun moneroVersion(): String?
     }

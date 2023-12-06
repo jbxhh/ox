@@ -45,7 +45,6 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
 import java.math.BigDecimal
-import java.math.BigInteger
 import java.net.MalformedURLException
 import java.net.SocketTimeoutException
 import java.net.URL
@@ -63,6 +62,7 @@ object Helper {
     private const val MONERO_DIR = "monero"
     private val HexArray = "0123456789ABCDEF".toCharArray()
     var ALLOW_SHIFT = false
+
     @JvmField
     var DISPLAY_DIGITS_INFO = 5
     private var ShakeAnimation: Animation? = null
