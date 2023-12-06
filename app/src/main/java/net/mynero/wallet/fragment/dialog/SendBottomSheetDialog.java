@@ -46,7 +46,7 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
     private final MutableLiveData<PendingTransaction> _pendingTransaction = new MutableLiveData<>(null);
     public ArrayList<String> selectedUtxos = new ArrayList<>();
     public LiveData<Boolean> sendingMax = _sendingMax;
-    private final ActivityResultLauncher<String> cameraPermissionsLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
+    public LiveData<PendingTransaction> pendingTransaction = _pendingTransaction;    private final ActivityResultLauncher<String> cameraPermissionsLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
             granted -> {
                 if (granted) {
                     onScan();
@@ -54,7 +54,6 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
                     Toast.makeText(getActivity(), getString(R.string.no_camera_permission), Toast.LENGTH_SHORT).show();
                 }
             });
-    public LiveData<PendingTransaction> pendingTransaction = _pendingTransaction;
     public UriData uriData = null;
     public boolean isChurning = false;
     public Listener listener = null;
@@ -123,7 +122,7 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
 
             String valueString = Wallet.getDisplayAmount(selectedValue);
             selectedUtxosValueTextView.setVisibility(View.VISIBLE);
-            if(isChurning) {
+            if (isChurning) {
                 _sendingMax.postValue(true);
                 sendMaxButton.setEnabled(false);
                 selectedUtxosValueTextView.setText(getResources().getString(R.string.selected_utxos_value_churning, valueString));
@@ -141,7 +140,7 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
     private void bindObservers() {
         BalanceService.getInstance().balanceInfo.observe(getViewLifecycleOwner(), balanceInfo -> {
             createButton.setEnabled(balanceInfo.getRawUnlocked() != 0);
-            if(!isChurning) {
+            if (!isChurning) {
                 sendMaxButton.setEnabled(balanceInfo.getRawUnlocked() != 0);
             }
         });
@@ -206,7 +205,7 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
 
         createButton.setOnClickListener(view1 -> {
             FragmentActivity activity = getActivity();
-            if(activity != null) {
+            if (activity != null) {
                 boolean sendAll = sendingMax.getValue() != null ? sendingMax.getValue() : false;
                 String address = addressEditText.getText().toString().trim();
                 String amount = amountEditText.getText().toString().trim();
@@ -274,7 +273,7 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
     private void createTx(String address, String amount, boolean sendAll, PendingTransaction.Priority feePriority) {
         Activity activity = getActivity();
         if (activity != null) {
-            ((MoneroApplication)activity.getApplication()).getExecutor().execute(() -> {
+            ((MoneroApplication) activity.getApplication()).getExecutor().execute(() -> {
                 try {
                     PendingTransaction pendingTx = TxService.getInstance().createTx(address, amount, sendAll, feePriority, selectedUtxos);
                     if (pendingTx != null && pendingTx.getStatus() == PendingTransaction.Status.Status_Ok) {
@@ -282,7 +281,7 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
                     } else {
                         activity.runOnUiThread(() -> {
                             createButton.setEnabled(true);
-                            if(pendingTx != null) {
+                            if (pendingTx != null) {
                                 Toast.makeText(activity, getString(R.string.error_creating_tx, pendingTx.getErrorString()), Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -350,4 +349,6 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
     public interface Listener {
         void onSentTransaction();
     }
+
+
 }

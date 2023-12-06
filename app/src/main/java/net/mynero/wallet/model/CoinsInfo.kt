@@ -23,18 +23,24 @@ class CoinsInfo : Parcelable, Comparable<CoinsInfo> {
     @JvmField
     var globalOutputIndex: Long
     var isSpent = false
+
     @JvmField
     var keyImage: String? = null
+
     @JvmField
     var amount: Long = 0
+
     @JvmField
     var hash: String? = null
+
     @JvmField
     var pubKey: String? = null
     var isUnlocked = false
+
     @JvmField
     var localOutputIndex: Long = 0
     var isFrozen = false
+
     @JvmField
     var address: String? = null
 
@@ -89,7 +95,7 @@ class CoinsInfo : Parcelable, Comparable<CoinsInfo> {
     companion object {
         @JvmField
         val CREATOR: Creator<CoinsInfo?> = object : Creator<CoinsInfo?> {
-            override fun createFromParcel(`in`: Parcel): CoinsInfo? {
+            override fun createFromParcel(`in`: Parcel): CoinsInfo {
                 return CoinsInfo(`in`)
             }
 

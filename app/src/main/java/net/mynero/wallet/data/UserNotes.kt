@@ -19,15 +19,20 @@ import java.util.regex.Pattern
 
 class UserNotes(txNotes: String?) {
     var txNotes: String? = ""
+
     @JvmField
     var note: String? = ""
+
     @JvmField
     var xmrtoTag: String? = null
+
     @JvmField
     var xmrtoKey: String? = null
+
     @JvmField
     var xmrtoAmount: String? = null // could be a double - but we are not doing any calculations
     var xmrtoCurrency: String? = null
+
     @JvmField
     var xmrtoDestination: String? = null
 

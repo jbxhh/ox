@@ -120,7 +120,7 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
 
     private void refresh(boolean walletSynced) {
         wallet.refreshHistory();
-        if(walletSynced) {
+        if (walletSynced) {
             wallet.refreshCoins();
         }
         listener.onRefresh(walletSynced);
@@ -136,7 +136,7 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
         long totalAmount = 0;
         ArrayList<TransactionOutput> outputs = new ArrayList<>();
 
-        for(Pair<String, String> dest : dests) {
+        for (Pair<String, String> dest : dests) {
             long amount = Wallet.getAmountFromString(dest.component2());
             totalAmount += amount;
             outputs.add(new TransactionOutput(dest.component1(), amount));
@@ -150,7 +150,7 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
             checkSelectedAmounts(preferredInputs, totalAmount, sendAll);
         }
 
-        if(sendAll) {
+        if (sendAll) {
             Pair<String, String> dest = dests.get(0);
             String address = dest.component1();
             return wallet.createSweepTransaction(address, feePriority, preferredInputs);
@@ -165,7 +165,7 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
         String paymentId = Wallet.getPaymentIdFromAddress(mainDestination.destination, WalletManager.getInstance().networkType.value);
         ArrayList<TransactionOutput> newOutputs = new ArrayList<>(outputs);
         boolean donatePerTx = PrefService.getInstance().getBoolean(Constants.PREF_DONATE_PER_TX, false);
-        if(donatePerTx && paymentId.isEmpty()) { // only attach donation when no payment id is needed (i.e. integrated address)
+        if (donatePerTx && paymentId.isEmpty()) { // only attach donation when no payment id is needed (i.e. integrated address)
             SecureRandom rand = new SecureRandom();
             float randomDonatePct = getRandomDonateAmount(0.005f, 0.015f); // occasionally attaches a 0.5% to 1.5% donation. It is random so that not even I know how much exactly you are sending.
             /*
@@ -173,14 +173,14 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
             it will periodically split it up into multiple outputs instead of one.
              */
             int attachDonationRoll = rand.nextInt(100);
-            if(attachDonationRoll > 90) { // 10% chance of being added
+            if (attachDonationRoll > 90) { // 10% chance of being added
                 int splitDonationRoll = rand.nextInt(100);
-                long donateAmount = (long) (amount*randomDonatePct);
-                if(splitDonationRoll > 50) { // 50% chance of being split
+                long donateAmount = (long) (amount * randomDonatePct);
+                if (splitDonationRoll > 50) { // 50% chance of being split
                     // split
                     int split = genRandomDonationSplit(1, 4); // splits into at most 4 outputs, for a total of 6 outputs in the transaction (real dest + change. we don't add donations to send-all/sweep transactions)
                     long splitAmount = donateAmount / split;
-                    for(int i = 0; i < split; i++) {
+                    for (int i = 0; i < split; i++) {
                         // TODO this can be expanded upon into the future to perform an auto-splitting/auto-churning for the user if their wallet is fresh and has few utxos.
                         // randomly split between multiple wallets
                         int randomDonationAddress = rand.nextInt(Constants.DONATION_ADDRESSES.length);
@@ -232,6 +232,7 @@ public class MoneroHandlerThread extends Thread implements WalletListener {
 
     public interface Listener {
         void onRefresh(boolean walletSynced);
+
         void onConnectionFail();
     }
 }

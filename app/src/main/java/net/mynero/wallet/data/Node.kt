@@ -51,8 +51,10 @@ class Node {
                 this.username = ""
                 this.password = ""
             }
+
             2 -> { // credentials
-                val userPassword = a[0].split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                val userPassword =
+                    a[0].split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                 require(userPassword.size == 2) { "User:Password invalid" }
                 this.username = userPassword[0]
                 this.password = if (this.username.isNotEmpty()) {
@@ -62,11 +64,13 @@ class Node {
                 }
                 daemonAddress = a[1]
             }
+
             else -> {
                 throw IllegalArgumentException("Too many @")
             }
         }
-        val daParts = daemonAddress.split("/".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        val daParts =
+            daemonAddress.split("/".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         require(!(daParts.size > 3 || daParts.isEmpty())) { "Too many '/' or too few" }
         daemonAddress = daParts[0]
         val da = daemonAddress.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
@@ -240,6 +244,7 @@ class Node {
         const val TESTNET = "testnet"
         private var DEFAULT_LEVIN_PORT = 0
         private var DEFAULT_RPC_PORT = 0
+
         @JvmStatic
         fun fromString(nodeString: String?): Node? {
             return try {

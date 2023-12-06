@@ -5,9 +5,6 @@ import androidx.lifecycle.MutableLiveData;
 
 import net.mynero.wallet.model.BalanceInfo;
 import net.mynero.wallet.model.CoinsInfo;
-import net.mynero.wallet.model.Wallet;
-import net.mynero.wallet.model.WalletManager;
-import net.mynero.wallet.util.Constants;
 
 public class BalanceService extends ServiceBase {
     public static BalanceService instance = null;
@@ -31,8 +28,8 @@ public class BalanceService extends ServiceBase {
 
     public long getUnlockedBalanceRaw() {
         long unlocked = 0;
-        for(CoinsInfo coinsInfo : UTXOService.getInstance().getUtxos()) {
-            if(!coinsInfo.isSpent() && !coinsInfo.isFrozen() && coinsInfo.isUnlocked() && !UTXOService.getInstance().isCoinFrozen(coinsInfo)) {
+        for (CoinsInfo coinsInfo : UTXOService.getInstance().getUtxos()) {
+            if (!coinsInfo.isSpent() && !coinsInfo.isFrozen() && coinsInfo.isUnlocked() && !UTXOService.getInstance().isCoinFrozen(coinsInfo)) {
                 unlocked += coinsInfo.amount;
             }
         }
@@ -41,8 +38,8 @@ public class BalanceService extends ServiceBase {
 
     public long getTotalBalanceRaw() {
         long total = 0;
-        for(CoinsInfo coinsInfo : UTXOService.getInstance().getUtxos()) {
-            if(!coinsInfo.isSpent() && !coinsInfo.isFrozen() && !UTXOService.getInstance().isCoinFrozen(coinsInfo)) {
+        for (CoinsInfo coinsInfo : UTXOService.getInstance().getUtxos()) {
+            if (!coinsInfo.isSpent() && !coinsInfo.isFrozen() && !UTXOService.getInstance().isCoinFrozen(coinsInfo)) {
                 total += coinsInfo.amount;
             }
         }

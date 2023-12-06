@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -24,7 +23,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import net.mynero.wallet.MainActivity;
 import net.mynero.wallet.R;
 import net.mynero.wallet.adapter.TransactionInfoAdapter;
-import net.mynero.wallet.fragment.dialog.SendBottomSheetDialog;
 import net.mynero.wallet.model.TransactionInfo;
 import net.mynero.wallet.model.Wallet;
 import net.mynero.wallet.model.WalletManager;
@@ -91,7 +89,7 @@ public class HomeFragment extends Fragment implements TransactionInfoAdapter.TxI
 
         if (balanceService != null) {
             balanceService.balanceInfo.observe(getViewLifecycleOwner(), balanceInfo -> {
-                if(balanceInfo != null) {
+                if (balanceInfo != null) {
                     unlockedBalanceTextView.setText(balanceInfo.getUnlockedDisplay());
 
                     if (balanceInfo.getLockedDisplay().equals(Constants.STREET_MODE_BALANCE) || balanceInfo.isLockedBalanceZero()) {
@@ -140,7 +138,7 @@ public class HomeFragment extends Fragment implements TransactionInfoAdapter.TxI
                     // DISPLAYING EMPTY WALLET HISTORY
                     Wallet wallet = WalletManager.getInstance().getWallet();
                     int textResId, botImgResId = 0;
-                    if(wallet != null && wallet.isSynchronized()) {
+                    if (wallet != null && wallet.isSynchronized()) {
                         textResId = R.string.no_history_nget_some_monero_in_here;
                         botImgResId = R.drawable.xmrchan_empty; // img for synchronized
                     } else {
@@ -189,7 +187,7 @@ public class HomeFragment extends Fragment implements TransactionInfoAdapter.TxI
         ImageView botImageView = view.findViewById(R.id.monerochan_imageview);
         view.findViewById(R.id.no_history_layout).setVisibility(display ? View.VISIBLE : View.GONE);
         boolean displayMonerochan = PrefService.getInstance().getBoolean(Constants.PREF_MONEROCHAN, true);
-        if(displayMonerochan) {
+        if (displayMonerochan) {
             botImageView.setVisibility(View.VISIBLE);
             mnrjTextView.setVisibility(View.VISIBLE);
             textView.setVisibility(View.GONE);

@@ -85,6 +85,7 @@ class Wallet {
         }
 
     private external fun statusWithErrorString(): Status
+
     @Synchronized
     external fun setPassword(password: String?): Boolean
     val address: String
@@ -126,6 +127,7 @@ class Wallet {
         subaddress.amount = amount
         return subaddress
     }
+
     external fun getPath(): String?
     val networkType: NetworkType?
         get() = fromInteger(nettype())
@@ -217,6 +219,7 @@ class Wallet {
     external fun getBalanceAll(): Long
     val unlockedBalance: Long
         get() = getUnlockedBalance(accountIndex)
+
     external fun getUnlockedBalanceAll(): Long
 
     external fun getUnlockedBalance(accountIndex: Int): Long
@@ -349,6 +352,7 @@ class Wallet {
     external fun setUserNote(txid: String?, note: String?): Boolean
     external fun getUserNote(txid: String?): String?
     external fun getTxKey(txid: String?): String?
+
     @JvmOverloads
     external fun addAccount(label: String? = NEW_ACCOUNT_NAME)
     var accountLabel: String?
@@ -428,6 +432,7 @@ class Wallet {
 
     class Status internal constructor(status: Int, @JvmField val errorString: String) {
         val status: StatusEnum
+
         @JvmField
         var connectionStatus: ConnectionStatus? = null // optional
 
@@ -454,22 +459,30 @@ class Wallet {
 
         @JvmStatic
         external fun getDisplayAmount(amount: Long): String
+
         @JvmStatic
         external fun getAmountFromString(amount: String?): Long
+
         @JvmStatic
         external fun getAmountFromDouble(amount: Double): Long
+
         @JvmStatic
         external fun generatePaymentId(): String
+
         @JvmStatic
         external fun isPaymentIdValid(payment_id: String): Boolean
+
         @JvmStatic
         fun isAddressValid(address: String): Boolean {
             return instance?.networkType?.value?.let { isAddressValid(address, it) } == true
         }
+
         @JvmStatic
         external fun isAddressValid(address: String?, networkType: Int): Boolean
+
         @JvmStatic
         external fun getPaymentIdFromAddress(address: String?, networkType: Int): String?
+
         @JvmStatic
         external fun getMaximumAllowedAmount(): Long
     }

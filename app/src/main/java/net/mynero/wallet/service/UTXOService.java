@@ -21,9 +21,9 @@ import java.util.List;
 
 public class UTXOService extends ServiceBase {
     public static UTXOService instance = null;
-    private List<CoinsInfo> internalCachedUtxos = new ArrayList<>();
     private final MutableLiveData<List<CoinsInfo>> _utxos = new MutableLiveData<>();
     public LiveData<List<CoinsInfo>> utxos = _utxos;
+    private List<CoinsInfo> internalCachedUtxos = new ArrayList<>();
     private ArrayList<String> frozenCoins = new ArrayList<>();
 
     public UTXOService(MoneroHandlerThread thread) {
@@ -56,8 +56,8 @@ public class UTXOService extends ServiceBase {
 
     public void toggleFrozen(HashMap<String, CoinsInfo> selectedCoins) {
         ArrayList<String> frozenCoinsCopy = new ArrayList<>(frozenCoins);
-        for(CoinsInfo coin : selectedCoins.values()) {
-            if(frozenCoinsCopy.contains(coin.pubKey)) {
+        for (CoinsInfo coin : selectedCoins.values()) {
+            if (frozenCoinsCopy.contains(coin.pubKey)) {
                 frozenCoinsCopy.remove(coin.pubKey);
             } else {
                 frozenCoinsCopy.add(coin.pubKey);
@@ -77,7 +77,7 @@ public class UTXOService extends ServiceBase {
         PrefService prefService = PrefService.getInstance();
         String frozenCoinsArrayString = prefService.getString(Constants.PREF_FROZEN_COINS, "[]");
         JSONArray frozenCoinsArray = new JSONArray(frozenCoinsArrayString);
-        for(int i = 0; i < frozenCoinsArray.length(); i++) {
+        for (int i = 0; i < frozenCoinsArray.length(); i++) {
             String pubKey = frozenCoinsArray.getString(i);
             frozenCoins.add(pubKey);
         }
@@ -88,7 +88,7 @@ public class UTXOService extends ServiceBase {
         PrefService prefService = PrefService.getInstance();
         JSONArray jsonArray = new JSONArray();
         ArrayList<String> frozenCoinsCopy = new ArrayList<>(frozenCoins);
-        for(String pubKey : frozenCoinsCopy) {
+        for (String pubKey : frozenCoinsCopy) {
             jsonArray.put(pubKey);
         }
         prefService.edit().putString(Constants.PREF_FROZEN_COINS, jsonArray.toString()).apply();
