@@ -19,7 +19,7 @@ import java.util.regex.Pattern
 
 class Subaddress(
     private val accountIndex: Int,
-    @JvmField val addressIndex: Int,
+    val addressIndex: Int,
     @JvmField val address: String,
     val label: String
 ) : Comparable<Subaddress> {
