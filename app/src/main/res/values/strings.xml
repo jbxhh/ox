@@ -127,7 +127,7 @@
     <string name="edit_node">Edit Node</string>
     <string name="wallet_seed_label">Recovery phrase</string>
     <string name="wallet_seed_desc">Anyone with your recovery phrase can spend ALL coins in this wallet!</string>
-    <string name="wallet_seed_offset_desc">Your wallet seed offset (sometimes called a seed passphrase) is the passphrase you use to open the wallet. It will not be displayed here, but it is needed to FULLY restore the keys to this wallet.</string>
+    <string name="wallet_seed_offset_desc">Your wallet seed offset (sometimes called a seed passphrase) is the passphrase you use to unlock the wallet in this app. It will not be displayed here, but it is needed to FULLY restore the keys to this wallet.</string>
     <string name="wallet_viewkey_label">Private view-key</string>
     <string name="wallet_viewkey_desc">Anyone with your private view-key can see all incoming transactions!</string>
     <string name="wallet_restore_height_label">Restore height</string>
