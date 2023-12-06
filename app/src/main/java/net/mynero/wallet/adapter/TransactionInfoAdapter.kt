@@ -13,164 +13,149 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package net.mynero.wallet.adapter
 
-package net.mynero.wallet.adapter;
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.progressindicator.CircularProgressIndicator
+import net.mynero.wallet.R
+import net.mynero.wallet.model.TransactionInfo
+import net.mynero.wallet.service.PrefService
+import net.mynero.wallet.util.Constants
+import net.mynero.wallet.util.DateHelper.DATETIME_FORMATTER
+import net.mynero.wallet.util.Helper
+import net.mynero.wallet.util.Helper.getDisplayAmount
+import net.mynero.wallet.util.ThemeHelper.getThemedColor
+import java.util.Calendar
+import java.util.Date
 
-import static net.mynero.wallet.util.DateHelper.DATETIME_FORMATTER;
-
-import android.text.Html;
-import android.text.Spanned;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.progressindicator.CircularProgressIndicator;
-
-import net.mynero.wallet.R;
-import net.mynero.wallet.model.TransactionInfo;
-import net.mynero.wallet.service.PrefService;
-import net.mynero.wallet.util.Constants;
-import net.mynero.wallet.util.Helper;
-import net.mynero.wallet.util.ThemeHelper;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
-
-public class TransactionInfoAdapter extends RecyclerView.Adapter<TransactionInfoAdapter.ViewHolder> {
-
-    private List<TransactionInfo> localDataSet;
-    private TxInfoAdapterListener listener = null;
+class TransactionInfoAdapter(val listener: TxInfoAdapterListener?) :
+    RecyclerView.Adapter<TransactionInfoAdapter.ViewHolder>() {
+    private var localDataSet: List<TransactionInfo>
 
     /**
      * Initialize the dataset of the Adapter.
      */
-    public TransactionInfoAdapter(TxInfoAdapterListener listener) {
-        this.listener = listener;
-        this.localDataSet = new ArrayList<>();
+    init {
+        localDataSet = ArrayList()
     }
 
-    public void submitList(List<TransactionInfo> dataSet) {
-        this.localDataSet = dataSet;
-        notifyDataSetChanged();
+    fun submitList(dataSet: List<TransactionInfo>) {
+        localDataSet = dataSet
+        notifyDataSetChanged()
     }
 
     // Create new views (invoked by the layout manager)
-    @Override
-    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         // Create a new view, which defines the UI of the list item
-        View view = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.transaction_history_item, viewGroup, false);
-
-        return new ViewHolder(listener, view);
+        val view = LayoutInflater.from(viewGroup.context)
+            .inflate(R.layout.transaction_history_item, viewGroup, false)
+        return ViewHolder(listener, view)
     }
 
     // Replace the contents of a view (invoked by the layout manager)
-    @Override
-    public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-        TransactionInfo tx = localDataSet.get(position);
-        viewHolder.bind(tx);
+    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+        val tx = localDataSet[position]
+        viewHolder.bind(tx)
     }
 
     // Return the size of your dataset (invoked by the layout manager)
-    @Override
-    public int getItemCount() {
-        return localDataSet.size();
+    override fun getItemCount(): Int {
+        return localDataSet.size
     }
 
-    public interface TxInfoAdapterListener {
-        void onClickTransaction(TransactionInfo txInfo);
+    interface TxInfoAdapterListener {
+        fun onClickTransaction(txInfo: TransactionInfo?)
     }
 
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder).
      */
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final int outboundColour;
-        private final int inboundColour;
-        private final int pendingColour;
-        private final int failedColour;
-        private TxInfoAdapterListener listener = null;
-        private TextView amountTextView = null;
+    class ViewHolder(val listener: TxInfoAdapterListener?, view: View) : RecyclerView.ViewHolder(view) {
+        private val outboundColour: Int
+        private val inboundColour: Int
+        private val pendingColour: Int
+        private val failedColour: Int
+        private var amountTextView: TextView? = null
 
-        public ViewHolder(TxInfoAdapterListener listener, View view) {
-            super(view);
-            inboundColour = ThemeHelper.getThemedColor(view.getContext(), R.attr.positiveColor);
-            outboundColour = ThemeHelper.getThemedColor(view.getContext(), R.attr.negativeColor);
-            pendingColour = ThemeHelper.getThemedColor(view.getContext(), R.attr.neutralColor);
-            failedColour = ThemeHelper.getThemedColor(view.getContext(), R.attr.neutralColor);
-            this.listener = listener;
-            Calendar cal = Calendar.getInstance();
-            TimeZone tz = cal.getTimeZone(); //get the local time zone.
-            DATETIME_FORMATTER.setTimeZone(tz);
+        init {
+            inboundColour = getThemedColor(view.context, R.attr.positiveColor)
+            outboundColour = getThemedColor(view.context, R.attr.negativeColor)
+            pendingColour = getThemedColor(view.context, R.attr.neutralColor)
+            failedColour = getThemedColor(view.context, R.attr.neutralColor)
+            val cal = Calendar.getInstance()
+            val tz = cal.timeZone //get the local time zone.
+            DATETIME_FORMATTER.timeZone = tz
         }
 
-        public void bind(TransactionInfo txInfo) {
-            boolean streetModeEnabled = PrefService.getInstance().getBoolean(Constants.PREF_STREET_MODE, false);
-            String displayAmount = streetModeEnabled ? Constants.STREET_MODE_BALANCE : Helper.getDisplayAmount(txInfo.amount, Helper.DISPLAY_DIGITS_INFO);
-            TextView confirmationsTextView = itemView.findViewById(R.id.tvConfirmations);
-            CircularProgressIndicator confirmationsProgressBar = itemView.findViewById(R.id.pbConfirmations);
-            confirmationsProgressBar.setMax(TransactionInfo.CONFIRMATION);
-            this.amountTextView = itemView.findViewById(R.id.tx_amount);
-            itemView.findViewById(R.id.tx_failed).setVisibility(View.GONE);
+        fun bind(txInfo: TransactionInfo) {
+            val streetModeEnabled =
+                PrefService.getInstance().getBoolean(Constants.PREF_STREET_MODE, false)
+            val displayAmount =
+                if (streetModeEnabled) Constants.STREET_MODE_BALANCE else getDisplayAmount(
+                    txInfo.amount,
+                    Helper.DISPLAY_DIGITS_INFO
+                )
+            val confirmationsTextView = itemView.findViewById<TextView>(R.id.tvConfirmations)
+            val confirmationsProgressBar =
+                itemView.findViewById<CircularProgressIndicator>(R.id.pbConfirmations)
+            confirmationsProgressBar.max = TransactionInfo.CONFIRMATION
+            amountTextView = itemView.findViewById(R.id.tx_amount)
+            itemView.findViewById<View>(R.id.tx_failed).visibility = View.GONE
             if (txInfo.isFailed) {
-                ((TextView) itemView.findViewById(R.id.tx_amount)).setText(itemView.getContext().getString(R.string.tx_list_amount_negative, displayAmount));
-                itemView.findViewById(R.id.tx_failed).setVisibility(View.VISIBLE);
-                setTxColour(failedColour);
-                confirmationsTextView.setVisibility(View.GONE);
-                confirmationsProgressBar.setVisibility(View.GONE);
+                (itemView.findViewById<View>(R.id.tx_amount) as TextView).text =
+                    itemView.context.getString(R.string.tx_list_amount_negative, displayAmount)
+                itemView.findViewById<View>(R.id.tx_failed).visibility = View.VISIBLE
+                setTxColour(failedColour)
+                confirmationsTextView.visibility = View.GONE
+                confirmationsProgressBar.visibility = View.GONE
             } else if (txInfo.isPending) {
-                setTxColour(pendingColour);
-                confirmationsProgressBar.setIndeterminate(true);
-                confirmationsProgressBar.setVisibility(View.VISIBLE);
-                confirmationsTextView.setVisibility(View.GONE);
+                setTxColour(pendingColour)
+                confirmationsProgressBar.isIndeterminate = true
+                confirmationsProgressBar.visibility = View.VISIBLE
+                confirmationsTextView.visibility = View.GONE
             } else if (txInfo.direction == TransactionInfo.Direction.Direction_In) {
-                setTxColour(inboundColour);
-                if (!txInfo.isConfirmed()) {
-                    confirmationsProgressBar.setVisibility(View.VISIBLE);
-                    final int confirmations = (int) txInfo.confirmations;
-                    confirmationsProgressBar.setProgressCompat(confirmations, true);
-                    final String confCount = Integer.toString(confirmations);
-                    confirmationsTextView.setText(confCount);
-                    if (confCount.length() == 1) // we only have space for character in the progress circle
-                        confirmationsTextView.setVisibility(View.VISIBLE);
-                    else
-                        confirmationsTextView.setVisibility(View.GONE);
+                setTxColour(inboundColour)
+                if (!txInfo.isConfirmed) {
+                    confirmationsProgressBar.visibility = View.VISIBLE
+                    val confirmations = txInfo.confirmations.toInt()
+                    confirmationsProgressBar.setProgressCompat(confirmations, true)
+                    val confCount = confirmations.toString()
+                    confirmationsTextView.text = confCount
+                    if (confCount.length == 1) // we only have space for character in the progress circle
+                        confirmationsTextView.visibility =
+                            View.VISIBLE else confirmationsTextView.visibility = View.GONE
                 } else {
-                    confirmationsProgressBar.setVisibility(View.GONE);
-                    confirmationsTextView.setVisibility(View.GONE);
+                    confirmationsProgressBar.visibility = View.GONE
+                    confirmationsTextView.visibility = View.GONE
                 }
             } else {
-                setTxColour(outboundColour);
-                confirmationsProgressBar.setVisibility(View.GONE);
-                confirmationsTextView.setVisibility(View.GONE);
+                setTxColour(outboundColour)
+                confirmationsProgressBar.visibility = View.GONE
+                confirmationsTextView.visibility = View.GONE
             }
-
             if (txInfo.direction == TransactionInfo.Direction.Direction_Out) {
-                ((TextView) itemView.findViewById(R.id.tx_amount)).setText(itemView.getContext().getString(R.string.tx_list_amount_negative, displayAmount));
+                (itemView.findViewById<View>(R.id.tx_amount) as TextView).text =
+                    itemView.context.getString(R.string.tx_list_amount_negative, displayAmount)
             } else {
-                ((TextView) itemView.findViewById(R.id.tx_amount)).setText(itemView.getContext().getString(R.string.tx_list_amount_positive, displayAmount));
+                (itemView.findViewById<View>(R.id.tx_amount) as TextView).text =
+                    itemView.context.getString(R.string.tx_list_amount_positive, displayAmount)
             }
-
-            ((TextView) itemView.findViewById(R.id.tx_datetime)).setText(getDateTime(txInfo.timestamp));
-            itemView.setOnClickListener(view -> {
-                listener.onClickTransaction(txInfo);
-            });
+            (itemView.findViewById<View>(R.id.tx_datetime) as TextView).text =
+                getDateTime(txInfo.timestamp)
+            itemView.setOnClickListener { _: View? -> listener?.onClickTransaction(txInfo) }
         }
 
-        private void setTxColour(int clr) {
-            amountTextView.setTextColor(clr);
+        private fun setTxColour(clr: Int) {
+            amountTextView?.setTextColor(clr)
         }
 
-        private String getDateTime(long time) {
-            return DATETIME_FORMATTER.format(new Date(time * 1000));
+        private fun getDateTime(time: Long): String {
+            return DATETIME_FORMATTER.format(Date(time * 1000))
         }
     }
 }
-
