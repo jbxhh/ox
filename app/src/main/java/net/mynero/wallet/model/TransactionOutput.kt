@@ -1,3 +1,3 @@
 package net.mynero.wallet.model
 
-class TransactionOutput(@JvmField val destination: String, @JvmField val amount: Long)
+class TransactionOutput(val destination: String, val amount: Long)

@@ -15,11 +15,10 @@
  */
 package net.mynero.wallet.model
 
-enum class NetworkType(@JvmField val value: Int) {
+enum class NetworkType(val value: Int) {
     NetworkType_Mainnet(0), NetworkType_Testnet(1), NetworkType_Stagenet(2);
 
     companion object {
-        @JvmStatic
         fun fromInteger(n: Int): NetworkType? {
             when (n) {
                 0 -> return NetworkType_Mainnet

@@ -38,7 +38,7 @@ class PendingTransaction internal constructor(var handle: Long) {
         Status_Ok, Status_Error, Status_Critical
     }
 
-    enum class Priority(@JvmField val value: Int) {
+    enum class Priority(value: Int) {
         Priority_Default(0), Priority_Low(1), Priority_Medium(2), Priority_High(3), Priority_Last(4);
 
         companion object {
