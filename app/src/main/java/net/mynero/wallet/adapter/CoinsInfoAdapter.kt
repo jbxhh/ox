@@ -96,7 +96,7 @@ class CoinsInfoAdapter(val listener: CoinsInfoAdapterListener?) :
     }
 
     interface CoinsInfoAdapterListener {
-        fun onUtxoSelected(coinsInfo: CoinsInfo?)
+        fun onUtxoSelected(coinsInfo: CoinsInfo)
     }
 
     /**
@@ -127,9 +127,9 @@ class CoinsInfoAdapter(val listener: CoinsInfoAdapterListener?) :
             val globalIdxTextView = itemView.findViewById<TextView>(R.id.utxo_global_index_textview)
             val outpointTextView = itemView.findViewById<TextView>(R.id.utxo_outpoint_textview)
             val streetModeEnabled =
-                PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false)
+                PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false) == true
             val balanceString =
-                if (streetModeEnabled == true) Constants.STREET_MODE_BALANCE else Wallet.getDisplayAmount(
+                if (streetModeEnabled) Constants.STREET_MODE_BALANCE else Wallet.getDisplayAmount(
                     coinsInfo.amount
                 )
             amountTextView.text =
@@ -167,7 +167,7 @@ class CoinsInfoAdapter(val listener: CoinsInfoAdapterListener?) :
             if (!editing) return
             val unlocked = coinsInfo?.isUnlocked == true
             if (unlocked) {
-                listener?.onUtxoSelected(coinsInfo)
+                coinsInfo?.let { listener?.onUtxoSelected(it) }
             }
         }
 
@@ -175,7 +175,7 @@ class CoinsInfoAdapter(val listener: CoinsInfoAdapterListener?) :
             if (editing) return false
             val unlocked = coinsInfo?.isUnlocked == true
             if (unlocked) {
-                listener?.onUtxoSelected(coinsInfo)
+                coinsInfo?.let { listener?.onUtxoSelected(it) }
             }
             return unlocked
         }

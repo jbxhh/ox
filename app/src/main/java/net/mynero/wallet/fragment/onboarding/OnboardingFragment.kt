@@ -1,326 +1,297 @@
-package net.mynero.wallet.fragment.onboarding;
+package net.mynero.wallet.fragment.onboarding
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Patterns;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.app.Activity
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Patterns
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.CompoundButton
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.widget.SwitchCompat
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import net.mynero.wallet.MoneroApplication
+import net.mynero.wallet.R
+import net.mynero.wallet.data.Node
+import net.mynero.wallet.fragment.dialog.AddNodeBottomSheetDialog
+import net.mynero.wallet.fragment.dialog.AddNodeBottomSheetDialog.AddNodeListener
+import net.mynero.wallet.fragment.dialog.NodeSelectionBottomSheetDialog
+import net.mynero.wallet.fragment.dialog.NodeSelectionBottomSheetDialog.NodeSelectionDialogListener
+import net.mynero.wallet.fragment.onboarding.OnboardingViewModel.SeedType
+import net.mynero.wallet.service.PrefService
+import net.mynero.wallet.util.Constants
 
-import androidx.activity.OnBackPressedCallback;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SwitchCompat;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.ViewModelProvider;
-
-import net.mynero.wallet.MoneroApplication;
-import net.mynero.wallet.R;
-import net.mynero.wallet.data.Node;
-import net.mynero.wallet.fragment.dialog.AddNodeBottomSheetDialog;
-import net.mynero.wallet.fragment.dialog.NodeSelectionBottomSheetDialog;
-import net.mynero.wallet.service.PrefService;
-import net.mynero.wallet.util.Constants;
-
-public class OnboardingFragment extends Fragment implements NodeSelectionBottomSheetDialog.NodeSelectionDialogListener, AddNodeBottomSheetDialog.AddNodeListener {
-    private boolean useOffset = true;
-    private OnboardingViewModel mViewModel;
-    TextWatcher proxyAddressListener = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
+class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListener {
+    private var useOffset = true
+    private var mViewModel: OnboardingViewModel? = null
+    private var proxyAddressListener: TextWatcher = object : TextWatcher {
+        override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+        override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+        override fun afterTextChanged(editable: Editable) {
             if (mViewModel != null) {
-                mViewModel.setProxyAddress(editable.toString());
-                mViewModel.updateProxy(((MoneroApplication) getActivity().getApplication()));
+                mViewModel?.setProxyAddress(editable.toString())
+                mViewModel?.updateProxy(activity?.application as MoneroApplication)
             }
         }
-    };
-    TextWatcher proxyPortListener = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
+    }
+    private var proxyPortListener: TextWatcher = object : TextWatcher {
+        override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+        override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+        override fun afterTextChanged(editable: Editable) {
             if (mViewModel != null) {
-                mViewModel.setProxyPort(editable.toString());
-                mViewModel.updateProxy(((MoneroApplication) getActivity().getApplication()));
+                mViewModel?.setProxyPort(editable.toString())
+                mViewModel?.updateProxy(activity?.application as MoneroApplication)
             }
         }
-    };
-    private EditText walletProxyAddressEditText;
-    private EditText walletProxyPortEditText;
-    private EditText walletPasswordEditText;
-    private EditText walletPasswordConfirmEditText;
-    private EditText walletSeedEditText;
-    private EditText walletRestoreHeightEditText;
-    private Button createWalletButton;
-    private TextView moreOptionsDropdownTextView;
-    private SwitchCompat torSwitch;
-    private ConstraintLayout advancedOptionsLayout;
-    private ImageView moreOptionsChevronImageView;
-    private CheckBox seedOffsetCheckbox;
-    private Button selectNodeButton;
-    private SwitchCompat showXmrchanSwitch;
-    private ImageView xmrchanOnboardingImage;
-    private Button seedTypeButton;
-    private TextView seedTypeDescTextView;
-
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_onboarding, container, false);
+    }
+    private var walletProxyAddressEditText: EditText? = null
+    private var walletProxyPortEditText: EditText? = null
+    private var walletPasswordEditText: EditText? = null
+    private var walletPasswordConfirmEditText: EditText? = null
+    private var walletSeedEditText: EditText? = null
+    private var walletRestoreHeightEditText: EditText? = null
+    private var createWalletButton: Button? = null
+    private var moreOptionsDropdownTextView: TextView? = null
+    private var torSwitch: SwitchCompat? = null
+    private var advancedOptionsLayout: ConstraintLayout? = null
+    private var moreOptionsChevronImageView: ImageView? = null
+    private var seedOffsetCheckbox: CheckBox? = null
+    private var selectNodeButton: Button? = null
+    private var showXmrchanSwitch: SwitchCompat? = null
+    private var xmrchanOnboardingImage: ImageView? = null
+    private var seedTypeButton: Button? = null
+    private var seedTypeDescTextView: TextView? = null
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_onboarding, container, false)
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        mViewModel = new ViewModelProvider(this).get(OnboardingViewModel.class);
-        selectNodeButton = view.findViewById(R.id.select_node_button);
-        walletPasswordEditText = view.findViewById(R.id.wallet_password_edittext);
-        walletPasswordConfirmEditText = view.findViewById(R.id.wallet_password_confirm_edittext);
-        walletSeedEditText = view.findViewById(R.id.wallet_seed_edittext);
-        walletRestoreHeightEditText = view.findViewById(R.id.wallet_restore_height_edittext);
-        createWalletButton = view.findViewById(R.id.create_wallet_button);
-        moreOptionsDropdownTextView = view.findViewById(R.id.advanced_settings_dropdown_textview);
-        moreOptionsChevronImageView = view.findViewById(R.id.advanced_settings_chevron_imageview);
-        torSwitch = view.findViewById(R.id.tor_onboarding_switch);
-        seedOffsetCheckbox = view.findViewById(R.id.seed_offset_checkbox);
-        walletProxyAddressEditText = view.findViewById(R.id.wallet_proxy_address_edittext);
-        walletProxyPortEditText = view.findViewById(R.id.wallet_proxy_port_edittext);
-        advancedOptionsLayout = view.findViewById(R.id.more_options_layout);
-        showXmrchanSwitch = view.findViewById(R.id.show_xmrchan_switch);
-        xmrchanOnboardingImage = view.findViewById(R.id.xmrchan_onboarding_imageview);
-        seedTypeButton = view.findViewById(R.id.seed_type_button);
-        seedTypeDescTextView = view.findViewById(R.id.seed_type_desc_textview);
-
-        bindListeners();
-        bindObservers();
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        mViewModel = ViewModelProvider(this)[OnboardingViewModel::class.java]
+        selectNodeButton = view.findViewById(R.id.select_node_button)
+        walletPasswordEditText = view.findViewById(R.id.wallet_password_edittext)
+        walletPasswordConfirmEditText = view.findViewById(R.id.wallet_password_confirm_edittext)
+        walletSeedEditText = view.findViewById(R.id.wallet_seed_edittext)
+        walletRestoreHeightEditText = view.findViewById(R.id.wallet_restore_height_edittext)
+        createWalletButton = view.findViewById(R.id.create_wallet_button)
+        moreOptionsDropdownTextView = view.findViewById(R.id.advanced_settings_dropdown_textview)
+        moreOptionsChevronImageView = view.findViewById(R.id.advanced_settings_chevron_imageview)
+        torSwitch = view.findViewById(R.id.tor_onboarding_switch)
+        seedOffsetCheckbox = view.findViewById(R.id.seed_offset_checkbox)
+        walletProxyAddressEditText = view.findViewById(R.id.wallet_proxy_address_edittext)
+        walletProxyPortEditText = view.findViewById(R.id.wallet_proxy_port_edittext)
+        advancedOptionsLayout = view.findViewById(R.id.more_options_layout)
+        showXmrchanSwitch = view.findViewById(R.id.show_xmrchan_switch)
+        xmrchanOnboardingImage = view.findViewById(R.id.xmrchan_onboarding_imageview)
+        seedTypeButton = view.findViewById(R.id.seed_type_button)
+        seedTypeDescTextView = view.findViewById(R.id.seed_type_desc_textview)
+        bindListeners()
+        bindObservers()
     }
 
-    private void bindObservers() {
-        mViewModel.showMoreOptions.observe(getViewLifecycleOwner(), show -> {
+    private fun bindObservers() {
+        mViewModel?.showMoreOptions?.observe(viewLifecycleOwner) { show: Boolean ->
             if (show) {
-                moreOptionsChevronImageView.setImageResource(R.drawable.ic_keyboard_arrow_up);
-                advancedOptionsLayout.setVisibility(View.VISIBLE);
+                moreOptionsChevronImageView?.setImageResource(R.drawable.ic_keyboard_arrow_up)
+                advancedOptionsLayout?.visibility = View.VISIBLE
             } else {
-                moreOptionsChevronImageView.setImageResource(R.drawable.ic_keyboard_arrow_down);
-                advancedOptionsLayout.setVisibility(View.GONE);
+                moreOptionsChevronImageView?.setImageResource(R.drawable.ic_keyboard_arrow_down)
+                advancedOptionsLayout?.visibility = View.GONE
             }
-        });
-
-        mViewModel.enableCreateButton.observe(getViewLifecycleOwner(), enable -> {
-            createWalletButton.setEnabled(enable);
-        });
-
-        mViewModel.seedType.observe(getViewLifecycleOwner(), seedType -> {
-            seedTypeButton.setText(seedType.toString());
-            seedTypeDescTextView.setText(getText(seedType.getDescResId()));
-            if (seedType == OnboardingViewModel.SeedType.LEGACY) {
-                seedOffsetCheckbox.setVisibility(View.VISIBLE);
-                walletRestoreHeightEditText.setVisibility(View.VISIBLE);
-                walletPasswordEditText.setHint(getString(R.string.password_optional));
+        }
+        mViewModel?.enableCreateButton?.observe(viewLifecycleOwner) { enable: Boolean ->
+            createWalletButton?.isEnabled = enable
+        }
+        mViewModel?.seedType?.observe(viewLifecycleOwner) { seedType: SeedType ->
+            seedTypeButton?.text = seedType.toString()
+            seedTypeDescTextView?.text = getText(seedType.descResId)
+            if (seedType == SeedType.LEGACY) {
+                seedOffsetCheckbox?.visibility = View.VISIBLE
+                walletRestoreHeightEditText?.visibility = View.VISIBLE
+                walletPasswordEditText?.hint = getString(R.string.password_optional)
             } else {
-                seedOffsetCheckbox.setVisibility(View.GONE);
-                walletRestoreHeightEditText.setVisibility(View.GONE);
-                walletPasswordEditText.setHint(getString(R.string.password_non_optional));
+                seedOffsetCheckbox?.visibility = View.GONE
+                walletRestoreHeightEditText?.visibility = View.GONE
+                walletPasswordEditText?.hint = getString(R.string.password_non_optional)
             }
-        });
+        }
     }
 
-    private void bindListeners() {
-        seedOffsetCheckbox.setChecked(useOffset);
+    private fun bindListeners() {
+        seedOffsetCheckbox?.isChecked = useOffset
         // Disable onBack click
-        OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-            }
-        };
-        FragmentActivity activity = getActivity();
-        if (activity != null)
-            activity.getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), onBackPressedCallback);
-
-        moreOptionsDropdownTextView.setOnClickListener(view12 -> mViewModel.onMoreOptionsClicked());
-        moreOptionsChevronImageView.setOnClickListener(view12 -> mViewModel.onMoreOptionsClicked());
-        seedOffsetCheckbox.setOnCheckedChangeListener((compoundButton, b) -> useOffset = b);
-
-        createWalletButton.setOnClickListener(view1 -> {
-            prepareDefaultNode();
-            onBackPressedCallback.setEnabled(false);
-            ((MoneroApplication) getActivity().getApplication()).getExecutor().execute(() -> {
+        val onBackPressedCallback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {}
+        }
+        val activity = activity
+        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, onBackPressedCallback)
+        moreOptionsDropdownTextView?.setOnClickListener { mViewModel?.onMoreOptionsClicked() }
+        moreOptionsChevronImageView?.setOnClickListener { mViewModel?.onMoreOptionsClicked() }
+        seedOffsetCheckbox?.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            useOffset = b
+        }
+        createWalletButton?.setOnClickListener {
+            prepareDefaultNode()
+            onBackPressedCallback.isEnabled = false
+            (getActivity()?.application as MoneroApplication).executor?.execute {
                 createOrImportWallet(
-                        walletPasswordEditText.getText().toString(),
-                        walletPasswordConfirmEditText.getText().toString(),
-                        walletSeedEditText.getText().toString().trim(),
-                        walletRestoreHeightEditText.getText().toString().trim()
-                );
-            });
-        });
-        walletPasswordEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    walletPasswordEditText?.text.toString(),
+                    walletPasswordConfirmEditText?.text.toString(),
+                    walletSeedEditText?.text.toString().trim { it <= ' ' },
+                    walletRestoreHeightEditText?.text.toString().trim { it <= ' ' }
+                )
             }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                String text = editable.toString();
+        }
+        walletPasswordEditText?.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+            override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+            override fun afterTextChanged(editable: Editable) {
+                val text = editable.toString()
                 if (text.isEmpty()) {
-                    walletPasswordConfirmEditText.setText(null);
-                    walletPasswordConfirmEditText.setVisibility(View.GONE);
+                    walletPasswordConfirmEditText?.text = null
+                    walletPasswordConfirmEditText?.visibility = View.GONE
                 } else {
-                    walletPasswordConfirmEditText.setVisibility(View.VISIBLE);
+                    walletPasswordConfirmEditText?.visibility = View.VISIBLE
                 }
             }
-        });
-        walletSeedEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                String text = editable.toString();
-
+        })
+        walletSeedEditText?.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+            override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+            override fun afterTextChanged(editable: Editable) {
+                val text = editable.toString()
                 if (text.isEmpty()) {
-                    createWalletButton.setText(R.string.create_wallet);
+                    createWalletButton?.setText(R.string.create_wallet)
                 } else {
-                    createWalletButton.setText(R.string.menu_restore);
+                    createWalletButton?.setText(R.string.menu_restore)
                 }
             }
-        });
-
-        seedTypeButton.setOnClickListener(v -> toggleSeedType());
-
-        torSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
-            PrefService.getInstance().edit().putBoolean(Constants.PREF_USES_TOR, b).apply();
-            removeProxyTextListeners();
+        })
+        seedTypeButton?.setOnClickListener { toggleSeedType() }
+        torSwitch?.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PrefService.instance?.edit()?.putBoolean(Constants.PREF_USES_TOR, b)?.apply()
+            removeProxyTextListeners()
             if (b) {
-                if (PrefService.getInstance().hasProxySet()) {
-                    String proxyAddress = PrefService.getInstance().getProxyAddress();
-                    String proxyPort = PrefService.getInstance().getProxyPort();
-                    initProxyStuff(proxyAddress, proxyPort);
+                if (PrefService.instance?.hasProxySet() == true) {
+                    val proxyAddress =
+                        PrefService.instance?.proxyAddress ?: return@setOnCheckedChangeListener
+                    val proxyPort =
+                        PrefService.instance?.proxyPort ?: return@setOnCheckedChangeListener
+                    initProxyStuff(proxyAddress, proxyPort)
                 } else {
-                    initProxyStuff("127.0.0.1", "9050");
+                    initProxyStuff("127.0.0.1", "9050")
                 }
-                addProxyTextListeners();
+                addProxyTextListeners()
             }
-
-            mViewModel.updateProxy(((MoneroApplication) getActivity().getApplication()));
-        });
-
-        showXmrchanSwitch.setChecked(PrefService.getInstance().getBoolean(Constants.PREF_MONEROCHAN, true));
-        showXmrchanSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
-            PrefService.getInstance().edit().putBoolean(Constants.PREF_MONEROCHAN, b).apply();
+            mViewModel?.updateProxy(getActivity()?.application as MoneroApplication)
+        }
+        showXmrchanSwitch?.isChecked =
+            PrefService.instance?.getBoolean(Constants.PREF_MONEROCHAN, true) == true
+        showXmrchanSwitch?.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PrefService.instance?.edit()?.putBoolean(Constants.PREF_MONEROCHAN, b)?.apply()
             if (b) {
-                xmrchanOnboardingImage.setVisibility(View.VISIBLE);
+                xmrchanOnboardingImage?.visibility = View.VISIBLE
             } else {
-                xmrchanOnboardingImage.setVisibility(View.GONE);
+                xmrchanOnboardingImage?.visibility = View.GONE
             }
-        });
-
-        Node node = PrefService.getInstance().getNode(); // should be using default here
-        selectNodeButton.setText(getString(R.string.node_button_text, node.getAddress()));
-        selectNodeButton.setOnClickListener(view1 -> {
-            NodeSelectionBottomSheetDialog dialog = new NodeSelectionBottomSheetDialog();
-            dialog.listener = this;
-            dialog.show(getActivity().getSupportFragmentManager(), "node_selection_dialog");
-        });
-    }
-
-    private void toggleSeedType() {
-        OnboardingViewModel.SeedType seedType = mViewModel.seedType.getValue();
-        if (seedType == null) return;
-        OnboardingViewModel.SeedType newSeedType = OnboardingViewModel.SeedType.UNKNOWN;
-        if (seedType == OnboardingViewModel.SeedType.POLYSEED) {
-            newSeedType = OnboardingViewModel.SeedType.LEGACY;
-        } else if (seedType == OnboardingViewModel.SeedType.LEGACY) {
-            newSeedType = OnboardingViewModel.SeedType.POLYSEED;
         }
-
-        mViewModel.setSeedType(newSeedType);
+        val node = PrefService.instance?.node // should be using default here
+        selectNodeButton?.text = getString(R.string.node_button_text, node?.address)
+        selectNodeButton?.setOnClickListener {
+            activity?.supportFragmentManager?.let { fragmentManager ->
+                val dialog = NodeSelectionBottomSheetDialog()
+                dialog.listener = this
+                dialog.show(fragmentManager, "node_selection_dialog")
+            }
+        }
     }
 
-    private void prepareDefaultNode() {
-        PrefService.getInstance().getNode();
+    private fun toggleSeedType() {
+        val seedType = mViewModel?.seedType?.value ?: return
+        var newSeedType = SeedType.UNKNOWN
+        if (seedType == SeedType.POLYSEED) {
+            newSeedType = SeedType.LEGACY
+        } else if (seedType == SeedType.LEGACY) {
+            newSeedType = SeedType.POLYSEED
+        }
+        mViewModel?.setSeedType(newSeedType)
     }
 
-    private void createOrImportWallet(String walletPassword, String confirmedPassword, String walletSeed, String restoreHeightText) {
-        Activity activity = getActivity();
+    private fun prepareDefaultNode() {
+        PrefService.instance?.node
+    }
+
+    private fun createOrImportWallet(
+        walletPassword: String,
+        confirmedPassword: String,
+        walletSeed: String,
+        restoreHeightText: String
+    ) {
+        val activity: Activity? = activity
         if (activity != null) {
-            mViewModel.createOrImportWallet(activity, walletPassword, confirmedPassword, walletSeed, restoreHeightText, useOffset);
+            mViewModel?.createOrImportWallet(
+                activity,
+                walletPassword,
+                confirmedPassword,
+                walletSeed,
+                restoreHeightText,
+                useOffset
+            )
         }
     }
 
-    private void removeProxyTextListeners() {
-        walletProxyAddressEditText.removeTextChangedListener(proxyAddressListener);
-        walletProxyPortEditText.removeTextChangedListener(proxyPortListener);
+    private fun removeProxyTextListeners() {
+        walletProxyAddressEditText?.removeTextChangedListener(proxyAddressListener)
+        walletProxyPortEditText?.removeTextChangedListener(proxyPortListener)
     }
 
-    private void addProxyTextListeners() {
-        walletProxyAddressEditText.addTextChangedListener(proxyAddressListener);
-        walletProxyPortEditText.addTextChangedListener(proxyPortListener);
+    private fun addProxyTextListeners() {
+        walletProxyAddressEditText?.addTextChangedListener(proxyAddressListener)
+        walletProxyPortEditText?.addTextChangedListener(proxyPortListener)
     }
 
-    private void initProxyStuff(String proxyAddress, String proxyPort) {
-        boolean validIpAddress = Patterns.IP_ADDRESS.matcher(proxyAddress).matches();
+    private fun initProxyStuff(proxyAddress: String, proxyPort: String) {
+        val validIpAddress = Patterns.IP_ADDRESS.matcher(proxyAddress).matches()
         if (validIpAddress) {
-            mViewModel.setProxyAddress(proxyAddress);
-            mViewModel.setProxyPort(proxyPort);
-            walletProxyAddressEditText.setText(proxyAddress);
-            walletProxyPortEditText.setText(proxyPort);
+            mViewModel?.setProxyAddress(proxyAddress)
+            mViewModel?.setProxyPort(proxyPort)
+            walletProxyAddressEditText?.setText(proxyAddress)
+            walletProxyPortEditText?.setText(proxyPort)
         }
     }
 
-    @Override
-    public void onNodeSelected() {
-        Node node = PrefService.getInstance().getNode();
-        selectNodeButton.setText(getString(R.string.node_button_text, node.getAddress()));
-        mViewModel.updateProxy(((MoneroApplication) getActivity().getApplication()));
+    override fun onNodeSelected() {
+        val node = PrefService.instance?.node
+        selectNodeButton?.text = getString(R.string.node_button_text, node?.address)
+        mViewModel?.updateProxy(activity?.application as MoneroApplication)
     }
 
-    @Override
-    public void onClickedEditNode(Node node) {
+    override fun onClickedEditNode(node: Node?) {}
+    override fun onClickedAddNode() {
+        activity?.supportFragmentManager?.let { fragmentManager ->
+            val addNodeDialog = AddNodeBottomSheetDialog()
+            addNodeDialog.listener = this
+            addNodeDialog.show(fragmentManager, "add_node_dialog")
+        }
     }
 
-    @Override
-    public void onClickedAddNode() {
-        AddNodeBottomSheetDialog addNodeDialog = new AddNodeBottomSheetDialog();
-        addNodeDialog.listener = this;
-        addNodeDialog.show(getActivity().getSupportFragmentManager(), "add_node_dialog");
-    }
-
-    @Override
-    public void onNodeAdded() {
-        NodeSelectionBottomSheetDialog dialog = new NodeSelectionBottomSheetDialog();
-        dialog.listener = this;
-        dialog.show(getActivity().getSupportFragmentManager(), "node_selection_dialog");
+    override fun onNodeAdded() {
+        activity?.supportFragmentManager?.let { fragmentManager ->
+            val dialog = NodeSelectionBottomSheetDialog()
+            dialog.listener = this
+            dialog.show(fragmentManager, "node_selection_dialog")
+        }
     }
 }

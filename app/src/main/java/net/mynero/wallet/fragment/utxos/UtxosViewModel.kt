@@ -1,7 +1,5 @@
-package net.mynero.wallet.fragment.utxos;
+package net.mynero.wallet.fragment.utxos
 
-import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModel
 
-public class UtxosViewModel extends ViewModel {
-
-}
+class UtxosViewModel : ViewModel()

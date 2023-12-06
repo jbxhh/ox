@@ -1,50 +1,43 @@
-package net.mynero.wallet.fragment.settings;
+package net.mynero.wallet.fragment.settings
 
-import android.util.Patterns;
+import android.util.Patterns
+import androidx.lifecycle.ViewModel
+import net.mynero.wallet.MoneroApplication
+import net.mynero.wallet.model.WalletManager
+import net.mynero.wallet.service.PrefService
+import net.mynero.wallet.util.Constants
 
-import androidx.lifecycle.ViewModel;
-
-import net.mynero.wallet.MoneroApplication;
-import net.mynero.wallet.data.Node;
-import net.mynero.wallet.model.WalletManager;
-import net.mynero.wallet.service.PrefService;
-import net.mynero.wallet.util.Constants;
-
-public class SettingsViewModel extends ViewModel {
-
-    private String proxyAddress = "";
-    private String proxyPort = "";
-
-    public void updateProxy(MoneroApplication application) {
-        application.getExecutor().execute(() -> {
-            boolean usesProxy = PrefService.getInstance().getBoolean(Constants.PREF_USES_TOR, false);
-            Node curretNode = PrefService.getInstance().getNode();
-            boolean isNodeLocalIp = curretNode.getAddress().startsWith("10.") || curretNode.getAddress().startsWith("192.168.") || curretNode.getAddress().equals("localhost") || curretNode.getAddress().equals("127.0.0.1");
-
+class SettingsViewModel : ViewModel() {
+    private var proxyAddress = ""
+    private var proxyPort = ""
+    fun updateProxy(application: MoneroApplication) {
+        application.executor?.execute {
+            val usesProxy = PrefService.instance?.getBoolean(Constants.PREF_USES_TOR, false) == true
+            val curretNode = PrefService.instance?.node
+            val isNodeLocalIp =
+                curretNode?.address?.startsWith("10.") == true || curretNode?.address?.startsWith("192.168.") == true || curretNode?.address == "localhost" || curretNode?.address == "127.0.0.1"
             if (!usesProxy || isNodeLocalIp) {
-                WalletManager.getInstance().setProxy("");
-                WalletManager.getInstance().getWallet().setProxy("");
-                return;
+                WalletManager.instance?.setProxy("")
+                WalletManager.instance?.wallet?.setProxy("")
+                return@execute
             }
-
-            if (proxyAddress.isEmpty()) proxyAddress = "127.0.0.1";
-            if (proxyPort.isEmpty()) proxyPort = "9050";
-            boolean validIpAddress = Patterns.IP_ADDRESS.matcher(proxyAddress).matches();
-
+            if (proxyAddress.isEmpty()) proxyAddress = "127.0.0.1"
+            if (proxyPort.isEmpty()) proxyPort = "9050"
+            val validIpAddress = Patterns.IP_ADDRESS.matcher(proxyAddress).matches()
             if (validIpAddress) {
-                String proxy = proxyAddress + ":" + proxyPort;
-                PrefService.getInstance().edit().putString(Constants.PREF_PROXY, proxy).apply();
-                WalletManager.getInstance().setProxy(proxy);
-                WalletManager.getInstance().getWallet().setProxy(proxy);
+                val proxy = "$proxyAddress:$proxyPort"
+                PrefService.instance?.edit()?.putString(Constants.PREF_PROXY, proxy)?.apply()
+                WalletManager.instance?.setProxy(proxy)
+                WalletManager.instance?.wallet?.setProxy(proxy)
             }
-        });
+        }
     }
 
-    public void setProxyAddress(String address) {
-        this.proxyAddress = address;
+    fun setProxyAddress(address: String) {
+        proxyAddress = address
     }
 
-    public void setProxyPort(String port) {
-        this.proxyPort = port;
+    fun setProxyPort(port: String) {
+        proxyPort = port
     }
 }

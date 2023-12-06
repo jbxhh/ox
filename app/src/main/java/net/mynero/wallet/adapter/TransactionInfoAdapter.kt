@@ -94,9 +94,9 @@ class TransactionInfoAdapter(val listener: TxInfoAdapterListener?) :
 
         fun bind(txInfo: TransactionInfo) {
             val streetModeEnabled =
-                PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false)
+                PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false) == true
             val displayAmount =
-                if (streetModeEnabled == true) Constants.STREET_MODE_BALANCE else Helper.getDisplayAmount(
+                if (streetModeEnabled) Constants.STREET_MODE_BALANCE else Helper.getDisplayAmount(
                     txInfo.amount,
                     Helper.DISPLAY_DIGITS_INFO
                 )
