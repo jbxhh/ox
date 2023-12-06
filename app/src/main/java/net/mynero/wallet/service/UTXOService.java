@@ -57,10 +57,10 @@ public class UTXOService extends ServiceBase {
     public void toggleFrozen(HashMap<String, CoinsInfo> selectedCoins) {
         ArrayList<String> frozenCoinsCopy = new ArrayList<>(frozenCoins);
         for(CoinsInfo coin : selectedCoins.values()) {
-            if(frozenCoinsCopy.contains(coin.getPubKey())) {
-                frozenCoinsCopy.remove(coin.getPubKey());
+            if(frozenCoinsCopy.contains(coin.pubKey)) {
+                frozenCoinsCopy.remove(coin.pubKey);
             } else {
-                frozenCoinsCopy.add(coin.getPubKey());
+                frozenCoinsCopy.add(coin.pubKey);
             }
         }
         this.frozenCoins = frozenCoinsCopy;
@@ -70,7 +70,7 @@ public class UTXOService extends ServiceBase {
     }
 
     public boolean isCoinFrozen(CoinsInfo coinsInfo) {
-        return frozenCoins.contains(coinsInfo.getPubKey());
+        return frozenCoins.contains(coinsInfo.pubKey);
     }
 
     private void loadFrozenCoins() throws JSONException {
@@ -104,18 +104,18 @@ public class UTXOService extends ServiceBase {
         Collections.sort(utxos);
         //loop through each utxo
         for (CoinsInfo coinsInfo : utxos) {
-            if (!coinsInfo.isSpent() && coinsInfo.isUnlocked() && !coinsInfo.isFrozen() && !frozenCoins.contains(coinsInfo.getPubKey())) { //filter out spent, locked, and frozen outputs
+            if (!coinsInfo.isSpent() && coinsInfo.isUnlocked() && !coinsInfo.isFrozen() && !frozenCoins.contains(coinsInfo.pubKey)) { //filter out spent, locked, and frozen outputs
                 if (sendAll) {
                     // if send all, add all utxos and set amount to send all
-                    selectedUtxos.add(coinsInfo.getKeyImage());
+                    selectedUtxos.add(coinsInfo.keyImage);
                     amountSelected = Wallet.SWEEP_ALL;
                 } else {
                     //if amount selected is still less than amount needed, and the utxos tx hash hasn't already been seen, add utxo
-                    if (amountSelected <= amountWithBasicFee && !seenTxs.contains(coinsInfo.getHash())) {
-                        selectedUtxos.add(coinsInfo.getKeyImage());
+                    if (amountSelected <= amountWithBasicFee && !seenTxs.contains(coinsInfo.hash)) {
+                        selectedUtxos.add(coinsInfo.keyImage);
                         // we don't want to spend multiple utxos from the same transaction, so we prevent that from happening here.
-                        seenTxs.add(coinsInfo.getHash());
-                        amountSelected += coinsInfo.getAmount();
+                        seenTxs.add(coinsInfo.hash);
+                        amountSelected += coinsInfo.amount;
                     }
                 }
             }

@@ -72,7 +72,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
         sendUtxosButton.setOnClickListener(view1 -> {
             ArrayList<String> selectedKeyImages = new ArrayList<>();
             for(CoinsInfo coinsInfo : adapter.getSelectedUtxos().values()) {
-                selectedKeyImages.add(coinsInfo.getKeyImage());
+                selectedKeyImages.add(coinsInfo.keyImage);
             }
             SendBottomSheetDialog sendDialog = new SendBottomSheetDialog();
             sendDialog.listener = this;
@@ -82,12 +82,12 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
         churnUtxosButton.setOnClickListener(view1 -> {
             ArrayList<String> selectedKeyImages = new ArrayList<>();
             for(CoinsInfo coinsInfo : adapter.getSelectedUtxos().values()) {
-                selectedKeyImages.add(coinsInfo.getKeyImage());
+                selectedKeyImages.add(coinsInfo.keyImage);
             }
             SendBottomSheetDialog sendDialog = new SendBottomSheetDialog();
             sendDialog.listener = this;
             sendDialog.isChurning = true;
-            sendDialog.uriData = UriData.parse(AddressService.getInstance().currentSubaddress().getAddress());
+            sendDialog.uriData = UriData.parse(AddressService.getInstance().currentSubaddress().address);
             sendDialog.selectedUtxos = selectedKeyImages;
             sendDialog.show(getActivity().getSupportFragmentManager(), null);
         });
@@ -103,7 +103,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
                 HashMap<String, CoinsInfo> filteredUtxos = new HashMap<>();
                 for (CoinsInfo coinsInfo : utxos) {
                     if (!coinsInfo.isSpent()) {
-                        filteredUtxos.put(coinsInfo.getPubKey(), coinsInfo);
+                        filteredUtxos.put(coinsInfo.pubKey, coinsInfo);
                     }
                 }
                 if (filteredUtxos.isEmpty()) {

@@ -60,7 +60,7 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
     }
 
     public void deselectUtxo(CoinsInfo coinsInfo) {
-        this.selectedUtxos.remove(coinsInfo.getPubKey());
+        this.selectedUtxos.remove(coinsInfo.pubKey);
 
         if(this.selectedUtxos.size() == 0) {
             editing = false;
@@ -71,12 +71,12 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
 
     public void selectUtxo(CoinsInfo coinsInfo) {
         editing = true;
-        this.selectedUtxos.put(coinsInfo.getPubKey(), coinsInfo);
+        this.selectedUtxos.put(coinsInfo.pubKey, coinsInfo);
         notifyDataSetChanged();
     }
 
     public boolean contains(CoinsInfo coinsInfo) {
-        return selectedUtxos.containsKey(coinsInfo.getPubKey());
+        return selectedUtxos.containsKey(coinsInfo.pubKey);
     }
 
     public void clear() {
@@ -135,7 +135,7 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
         public void bind(boolean editing, CoinsInfo coinsInfo, HashMap<String, CoinsInfo> selectedUtxos) {
             this.editing = editing;
             this.coinsInfo = coinsInfo;
-            boolean selected = selectedUtxos.containsKey(coinsInfo.getPubKey());
+            boolean selected = selectedUtxos.containsKey(coinsInfo.pubKey);
 
             TextView pubKeyTextView = itemView.findViewById(R.id.utxo_pub_key_textview);
             TextView amountTextView = itemView.findViewById(R.id.utxo_amount_textview);
@@ -143,12 +143,12 @@ public class CoinsInfoAdapter extends RecyclerView.Adapter<CoinsInfoAdapter.View
             TextView globalIdxTextView = itemView.findViewById(R.id.utxo_global_index_textview);
             TextView outpointTextView = itemView.findViewById(R.id.utxo_outpoint_textview);
             boolean streetModeEnabled = PrefService.getInstance().getBoolean(Constants.PREF_STREET_MODE, false);
-            String balanceString = streetModeEnabled ? Constants.STREET_MODE_BALANCE : Wallet.getDisplayAmount(coinsInfo.getAmount());
+            String balanceString = streetModeEnabled ? Constants.STREET_MODE_BALANCE : Wallet.getDisplayAmount(coinsInfo.amount);
             amountTextView.setText(itemView.getResources().getString(R.string.tx_amount_no_prefix, balanceString));
-            pubKeyTextView.setText(coinsInfo.getPubKey());
-            addressTextView.setText(coinsInfo.getAddress());
-            globalIdxTextView.setText(itemView.getResources().getString(R.string.global_index_text, coinsInfo.getGlobalOutputIndex()));
-            outpointTextView.setText(itemView.getResources().getString(R.string.outpoint_text, coinsInfo.getHash() + ":" + coinsInfo.getLocalOutputIndex()));
+            pubKeyTextView.setText(coinsInfo.pubKey);
+            addressTextView.setText(coinsInfo.address);
+            globalIdxTextView.setText(itemView.getResources().getString(R.string.global_index_text, coinsInfo.globalOutputIndex));
+            outpointTextView.setText(itemView.getResources().getString(R.string.outpoint_text, coinsInfo.hash + ":" + coinsInfo.localOutputIndex));
             if (selected) {
                 itemView.setBackgroundTintList(ContextCompat.getColorStateList(itemView.getContext(), R.color.oled_colorSecondary));
             } else if(coinsInfo.isFrozen() || UTXOService.instance.isCoinFrozen(coinsInfo)) {

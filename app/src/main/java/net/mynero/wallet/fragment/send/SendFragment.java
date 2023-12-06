@@ -411,7 +411,7 @@ public class SendFragment extends Fragment {
                 mViewModel.setShowAddOutputButton(false);
             }
             EditText addressField = entryView.findViewById(R.id.address_edittext);
-            addressField.setText(uriData.getAddress());
+            addressField.setText(uriData.address);
             if (uriData.hasAmount()) {
                 setAmount(entryView, uriData.getAmount());
             }

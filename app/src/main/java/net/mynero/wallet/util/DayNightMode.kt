@@ -13,33 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package net.mynero.wallet.util
 
-package net.mynero.wallet.util;
+import androidx.appcompat.app.AppCompatDelegate
 
-import androidx.appcompat.app.AppCompatDelegate;
-
-public enum DayNightMode {
+enum class DayNightMode(val nightMode: Int) {
     // order must match R.array.daynight_themes
-    AUTO(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM),
-    DAY(AppCompatDelegate.MODE_NIGHT_NO),
-    NIGHT(AppCompatDelegate.MODE_NIGHT_YES),
+    AUTO(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM), DAY(AppCompatDelegate.MODE_NIGHT_NO), NIGHT(
+        AppCompatDelegate.MODE_NIGHT_YES
+    ),
     UNKNOWN(AppCompatDelegate.MODE_NIGHT_UNSPECIFIED);
 
-    final private int nightMode;
-
-    DayNightMode(int nightMode) {
-        this.nightMode = nightMode;
-    }
-
-    static public DayNightMode getValue(int nightMode) {
-        for (DayNightMode mode : DayNightMode.values()) {
-            if (mode.nightMode == nightMode)
-                return mode;
+    companion object {
+        fun getValue(nightMode: Int): DayNightMode {
+            for (mode in values()) {
+                if (mode.nightMode == nightMode) return mode
+            }
+            return UNKNOWN
         }
-        return UNKNOWN;
-    }
-
-    public int getNightMode() {
-        return nightMode;
     }
 }

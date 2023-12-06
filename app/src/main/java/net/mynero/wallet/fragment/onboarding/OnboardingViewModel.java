@@ -132,7 +132,7 @@ public class OnboardingViewModel extends ViewModel {
             } else {
                 mainActivity.runOnUiThread(() -> {
                     _enableCreateButton.postValue(true);
-                    Toast.makeText(mainActivity, application.getString(R.string.create_wallet_failed, walletStatus.getErrorString()), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mainActivity, application.getString(R.string.create_wallet_failed, walletStatus.errorString), Toast.LENGTH_SHORT).show();
                 });
             }
         });

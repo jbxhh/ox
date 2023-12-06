@@ -13,69 +13,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package net.mynero.wallet.model
 
-package net.mynero.wallet.model;
+import timber.log.Timber
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+class TransactionHistory(private val handle: Long, var accountIndex: Int) {
+    var all: List<TransactionInfo> = ArrayList()
+        private set
 
-import timber.log.Timber;
-
-public class TransactionHistory {
-    static {
-        System.loadLibrary("monerujo");
-    }
-
-    private final long handle;
-
-    int accountIndex;
-    private List<TransactionInfo> transactions = new ArrayList<>();
-
-    public TransactionHistory(long handle, int accountIndex) {
-        this.handle = handle;
-        this.accountIndex = accountIndex;
-    }
-
-    public void setAccountFor(Wallet wallet) {
+    fun setAccountFor(wallet: Wallet) {
         if (accountIndex != wallet.getAccountIndex()) {
-            this.accountIndex = wallet.getAccountIndex();
-            refreshWithNotes(wallet);
+            accountIndex = wallet.getAccountIndex()
+            refreshWithNotes(wallet)
         }
     }
 
-    private void loadNotes(Wallet wallet) {
-        for (TransactionInfo info : transactions) {
-            info.notes = wallet.getUserNote(info.hash);
+    private fun loadNotes(wallet: Wallet) {
+        for (info in all) {
+            info.notes = wallet.getUserNote(info.hash)
         }
     }
 
-    //private native long getTransactionByIndexJ(int i);
+    external fun getCount(): Int
 
-    //private native long getTransactionByIdJ(String id);
-
-    public native int getCount(); // over all accounts/subaddresses
-
-    public List<TransactionInfo> getAll() {
-        return transactions;
+    fun refreshWithNotes(wallet: Wallet) {
+        refresh()
+        loadNotes(wallet)
     }
 
-    void refreshWithNotes(Wallet wallet) {
-        refresh();
-        loadNotes(wallet);
-    }
-
-    private void refresh() {
-        List<TransactionInfo> transactionInfos = refreshJ();
-        Timber.d("refresh size=%d", transactionInfos.size());
-        for (Iterator<TransactionInfo> iterator = transactionInfos.iterator(); iterator.hasNext(); ) {
-            TransactionInfo info = iterator.next();
+    private fun refresh() {
+        val transactionInfos = refreshJ()
+        Timber.d("refresh size=%d", transactionInfos.size)
+        val iterator = transactionInfos.iterator()
+        while (iterator.hasNext()) {
+            val info = iterator.next()
             if (info.accountIndex != accountIndex) {
-                iterator.remove();
+                iterator.remove()
             }
         }
-        transactions = transactionInfos;
+        all = transactionInfos
     }
 
-    private native List<TransactionInfo> refreshJ();
+    private external fun refreshJ(): MutableList<TransactionInfo>
+
+    companion object {
+        init {
+            System.loadLibrary("monerujo")
+        }
+    }
 }

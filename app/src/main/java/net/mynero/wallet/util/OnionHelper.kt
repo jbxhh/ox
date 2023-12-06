@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package net.mynero.wallet.util
 
-package net.mynero.wallet.util;
-
-public class OnionHelper {
-
-    public static boolean isOnionHost(String hostname) {
-        return hostname.endsWith(".onion");
+object OnionHelper {
+    fun isOnionHost(hostname: String): Boolean {
+        return hostname.endsWith(".onion")
     }
 
-    public static boolean isI2PHost(String hostname) {
-        return hostname.endsWith(".i2p");
+    fun isI2PHost(hostname: String): Boolean {
+        return hostname.endsWith(".i2p")
     }
 }

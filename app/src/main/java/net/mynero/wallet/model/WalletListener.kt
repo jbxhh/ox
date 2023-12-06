@@ -13,17 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package net.mynero.wallet.model
 
-package net.mynero.wallet.model;
-
-public interface WalletListener {
+interface WalletListener {
     /**
      * moneySpent - called when money spent
      *
      * @param txId   - transaction id
      * @param amount - tvAmount
      */
-    void moneySpent(String txId, long amount);
+    fun moneySpent(txId: String?, amount: Long)
 
     /**
      * moneyReceived - called when money received
@@ -31,7 +30,7 @@ public interface WalletListener {
      * @param txId   - transaction id
      * @param amount - tvAmount
      */
-    void moneyReceived(String txId, long amount);
+    fun moneyReceived(txId: String?, amount: Long)
 
     /**
      * unconfirmedMoneyReceived - called when payment arrived in tx pool
@@ -39,23 +38,22 @@ public interface WalletListener {
      * @param txId   - transaction id
      * @param amount - tvAmount
      */
-    void unconfirmedMoneyReceived(String txId, long amount);
+    fun unconfirmedMoneyReceived(txId: String?, amount: Long)
 
     /**
      * newBlock      - called when new block received
      *
      * @param height - block height
      */
-    void newBlock(long height);
+    fun newBlock(height: Long)
 
     /**
      * updated  - generic callback, called when any event (sent/received/block reveived/etc) happened with the wallet;
      */
-    void updated();
+    fun updated()
 
     /**
      * refreshed - called when wallet refreshed by background thread or explicitly refreshed by calling "refresh" synchronously
      */
-    void refreshed();
-
+    fun refreshed()
 }

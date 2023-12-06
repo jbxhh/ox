@@ -13,33 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package net.mynero.wallet.model
 
-package net.mynero.wallet.model;
+enum class NetworkType(@JvmField val value: Int) {
+    NetworkType_Mainnet(0), NetworkType_Testnet(1), NetworkType_Stagenet(2);
 
-public enum NetworkType {
-    NetworkType_Mainnet(0),
-    NetworkType_Testnet(1),
-    NetworkType_Stagenet(2);
-
-    private final int value;
-
-    NetworkType(int value) {
-        this.value = value;
-    }
-
-    public static NetworkType fromInteger(int n) {
-        switch (n) {
-            case 0:
-                return NetworkType_Mainnet;
-            case 1:
-                return NetworkType_Testnet;
-            case 2:
-                return NetworkType_Stagenet;
+    companion object {
+        @JvmStatic
+        fun fromInteger(n: Int): NetworkType? {
+            when (n) {
+                0 -> return NetworkType_Mainnet
+                1 -> return NetworkType_Testnet
+                2 -> return NetworkType_Stagenet
+            }
+            return null
         }
-        return null;
-    }
-
-    public int getValue() {
-        return value;
     }
 }

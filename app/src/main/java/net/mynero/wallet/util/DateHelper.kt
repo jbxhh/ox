@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package net.mynero.wallet.util
 
-package net.mynero.wallet.util;
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Date
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-public class DateHelper {
-    public static final SimpleDateFormat DATETIME_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    public static Date parse(String dateString) throws ParseException {
-        return DATETIME_FORMATTER.parse(dateString.replaceAll("Z$", "+0000"));
+object DateHelper {
+    @JvmField
+    val DATETIME_FORMATTER = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    @Throws(ParseException::class)
+    fun parse(dateString: String): Date {
+        return DATETIME_FORMATTER.parse(dateString.replace("Z$".toRegex(), "+0000"))
     }
 }
