@@ -60,7 +60,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
         freezeUtxosButton.setOnClickListener(view1 -> {
             Toast.makeText(getContext(), "Toggling freeze status, please wait.", Toast.LENGTH_SHORT).show();
             MoneroThreadPoolExecutor.MONERO_THREAD_POOL_EXECUTOR.execute(() -> {
-                UTXOService.getInstance().toggleFrozen(adapter.getSelectedUtxos());
+                UTXOService.getInstance().toggleFrozen(adapter.selectedUtxos);
                 getActivity().runOnUiThread(() -> {
                     adapter.clear();
                     sendUtxosButton.setVisibility(View.GONE);
@@ -71,7 +71,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
         });
         sendUtxosButton.setOnClickListener(view1 -> {
             ArrayList<String> selectedKeyImages = new ArrayList<>();
-            for(CoinsInfo coinsInfo : adapter.getSelectedUtxos().values()) {
+            for(CoinsInfo coinsInfo : adapter.selectedUtxos.values()) {
                 selectedKeyImages.add(coinsInfo.keyImage);
             }
             SendBottomSheetDialog sendDialog = new SendBottomSheetDialog();
@@ -81,7 +81,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
         });
         churnUtxosButton.setOnClickListener(view1 -> {
             ArrayList<String> selectedKeyImages = new ArrayList<>();
-            for(CoinsInfo coinsInfo : adapter.getSelectedUtxos().values()) {
+            for(CoinsInfo coinsInfo : adapter.selectedUtxos.values()) {
                 selectedKeyImages.add(coinsInfo.keyImage);
             }
             SendBottomSheetDialog sendDialog = new SendBottomSheetDialog();
@@ -126,7 +126,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
         }
 
         boolean frozenExists = false, unfrozenExists = false, bothExist = false;
-        for(CoinsInfo selectedUtxo : adapter.getSelectedUtxos().values()) {
+        for(CoinsInfo selectedUtxo : adapter.selectedUtxos.values()) {
             if(selectedUtxo.isFrozen() || UTXOService.getInstance().isCoinFrozen(selectedUtxo))
                 frozenExists = true;
             else {
@@ -135,7 +135,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
         }
         bothExist = frozenExists && unfrozenExists;
 
-        if (adapter.getSelectedUtxos().isEmpty()) {
+        if (adapter.selectedUtxos.isEmpty()) {
             sendUtxosButton.setVisibility(View.GONE);
             churnUtxosButton.setVisibility(View.GONE);
             freezeUtxosButton.setVisibility(View.GONE);

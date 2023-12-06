@@ -13,119 +13,102 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package net.mynero.wallet.adapter
 
-package net.mynero.wallet.adapter;
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import net.mynero.wallet.R
+import net.mynero.wallet.data.Subaddress
+import net.mynero.wallet.service.PrefService
+import net.mynero.wallet.util.Constants
+import net.mynero.wallet.util.Helper
+import net.mynero.wallet.util.Helper.getDisplayAmount
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
-
-import net.mynero.wallet.R;
-import net.mynero.wallet.data.Subaddress;
-import net.mynero.wallet.model.CoinsInfo;
-import net.mynero.wallet.model.Wallet;
-import net.mynero.wallet.service.PrefService;
-import net.mynero.wallet.util.Constants;
-import net.mynero.wallet.util.Helper;
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class SubaddressAdapter extends RecyclerView.Adapter<SubaddressAdapter.ViewHolder> {
-
-    private List<Subaddress> localDataSet;
-    private SubaddressAdapterListener listener = null;
+class SubaddressAdapter(val listener: SubaddressAdapterListener?) :
+    RecyclerView.Adapter<SubaddressAdapter.ViewHolder>() {
+    private var localDataSet: List<Subaddress>
 
     /**
      * Initialize the dataset of the Adapter.
      */
-    public SubaddressAdapter(SubaddressAdapterListener listener) {
-        this.localDataSet = new ArrayList<>();
-        this.listener = listener;
+    init {
+        localDataSet = ArrayList()
     }
 
-    public void submitList(List<Subaddress> dataSet) {
-        this.localDataSet = dataSet;
-        notifyDataSetChanged();
+    fun submitList(dataSet: List<Subaddress>) {
+        localDataSet = dataSet
+        notifyDataSetChanged()
     }
 
     // Create new views (invoked by the layout manager)
-    @Override
-    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         // Create a new view, which defines the UI of the list item
-        View view = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.address_item, viewGroup, false);
-
-        return new ViewHolder(view, listener);
+        val view = LayoutInflater.from(viewGroup.context)
+            .inflate(R.layout.address_item, viewGroup, false)
+        return ViewHolder(view, listener)
     }
 
     // Replace the contents of a view (invoked by the layout manager)
-    @Override
-    public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-        Subaddress subaddress = localDataSet.get(position);
-        viewHolder.bind(subaddress);
+    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+        val subaddress = localDataSet[position]
+        viewHolder.bind(subaddress)
     }
 
     // Return the size of your dataset (invoked by the layout manager)
-    @Override
-    public int getItemCount() {
-        return localDataSet.size();
+    override fun getItemCount(): Int {
+        return localDataSet.size
     }
 
-    public interface SubaddressAdapterListener {
-        void onSubaddressSelected(Subaddress subaddress);
-
-        void onSubaddressEditLabel(Subaddress subaddress);
+    interface SubaddressAdapterListener {
+        fun onSubaddressSelected(subaddress: Subaddress?)
+        fun onSubaddressEditLabel(subaddress: Subaddress?)
     }
 
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder).
      */
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        private SubaddressAdapterListener listener = null;
+    class ViewHolder(view: View, val listener: SubaddressAdapterListener?) : RecyclerView.ViewHolder(
+        view
+    ) {
 
-        public ViewHolder(View view, SubaddressAdapterListener listener) {
-            super(view);
-            this.listener = listener;
-        }
-
-        public void bind(Subaddress subaddress) {
-            TextView addressTextView = itemView.findViewById(R.id.address_item_address_textview);
-            TextView addressLabelTextView = itemView.findViewById(R.id.address_label_textview);
-            TextView addressAmountTextView = itemView.findViewById(R.id.address_amount_textview);
-
-            addressTextView.setText(subaddress.address);
-
-            final String label = subaddress.getDisplayLabel();
-            final String address = itemView.getContext().getString(R.string.subbaddress_info_subtitle,
-                    subaddress.addressIndex, subaddress.getSquashedAddress());
-            addressLabelTextView.setText(label.isEmpty() ? address : label);
-
-            final long amount = subaddress.amount;
+        fun bind(subaddress: Subaddress) {
+            val addressTextView =
+                itemView.findViewById<TextView>(R.id.address_item_address_textview)
+            val addressLabelTextView = itemView.findViewById<TextView>(R.id.address_label_textview)
+            val addressAmountTextView =
+                itemView.findViewById<TextView>(R.id.address_amount_textview)
+            addressTextView.text = subaddress.address
+            val label = subaddress.displayLabel
+            val address = itemView.context.getString(
+                R.string.subbaddress_info_subtitle,
+                subaddress.addressIndex, subaddress.squashedAddress
+            )
+            addressLabelTextView.text = label.ifEmpty { address }
+            val amount = subaddress.amount
             if (amount > 0) {
-                boolean streetMode = PrefService.getInstance().getBoolean(Constants.PREF_STREET_MODE, false);
-                if(streetMode) {
-                    addressAmountTextView.setText(itemView.getContext().getString(R.string.tx_list_amount_positive,
-                            Constants.STREET_MODE_BALANCE));
+                val streetMode =
+                    PrefService.getInstance().getBoolean(Constants.PREF_STREET_MODE, false)
+                if (streetMode) {
+                    addressAmountTextView.text = itemView.context.getString(
+                        R.string.tx_list_amount_positive,
+                        Constants.STREET_MODE_BALANCE
+                    )
                 } else {
-                    addressAmountTextView.setText(itemView.getContext().getString(R.string.tx_list_amount_positive,
-                            Helper.getDisplayAmount(amount, Helper.DISPLAY_DIGITS_INFO)));
+                    addressAmountTextView.text = itemView.context.getString(
+                        R.string.tx_list_amount_positive,
+                        getDisplayAmount(amount, Helper.DISPLAY_DIGITS_INFO)
+                    )
                 }
+            } else addressAmountTextView.text = ""
+            itemView.setOnClickListener { listener?.onSubaddressSelected(subaddress) }
+            itemView.setOnLongClickListener { _: View? ->
+                listener?.onSubaddressEditLabel(subaddress)
+                true
             }
-            else
-                addressAmountTextView.setText("");
-
-            itemView.setOnClickListener(view -> listener.onSubaddressSelected(subaddress));
-            itemView.setOnLongClickListener(v -> {
-                listener.onSubaddressEditLabel(subaddress);
-                return true;
-            });
         }
     }
 }
-
