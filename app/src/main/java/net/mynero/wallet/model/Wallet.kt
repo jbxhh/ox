@@ -18,7 +18,6 @@ package net.mynero.wallet.model
 import android.util.Pair
 import net.mynero.wallet.data.Subaddress
 import net.mynero.wallet.model.NetworkType.Companion.fromInteger
-import net.mynero.wallet.model.WalletManager.Companion.instance
 import timber.log.Timber
 import java.io.File
 import java.text.SimpleDateFormat
@@ -150,17 +149,17 @@ class Wallet {
     external fun store(path: String?): Boolean
     fun close(): Boolean {
         disposePendingTransaction()
-        return instance?.close(this) == true
+        return WalletManager.instance?.close(this) == true
     }
 
     external fun getFilename(): String
 
     //    virtual std::string keysFilename() const = 0;
     fun init(upperTransactionSizeLimit: Long): Boolean {
-        var daemonAddress = instance?.getDaemonAddress()
-        var daemonUsername = instance?.daemonUsername
-        var daemonPassword = instance?.daemonPassword
-        var proxyAddress = instance?.proxy
+        var daemonAddress = WalletManager.instance?.getDaemonAddress()
+        var daemonUsername = WalletManager.instance?.daemonUsername
+        var daemonPassword = WalletManager.instance?.daemonPassword
+        var proxyAddress = WalletManager.instance?.proxy
         Timber.d("init(")
         if (daemonAddress != null) {
             Timber.d(daemonAddress.toString())
@@ -474,7 +473,12 @@ class Wallet {
 
         @JvmStatic
         fun isAddressValid(address: String): Boolean {
-            return instance?.networkType?.value?.let { isAddressValid(address, it) } == true
+            return WalletManager.instance?.networkType?.value?.let {
+                isAddressValid(
+                    address,
+                    it
+                )
+            } == true
         }
 
         @JvmStatic

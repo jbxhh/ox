@@ -107,7 +107,7 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
         streetModeSwitch.setChecked(PrefService.getInstance().getBoolean(Constants.PREF_STREET_MODE, false));
         streetModeSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
             PrefService.getInstance().edit().putBoolean(Constants.PREF_STREET_MODE, b).apply();
-            BalanceService.getInstance().refreshBalance();
+            BalanceService.instance.refreshBalance();
         });
 
         monerochanSwitch.setChecked(PrefService.getInstance().getBoolean(Constants.PREF_MONEROCHAN, true));
@@ -172,7 +172,7 @@ public class SettingsFragment extends Fragment implements PasswordBottomSheetDia
         });
 
         TextView statusTextView = view.findViewById(R.id.status_textview);
-        BlockchainService.getInstance().connectionStatus.observe(getViewLifecycleOwner(), connectionStatus -> {
+        BlockchainService.instance.connectionStatus.observe(getViewLifecycleOwner(), connectionStatus -> {
             if (connectionStatus == Wallet.ConnectionStatus.ConnectionStatus_Connected) {
                 statusTextView.setText(getResources().getText(R.string.connected));
             } else if (connectionStatus == Wallet.ConnectionStatus.ConnectionStatus_Disconnected) {

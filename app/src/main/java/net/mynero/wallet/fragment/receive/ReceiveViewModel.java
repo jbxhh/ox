@@ -20,14 +20,16 @@ public class ReceiveViewModel extends ViewModel {
     public LiveData<List<Subaddress>> addresses = _addresses;
 
     public void init() {
-        _address.setValue(AddressService.getInstance().currentSubaddress());
+        if (AddressService.instance != null) {
+            _address.setValue(AddressService.instance.currentSubaddress());
+        }
         _addresses.setValue(getSubaddresses());
     }
 
     private List<Subaddress> getSubaddresses() {
         Wallet wallet = WalletManager.getInstance().getWallet();
         ArrayList<Subaddress> subaddresses = new ArrayList<>();
-        int addressesSize = AddressService.getInstance().getLatestAddressIndex();
+        int addressesSize = AddressService.instance != null ? AddressService.instance.getLatestAddressIndex() : 0;
         for (int i = addressesSize - 1; i >= 0; i--) {
             subaddresses.add(wallet.getSubaddressObject(i));
         }
@@ -35,7 +37,9 @@ public class ReceiveViewModel extends ViewModel {
     }
 
     public void getFreshSubaddress() {
-        _address.setValue(AddressService.getInstance().freshSubaddress());
+        if (AddressService.instance != null) {
+            _address.setValue(AddressService.instance.freshSubaddress());
+        }
         _addresses.setValue(getSubaddresses());
     }
 

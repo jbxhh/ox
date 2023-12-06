@@ -85,7 +85,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
             SendBottomSheetDialog sendDialog = new SendBottomSheetDialog();
             sendDialog.listener = this;
             sendDialog.isChurning = true;
-            sendDialog.uriData = UriData.parse(AddressService.getInstance().currentSubaddress().address);
+            sendDialog.uriData = UriData.parse(AddressService.instance.currentSubaddress().address);
             sendDialog.selectedUtxos = selectedKeyImages;
             sendDialog.show(getActivity().getSupportFragmentManager(), null);
         });
