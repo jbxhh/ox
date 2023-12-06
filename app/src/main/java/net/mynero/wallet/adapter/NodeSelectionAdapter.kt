@@ -80,7 +80,7 @@ class NodeSelectionAdapter(val listener: NodeSelectionAdapterListener?) :
             view
         ) {
         fun bind(node: Node) {
-            val currentNode = PrefService.getInstance().node
+            val currentNode = PrefService.instance?.node
             val match = node == currentNode
             if (match) {
                 itemView.setBackgroundColor(itemView.resources.getColor(R.color.oled_colorSecondary))

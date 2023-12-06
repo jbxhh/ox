@@ -36,7 +36,7 @@ public class EditAddressLabelBottomSheetDialog extends BottomSheetDialogFragment
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         Wallet wallet = WalletManager.getInstance().getWallet();
-        AddressService addressService = AddressService.getInstance();
+        AddressService addressService = AddressService.instance;
         ImageButton pasteButton = view.findViewById(R.id.paste_password_imagebutton);
         EditText labelEditText = view.findViewById(R.id.wallet_password_edittext);
         Button saveLabelButton = view.findViewById(R.id.unlock_wallet_button);

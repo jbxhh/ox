@@ -12,8 +12,8 @@ class BalanceInfo(val rawUnlocked: Long, val rawLocked: Long) {
     val unlockedDisplay: String
         get() {
             val streetModeEnabled =
-                PrefService.getInstance().getBoolean(Constants.PREF_STREET_MODE, false)
-            return if (streetModeEnabled) {
+                PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false)
+            return if (streetModeEnabled == true) {
                 Constants.STREET_MODE_BALANCE
             } else {
                 Wallet.getDisplayAmount(rawUnlocked)
@@ -22,8 +22,8 @@ class BalanceInfo(val rawUnlocked: Long, val rawLocked: Long) {
     val lockedDisplay: String
         get() {
             val streetModeEnabled =
-                PrefService.getInstance().getBoolean(Constants.PREF_STREET_MODE, false)
-            return if (streetModeEnabled) {
+                PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false)
+            return if (streetModeEnabled == true) {
                 Constants.STREET_MODE_BALANCE
             } else {
                 Wallet.getDisplayAmount(rawLocked)

@@ -72,15 +72,7 @@ public class SendFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_send, container, false);
-    }    private final ActivityResultLauncher<String> cameraPermissionsLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
-            granted -> {
-                if (granted) {
-                    onScan(currentEntryIndex);
-                } else {
-                    Toast.makeText(getActivity(), getString(R.string.no_camera_permission), Toast.LENGTH_SHORT).show();
-                    currentEntryIndex = -1;
-                }
-            });
+    }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -105,7 +97,15 @@ public class SendFragment extends Fragment {
         bindListeners();
         bindObservers();
         init();
-    }
+    }    private final ActivityResultLauncher<String> cameraPermissionsLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
+            granted -> {
+                if (granted) {
+                    onScan(currentEntryIndex);
+                } else {
+                    Toast.makeText(getActivity(), getString(R.string.no_camera_permission), Toast.LENGTH_SHORT).show();
+                    currentEntryIndex = -1;
+                }
+            });
 
     private void init() {
         addOutput(true);
@@ -170,7 +170,7 @@ public class SendFragment extends Fragment {
                 }
 
                 long amountRaw = Wallet.getAmountFromString(amount);
-                long balance = BalanceService.getInstance().getUnlockedBalanceRaw();
+                long balance = BalanceService.instance.getUnlockedBalanceRaw();
                 if (amountRaw >= balance || amountRaw <= 0) {
                     Toast.makeText(getActivity(), getString(R.string.send_amount_invalid), Toast.LENGTH_SHORT).show();
                     return false;
@@ -429,7 +429,7 @@ public class SendFragment extends Fragment {
     private void createTx(List<Pair<String, String>> dests, boolean sendAll, PendingTransaction.Priority feePriority) {
         ((MoneroApplication) getActivity().getApplication()).getExecutor().execute(() -> {
             try {
-                PendingTransaction pendingTx = TxService.getInstance().createTx(dests, sendAll, feePriority, new ArrayList<>());
+                PendingTransaction pendingTx = TxService.instance.createTx(dests, sendAll, feePriority, new ArrayList<>());
                 if (pendingTx != null && pendingTx.getStatus() == PendingTransaction.Status.Status_Ok) {
                     mViewModel.setPendingTransaction(pendingTx);
                 } else {
@@ -459,7 +459,7 @@ public class SendFragment extends Fragment {
 
     private void sendTx(PendingTransaction pendingTx) {
         ((MoneroApplication) getActivity().getApplication()).getExecutor().execute(() -> {
-            boolean success = TxService.getInstance().sendTx(pendingTx);
+            boolean success = TxService.instance.sendTx(pendingTx);
             Activity activity = getActivity();
             if (activity != null) {
                 activity.runOnUiThread(() -> {
@@ -478,6 +478,8 @@ public class SendFragment extends Fragment {
     private void setAddOutputButtonVisibility(int visibility) {
         addOutputImageView.setVisibility(visibility);
     }
+
+
 
 
 }

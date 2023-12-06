@@ -9,7 +9,7 @@ import net.mynero.wallet.fragment.dialog.PasswordBottomSheetDialog
 import net.mynero.wallet.fragment.dialog.PasswordBottomSheetDialog.PasswordListener
 import net.mynero.wallet.fragment.dialog.SendBottomSheetDialog
 import net.mynero.wallet.livedata.SingleLiveEvent
-import net.mynero.wallet.model.WalletManager.Companion.instance
+import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.service.AddressService
 import net.mynero.wallet.service.BalanceService
 import net.mynero.wallet.service.BlockchainService
@@ -41,8 +41,8 @@ class MainActivity : AppCompatActivity(), MoneroHandlerThread.Listener, Password
         val walletKeysFile = File(applicationInfo.dataDir, Constants.WALLET_NAME + ".keys")
         if (walletKeysFile.exists()) {
             val promptPassword =
-                PrefService.getInstance().getBoolean(Constants.PREF_USES_PASSWORD, false)
-            if (!promptPassword) {
+                PrefService.instance?.getBoolean(Constants.PREF_USES_PASSWORD, false)
+            if (promptPassword == false) {
                 init(walletFile, "")
             } else {
                 val passwordDialog = PasswordBottomSheetDialog()
@@ -70,15 +70,17 @@ class MainActivity : AppCompatActivity(), MoneroHandlerThread.Listener, Password
     }
 
     fun init(walletFile: File, password: String?) {
-        val wallet = password?.let { instance?.openWallet(walletFile.absolutePath, it) }
-        thread = MoneroHandlerThread("WalletService", this, wallet)
-        TxService(thread)
-        balanceService = BalanceService(thread)
-        addressService = AddressService(thread)
-        historyService = HistoryService(thread)
-        blockchainService = BlockchainService(thread)
-        utxoService = UTXOService(thread)
-        thread?.start()
+        val wallet = WalletManager.instance?.openWallet(walletFile.absolutePath, password ?: "")
+        thread = wallet?.let { MoneroHandlerThread("WalletService", this, it) }
+        thread?.let { thread ->
+            TxService(thread)
+            balanceService = BalanceService(thread)
+            addressService = AddressService(thread)
+            historyService = HistoryService(thread)
+            blockchainService = BlockchainService(thread)
+            utxoService = UTXOService(thread)
+            thread.start()
+        }
     }
 
     override fun onRefresh(walletSynced: Boolean) {

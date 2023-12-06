@@ -46,7 +46,8 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
     private final MutableLiveData<PendingTransaction> _pendingTransaction = new MutableLiveData<>(null);
     public ArrayList<String> selectedUtxos = new ArrayList<>();
     public LiveData<Boolean> sendingMax = _sendingMax;
-    public LiveData<PendingTransaction> pendingTransaction = _pendingTransaction;    private final ActivityResultLauncher<String> cameraPermissionsLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
+    public LiveData<PendingTransaction> pendingTransaction = _pendingTransaction;
+    public UriData uriData = null;    private final ActivityResultLauncher<String> cameraPermissionsLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
             granted -> {
                 if (granted) {
                     onScan();
@@ -54,7 +55,6 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
                     Toast.makeText(getActivity(), getString(R.string.no_camera_permission), Toast.LENGTH_SHORT).show();
                 }
             });
-    public UriData uriData = null;
     public boolean isChurning = false;
     public Listener listener = null;
     public PendingTransaction.Priority priority;
@@ -138,7 +138,7 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
     }
 
     private void bindObservers() {
-        BalanceService.getInstance().balanceInfo.observe(getViewLifecycleOwner(), balanceInfo -> {
+        BalanceService.instance.balanceInfo.observe(getViewLifecycleOwner(), balanceInfo -> {
             createButton.setEnabled(balanceInfo.getRawUnlocked() != 0);
             if (!isChurning) {
                 sendMaxButton.setEnabled(balanceInfo.getRawUnlocked() != 0);
@@ -212,7 +212,7 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
                 boolean validAddress = Wallet.isAddressValid(address);
                 if (validAddress && (!amount.isEmpty() || sendAll)) {
                     long amountRaw = Wallet.getAmountFromString(amount);
-                    long balance = BalanceService.getInstance().getUnlockedBalanceRaw();
+                    long balance = BalanceService.instance.getUnlockedBalanceRaw();
                     if ((amountRaw >= balance || amountRaw <= 0) && !sendAll) {
                         Toast.makeText(activity, getString(R.string.send_amount_invalid), Toast.LENGTH_SHORT).show();
                         return;
@@ -253,7 +253,7 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
         Activity activity = getActivity();
         if (activity != null) {
             ((MoneroApplication) activity.getApplication()).getExecutor().execute(() -> {
-                boolean success = TxService.getInstance().sendTx(pendingTx);
+                boolean success = TxService.instance.sendTx(pendingTx);
                 activity.runOnUiThread(() -> {
                     if (success) {
                         Toast.makeText(activity, getString(R.string.sent_tx), Toast.LENGTH_SHORT).show();
@@ -275,7 +275,7 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
         if (activity != null) {
             ((MoneroApplication) activity.getApplication()).getExecutor().execute(() -> {
                 try {
-                    PendingTransaction pendingTx = TxService.getInstance().createTx(address, amount, sendAll, feePriority, selectedUtxos);
+                    PendingTransaction pendingTx = TxService.instance.createTx(address, amount, sendAll, feePriority, selectedUtxos);
                     if (pendingTx != null && pendingTx.getStatus() == PendingTransaction.Status.Status_Ok) {
                         _pendingTransaction.postValue(pendingTx);
                     } else {
@@ -349,6 +349,8 @@ public class SendBottomSheetDialog extends BottomSheetDialogFragment {
     public interface Listener {
         void onSentTransaction();
     }
+
+
 
 
 }

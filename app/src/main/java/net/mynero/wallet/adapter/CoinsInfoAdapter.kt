@@ -127,9 +127,9 @@ class CoinsInfoAdapter(val listener: CoinsInfoAdapterListener?) :
             val globalIdxTextView = itemView.findViewById<TextView>(R.id.utxo_global_index_textview)
             val outpointTextView = itemView.findViewById<TextView>(R.id.utxo_outpoint_textview)
             val streetModeEnabled =
-                PrefService.getInstance().getBoolean(Constants.PREF_STREET_MODE, false)
+                PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false)
             val balanceString =
-                if (streetModeEnabled) Constants.STREET_MODE_BALANCE else Wallet.getDisplayAmount(
+                if (streetModeEnabled == true) Constants.STREET_MODE_BALANCE else Wallet.getDisplayAmount(
                     coinsInfo.amount
                 )
             amountTextView.text =
@@ -148,7 +148,7 @@ class CoinsInfoAdapter(val listener: CoinsInfoAdapterListener?) :
             if (selected) {
                 itemView.backgroundTintList =
                     ContextCompat.getColorStateList(itemView.context, R.color.oled_colorSecondary)
-            } else if (coinsInfo.isFrozen || UTXOService.instance.isCoinFrozen(coinsInfo)) {
+            } else if (coinsInfo.isFrozen || UTXOService.instance?.isCoinFrozen(coinsInfo) == true) {
                 itemView.backgroundTintList =
                     ContextCompat.getColorStateList(itemView.context, R.color.oled_frozen_utxo)
             } else if (!coinsInfo.isUnlocked) {

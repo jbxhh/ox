@@ -83,9 +83,9 @@ public class HomeFragment extends Fragment implements TransactionInfoAdapter.TxI
         TextView unlockedBalanceTextView = view.findViewById(R.id.balance_unlocked_textview);
         TextView lockedBalanceTextView = view.findViewById(R.id.balance_locked_textview);
 
-        BalanceService balanceService = BalanceService.getInstance();
+        BalanceService balanceService = BalanceService.instance;
         HistoryService historyService = HistoryService.getInstance();
-        BlockchainService blockchainService = BlockchainService.getInstance();
+        BlockchainService blockchainService = BlockchainService.instance;
 
         if (balanceService != null) {
             balanceService.balanceInfo.observe(getViewLifecycleOwner(), balanceInfo -> {
