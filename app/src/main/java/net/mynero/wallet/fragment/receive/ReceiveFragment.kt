@@ -1,138 +1,144 @@
-package net.mynero.wallet.fragment.receive;
+package net.mynero.wallet.fragment.receive
 
-import android.graphics.Bitmap;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.graphics.Bitmap
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
+import com.google.zxing.WriterException
+import com.google.zxing.qrcode.QRCodeWriter
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import net.mynero.wallet.R
+import net.mynero.wallet.adapter.SubaddressAdapter
+import net.mynero.wallet.adapter.SubaddressAdapter.SubaddressAdapterListener
+import net.mynero.wallet.data.Subaddress
+import net.mynero.wallet.fragment.dialog.EditAddressLabelBottomSheetDialog
+import net.mynero.wallet.fragment.dialog.EditAddressLabelBottomSheetDialog.LabelListener
+import net.mynero.wallet.util.Helper.clipBoardCopy
+import timber.log.Timber
+import java.nio.charset.StandardCharsets
+import java.util.EnumMap
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeWriter;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-
-import net.mynero.wallet.R;
-import net.mynero.wallet.adapter.SubaddressAdapter;
-import net.mynero.wallet.data.Subaddress;
-import net.mynero.wallet.fragment.dialog.EditAddressLabelBottomSheetDialog;
-import net.mynero.wallet.util.Helper;
-
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-
-import timber.log.Timber;
-
-public class ReceiveFragment extends Fragment {
-    private TextView addressTextView = null;
-    private TextView addressLabelTextView = null;
-    private ImageView addressImageView = null;
-    private ImageButton copyAddressImageButton = null;
-    private ReceiveViewModel mViewModel;
-
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_receive, container, false);
+class ReceiveFragment : Fragment() {
+    private var addressTextView: TextView? = null
+    private var addressLabelTextView: TextView? = null
+    private var addressImageView: ImageView? = null
+    private var copyAddressImageButton: ImageButton? = null
+    private var mViewModel: ReceiveViewModel? = null
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_receive, container, false)
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        mViewModel = new ViewModelProvider(this).get(ReceiveViewModel.class);
-        addressImageView = view.findViewById(R.id.monero_qr_imageview);
-        addressTextView = view.findViewById(R.id.address_textview);
-        addressLabelTextView = view.findViewById(R.id.address_label_textview);
-        copyAddressImageButton = view.findViewById(R.id.copy_address_imagebutton);
-        bindListeners(view);
-        bindObservers(view);
-        mViewModel.init();
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        mViewModel = ViewModelProvider(this)[ReceiveViewModel::class.java]
+        addressImageView = view.findViewById(R.id.monero_qr_imageview)
+        addressTextView = view.findViewById(R.id.address_textview)
+        addressLabelTextView = view.findViewById(R.id.address_label_textview)
+        copyAddressImageButton = view.findViewById(R.id.copy_address_imagebutton)
+        bindListeners(view)
+        bindObservers(view)
+        mViewModel?.init()
     }
 
-    private void bindListeners(View view) {
-        ImageButton freshAddressImageView = view.findViewById(R.id.fresh_address_imageview);
-        freshAddressImageView.setOnClickListener(view1 -> {
-            mViewModel.getFreshSubaddress();
-        });
+    private fun bindListeners(view: View) {
+        val freshAddressImageView = view.findViewById<ImageButton>(R.id.fresh_address_imageview)
+        freshAddressImageView.setOnClickListener { mViewModel?.freshSubaddress }
     }
 
-    private void bindObservers(View view) {
-        SubaddressAdapter adapter = new SubaddressAdapter(new SubaddressAdapter.SubaddressAdapterListener() {
-            @Override
-            public void onSubaddressSelected(Subaddress subaddress) {
-                mViewModel.selectAddress(subaddress);
+    private fun bindObservers(view: View) {
+        val adapter = SubaddressAdapter(object : SubaddressAdapterListener {
+            override fun onSubaddressSelected(subaddress: Subaddress?) {
+                mViewModel?.selectAddress(subaddress)
             }
 
-            @Override
-            public void onSubaddressEditLabel(Subaddress subaddress) {
-                editAddressLabel(subaddress);
+            override fun onSubaddressEditLabel(subaddress: Subaddress?) {
+                editAddressLabel(subaddress)
             }
-        });
-        RecyclerView recyclerView = view.findViewById(R.id.address_list_recyclerview);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setAdapter(adapter);
-        mViewModel.address.observe(getViewLifecycleOwner(), this::setAddress);
-        mViewModel.addresses.observe(getViewLifecycleOwner(), adapter::submitList);
+        })
+        val recyclerView = view.findViewById<RecyclerView>(R.id.address_list_recyclerview)
+        recyclerView.layoutManager = LinearLayoutManager(activity)
+        recyclerView.adapter = adapter
+        mViewModel?.address?.observe(viewLifecycleOwner) { subaddress: Subaddress? ->
+            setAddress(
+                subaddress
+            )
+        }
+        mViewModel?.addresses?.observe(viewLifecycleOwner) { dataSet: List<Subaddress> ->
+            adapter.submitList(
+                dataSet
+            )
+        }
     }
 
-    private void editAddressLabel(Subaddress subaddress) {
-        EditAddressLabelBottomSheetDialog dialog = new EditAddressLabelBottomSheetDialog();
-        dialog.addressIndex = subaddress.addressIndex;
-        dialog.listener = () -> mViewModel.init();
-        dialog.show(getParentFragmentManager(), "edit_address_dialog");
+    private fun editAddressLabel(subaddress: Subaddress?) {
+        val dialog = EditAddressLabelBottomSheetDialog()
+        dialog.addressIndex = subaddress?.addressIndex ?: return
+        dialog.listener = object : LabelListener {
+            override fun onDismiss() {
+                mViewModel?.init()
+            }
+        }
+        dialog.show(parentFragmentManager, "edit_address_dialog")
     }
 
-    private void setAddress(Subaddress subaddress) {
-        final String label = subaddress.getDisplayLabel();
-        final String address = getContext().getString(R.string.subbaddress_info_subtitle,
-                subaddress.addressIndex, subaddress.getSquashedAddress());
-        addressLabelTextView.setText(label.isEmpty() ? address : label);
-        addressTextView.setText(subaddress.address);
-        addressImageView.setImageBitmap(generate(subaddress.address, 256, 256));
-        copyAddressImageButton.setOnClickListener(view1 -> Helper.clipBoardCopy(getContext(), "address", subaddress.address));
-        addressLabelTextView.setOnLongClickListener(v -> {
-            editAddressLabel(subaddress);
-            return true;
-        });
-        addressTextView.setOnLongClickListener(v -> {
-            editAddressLabel(subaddress);
-            return true;
-        });
+    private fun setAddress(subaddress: Subaddress?) {
+        val label = subaddress?.displayLabel
+        val address = context?.getString(
+            R.string.subbaddress_info_subtitle,
+            subaddress?.addressIndex, subaddress?.squashedAddress
+        )
+        addressLabelTextView?.text = if (label?.isEmpty() == true) address else label
+        addressTextView?.text = subaddress?.address
+        addressImageView?.setImageBitmap(subaddress?.address?.let { generate(it, 256, 256) })
+        copyAddressImageButton?.setOnClickListener {
+            clipBoardCopy(
+                context, "address", subaddress?.address
+            )
+        }
+        addressLabelTextView?.setOnLongClickListener {
+            editAddressLabel(subaddress)
+            true
+        }
+        addressTextView?.setOnLongClickListener {
+            editAddressLabel(subaddress)
+            true
+        }
     }
 
-    private Bitmap generate(String text, int width, int height) {
-        if ((width <= 0) || (height <= 0)) return null;
-        Map<EncodeHintType, Object> hints = new HashMap<>();
-        hints.put(EncodeHintType.CHARACTER_SET, StandardCharsets.UTF_8);
-        hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M);
+    private fun generate(text: String, width: Int, height: Int): Bitmap? {
+        if (width <= 0 || height <= 0) return null
+        val hints: MutableMap<EncodeHintType, Any?> = EnumMap(com.google.zxing.EncodeHintType::class.java)
+        hints[EncodeHintType.CHARACTER_SET] = StandardCharsets.UTF_8
+        hints[EncodeHintType.ERROR_CORRECTION] = ErrorCorrectionLevel.M
         try {
-            BitMatrix bitMatrix = new QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, width, height, hints);
-            int[] pixels = new int[width * height];
-            for (int i = 0; i < height; i++) {
-                for (int j = 0; j < width; j++) {
-                    if (bitMatrix.get(j, i)) {
-                        pixels[i * width + j] = 0xffffffff;
+            val bitMatrix = QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, width, height, hints)
+            val pixels = IntArray(width * height)
+            for (i in 0 until height) {
+                for (j in 0 until width) {
+                    if (bitMatrix[j, i]) {
+                        pixels[i * width + j] = -0x1
                     } else {
-                        pixels[i * height + j] = getResources().getColor(R.color.oled_colorBackground);
+                        pixels[i * height + j] = resources.getColor(R.color.oled_colorBackground)
                     }
                 }
             }
-            return Bitmap.createBitmap(pixels, 0, width, width, height, Bitmap.Config.RGB_565);
-        } catch (WriterException ex) {
-            Timber.e(ex);
+            return Bitmap.createBitmap(pixels, 0, width, width, height, Bitmap.Config.RGB_565)
+        } catch (ex: WriterException) {
+            Timber.e(ex)
         }
-        return null;
+        return null
     }
 }
