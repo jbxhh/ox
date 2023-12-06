@@ -71,7 +71,7 @@ class UserNotes(txNotes: String?) {
             sb.append(",")
             sb.append(xmrtoDestination)
             sb.append("}")
-            if (note != null && !note!!.isEmpty()) sb.append(" ")
+            if (note != null && note?.isNotEmpty() == true) sb.append(" ")
         }
         sb.append(note)
         return sb.toString()

@@ -55,7 +55,7 @@ class UTXOService(thread: MoneroHandlerThread?) : ServiceBase(thread) {
         frozenCoins = frozenCoinsCopy
         saveFrozenCoins()
         refreshUtxos()
-        BalanceService.instance!!.refreshBalance()
+        BalanceService.instance?.refreshBalance()
     }
 
     fun isCoinFrozen(coinsInfo: CoinsInfo): Boolean {
@@ -65,7 +65,7 @@ class UTXOService(thread: MoneroHandlerThread?) : ServiceBase(thread) {
     @Throws(JSONException::class)
     private fun loadFrozenCoins() {
         val prefService = PrefService.instance
-        val frozenCoinsArrayString = prefService!!.getString(Constants.PREF_FROZEN_COINS, "[]")
+        val frozenCoinsArrayString = prefService?.getString(Constants.PREF_FROZEN_COINS, "[]")
         val frozenCoinsArray = JSONArray(frozenCoinsArrayString)
         for (i in 0 until frozenCoinsArray.length()) {
             val pubKey = frozenCoinsArray.getString(i)
@@ -81,8 +81,7 @@ class UTXOService(thread: MoneroHandlerThread?) : ServiceBase(thread) {
         for (pubKey in frozenCoinsCopy) {
             jsonArray.put(pubKey)
         }
-        prefService!!.edit()!!
-            .putString(Constants.PREF_FROZEN_COINS, jsonArray.toString()).apply()
+        prefService?.edit()?.putString(Constants.PREF_FROZEN_COINS, jsonArray.toString())?.apply()
     }
 
     @Throws(Exception::class)
@@ -91,7 +90,7 @@ class UTXOService(thread: MoneroHandlerThread?) : ServiceBase(thread) {
         sendAll: Boolean,
         feePriority: PendingTransaction.Priority
     ): ArrayList<String> {
-        val basicFeeEstimate = calculateBasicFee(amount, feePriority)
+        val basicFeeEstimate = calculateBasicFee(amount, feePriority) ?: return arrayListOf()
         val amountWithBasicFee = amount + basicFeeEstimate
         val selectedUtxos = ArrayList<String>()
         val seenTxs = ArrayList<String>()
@@ -125,7 +124,7 @@ class UTXOService(thread: MoneroHandlerThread?) : ServiceBase(thread) {
         return selectedUtxos
     }
 
-    private fun calculateBasicFee(amount: Long, feePriority: PendingTransaction.Priority): Long {
+    private fun calculateBasicFee(amount: Long, feePriority: PendingTransaction.Priority): Long? {
         val destinations = ArrayList<Pair<String, Long>>()
         destinations.add(
             Pair(
@@ -134,7 +133,7 @@ class UTXOService(thread: MoneroHandlerThread?) : ServiceBase(thread) {
             )
         )
         // destination string doesn't actually matter here, so i'm using the donation address. amount also technically doesn't matter
-        return WalletManager.instance!!.wallet!!.estimateTransactionFee(destinations, feePriority)
+        return WalletManager.instance?.wallet?.estimateTransactionFee(destinations, feePriority)
     }
 
     companion object {

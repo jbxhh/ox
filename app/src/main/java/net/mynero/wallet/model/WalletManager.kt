@@ -23,7 +23,6 @@ import java.util.Calendar
 import java.util.Locale
 
 class WalletManager {
-    @JvmField
     val networkType = NetworkType.NetworkType_Mainnet
     var wallet: Wallet? = null
         private set
@@ -209,7 +208,7 @@ class WalletManager {
         subaddressLookahead: String
     ): Long
 
-    external fun closeJ(wallet: Wallet?): Boolean
+    private external fun closeJ(wallet: Wallet?): Boolean
     fun close(wallet: Wallet): Boolean {
         unmanageWallet(wallet)
         val closed = closeJ(wallet)
@@ -225,28 +224,28 @@ class WalletManager {
         return walletExists(aFile.absolutePath)
     }
 
-    external fun walletExists(path: String?): Boolean
+    private external fun walletExists(path: String?): Boolean
     external fun verifyWalletPassword(
-        keys_file_name: String?,
+        keysFileName: String?,
         password: String?,
-        watch_only: Boolean
+        watchOnly: Boolean
     ): Boolean
 
-    fun verifyWalletPasswordOnly(keys_file_name: String, password: String): Boolean {
-        return queryWalletDeviceJ(keys_file_name, password) >= 0
+    fun verifyWalletPasswordOnly(keysFileName: String, password: String): Boolean {
+        return queryWalletDeviceJ(keysFileName, password) >= 0
     }
 
-    fun queryWalletDevice(keys_file_name: String, password: String): Wallet.Device {
-        val device = queryWalletDeviceJ(keys_file_name, password)
+    fun queryWalletDevice(keysFileName: String, password: String): Wallet.Device {
+        val device = queryWalletDeviceJ(keysFileName, password)
         return Wallet.Device.values()[device + 1] // mapping is monero+1=android
     }
 
-    private external fun queryWalletDeviceJ(keys_file_name: String, password: String): Int
+    private external fun queryWalletDeviceJ(keysFileName: String, password: String): Int
     fun findWallets(path: File): List<WalletInfo> {
         val wallets: MutableList<WalletInfo> = ArrayList()
         Timber.d("Scanning: %s", path.absolutePath)
         val found =
-            path.listFiles { dir, filename -> filename.endsWith(".keys") } ?: return emptyList()
+            path.listFiles { _, filename -> filename.endsWith(".keys") } ?: return emptyList()
         for (i in found.indices) {
             val filename = found[i].name
             val f = File(
@@ -291,8 +290,8 @@ class WalletManager {
 
     external fun startMining(
         address: String?,
-        background_mining: Boolean,
-        ignore_battery: Boolean
+        backgroundMining: Boolean,
+        ignoreBattery: Boolean
     ): Boolean
 
     external fun stopMining(): Boolean
@@ -320,7 +319,6 @@ class WalletManager {
 
     companion object {
         //TODO: maybe put these in an enum like in monero core - but why?
-        @JvmField
         var LOGLEVEL_SILENT = -1
         var LOGLEVEL_WARN = 0
         var LOGLEVEL_INFO = 1
@@ -349,7 +347,6 @@ class WalletManager {
                 NetworkType.NetworkType_Testnet -> "9A-"
                 NetworkType.NetworkType_Mainnet -> "4-"
                 NetworkType.NetworkType_Stagenet -> "5-"
-                else -> throw IllegalStateException("Unsupported Network: $networkType")
             }
         }
 

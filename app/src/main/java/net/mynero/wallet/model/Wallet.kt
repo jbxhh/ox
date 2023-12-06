@@ -17,7 +17,6 @@ package net.mynero.wallet.model
 
 import android.util.Pair
 import net.mynero.wallet.data.Subaddress
-import net.mynero.wallet.model.NetworkType.Companion.fromInteger
 import timber.log.Timber
 import java.io.File
 import java.text.SimpleDateFormat
@@ -129,7 +128,7 @@ class Wallet {
 
     external fun getPath(): String?
     val networkType: NetworkType?
-        get() = fromInteger(nettype())
+        get() = NetworkType.fromInteger(nettype())
 
     external fun nettype(): Int
 
@@ -255,7 +254,7 @@ class Wallet {
         destinations: List<Pair<String, Long>>,
         priority: PendingTransaction.Priority
     ): Long {
-        val _priority = priority.value
+        val _priority = priority.ordinal
         return estimateTransactionFee(destinations, _priority)
     }
 
@@ -270,7 +269,7 @@ class Wallet {
         keyImages: ArrayList<String>
     ): PendingTransaction? {
         disposePendingTransaction()
-        val _priority = priority.value
+        val _priority = priority.ordinal
         val txHandle = createSweepTransaction(dstAddr, "", 0, _priority, accountIndex, keyImages)
         pendingTransaction = PendingTransaction(txHandle)
         return pendingTransaction
@@ -282,7 +281,7 @@ class Wallet {
         keyImages: ArrayList<String>
     ): PendingTransaction? {
         disposePendingTransaction()
-        val _priority = priority.value
+        val _priority = priority.ordinal
         val destinations = ArrayList<String>()
         val amounts = LongArray(outputs.size)
         for (i in outputs.indices) {

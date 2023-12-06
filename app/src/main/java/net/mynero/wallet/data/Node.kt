@@ -245,7 +245,6 @@ class Node {
         private var DEFAULT_LEVIN_PORT = 0
         private var DEFAULT_RPC_PORT = 0
 
-        @JvmStatic
         fun fromString(nodeString: String?): Node? {
             return try {
                 Node(nodeString)

@@ -70,7 +70,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
         sendUtxosButton.setOnClickListener(view1 -> {
             ArrayList<String> selectedKeyImages = new ArrayList<>();
             for (CoinsInfo coinsInfo : adapter.selectedUtxos.values()) {
-                selectedKeyImages.add(coinsInfo.keyImage);
+                selectedKeyImages.add(coinsInfo.getKeyImage());
             }
             SendBottomSheetDialog sendDialog = new SendBottomSheetDialog();
             sendDialog.listener = this;
@@ -80,7 +80,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
         churnUtxosButton.setOnClickListener(view1 -> {
             ArrayList<String> selectedKeyImages = new ArrayList<>();
             for (CoinsInfo coinsInfo : adapter.selectedUtxos.values()) {
-                selectedKeyImages.add(coinsInfo.keyImage);
+                selectedKeyImages.add(coinsInfo.getKeyImage());
             }
             SendBottomSheetDialog sendDialog = new SendBottomSheetDialog();
             sendDialog.listener = this;
@@ -101,7 +101,7 @@ public class UtxosFragment extends Fragment implements CoinsInfoAdapter.CoinsInf
                 HashMap<String, CoinsInfo> filteredUtxos = new HashMap<>();
                 for (CoinsInfo coinsInfo : utxos) {
                     if (!coinsInfo.isSpent()) {
-                        filteredUtxos.put(coinsInfo.pubKey, coinsInfo);
+                        filteredUtxos.put(coinsInfo.getPubKey(), coinsInfo);
                     }
                 }
                 if (filteredUtxos.isEmpty()) {

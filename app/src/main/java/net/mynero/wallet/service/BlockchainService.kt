@@ -8,10 +8,7 @@ import net.mynero.wallet.model.WalletManager
 class BlockchainService(thread: MoneroHandlerThread) : ServiceBase(thread) {
     private val _currentHeight = MutableLiveData(0L)
     private val _connectionStatus = MutableLiveData(ConnectionStatus.ConnectionStatus_Disconnected)
-
-    @JvmField
     var height: LiveData<Long> = _currentHeight
-
     @JvmField
     var connectionStatus: LiveData<ConnectionStatus> = _connectionStatus
     var daemonHeight: Long = 0
@@ -22,7 +19,7 @@ class BlockchainService(thread: MoneroHandlerThread) : ServiceBase(thread) {
                 lastDaemonHeightUpdateTimeMs = t
             } else {
                 if (t - lastDaemonHeightUpdateTimeMs > 120000) {
-                    field = WalletManager.instance!!.wallet!!.getDaemonBlockChainHeight()
+                    field = WalletManager.instance?.wallet?.getDaemonBlockChainHeight() ?: return
                     lastDaemonHeightUpdateTimeMs = t
                 }
             }
@@ -37,8 +34,8 @@ class BlockchainService(thread: MoneroHandlerThread) : ServiceBase(thread) {
         _currentHeight.postValue(currentHeight)
     }
 
-    val currentHeight: Long
-        get() = WalletManager.instance!!.wallet!!.getBlockChainHeight()
+    private val currentHeight: Long
+        get() = WalletManager.instance?.wallet?.getBlockChainHeight() ?: -1
 
     fun setConnectionStatus(status: ConnectionStatus) {
         _connectionStatus.postValue(status)

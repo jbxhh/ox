@@ -20,28 +20,15 @@ import android.os.Parcelable
 import android.os.Parcelable.Creator
 
 class CoinsInfo : Parcelable, Comparable<CoinsInfo> {
-    @JvmField
     var globalOutputIndex: Long
     var isSpent = false
-
-    @JvmField
     var keyImage: String? = null
-
-    @JvmField
     var amount: Long = 0
-
-    @JvmField
     var hash: String? = null
-
-    @JvmField
     var pubKey: String? = null
     var isUnlocked = false
-
-    @JvmField
     var localOutputIndex: Long = 0
     var isFrozen = false
-
-    @JvmField
     var address: String? = null
 
     constructor(
@@ -68,7 +55,7 @@ class CoinsInfo : Parcelable, Comparable<CoinsInfo> {
         this.address = address
     }
 
-    protected constructor(`in`: Parcel) {
+    private constructor(`in`: Parcel) {
         globalOutputIndex = `in`.readLong()
     }
 
@@ -80,15 +67,15 @@ class CoinsInfo : Parcelable, Comparable<CoinsInfo> {
         parcel.writeLong(globalOutputIndex)
     }
 
-    override fun compareTo(another: CoinsInfo): Int {
+    override fun compareTo(other: CoinsInfo): Int {
         val b1 = amount
-        val b2 = another.amount
+        val b2 = other.amount
         return if (b1 > b2) {
             -1
         } else if (b1 < b2) {
             1
         } else {
-            hash!!.compareTo(another.hash!!)
+            other.hash?.let { hash?.compareTo(it) } ?: 0
         }
     }
 

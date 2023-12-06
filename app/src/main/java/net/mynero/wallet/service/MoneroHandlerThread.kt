@@ -32,10 +32,10 @@ import java.security.SecureRandom
  * used to create handler classes. Note that start() must still be called.
  * The started Thread has a stck size of STACK_SIZE (=5MB)
  */
-class MoneroHandlerThread(name: String?, val listener: Listener?, wallet: Wallet) :
+class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet) :
     Thread(null, null, name, THREAD_STACK_SIZE), WalletListener {
     private val wallet: Wallet
-    var triesLeft = 5
+    private var triesLeft = 5
 
     init {
         this.wallet = wallet

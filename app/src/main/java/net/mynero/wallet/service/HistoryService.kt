@@ -20,7 +20,7 @@ class HistoryService(thread: MoneroHandlerThread) : ServiceBase(thread) {
     }
 
     private fun getHistory(): List<TransactionInfo> {
-        return WalletManager.instance!!.wallet!!.history!!.all
+        return WalletManager.instance?.wallet?.history?.all ?: emptyList()
     }
 
     companion object {

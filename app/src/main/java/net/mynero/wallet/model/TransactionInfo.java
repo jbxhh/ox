@@ -19,6 +19,8 @@ package net.mynero.wallet.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+
 import net.mynero.wallet.data.Subaddress;
 
 import java.util.List;
@@ -100,7 +102,7 @@ public class TransactionInfo implements Parcelable, Comparable<TransactionInfo> 
         addressIndex = in.readInt();
         confirmations = in.readLong();
         subaddressLabel = in.readString();
-        transfers = in.readArrayList(Transfer.class.getClassLoader());
+        in.readList(transfers, Transfer.class.getClassLoader());
         txKey = in.readString();
         notes = in.readString();
         address = in.readString();
@@ -117,6 +119,8 @@ public class TransactionInfo implements Parcelable, Comparable<TransactionInfo> 
             return subaddressLabel;
     }
 
+    @Override
+    @NonNull
     public String toString() {
         return direction + "@" + blockheight + " " + amount;
     }
@@ -171,13 +175,11 @@ public class TransactionInfo implements Parcelable, Comparable<TransactionInfo> 
         }
 
         public static Direction fromInteger(int n) {
-            switch (n) {
-                case 0:
-                    return Direction_In;
-                case 1:
-                    return Direction_Out;
-            }
-            return null;
+            return switch (n) {
+                case 0 -> Direction_In;
+                case 1 -> Direction_Out;
+                default -> null;
+            };
         }
 
         public int getValue() {

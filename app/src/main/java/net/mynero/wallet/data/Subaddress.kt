@@ -23,7 +23,6 @@ class Subaddress(
     @JvmField val address: String,
     val label: String
 ) : Comparable<Subaddress> {
-    @JvmField
     var amount: Long = 0
 
     override fun compareTo(other: Subaddress): Int { // newer is <
