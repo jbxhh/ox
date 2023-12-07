@@ -5,23 +5,21 @@
 
 ## What features does it have?
 
-- Uses Monero v0.18.1.0
+- Uses Monero v0.18.3.1
 - Support for Android >= 5.0
-- Testnet and Mainnet
 - Generate new wallets
 - Recover wallets from mnemonic seed
-- Support for accounts
 - View transactions including details and copy to clipboard
 - Spend Moneroj (handle with care on mainnet!)
 - QR Code scanning - make sure to *ALWAYS* verify the scanned code is what it is advertised to be!
 - Custom daemons (remote or local network)
-- Tor support, with settings to customize proxy address and port.
+- Tor and I2P support, with settings to customize proxy address and port.
 
 ## How does the wallet get an exchange rate?
 It doesn't.
 
 ## How do I use a node with username & password?
-Not supported just yet.
+Enter username and password when adding/editing a node.
 
 ## The app always crashes as soon as I open a wallet!
 Users of Zenfone MAX & Zenfone 2 Laser (possibly others) **MUST** use the armeabi-v7a APK as the arm64-v8a build uses hardware AES
