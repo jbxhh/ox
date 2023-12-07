@@ -183,7 +183,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:background="@drawable/edittext_bg"
-                        android:hint="@string/recovery_phrase_optional"
+                        android:hint="@string/recovery_phrase_optional_polyseed"
                         android:minHeight="48dp"
                         app:layout_constraintBottom_toTopOf="@id/wallet_restore_height_edittext"
                         app:layout_constraintEnd_toEndOf="parent"

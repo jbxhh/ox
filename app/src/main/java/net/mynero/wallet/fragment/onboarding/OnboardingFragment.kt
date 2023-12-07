@@ -121,10 +121,12 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
                 seedOffsetCheckbox?.visibility = View.VISIBLE
                 walletRestoreHeightEditText?.visibility = View.VISIBLE
                 walletPasswordEditText?.hint = getString(R.string.password_optional)
+                walletSeedEditText?.hint = getString(R.string.recovery_phrase_optional_legacy)
             } else {
                 seedOffsetCheckbox?.visibility = View.GONE
                 walletRestoreHeightEditText?.visibility = View.GONE
                 walletPasswordEditText?.hint = getString(R.string.password_non_optional)
+                walletSeedEditText?.hint = getString(R.string.recovery_phrase_optional_polyseed)
             }
         }
     }
