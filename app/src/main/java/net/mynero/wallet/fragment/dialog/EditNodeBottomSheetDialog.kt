@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
@@ -39,6 +40,7 @@ class EditNodeBottomSheetDialog : BottomSheetDialogFragment() {
         val nodeNameEditText = view.findViewById<EditText>(R.id.node_name_edittext)
         val usernameEditText = view.findViewById<EditText>(R.id.username_edittext)
         val passwordEditText = view.findViewById<EditText>(R.id.password_edittext)
+        val trustedDaemonCheckBox = view.findViewById<CheckBox>(R.id.trusted_node_checkbox)
         val pastePasswordImageButton =
             view.findViewById<ImageButton>(R.id.paste_password_imagebutton)
         if (node == null) return
@@ -46,6 +48,7 @@ class EditNodeBottomSheetDialog : BottomSheetDialogFragment() {
         portEditText.setText("${node?.rpcPort}")
         nodeNameEditText.setText(node?.name)
         usernameEditText.setText(node?.username)
+        trustedDaemonCheckBox.isChecked = node?.trusted ?: false
         if (node?.password?.isNotEmpty() == true) {
             passwordEditText.setText(node?.password)
             passwordEditText.visibility = View.VISIBLE
@@ -78,6 +81,7 @@ class EditNodeBottomSheetDialog : BottomSheetDialogFragment() {
             val nodeName = nodeNameEditText.text.toString()
             val user = usernameEditText.text.toString()
             val pass = passwordEditText.text.toString()
+            val trusted = trustedDaemonCheckBox.isChecked
             if (nodeName.isEmpty()) {
                 Toast.makeText(context, "Enter node name", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -101,6 +105,7 @@ class EditNodeBottomSheetDialog : BottomSheetDialogFragment() {
                 jsonObject.put("rpcPort", portString.toInt())
                 jsonObject.put("network", "mainnet")
                 jsonObject.put("name", nodeName)
+                jsonObject.put("trusted", trusted)
                 listener?.onNodeEdited(node, fromJson(jsonObject))
                 dismiss()
             } catch (e: JSONException) {

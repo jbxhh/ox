@@ -1,8 +1,6 @@
 package net.mynero.wallet.fragment.settings
 
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
@@ -12,12 +10,17 @@ import android.widget.CompoundButton
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
-import net.mynero.wallet.MoneroApplication
+import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.mynero.wallet.R
 import net.mynero.wallet.data.Node
 import net.mynero.wallet.data.Node.Companion.fromJson
@@ -34,37 +37,23 @@ import net.mynero.wallet.model.Wallet.ConnectionStatus
 import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.service.BalanceService
 import net.mynero.wallet.service.BlockchainService
+import net.mynero.wallet.service.DaemonService
 import net.mynero.wallet.service.HistoryService
 import net.mynero.wallet.service.PrefService
+import net.mynero.wallet.service.ProxyService
 import net.mynero.wallet.util.Constants
 import org.json.JSONArray
+import timber.log.Timber
 
 class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListener, AddNodeListener,
     EditNodeListener {
     private var mViewModel: SettingsViewModel? = null
-    private var proxyAddressListener: TextWatcher = object : TextWatcher {
-        override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-        override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-        override fun afterTextChanged(editable: Editable) {
-            if (mViewModel != null) {
-                mViewModel?.setProxyAddress(editable.toString())
-                mViewModel?.updateProxy(activity?.application as MoneroApplication)
-            }
-        }
-    }
-    private var proxyPortListener: TextWatcher = object : TextWatcher {
-        override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-        override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-        override fun afterTextChanged(editable: Editable) {
-            if (mViewModel != null) {
-                mViewModel?.setProxyPort(editable.toString())
-                mViewModel?.updateProxy(activity?.application as MoneroApplication)
-            }
-        }
-    }
     private var walletProxyAddressEditText: EditText? = null
     private var walletProxyPortEditText: EditText? = null
     private var selectNodeButton: Button? = null
+    private var cachedProxyAddress: String = ""
+    private var cachedProxyPort: String = ""
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -103,12 +92,12 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
         donationSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
             PrefService.instance?.edit()?.putBoolean(Constants.PREF_DONATE_PER_TX, b)?.apply()
         }
-        val prefService = PrefService.instance
-        val usesProxy = prefService?.getBoolean(Constants.PREF_USES_TOR, false) == true
-        if (prefService?.hasProxySet() == true) {
-            val proxyAddress = prefService.proxyAddress
-            val proxyPort = prefService.proxyPort
-            initProxyStuff(proxyAddress, proxyPort)
+        val prefService = PrefService.instance ?: return
+        val usesProxy = prefService.getBoolean(Constants.PREF_USES_TOR, false)
+        cachedProxyAddress = ProxyService.instance?.proxyAddress ?: return
+        cachedProxyPort = ProxyService.instance?.proxyPort ?: return
+        if (ProxyService.instance?.hasProxySet() == true) {
+            initProxyStuff(cachedProxyAddress, cachedProxyPort)
         }
         torSwitch.isChecked = usesProxy
         if (usesProxy) {
@@ -116,22 +105,19 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
         } else {
             proxySettingsLayout.visibility = View.GONE
         }
-        addProxyTextListeners()
         torSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
-            prefService?.edit()?.putBoolean(Constants.PREF_USES_TOR, b)?.apply()
+            prefService.edit()?.putBoolean(Constants.PREF_USES_TOR, b)?.apply()
             if (b) {
-                if (prefService?.hasProxySet() == true) {
-                    removeProxyTextListeners()
-                    val proxyAddress = prefService.proxyAddress
-                    val proxyPort = prefService.proxyPort
+                if (ProxyService.instance?.hasProxySet() == true) {
+                    val proxyAddress = ProxyService.instance?.proxyAddress ?: return@setOnCheckedChangeListener
+                    val proxyPort = ProxyService.instance?.proxyPort ?: return@setOnCheckedChangeListener
                     initProxyStuff(proxyAddress, proxyPort)
-                    addProxyTextListeners()
                 }
                 proxySettingsLayout.visibility = View.VISIBLE
             } else {
                 proxySettingsLayout.visibility = View.GONE
             }
-            mViewModel?.updateProxy(activity?.application as MoneroApplication)
+            refreshProxy()
         }
         displaySeedButton.setOnClickListener {
             val usesPassword =
@@ -148,16 +134,6 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
             }
         }
         displayUtxosButton.setOnClickListener { navigate(R.id.nav_to_utxos) }
-        val statusTextView = view.findViewById<TextView>(R.id.status_textview)
-        BlockchainService.instance?.connectionStatus?.observe(viewLifecycleOwner) { connectionStatus: ConnectionStatus ->
-            if (connectionStatus === ConnectionStatus.ConnectionStatus_Connected) {
-                statusTextView.text = resources.getText(R.string.connected)
-            } else if (connectionStatus === ConnectionStatus.ConnectionStatus_Disconnected) {
-                statusTextView.text = resources.getText(R.string.disconnected)
-            } else if (connectionStatus === ConnectionStatus.ConnectionStatus_WrongVersion) {
-                statusTextView.text = resources.getText(R.string.version_mismatch)
-            }
-        }
         val node = PrefService.instance?.node // shouldn't use default value here
         selectNodeButton?.text = getString(R.string.node_button_text, node?.address)
         selectNodeButton?.setOnClickListener {
@@ -166,6 +142,25 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
                 dialog.listener = this
                 dialog.show(fragmentManager, "node_selection_dialog")
             }
+        }
+
+        val onBackPressedCallback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                refreshProxy()
+                findNavController().popBackStack()
+            }
+        }
+
+        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, onBackPressedCallback)
+    }
+
+    private fun refreshProxy() {
+        val proxyAddress = walletProxyAddressEditText?.text.toString()
+        val proxyPort = walletProxyPortEditText?.text.toString()
+        if((proxyAddress != cachedProxyAddress) || (proxyPort != cachedProxyPort)) {
+            ProxyService.instance?.updateProxy(proxyAddress, proxyPort)
+            cachedProxyAddress = proxyAddress
+            cachedProxyPort = proxyPort
         }
     }
 
@@ -188,30 +183,22 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
     private fun initProxyStuff(proxyAddress: String, proxyPort: String) {
         val validIpAddress = Patterns.IP_ADDRESS.matcher(proxyAddress).matches()
         if (validIpAddress) {
-            mViewModel?.setProxyAddress(proxyAddress)
-            mViewModel?.setProxyPort(proxyPort)
             walletProxyAddressEditText?.setText(proxyAddress)
             walletProxyPortEditText?.setText(proxyPort)
         }
     }
 
-    private fun removeProxyTextListeners() {
-        walletProxyAddressEditText?.removeTextChangedListener(proxyAddressListener)
-        walletProxyPortEditText?.removeTextChangedListener(proxyPortListener)
-    }
-
-    private fun addProxyTextListeners() {
-        walletProxyAddressEditText?.addTextChangedListener(proxyAddressListener)
-        walletProxyPortEditText?.addTextChangedListener(proxyPortListener)
-    }
-
     override fun onNodeSelected() {
         val node = PrefService.instance?.node
         selectNodeButton?.text = getString(R.string.node_button_text, node?.address)
-        mViewModel?.updateProxy(activity?.application as MoneroApplication)
-        (activity?.application as MoneroApplication).executor?.execute {
-            WalletManager.instance?.wallet?.init(0)
-            WalletManager.instance?.wallet?.startRefresh()
+        refreshProxy()
+
+        activity?.runOnUiThread {
+            Toast.makeText(
+                activity,
+                activity?.getString(R.string.node_selected, node?.name ?: node?.host),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 

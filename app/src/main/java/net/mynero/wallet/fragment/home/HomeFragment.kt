@@ -8,12 +8,16 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.mynero.wallet.MainActivity
 import net.mynero.wallet.R
 import net.mynero.wallet.adapter.TransactionInfoAdapter
@@ -22,9 +26,12 @@ import net.mynero.wallet.model.TransactionInfo
 import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.service.BalanceService
 import net.mynero.wallet.service.BlockchainService
+import net.mynero.wallet.service.DaemonService
 import net.mynero.wallet.service.HistoryService
 import net.mynero.wallet.service.PrefService
+import net.mynero.wallet.service.ProxyService
 import net.mynero.wallet.util.Constants
+import timber.log.Timber
 
 class HomeFragment : Fragment(), TxInfoAdapterListener {
     private var startHeight: Long = 0
@@ -66,6 +73,26 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
         val historyService = HistoryService.instance
         val blockchainService = BlockchainService.instance
 
+        ProxyService.instance?.proxyChangeEvents?.observe(viewLifecycleOwner) { proxy ->
+            lifecycleScope.launch(Dispatchers.IO) {
+                Timber.d("Updating proxy:: $proxy")
+                WalletManager.instance?.setProxy(proxy)
+                WalletManager.instance?.wallet?.setProxy(proxy)
+                WalletManager.instance?.wallet?.init(0)
+                WalletManager.instance?.wallet?.startRefresh()
+            }
+        }
+
+        DaemonService.instance?.daemonChangeEvents?.observe(viewLifecycleOwner) { daemon ->
+            lifecycleScope.launch(Dispatchers.IO) {
+                Timber.d("Updating daemon:: $daemon")
+                WalletManager.instance?.setDaemon(daemon)
+                WalletManager.instance?.wallet?.setTrustedDaemon(daemon.trusted)
+                WalletManager.instance?.wallet?.init(0)
+                WalletManager.instance?.wallet?.startRefresh()
+            }
+        }
+
         balanceService?.balanceInfo?.observe(viewLifecycleOwner) { balanceInfo ->
             if (balanceInfo != null) {
                 unlockedBalanceTextView.text = balanceInfo.unlockedDisplay
@@ -101,7 +128,8 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
                 }
             } else {
                 progressBar.visibility = View.INVISIBLE
-                progressBarText.visibility = View.GONE
+                progressBarText.visibility = View.VISIBLE
+                progressBarText.text = "Synchronized"
             }
         }
         val adapter = TransactionInfoAdapter(this)

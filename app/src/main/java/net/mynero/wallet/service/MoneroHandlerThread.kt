@@ -16,6 +16,7 @@
  */
 package net.mynero.wallet.service
 
+import android.util.Log
 import net.mynero.wallet.model.PendingTransaction
 import net.mynero.wallet.model.TransactionOutput
 import net.mynero.wallet.model.Wallet
@@ -25,6 +26,7 @@ import net.mynero.wallet.model.Wallet.ConnectionStatus
 import net.mynero.wallet.model.WalletListener
 import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.util.Constants
+import timber.log.Timber
 import java.security.SecureRandom
 
 /**
@@ -57,11 +59,12 @@ class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet)
                     currentNode?.address == "localhost" ||
                     currentNode?.address == "127.0.0.1"
         if (usesTor && !isLocalIp) {
-            val proxy = prefService.proxy
+            val proxy = ProxyService.instance?.proxy
             proxy?.let { WalletManager.instance?.setProxy(it) }
             wallet.setProxy(proxy)
         }
         WalletManager.instance?.setDaemon(currentNode)
+        currentNode?.trusted?.let { wallet.setTrustedDaemon(it) }
         wallet.init(0)
         wallet.setListener(this)
         wallet.startRefresh()
@@ -81,20 +84,36 @@ class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet)
 
     override fun refreshed() {
         val status = wallet.fullStatus.connectionStatus
-        if (status === ConnectionStatus.ConnectionStatus_Disconnected || status == null) {
-            if (triesLeft > 0) {
-                wallet.startRefresh()
-                triesLeft--
-            } else {
-                listener?.onConnectionFail()
-            }
-        } else {
-            BlockchainService.instance?.daemonHeight = wallet.getDaemonBlockChainHeight()
-            wallet.setSynchronized()
-            wallet.store()
-            refresh(true)
-        }
+        val daemonHeight = wallet.getDaemonBlockChainHeight()
+        val chainHeight = wallet.getBlockChainHeight()
+        BlockchainService.instance?.daemonHeight = daemonHeight
         status?.let { BlockchainService.instance?.setConnectionStatus(it) }
+        if (status === ConnectionStatus.ConnectionStatus_Disconnected || status == null) {
+            tryRestartOrFail()
+        } else {
+            val heightDiff = daemonHeight - chainHeight
+            if(heightDiff >= 2) {
+                tryRestartOrFail()
+            } else {
+                Timber.d("refreshed() Synchronized")
+                wallet.setSynchronized()
+                wallet.store()
+                refresh(true)
+            }
+
+        }
+    }
+
+    private fun tryRestartOrFail() {
+        Timber.d("refreshed() Disconnected")
+        if (triesLeft > 0) {
+            Timber.d("refreshed() Starting refresh")
+            wallet.startRefresh()
+            triesLeft--
+        } else {
+            Timber.d("refreshed() On connection fail")
+            listener?.onConnectionFail()
+        }
     }
 
     private fun refresh(walletSynced: Boolean) {

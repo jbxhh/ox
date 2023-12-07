@@ -208,8 +208,20 @@ class Wallet {
         }
 
     private external fun getConnectionStatusJ(): Int
+    fun setTrustedDaemon(trusted: Boolean) {
+        setTrustedDaemonJ(trusted)
+    }
+    private external fun setTrustedDaemonJ(trusted: Boolean)
 
-    external fun setProxy(address: String?): Boolean
+    fun isTrustedDaemon(): Boolean {
+        return isTrustedDaemonJ();
+    }
+    private external fun isTrustedDaemonJ(): Boolean
+
+    fun setProxy(address: String?): Boolean {
+        return setProxyJ(address)
+    }
+    private external fun setProxyJ(address: String?): Boolean
     val balance: Long
         get() = getBalance(accountIndex)
 

@@ -920,11 +920,25 @@ Java_net_mynero_wallet_model_Wallet_getConnectionStatusJ(JNIEnv *env, jobject in
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     return wallet->connected();
 }
-//TODO virtual void setTrustedDaemon(bool arg) = 0;
+JNIEXPORT void JNICALL
+Java_net_mynero_wallet_model_Wallet_setTrustedDaemonJ(JNIEnv *env, jobject instance, jboolean trusted) {
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+    if (trusted) {
+        wallet->setTrustedDaemon(true);
+    } else {
+        wallet->setTrustedDaemon(false);
+    }
+}
+JNIEXPORT jboolean JNICALL
+Java_net_mynero_wallet_model_Wallet_isTrustedDaemonJ(JNIEnv *env, jobject instance) {
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+    bool td = wallet->trustedDaemon();
+    return td;
+}
 //TODO virtual bool trustedDaemon() const = 0;
 
 JNIEXPORT jboolean JNICALL
-Java_net_mynero_wallet_model_Wallet_setProxy(JNIEnv *env, jobject instance,
+Java_net_mynero_wallet_model_Wallet_setProxyJ(JNIEnv *env, jobject instance,
                                                 jstring address) {
     const char *_address = env->GetStringUTFChars(address, nullptr);
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);

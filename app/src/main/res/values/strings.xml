@@ -105,7 +105,8 @@
     <string name="transaction_conf_1_desc2_confirmed">time, and was mined in block</string>
     <string name="date">Date</string>
     <string name="transaction_on_date_label">on</string>
-    <string name="node_selected">Node has been selected</string>
+    <string name="node_selecting">Selecting node…</string>
+    <string name="node_selected">Using node: %1$s</string>
     <string name="fee_priority">Fee priority:</string>
     <string name="low">Low</string>
     <string name="medium">Medium</string>
@@ -134,6 +135,7 @@
     <string name="wallet_restore_height_label">Restore height</string>
     <string name="block_height">Block Height</string>
     <string name="use_password_as_seed_offset">Use passphrase as seed offset</string>
+    <string name="trusted_daemon">Trusted daemon</string>
     <string name="subbaddress_info_subtitle" translatable="false">#%1$d: %2$s</string>
     <string name="previous_addresses">Previous addresses</string>
     <string name="donate_label">Donate to Mysu</string>

@@ -14,6 +14,7 @@ import android.widget.CompoundButton
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -28,6 +29,7 @@ import net.mynero.wallet.fragment.dialog.NodeSelectionBottomSheetDialog
 import net.mynero.wallet.fragment.dialog.NodeSelectionBottomSheetDialog.NodeSelectionDialogListener
 import net.mynero.wallet.fragment.onboarding.OnboardingViewModel.SeedType
 import net.mynero.wallet.service.PrefService
+import net.mynero.wallet.service.ProxyService
 import net.mynero.wallet.util.Constants
 
 class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListener {
@@ -186,11 +188,11 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
             PrefService.instance?.edit()?.putBoolean(Constants.PREF_USES_TOR, b)?.apply()
             removeProxyTextListeners()
             if (b) {
-                if (PrefService.instance?.hasProxySet() == true) {
+                if (ProxyService.instance?.hasProxySet() == true) {
                     val proxyAddress =
-                        PrefService.instance?.proxyAddress ?: return@setOnCheckedChangeListener
+                        ProxyService.instance?.proxyAddress ?: return@setOnCheckedChangeListener
                     val proxyPort =
-                        PrefService.instance?.proxyPort ?: return@setOnCheckedChangeListener
+                        ProxyService.instance?.proxyPort ?: return@setOnCheckedChangeListener
                     initProxyStuff(proxyAddress, proxyPort)
                 } else {
                     initProxyStuff("127.0.0.1", "9050")
@@ -277,6 +279,11 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
     override fun onNodeSelected() {
         val node = PrefService.instance?.node
         selectNodeButton?.text = getString(R.string.node_button_text, node?.address)
+        Toast.makeText(
+            activity,
+            getString(R.string.node_selected),
+            Toast.LENGTH_SHORT
+        ).show()
         mViewModel?.updateProxy(activity?.application as MoneroApplication)
     }
 

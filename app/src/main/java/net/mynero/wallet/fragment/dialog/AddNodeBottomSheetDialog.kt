@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
@@ -38,6 +39,8 @@ class AddNodeBottomSheetDialog : BottomSheetDialogFragment() {
         val nodeNameEditText = view.findViewById<EditText>(R.id.node_name_edittext)
         val usernameEditText = view.findViewById<EditText>(R.id.username_edittext)
         val passwordEditText = view.findViewById<EditText>(R.id.password_edittext)
+        val trustedDaemonCheckbox = view.findViewById<CheckBox>(R.id.trusted_node_checkbox)
+
         val pastePasswordImageButton =
             view.findViewById<ImageButton>(R.id.paste_password_imagebutton)
         usernameEditText.addTextChangedListener(object : TextWatcher {
@@ -63,6 +66,8 @@ class AddNodeBottomSheetDialog : BottomSheetDialogFragment() {
             val name = nodeNameEditText.text.toString()
             val user = usernameEditText.text.toString()
             val pass = passwordEditText.text.toString()
+            val trusted = trustedDaemonCheckbox.isChecked
+
             if (name.isEmpty()) {
                 Toast.makeText(context, "Enter node name", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -85,6 +90,7 @@ class AddNodeBottomSheetDialog : BottomSheetDialogFragment() {
                 jsonObject.put("rpcPort", portString.toInt())
                 jsonObject.put("network", "mainnet")
                 jsonObject.put("name", name)
+                jsonObject.put("trusted", trusted)
                 addNodeToSaved(jsonObject)
                 if (listener != null) {
                     listener?.onNodeAdded()
