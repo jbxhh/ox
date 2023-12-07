@@ -19,8 +19,8 @@ Clone a specific branch, and shorten I2P download time with `git clone -b releas
 
 4. Then go into the mynero repo folder, then external-libs. Here you need to create symbol link to `monero` folder:
 
-Linux: `ln -s ~/monero ~/mynero/external-libs/monero`
+Linux: `ln -s ~/monero ~/mysu/external-libs/monero`
 
-Windows: `mklink /D "C:\Users\<USERNAME>\monero-wallet\external-libs\monero" "C:\Users\<USERNAME>\monero"`
+Windows: `mklink /D "C:\Users\<USERNAME>\mysu\external-libs\monero" "C:\Users\<USERNAME>\monero"`
 
 5. Start Docker and then run `sudo make` in `external-libs` folder. It will fail at end on Windows, but if `wallet2_api.h` exists in `include` folder, the build was successful. 
