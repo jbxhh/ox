@@ -22,43 +22,22 @@ import android.os.Parcelable.Creator
 import net.mynero.wallet.data.Subaddress
 
 class TransactionInfo : Parcelable, Comparable<TransactionInfo> {
-    @JvmField
     var direction: Direction
     var isPending: Boolean
     var isFailed: Boolean
-
-    @JvmField
     var amount: Long
     var fee: Long
-
-    @JvmField
     var blockheight: Long
-
-    @JvmField
     var hash: String?
-
-    @JvmField
     var timestamp: Long
     var paymentId: String?
-
-    @JvmField
     var accountIndex: Int
-
-    @JvmField
     var addressIndex: Int
-
-    @JvmField
     var confirmations: Long
     var subaddressLabel: String?
-
-    @JvmField
     var transfers: List<Transfer>? = listOf()
-
-    @JvmField
     var txKey: String? = null
     var notes: String? = null
-
-    @JvmField
     var address: String? = null
 
     constructor(

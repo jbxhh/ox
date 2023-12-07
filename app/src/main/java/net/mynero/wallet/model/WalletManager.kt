@@ -328,7 +328,6 @@ class WalletManager {
 
         // no need to keep a reference to the REAL WalletManager (we get it every tvTime we need it)
         @get:Synchronized
-        @JvmStatic
         var instance: WalletManager? = null
             get() {
                 if (field == null) {

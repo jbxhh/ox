@@ -111,7 +111,6 @@ class PrefService(application: MoneroApplication) : ServiceBase(null) {
     companion object {
         private var preferences: SharedPreferences? = null
 
-        @JvmStatic
         var instance: PrefService? = null
             private set
     }

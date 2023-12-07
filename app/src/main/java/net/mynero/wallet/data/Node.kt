@@ -254,7 +254,6 @@ class Node {
             }
         }
 
-        @JvmStatic
         fun fromJson(jsonObject: JSONObject?): Node? {
             return try {
                 Node(jsonObject)

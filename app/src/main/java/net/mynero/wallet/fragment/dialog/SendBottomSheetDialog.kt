@@ -38,13 +38,9 @@ import net.mynero.wallet.util.UriData.Companion.parse
 class SendBottomSheetDialog : BottomSheetDialogFragment() {
     private val _sendingMax = MutableLiveData(false)
     private val _pendingTransaction = MutableLiveData<PendingTransaction?>(null)
-
-    @JvmField
     var selectedUtxos = ArrayList<String>()
     private var sendingMax: LiveData<Boolean?> = _sendingMax
     private var pendingTransaction: LiveData<PendingTransaction?> = _pendingTransaction
-
-    @JvmField
     var uriData: UriData? = null
     private val cameraPermissionsLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -57,10 +53,7 @@ class SendBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    @JvmField
     var isChurning = false
-
-    @JvmField
     var listener: Listener? = null
     var priority: PendingTransaction.Priority = PendingTransaction.Priority.Priority_Low
     private var addressEditText: EditText? = null

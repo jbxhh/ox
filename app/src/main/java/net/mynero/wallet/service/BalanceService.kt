@@ -50,7 +50,6 @@ class BalanceService(thread: MoneroHandlerThread) : ServiceBase(thread) {
         get() = totalBalanceRaw - unlockedBalanceRaw
 
     companion object {
-        @JvmField
         var instance: BalanceService? = null
     }
 }

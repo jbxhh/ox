@@ -14,8 +14,8 @@ import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.Helper.clipBoardCopy
 
 class WalletKeysBottomSheetDialog : BottomSheetDialogFragment() {
-    @JvmField
     var password = ""
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

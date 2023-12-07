@@ -195,7 +195,6 @@ class RestoreHeight internal constructor() {
         const val DIFFICULTY_TARGET = 120 // seconds
         private var Singleton: RestoreHeight? = null
 
-        @JvmStatic
         val instance: RestoreHeight?
             get() {
                 if (Singleton == null) {

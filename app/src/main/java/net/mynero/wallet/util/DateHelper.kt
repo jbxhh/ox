@@ -20,7 +20,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 object DateHelper {
-    @JvmField
     val DATETIME_FORMATTER = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
     @Throws(ParseException::class)

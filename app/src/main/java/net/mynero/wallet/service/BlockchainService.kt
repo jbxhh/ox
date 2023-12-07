@@ -9,8 +9,6 @@ class BlockchainService(thread: MoneroHandlerThread) : ServiceBase(thread) {
     private val _currentHeight = MutableLiveData(0L)
     private val _connectionStatus = MutableLiveData(ConnectionStatus.ConnectionStatus_Disconnected)
     var height: LiveData<Long> = _currentHeight
-
-    @JvmField
     var connectionStatus: LiveData<ConnectionStatus> = _connectionStatus
     var daemonHeight: Long = 0
         set(height) {
@@ -43,7 +41,6 @@ class BlockchainService(thread: MoneroHandlerThread) : ServiceBase(thread) {
     }
 
     companion object {
-        @JvmField
         var instance: BlockchainService? = null
     }
 }

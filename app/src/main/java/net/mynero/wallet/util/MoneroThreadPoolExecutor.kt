@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 object MoneroThreadPoolExecutor {
-    @JvmField
     var MONERO_THREAD_POOL_EXECUTOR: Executor? = null
     private val CPU_COUNT = Runtime.getRuntime().availableProcessors()
     private val CORE_POOL_SIZE = Math.max(2, Math.min(CPU_COUNT - 1, 4))

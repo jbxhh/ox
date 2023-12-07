@@ -7,8 +7,6 @@ import net.mynero.wallet.model.WalletManager
 
 class HistoryService(thread: MoneroHandlerThread) : ServiceBase(thread) {
     private val _history = MutableLiveData<List<TransactionInfo>>()
-
-    @JvmField
     var history: LiveData<List<TransactionInfo>> = _history
 
     init {
@@ -24,7 +22,6 @@ class HistoryService(thread: MoneroHandlerThread) : ServiceBase(thread) {
     }
 
     companion object {
-        @JvmStatic
         var instance: HistoryService? = null
             private set
     }

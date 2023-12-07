@@ -139,7 +139,7 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
             if (usesPassword) {
                 activity?.supportFragmentManager?.let { fragmentManager ->
                     val passwordDialog = PasswordBottomSheetDialog()
-                    passwordDialog.cancelable = true
+                    passwordDialog.canCancel = true
                     passwordDialog.listener = this
                     passwordDialog.show(fragmentManager, "password_dialog")
                 }

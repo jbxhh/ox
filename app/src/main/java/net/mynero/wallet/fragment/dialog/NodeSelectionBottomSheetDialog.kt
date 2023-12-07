@@ -25,7 +25,6 @@ import org.json.JSONException
 import org.json.JSONObject
 
 class NodeSelectionBottomSheetDialog : BottomSheetDialogFragment(), NodeSelectionAdapterListener {
-    @JvmField
     var listener: NodeSelectionDialogListener? = null
     private var adapter: NodeSelectionAdapter? = null
     override fun onCreateView(
