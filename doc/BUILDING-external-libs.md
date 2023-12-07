@@ -11,7 +11,7 @@
 ## Building:
 
 1. Clone the Monero repo required for this app to function. A specific fork for UTXO management is hosted here: http://4hsesnr6mjb4qrflgf5gezjaszzoqnnisin7ywzbsv6pgcxysiaq.b32.i2p/pokkst/monero.git
-Clone a specific branch, and shorten I2P download time with `git clone -b release-v0.18.2.2-mysu --single-branch --depth 1 http://4hsesnr6mjb4qrflgf5gezjaszzoqnnisin7ywzbsv6pgcxysiaq.b32.i2p/pokkst/monero.git`
+Clone a specific branch, and shorten I2P download time with `git clone -b release-v0.18.3.1-mysu --single-branch --depth 1 http://4hsesnr6mjb4qrflgf5gezjaszzoqnnisin7ywzbsv6pgcxysiaq.b32.i2p/pokkst/monero.git`
 
 2. Change current directory to the monero repo: `cd monero`
 
