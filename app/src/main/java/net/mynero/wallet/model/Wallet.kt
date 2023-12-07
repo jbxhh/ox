@@ -428,7 +428,7 @@ class Wallet {
         ConnectionStatus_Disconnected, ConnectionStatus_Connected, ConnectionStatus_WrongVersion
     }
 
-    class Status internal constructor(status: Int, @JvmField val errorString: String) {
+    class Status internal constructor(status: Int, val errorString: String) {
         val status: StatusEnum
         var connectionStatus: ConnectionStatus? = null // optional
 

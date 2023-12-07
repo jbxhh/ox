@@ -33,7 +33,6 @@ class AddressService(thread: MoneroHandlerThread) : ServiceBase(thread) {
     }
 
     companion object {
-        @JvmField
         var instance: AddressService? = null
     }
 }

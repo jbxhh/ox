@@ -19,11 +19,9 @@ import org.json.JSONException
 import org.json.JSONObject
 
 class EditNodeBottomSheetDialog : BottomSheetDialogFragment() {
-    @JvmField
     var listener: EditNodeListener? = null
-
-    @JvmField
     var node: Node? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

@@ -14,8 +14,6 @@ import java.util.Collections
 
 class UTXOService(thread: MoneroHandlerThread?) : ServiceBase(thread) {
     private val _utxos = MutableLiveData<List<CoinsInfo>>()
-
-    @JvmField
     var utxos: LiveData<List<CoinsInfo>> = _utxos
     private var internalCachedUtxos: List<CoinsInfo> = ArrayList()
     private var frozenCoins = ArrayList<String?>()
@@ -137,7 +135,6 @@ class UTXOService(thread: MoneroHandlerThread?) : ServiceBase(thread) {
     }
 
     companion object {
-        @JvmStatic
         var instance: UTXOService? = null
     }
 }

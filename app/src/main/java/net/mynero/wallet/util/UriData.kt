@@ -4,7 +4,7 @@ import net.mynero.wallet.model.Wallet.Companion.getPaymentIdFromAddress
 import net.mynero.wallet.model.Wallet.Companion.isAddressValid
 import net.mynero.wallet.model.WalletManager.Companion.instance
 
-class UriData(@JvmField val address: String, val params: HashMap<String, String>) {
+class UriData(val address: String, val params: HashMap<String, String>) {
 
     fun hasPaymentId(): Boolean {
         return instance?.wallet?.nettype()?.let { getPaymentIdFromAddress(address, it) }
@@ -20,7 +20,6 @@ class UriData(@JvmField val address: String, val params: HashMap<String, String>
     }
 
     companion object {
-        @JvmStatic
         fun parse(uri: String): UriData? {
             if (uri.isEmpty()) return null
             val params = HashMap<String, String>()

@@ -160,7 +160,6 @@ object Helper {
         return getDisplayAmount(amount, XMR_DECIMALS)
     }
 
-    @JvmStatic
     fun getDisplayAmount(amount: Long, maxDecimals: Int): String {
         // a Java bug does not strip zeros properly if the value is 0
         if (amount == 0L) return "0.00"
@@ -173,8 +172,7 @@ object Helper {
 
     fun getFormattedAmount(amount: Double, isCrypto: Boolean): String? {
         // at this point selection is XMR in case of error
-        val displayB: String?
-        displayB = if (isCrypto) {
+        val displayB: String? = if (isCrypto) {
             if (amount >= 0 || amount == 0.0) {
                 String.format(Locale.US, "%,.5f", amount)
             } else {
@@ -186,7 +184,6 @@ object Helper {
         return displayB
     }
 
-    @JvmStatic
     fun getDisplayAmount(amount: Double): String {
         // a Java bug does not strip zeros properly if the value is 0
         var d = BigDecimal(amount)
@@ -244,7 +241,6 @@ object Helper {
         return null
     }
 
-    @JvmStatic
     fun clipBoardCopy(context: Context?, label: String?, text: String?) {
         if (context != null) {
             val clipboardManager =

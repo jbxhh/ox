@@ -25,7 +25,7 @@ import net.mynero.wallet.R
 import net.mynero.wallet.model.TransactionInfo
 import net.mynero.wallet.service.PrefService
 import net.mynero.wallet.util.Constants
-import net.mynero.wallet.util.DateHelper.DATETIME_FORMATTER
+import net.mynero.wallet.util.DateHelper
 import net.mynero.wallet.util.Helper
 import net.mynero.wallet.util.ThemeHelper
 import java.util.Calendar
@@ -89,7 +89,7 @@ class TransactionInfoAdapter(val listener: TxInfoAdapterListener?) :
             failedColour = ThemeHelper.getThemedColor(view.context, R.attr.neutralColor)
             val cal = Calendar.getInstance()
             val tz = cal.timeZone //get the local time zone.
-            DATETIME_FORMATTER.timeZone = tz
+            DateHelper.DATETIME_FORMATTER.timeZone = tz
         }
 
         fun bind(txInfo: TransactionInfo) {
@@ -155,7 +155,7 @@ class TransactionInfoAdapter(val listener: TxInfoAdapterListener?) :
         }
 
         private fun getDateTime(time: Long): String {
-            return DATETIME_FORMATTER.format(Date(time * 1000))
+            return DateHelper.DATETIME_FORMATTER.format(Date(time * 1000))
         }
     }
 }

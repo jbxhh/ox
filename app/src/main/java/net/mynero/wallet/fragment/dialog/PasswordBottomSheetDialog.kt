@@ -15,11 +15,9 @@ import net.mynero.wallet.util.Helper.getClipBoardText
 import java.io.File
 
 class PasswordBottomSheetDialog : BottomSheetDialogFragment() {
-    @JvmField
     var listener: PasswordListener? = null
+    var canCancel = false
 
-    @JvmField
-    var cancelable = false
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -30,7 +28,7 @@ class PasswordBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        isCancelable = cancelable
+        isCancelable = canCancel
         val walletFile = File(activity?.applicationInfo?.dataDir, Constants.WALLET_NAME)
         val pastePasswordImageButton =
             view.findViewById<ImageButton>(R.id.paste_password_imagebutton)
