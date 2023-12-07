@@ -213,6 +213,7 @@
             android:layout_marginBottom="24dp"
             android:elevation="6dp"
             android:visibility="gone"
+            android:importantForAccessibility="yes"
             app:area_margin="10dp"
             app:border_radius="20dp"
             app:inner_color="@android:color/white"

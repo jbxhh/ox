@@ -155,5 +155,6 @@
     <string name="copy_transaction_addr">Copy transaction address</string>
     <string name="seed_desc_polyseed">16 words instead of 25; just as secure, but not supported in as many wallets right now. In Mysu, seed passphrase is enforced for these wallets.</string>
     <string name="seed_desc_legacy">Older, 25 word seed; supported in all Monero wallets. In Mysu, seed passphrase is not enforced for these wallets.</string>
+    <string name="approve_the_transaction">Send transaction</string>
 
 </resources>

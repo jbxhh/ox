@@ -16,6 +16,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.zxing.client.android.Intents
@@ -142,12 +143,23 @@ class SendFragment : Fragment() {
         sendTxSlider?.onSlideCompleteListener =
             object : OnSlideCompleteListener {
                 override fun onSlideComplete(view: SlideToActView) {
-                    val pendingTx = mViewModel?.pendingTransaction?.value ?: return
-                    Toast.makeText(activity, getString(R.string.sending_tx), Toast.LENGTH_SHORT)
-                        .show()
-                    sendTx(pendingTx)
+                    confirmSlider()
                 }
             }
+
+        sendTxSlider?.let { slideToActView ->
+            ViewCompat.addAccessibilityAction(slideToActView, getString(R.string.approve_the_transaction)) { _, _ ->
+                confirmSlider()
+                return@addAccessibilityAction true
+            }
+        }
+    }
+
+    private fun confirmSlider() {
+        val pendingTx = mViewModel?.pendingTransaction?.value ?: return
+        Toast.makeText(activity, getString(R.string.sending_tx), Toast.LENGTH_SHORT)
+            .show()
+        sendTx(pendingTx)
     }
 
     private fun checkDestsValidity(sendAll: Boolean): Boolean {
