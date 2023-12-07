@@ -39,7 +39,8 @@ class Node {
         private set
     var password = ""
         private set
-    private var favourite = false
+    var trusted = false
+        private set
 
     internal constructor(nodeString: String?) {
         require(!nodeString.isNullOrEmpty()) { "daemon is empty" }
@@ -142,6 +143,9 @@ class Node {
             }
             require(networkType == WalletManager.instance?.networkType) { "wrong net: $networkType" }
         }
+        if (jsonObject.has("trusted")) {
+            this.trusted = jsonObject.getBoolean("trusted")
+        }
     }
 
     constructor() {
@@ -197,6 +201,7 @@ class Node {
                 null -> TODO()
             }
             if (name?.isNotEmpty() == true) jsonObject.put("name", name)
+            jsonObject.put("trusted", trusted)
         } catch (e: JSONException) {
             throw RuntimeException(e)
         }
@@ -235,7 +240,7 @@ class Node {
         levinPort = anotherNode.levinPort
         username = anotherNode.username
         password = anotherNode.password
-        favourite = anotherNode.favourite
+        trusted = anotherNode.trusted
     }
 
     companion object {

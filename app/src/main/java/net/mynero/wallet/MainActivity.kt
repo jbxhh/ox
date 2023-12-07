@@ -4,7 +4,11 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.mynero.wallet.fragment.dialog.PasswordBottomSheetDialog
 import net.mynero.wallet.fragment.dialog.PasswordBottomSheetDialog.PasswordListener
 import net.mynero.wallet.fragment.dialog.SendBottomSheetDialog
@@ -13,13 +17,16 @@ import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.service.AddressService
 import net.mynero.wallet.service.BalanceService
 import net.mynero.wallet.service.BlockchainService
+import net.mynero.wallet.service.DaemonService
 import net.mynero.wallet.service.HistoryService
 import net.mynero.wallet.service.MoneroHandlerThread
 import net.mynero.wallet.service.PrefService
+import net.mynero.wallet.service.ProxyService
 import net.mynero.wallet.service.TxService
 import net.mynero.wallet.service.UTXOService
 import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.UriData
+import timber.log.Timber
 import java.io.File
 
 class MainActivity : AppCompatActivity(), MoneroHandlerThread.Listener, PasswordListener {
@@ -29,6 +36,8 @@ class MainActivity : AppCompatActivity(), MoneroHandlerThread.Listener, Password
     private var balanceService: BalanceService? = null
     private var addressService: AddressService? = null
     private var historyService: HistoryService? = null
+    private var proxyService: ProxyService? = null
+    private var daemonService: DaemonService? = null
     private var blockchainService: BlockchainService? = null
     private var utxoService: UTXOService? = null
     private var proceedToSend = false
@@ -77,6 +86,8 @@ class MainActivity : AppCompatActivity(), MoneroHandlerThread.Listener, Password
             addressService = AddressService(thread)
             historyService = HistoryService(thread)
             blockchainService = BlockchainService(thread)
+            daemonService = DaemonService(thread)
+            proxyService = ProxyService(thread)
             utxoService = UTXOService(thread)
             thread.start()
         }

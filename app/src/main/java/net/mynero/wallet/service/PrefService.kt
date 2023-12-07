@@ -29,8 +29,8 @@ class PrefService(application: MoneroApplication) : ServiceBase(null) {
             val usesProxy = getBoolean(Constants.PREF_USES_TOR, false)
             var defaultNode = DefaultNodes.SAMOURAI
             if (usesProxy) {
-                val proxyPort = proxyPort
-                if (proxyPort.isNotEmpty()) {
+                val proxyPort = ProxyService.instance?.proxyPort
+                if (proxyPort?.isNotEmpty() == true) {
                     val port = proxyPort.toInt()
                     defaultNode = if (port == 4447) {
                         DefaultNodes.MYNERO_I2P
@@ -59,35 +59,6 @@ class PrefService(application: MoneroApplication) : ServiceBase(null) {
         }
         return null
     }
-
-    val proxy: String?
-        get() = instance?.getString(Constants.PREF_PROXY, "")
-
-    fun hasProxySet(): Boolean {
-        val proxyString = proxy
-        return proxyString?.contains(":") == true
-    }
-
-    val proxyAddress: String
-        get() {
-            if (hasProxySet()) {
-                val proxyString = proxy
-                return proxyString?.split(":".toRegex())?.dropLastWhile { it.isEmpty() }
-                    ?.toTypedArray()
-                    ?.get(0) ?: ""
-            }
-            return ""
-        }
-    val proxyPort: String
-        get() {
-            if (hasProxySet()) {
-                val proxyString = proxy
-                return proxyString?.split(":".toRegex())?.dropLastWhile { it.isEmpty() }
-                    ?.toTypedArray()
-                    ?.get(1) ?: ""
-            }
-            return ""
-        }
 
     fun getString(key: String?, defaultValue: String): String? {
         val value = preferences?.getString(key, "")

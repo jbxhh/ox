@@ -7,9 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.mynero.wallet.R
 import net.mynero.wallet.adapter.NodeSelectionAdapter
 import net.mynero.wallet.adapter.NodeSelectionAdapter.NodeSelectionAdapterListener
@@ -18,6 +21,7 @@ import net.mynero.wallet.data.Node
 import net.mynero.wallet.data.Node.Companion.fromJson
 import net.mynero.wallet.data.Node.Companion.fromString
 import net.mynero.wallet.model.WalletManager
+import net.mynero.wallet.service.DaemonService
 import net.mynero.wallet.service.PrefService
 import net.mynero.wallet.util.Constants
 import org.json.JSONArray
@@ -90,18 +94,12 @@ class NodeSelectionBottomSheetDialog : BottomSheetDialogFragment(), NodeSelectio
     }
 
     override fun onSelectNode(node: Node?) {
-        val activity: Activity? = activity
-        activity?.runOnUiThread {
-            Toast.makeText(
-                activity,
-                getString(R.string.node_selected),
-                Toast.LENGTH_SHORT
-            ).show()
-        }
         PrefService.instance?.edit()?.putString(Constants.PREF_NODE_2, node?.toJson().toString())
             ?.apply()
-        WalletManager.instance?.setDaemon(node)
-        adapter?.updateSelectedNode()
+        node?.let { DaemonService.instance?.setDaemon(it) }
+        activity?.runOnUiThread {
+            adapter?.updateSelectedNode()
+        }
         listener?.onNodeSelected()
     }
 

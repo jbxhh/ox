@@ -59,20 +59,20 @@
             android:id="@+id/address_edittext"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/edittext_bg"
             android:hint="@string/node_address_hint"
             android:inputType="text"
             android:digits="QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890.:-[]"
-            app:layout_constraintBottom_toTopOf="@id/username_edittext"
+            app:layout_constraintBottom_toTopOf="@id/trusted_node_checkbox"
             app:layout_constraintEnd_toStartOf="@id/node_port_edittext"
+            app:layout_constraintTop_toBottomOf="@id/node_name_edittext"
             app:layout_constraintStart_toStartOf="parent" />
 
         <EditText
             android:id="@+id/node_port_edittext"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:background="@drawable/edittext_bg"
             android:hint="@string/node_port_hint"
@@ -82,6 +82,19 @@
             app:layout_constraintBottom_toBottomOf="@id/address_edittext"
             app:layout_constraintEnd_toStartOf="@id/paste_address_imagebutton"
             app:layout_constraintStart_toEndOf="@id/address_edittext" />
+
+        <CheckBox
+            android:id="@+id/trusted_node_checkbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/trusted_daemon"
+            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/username_edittext"
+            app:layout_constraintTop_toBottomOf="@id/address_edittext"/>
 
         <Button
             android:id="@+id/add_node_button"
@@ -101,6 +114,7 @@
             android:background="@drawable/edittext_bg"
             android:hint="@string/node_username_hint"
             android:inputType="text"
+            app:layout_constraintTop_toBottomOf="@id/trusted_node_checkbox"
             app:layout_constraintBottom_toTopOf="@id/password_edittext"
             app:layout_constraintEnd_toStartOf="@id/paste_username_imagebutton"
             app:layout_constraintStart_toStartOf="parent" />
@@ -123,11 +137,10 @@
             android:id="@+id/password_edittext"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
             android:background="@drawable/edittext_bg"
             android:hint="@string/node_password_hint"
             android:inputType="textPassword"
-            android:visibility="gone"
+            android:visibility="visible"
             app:layout_constraintBottom_toTopOf="@id/add_node_button"
             app:layout_constraintEnd_toStartOf="@id/paste_password_imagebutton"
             app:layout_constraintStart_toStartOf="parent" />
@@ -136,12 +149,10 @@
             android:id="@+id/paste_password_imagebutton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
             android:background="@android:color/transparent"
             android:minWidth="48dp"
             android:minHeight="48dp"
-            android:visibility="gone"
+            android:visibility="visible"
             android:src="@drawable/ic_content_paste_24dp"
             app:layout_constraintBottom_toBottomOf="@id/password_edittext"
             app:layout_constraintEnd_toEndOf="parent"

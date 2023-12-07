@@ -16,23 +16,12 @@
             android:text="@string/settings"
             android:layout_marginTop="24dp"
             android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
             android:textSize="32sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/status_textview"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/status_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/disconnected"
-            android:textSize="12sp"
-            android:layout_marginEnd="24dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/settings_textview"
-            app:layout_constraintBottom_toBottomOf="@id/settings_textview"
-            app:layout_constraintTop_toTopOf="@id/settings_textview" />
 
         <TextView
             android:id="@+id/wallet_settings_textview"
