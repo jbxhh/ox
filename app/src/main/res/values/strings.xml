@@ -48,10 +48,11 @@
     <string name="send_monero">Send</string>
     <string name="recv_monero">Receive</string>
     <string name="more_options">More options</string>
-    <string name="recovery_phrase_optional">Recovery phrase (optional)</string>
+    <string name="recovery_phrase_optional_legacy">Recovery seed (legacy)</string>
+    <string name="recovery_phrase_optional_polyseed">Recovery seed (polyseed)</string>
     <string name="restore_height_optional">Restore height (optional)</string>
     <string name="password_optional">Passphrase (optional)</string>
-    <string name="password_non_optional">Enter a passphrase</string>
+    <string name="password_non_optional">Passphrase (seed offset; required)</string>
     <string name="password_confirm">Confirm passphrase</string>
     <string name="password">Passphrase</string>
     <string name="label">Label</string>
@@ -125,9 +126,9 @@
     <string name="cant_edit_current_node">Cannot edit current node.</string>
     <string name="cant_edit_default_nodes">Cannot edit default node.</string>
     <string name="edit_node">Edit Node</string>
-    <string name="wallet_seed_label">Recovery phrase</string>
-    <string name="wallet_seed_desc">Anyone with your recovery phrase can spend ALL coins in this wallet!</string>
-    <string name="wallet_seed_offset_desc">Your wallet seed offset (sometimes called a seed passphrase) is the passphrase you use to unlock the wallet in this app. It will not be displayed here, but it is needed to FULLY restore the keys to this wallet.</string>
+    <string name="wallet_seed_label">Recovery seed</string>
+    <string name="wallet_seed_desc">Anyone with your recovery seed can spend ALL coins in this wallet!</string>
+    <string name="wallet_seed_offset_desc">Your wallet seed passphrase (sometimes called a seed offset) is the passphrase you use to unlock the wallet in this app. It will not be displayed here, but it is needed to FULLY restore the keys to this wallet.</string>
     <string name="wallet_viewkey_label">Private view-key</string>
     <string name="wallet_viewkey_desc">Anyone with your private view-key can see all incoming transactions!</string>
     <string name="wallet_restore_height_label">Restore height</string>
@@ -157,5 +158,6 @@
     <string name="seed_desc_legacy">Older, 25 word seed; supported in all Monero wallets. In Mysu, seed passphrase is not enforced for these wallets.</string>
     <string name="approve_the_transaction">Send transaction</string>
     <string name="paste_clipboard_into_passphrase_field">Paste clipboard into passphrase field</string>
+    <string name="slide_to_send_transaction">Slide to send transaction</string>
 
 </resources>

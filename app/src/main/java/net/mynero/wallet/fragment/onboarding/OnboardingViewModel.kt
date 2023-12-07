@@ -93,8 +93,8 @@ class OnboardingViewModel : ViewModel() {
             if (offset.isNotEmpty()) {
                 PrefService.instance?.edit()?.putBoolean(Constants.PREF_USES_OFFSET, true)?.apply()
             }
+            val seedTypeValue = seedType.value ?: return@execute
             if (walletSeed.isEmpty()) {
-                val seedTypeValue = seedType.value ?: return@execute
                 if (seedTypeValue == SeedType.POLYSEED) {
                     wallet = if (offset.isEmpty()) {
                         mainActivity.runOnUiThread {
@@ -145,13 +145,22 @@ class OnboardingViewModel : ViewModel() {
                 if (restoreHeightText.isNotEmpty()) {
                     restoreHeight = restoreHeightText.toLong()
                 }
-                wallet = WalletManager.instance?.recoveryWallet(
-                    walletFile,
-                    walletPassword,
-                    walletSeed,
-                    offset,
-                    restoreHeight
-                )
+                if (seedTypeValue == SeedType.POLYSEED) {
+                    wallet = WalletManager.instance?.recoveryWalletPolyseed(
+                        walletFile,
+                        walletPassword,
+                        walletSeed,
+                        offset
+                    )
+                } else if (seedTypeValue == SeedType.LEGACY) {
+                    wallet = WalletManager.instance?.recoveryWallet(
+                        walletFile,
+                        walletPassword,
+                        walletSeed,
+                        offset,
+                        restoreHeight
+                    )
+                }
             }
             val walletStatus = wallet?.status
             wallet?.close()
