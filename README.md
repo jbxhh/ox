@@ -1,24 +1,21 @@
 # Mysu
 A no-bullshit, pure Monero wallet suitable for both newcomers and experienced users.
-	**(not
-    Monero Classic,
-    Monero-Classic,
-    Monero Zero,
-    Monero Original,
-    Monero C,
-    Monero V)**
+Originally forked from the Monerujo codebase, it has been entirely rewritten on the Java side into Kotlin.
+The monerujo.cpp C++ file still exists but has been updated/modified.
 
 ### QUICKSTART
 - Download the APK for the most current release [here](http://4hsesnr6mjb4qrflgf5gezjaszzoqnnisin7ywzbsv6pgcxysiaq.b32.i2p/pokkst/mysu/releases) and install it
-- Run the app, enter a password (optional), recovery seed (optional), and restore height (optional) to create a wallet.
+- Run the app, enter a passphrase (optional, depending on seed type), recovery seed (optional), and restore height (optional) to create a wallet.
 - See the [FAQ](doc/FAQ.md)
 
 ### Disclaimer
-Be sure to back up your wallet recovery phrase. We are not responsible for lost or stolen funds.
+Be sure to back up your wallet recovery phrase (and seed offset/passphrase, if you set one. Mysu enforces seed offsets/passphrases for Polyseed wallets). We are NOT responsible for lost or stolen funds.
 
-### Random Notes
-- supports custom proxy settings. specify specific address and port.
-- use your own daemon - it's easy
+### Notable Features
+- Tor and I2P support (no built-in daemons though)
+- Coin control (UTXO management)
+- Seed passphrases/offsets
+- Polyseed
 
 ### HOW TO BUILD
 
