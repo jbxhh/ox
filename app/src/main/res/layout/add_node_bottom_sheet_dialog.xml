@@ -140,7 +140,7 @@
             android:background="@drawable/edittext_bg"
             android:hint="@string/node_password_hint"
             android:inputType="textPassword"
-            android:visibility="visible"
+            android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@id/add_node_button"
             app:layout_constraintEnd_toStartOf="@id/paste_password_imagebutton"
             app:layout_constraintStart_toStartOf="parent" />
@@ -152,7 +152,7 @@
             android:background="@android:color/transparent"
             android:minWidth="48dp"
             android:minHeight="48dp"
-            android:visibility="visible"
+            android:visibility="gone"
             android:src="@drawable/ic_content_paste_24dp"
             app:layout_constraintBottom_toBottomOf="@id/password_edittext"
             app:layout_constraintEnd_toEndOf="parent"

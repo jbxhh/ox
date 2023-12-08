@@ -101,10 +101,14 @@ class NodeSelectionAdapter(val listener: NodeSelectionAdapterListener?) :
             val nodeNameTextView = itemView.findViewById<TextView>(R.id.node_name_textview)
             val nodeAddressTextView = itemView.findViewById<TextView>(R.id.node_uri_textview)
             val authTextView = itemView.findViewById<TextView>(R.id.authenticated_textview)
+            val trustedTextView = itemView.findViewById<TextView>(R.id.trusted_node_textview)
             nodeNameTextView.text = node.name
             nodeAddressTextView.text = node.address
             if (node.password.isNotEmpty()) {
                 authTextView.visibility = View.VISIBLE
+            }
+            if(node.trusted) {
+                trustedTextView.visibility = View.VISIBLE
             }
             val nodeAnonymityNetworkImageView =
                 itemView.findViewById<ImageView>(R.id.anonymity_network_imageview)
