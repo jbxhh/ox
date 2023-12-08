@@ -129,7 +129,7 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
             } else {
                 progressBar.visibility = View.INVISIBLE
                 progressBarText.visibility = View.VISIBLE
-                progressBarText.text = "Synchronized"
+                progressBarText.text = "Synchronized at $height"
             }
         }
         val adapter = TransactionInfoAdapter(this)

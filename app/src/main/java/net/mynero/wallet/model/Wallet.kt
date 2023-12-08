@@ -234,9 +234,15 @@ class Wallet {
 
     external fun getUnlockedBalance(accountIndex: Int): Long
     external fun isWatchOnly(): Boolean
-    external fun getBlockChainHeight(): Long
+    fun getBlockChainHeight(): Long {
+        return getBlockChainHeightJ().minus(1)
+    }
+    private external fun getBlockChainHeightJ(): Long
     external fun getApproximateBlockChainHeight(): Long
-    external fun getDaemonBlockChainHeight(): Long
+    fun getDaemonBlockChainHeight(): Long {
+        return getDaemonBlockChainHeightJ().minus(1)
+    }
+    private external fun getDaemonBlockChainHeightJ(): Long
     external fun getDaemonBlockChainTargetHeight(): Long
 
     fun setSynchronized() {

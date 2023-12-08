@@ -75,7 +75,7 @@ class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet)
     override fun unconfirmedMoneyReceived(txId: String?, amount: Long) {}
     override fun newBlock(height: Long) {
         refresh(false)
-        BlockchainService.instance?.daemonHeight = if (wallet.isSynchronized) height else 0
+        BlockchainService.instance?.daemonHeight = if (wallet.isSynchronized) height else 0 // when 0 it fetches from C++
     }
 
     override fun updated() {

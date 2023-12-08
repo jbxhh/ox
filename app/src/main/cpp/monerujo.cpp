@@ -980,7 +980,7 @@ Java_net_mynero_wallet_model_Wallet_isWatchOnly(JNIEnv *env, jobject instance) {
 }
 
 JNIEXPORT jlong JNICALL
-Java_net_mynero_wallet_model_Wallet_getBlockChainHeight(JNIEnv *env, jobject instance) {
+Java_net_mynero_wallet_model_Wallet_getBlockChainHeightJ(JNIEnv *env, jobject instance) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     return wallet->blockChainHeight();
 }
@@ -993,7 +993,7 @@ Java_net_mynero_wallet_model_Wallet_getApproximateBlockChainHeight(JNIEnv *env,
 }
 
 JNIEXPORT jlong JNICALL
-Java_net_mynero_wallet_model_Wallet_getDaemonBlockChainHeight(JNIEnv *env, jobject instance) {
+Java_net_mynero_wallet_model_Wallet_getDaemonBlockChainHeightJ(JNIEnv *env, jobject instance) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     return wallet->daemonBlockChainHeight();
 }
