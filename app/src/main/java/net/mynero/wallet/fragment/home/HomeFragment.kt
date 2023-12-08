@@ -87,8 +87,8 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
             lifecycleScope.launch(Dispatchers.IO) {
                 Timber.d("Updating daemon:: $daemon")
                 WalletManager.instance?.setDaemon(daemon)
-                WalletManager.instance?.wallet?.setTrustedDaemon(daemon.trusted)
                 WalletManager.instance?.wallet?.init(0)
+                WalletManager.instance?.wallet?.setTrustedDaemon(daemon.trusted)
                 WalletManager.instance?.wallet?.startRefresh()
             }
         }
