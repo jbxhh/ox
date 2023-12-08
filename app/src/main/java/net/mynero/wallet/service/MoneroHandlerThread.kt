@@ -64,8 +64,8 @@ class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet)
             wallet.setProxy(proxy)
         }
         WalletManager.instance?.setDaemon(currentNode)
-        currentNode?.trusted?.let { wallet.setTrustedDaemon(it) }
         wallet.init(0)
+        currentNode?.trusted?.let { wallet.setTrustedDaemon(it) }
         wallet.setListener(this)
         wallet.startRefresh()
     }
