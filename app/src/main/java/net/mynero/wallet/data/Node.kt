@@ -173,7 +173,7 @@ class Node {
     // Nodes are equal if they are the same host address:port & are on the same network
     override fun equals(other: Any?): Boolean {
         if (other !is Node) return false
-        return host == other.host && address == other.address && rpcPort == other.rpcPort && networkType == other.networkType && username == other.username && password == other.password
+        return trusted == other.trusted && host == other.host && address == other.address && rpcPort == other.rpcPort && networkType == other.networkType && username == other.username && password == other.password
     }
 
     val isOnion: Boolean
