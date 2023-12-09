@@ -15,6 +15,7 @@
  */
 package net.mynero.wallet.model
 
+import android.util.Log
 import android.util.Pair
 import net.mynero.wallet.data.Subaddress
 import timber.log.Timber
@@ -60,7 +61,7 @@ class Wallet {
     }
 
     fun setAccountIndex(accountIndex: Int) {
-        Timber.d("setAccountIndex(%d)", accountIndex)
+        Log.d("Wallet.kt", "setAccountIndex($accountIndex)")
         this.accountIndex = accountIndex
         history?.setAccountFor(this)
     }
@@ -159,33 +160,33 @@ class Wallet {
         var daemonUsername = WalletManager.instance?.daemonUsername
         var daemonPassword = WalletManager.instance?.daemonPassword
         var proxyAddress = WalletManager.instance?.proxy
-        Timber.d("init(")
+        Log.d("Wallet.kt", "init(")
         if (daemonAddress != null) {
-            Timber.d(daemonAddress.toString())
+            Log.d("Wallet.kt", daemonAddress.toString())
         } else {
-            Timber.d("daemon_address == null")
+            Log.d("Wallet.kt", "daemon_address == null")
             daemonAddress = ""
         }
-        Timber.d("upper_transaction_size_limit = 0 (probably)")
+        Log.d("Wallet.kt", "upper_transaction_size_limit = 0 (probably)")
         if (daemonUsername != null) {
-            Timber.d(daemonUsername)
+            Log.d("Wallet.kt", daemonUsername)
         } else {
-            Timber.d("daemon_username == null")
+            Log.d("Wallet.kt", "daemon_username == null")
             daemonUsername = ""
         }
         if (daemonPassword != null) {
-            Timber.d(daemonPassword)
+            Log.d("Wallet.kt", daemonPassword)
         } else {
-            Timber.d("daemon_password == null")
+            Log.d("Wallet.kt", "daemon_password == null")
             daemonPassword = ""
         }
         if (proxyAddress != null) {
-            Timber.d(proxyAddress)
+            Log.d("Wallet.kt", proxyAddress)
         } else {
-            Timber.d("proxy_address == null")
+            Log.d("Wallet.kt", "proxy_address == null")
             proxyAddress = ""
         }
-        Timber.d(");")
+        Log.d("Wallet.kt", ");")
         return initJ(
             daemonAddress, upperTransactionSizeLimit,
             daemonUsername, daemonPassword,
@@ -419,7 +420,7 @@ class Wallet {
         val timeStamp = SimpleDateFormat("yyyy-MM-dd-HH:mm:ss", Locale.US).format(Date())
         addSubaddress(accountIndex, timeStamp)
         val subaddress = getLastSubaddress(accountIndex)
-        Timber.d("%d: %s", getNumSubaddresses(accountIndex) - 1, subaddress)
+        Log.d("Wallet.kt", "${(getNumSubaddresses(accountIndex) - 1)}: $subaddress")
         return subaddress
     }
 

@@ -46,8 +46,6 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
     private var walletProxyAddressEditText: EditText? = null
     private var walletProxyPortEditText: EditText? = null
     private var selectNodeButton: Button? = null
-    private var cachedProxyAddress: String = ""
-    private var cachedProxyPort: String = ""
     private var streetModeSwitch: SwitchCompat? = null
     private var monerochanSwitch: SwitchCompat? = null
     private var donationSwitch: SwitchCompat? = null
@@ -87,8 +85,8 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
         donationSwitch?.isChecked = PrefService.instance?.getBoolean(Constants.PREF_DONATE_PER_TX, false) == true
 
         val usesProxy = ProxyService.instance?.usingProxy == true
-        cachedProxyAddress = ProxyService.instance?.proxyAddress ?: return
-        cachedProxyPort = ProxyService.instance?.proxyPort ?: return
+        val cachedProxyAddress = ProxyService.instance?.proxyAddress ?: return
+        val cachedProxyPort = ProxyService.instance?.proxyPort ?: return
         if (ProxyService.instance?.hasProxySet() == true) {
             initProxyStuff(cachedProxyAddress, cachedProxyPort)
         }
@@ -199,11 +197,7 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
                     torIcon?.visibility = View.INVISIBLE
                     indicatorCircle?.visibility = View.INVISIBLE
                 }
-                EnumTorState.STARTING -> {
-                    torIcon?.visibility = View.INVISIBLE
-                    indicatorCircle?.visibility = View.VISIBLE
-                }
-                EnumTorState.STOPPING -> {
+                EnumTorState.STARTING, EnumTorState.STOPPING -> {
                     torIcon?.visibility = View.INVISIBLE
                     indicatorCircle?.visibility = View.VISIBLE
                 }
@@ -215,11 +209,7 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
     private fun refreshProxy() {
         val proxyAddress = walletProxyAddressEditText?.text.toString()
         val proxyPort = walletProxyPortEditText?.text.toString()
-        if((proxyAddress != cachedProxyAddress) || (proxyPort != cachedProxyPort)) {
-            ProxyService.instance?.updateProxy(proxyAddress, proxyPort)
-            cachedProxyAddress = proxyAddress
-            cachedProxyPort = proxyPort
-        }
+        ProxyService.instance?.updateProxy(proxyAddress, proxyPort)
     }
 
     private fun displaySeedDialog(password: String) {

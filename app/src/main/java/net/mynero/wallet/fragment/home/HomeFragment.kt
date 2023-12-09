@@ -1,6 +1,7 @@
 package net.mynero.wallet.fragment.home
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -78,7 +79,7 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
 
         ProxyService.instance?.proxyChangeEvents?.observe(viewLifecycleOwner) { proxy ->
             lifecycleScope.launch(Dispatchers.IO) {
-                Timber.d("Updating proxy:: $proxy")
+                Log.d("HomeFragment", "Updating proxy:: $proxy")
                 WalletManager.instance?.setProxy(proxy)
                 WalletManager.instance?.wallet?.setProxy(proxy)
                 WalletManager.instance?.wallet?.init(0)
@@ -88,7 +89,7 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
 
         DaemonService.instance?.daemonChangeEvents?.observe(viewLifecycleOwner) { daemon ->
             lifecycleScope.launch(Dispatchers.IO) {
-                Timber.d("Updating daemon:: $daemon")
+                Log.d("HomeFragment", "Updating daemon:: $daemon")
                 WalletManager.instance?.setDaemon(daemon)
                 WalletManager.instance?.wallet?.init(0)
                 WalletManager.instance?.wallet?.setTrustedDaemon(daemon.trusted)

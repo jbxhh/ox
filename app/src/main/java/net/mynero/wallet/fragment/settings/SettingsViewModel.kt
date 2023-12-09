@@ -26,7 +26,7 @@ class SettingsViewModel : ViewModel() {
         PrefService.instance?.edit()?.putBoolean(Constants.PREF_USES_PROXY, use)?.apply()
 
         val samouraiTorManager = ProxyService.instance?.samouraiTorManager
-        if(use && useBundledTor.value == true) {
+        if(use && ProxyService.instance?.useBundledTor == true) {
             samouraiTorManager?.start()
         } else {
             samouraiTorManager?.stop()
@@ -34,11 +34,11 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun setUseBundledTor(use: Boolean) {
-        PrefService.instance?.edit()?.putBoolean(Constants.PREF_USE_BUNDLED_TOR, use)?.apply()
         _useBundledTor.value = use
+        PrefService.instance?.edit()?.putBoolean(Constants.PREF_USE_BUNDLED_TOR, use)?.apply()
 
         val samouraiTorManager = ProxyService.instance?.samouraiTorManager
-        if(use && useProxy.value == true) {
+        if(use && ProxyService.instance?.usingProxy == true) {
             samouraiTorManager?.start()
         } else {
             samouraiTorManager?.stop()

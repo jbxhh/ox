@@ -1,35 +1,33 @@
 package net.mynero.wallet.service
 
 import android.app.Application
+import android.util.Log
 import android.util.Patterns
-import net.mynero.wallet.MainActivity
 import net.mynero.wallet.livedata.SingleLiveEvent
 import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.util.Constants
 
-class ProxyService(activity: MainActivity) : ServiceBase(null) {
+class ProxyService(application: Application) : ServiceBase(null) {
     val proxyChangeEvents: SingleLiveEvent<String> = SingleLiveEvent()
     var samouraiTorManager: SamouraiTorManager? = null
 
     init {
-        samouraiTorManager = SamouraiTorManager(activity.application, TorKmpManager(activity.application))
         instance = this
+        samouraiTorManager = SamouraiTorManager(application, TorKmpManager(application))
 
-        activity.runOnUiThread {
-            samouraiTorManager?.getTorStateLiveData()?.observeForever {
-                samouraiTorManager?.getProxy()?.address()?.let { socketAddress ->
-                    if(socketAddress.toString().isEmpty()) return@let
-                    val proxyString = socketAddress.toString().substring(1)
-                    val address = proxyString.split(":")[0]
-                    val port = proxyString.split(":")[1]
-                    if(usingProxy && useBundledTor)
-                        updateProxy(address, port)
-                }
+        samouraiTorManager?.getTorStateLiveData()?.observeForever {
+            samouraiTorManager?.getProxy()?.address()?.let { socketAddress ->
+                if(socketAddress.toString().isEmpty()) return@let
+                val proxyString = socketAddress.toString().substring(1)
+                val address = proxyString.split(":")[0]
+                val port = proxyString.split(":")[1]
+                if(usingProxy && useBundledTor)
+                    updateProxy(address, port)
             }
+        }
 
-            if(useBundledTor) {
-                samouraiTorManager?.start()
-            }
+        if(useBundledTor && usingProxy) {
+            samouraiTorManager?.start()
         }
     }
 
@@ -43,16 +41,16 @@ class ProxyService(activity: MainActivity) : ServiceBase(null) {
         if (!usingProxy || isNodeLocalIp) {
             // User is not using proxy, or is using local node currently, so we will disable proxy here.
             proxyChangeEvents.postValue("")
+            Log.d("ProxyService", "Not using proxy...")
             return
         }
         // We are using proxy at this point, but user set them to empty. We will fallback to Tor defaults here.
         if (proxyAddress.isEmpty()) finalProxyAddress = "127.0.0.1"
         if (proxyPort.isEmpty()) finalProxyPort = "9050"
-        val validIpAddress = Patterns.IP_ADDRESS.matcher(proxyAddress).matches()
+        val validIpAddress = Patterns.IP_ADDRESS.matcher(finalProxyAddress).matches()
         if (validIpAddress) {
-            val proxy = "$finalProxyAddress:$finalProxyPort"
-            PrefService.instance?.edit()?.putString(Constants.PREF_PROXY, proxy)?.apply()
-            proxyChangeEvents.postValue(proxy)
+            val proxy = PrefService.instance?.saveProxy(finalProxyAddress, finalProxyPort)
+            proxy?.let { proxyChangeEvents.postValue(it) }
         }
     }
 
