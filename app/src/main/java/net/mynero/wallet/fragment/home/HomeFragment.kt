@@ -26,6 +26,7 @@ import net.mynero.wallet.adapter.TransactionInfoAdapter
 import net.mynero.wallet.adapter.TransactionInfoAdapter.TxInfoAdapterListener
 import net.mynero.wallet.model.EnumTorState
 import net.mynero.wallet.model.TransactionInfo
+import net.mynero.wallet.model.Wallet
 import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.service.BalanceService
 import net.mynero.wallet.service.BlockchainService
@@ -181,7 +182,9 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
                     val proxyString = socketAddress.toString().substring(1)
                     val address = proxyString.split(":")[0]
                     val port = proxyString.split(":")[1]
-                    refreshProxy(address, port)
+
+                    if(WalletManager.instance?.proxy != proxyString)
+                        refreshProxy(address, port)
                 }
             }
         }

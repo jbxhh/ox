@@ -15,7 +15,6 @@ class SettingsViewModel : ViewModel() {
     val useProxy: LiveData<Boolean> = _useProxy
     private val _useBundledTor = MutableLiveData(false)
     val useBundledTor: LiveData<Boolean> = _useBundledTor
-    var edited = false
 
     init {
         _useProxy.value = ProxyService.instance?.usingProxy
@@ -32,8 +31,6 @@ class SettingsViewModel : ViewModel() {
         } else {
             samouraiTorManager?.stop()
         }
-
-        edited = true
     }
 
     fun setUseBundledTor(use: Boolean) {
@@ -46,7 +43,5 @@ class SettingsViewModel : ViewModel() {
         } else {
             samouraiTorManager?.stop()
         }
-
-        edited = true
     }
 }
