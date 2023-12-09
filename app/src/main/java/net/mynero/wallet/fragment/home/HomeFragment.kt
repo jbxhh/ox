@@ -24,6 +24,7 @@ import net.mynero.wallet.MainActivity
 import net.mynero.wallet.R
 import net.mynero.wallet.adapter.TransactionInfoAdapter
 import net.mynero.wallet.adapter.TransactionInfoAdapter.TxInfoAdapterListener
+import net.mynero.wallet.model.EnumTorState
 import net.mynero.wallet.model.TransactionInfo
 import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.service.BalanceService
@@ -79,9 +80,10 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
 
         ProxyService.instance?.proxyChangeEvents?.observe(viewLifecycleOwner) { proxy ->
             lifecycleScope.launch(Dispatchers.IO) {
-                Log.d("HomeFragment", "Updating proxy:: $proxy")
-                WalletManager.instance?.setProxy(proxy)
-                WalletManager.instance?.wallet?.setProxy(proxy)
+                Log.d("HomeFragment", "Updating proxy, restarting wallet. proxy=$proxy")
+                val finalProxy = if(proxy.isNotEmpty() && ProxyService.instance?.usingProxy == true) proxy else ""
+                WalletManager.instance?.setProxy(finalProxy)
+                WalletManager.instance?.wallet?.setProxy(finalProxy)
                 WalletManager.instance?.wallet?.init(0)
                 WalletManager.instance?.wallet?.startRefresh()
             }
@@ -89,7 +91,7 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
 
         DaemonService.instance?.daemonChangeEvents?.observe(viewLifecycleOwner) { daemon ->
             lifecycleScope.launch(Dispatchers.IO) {
-                Log.d("HomeFragment", "Updating daemon:: $daemon")
+                Log.d("HomeFragment", "Updating daemon, restarting wallet. daemon=$daemon")
                 WalletManager.instance?.setDaemon(daemon)
                 WalletManager.instance?.wallet?.init(0)
                 WalletManager.instance?.wallet?.setTrustedDaemon(daemon.trusted)
@@ -169,6 +171,27 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
                     R.drawable.xmrchan_loading
                 )
             }
+        }
+
+        val samouraiTorManager = ProxyService.instance?.samouraiTorManager
+        samouraiTorManager?.getTorStateLiveData()?.observe(viewLifecycleOwner) {
+            samouraiTorManager.getProxy()?.address()?.let { socketAddress ->
+                if(socketAddress.toString().isEmpty()) return@let
+                if(ProxyService.instance?.usingProxy == true && ProxyService.instance?.useBundledTor == true) {
+                    val proxyString = socketAddress.toString().substring(1)
+                    val address = proxyString.split(":")[0]
+                    val port = proxyString.split(":")[1]
+                    refreshProxy(address, port)
+                }
+            }
+        }
+    }
+
+    private fun refreshProxy(proxyAddress: String, proxyPort: String) {
+        val cachedProxyAddress = ProxyService.instance?.proxyAddress
+        val cachedProxyPort = ProxyService.instance?.proxyPort
+        if((proxyAddress != cachedProxyAddress) || (proxyPort != cachedProxyPort)) {
+            ProxyService.instance?.updateProxy(proxyAddress, proxyPort)
         }
     }
 

@@ -15,6 +15,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
@@ -77,21 +78,23 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
         walletProxyPortEditText = view.findViewById(R.id.wallet_proxy_port_edittext)
         useBundledTor = view.findViewById(R.id.bundled_tor_checkbox)
 
-        useBundledTor?.isChecked = ProxyService.instance?.useBundledTor == true
-        walletProxyPortEditText?.visibility = if (useBundledTor?.isChecked == true) View.GONE else View.VISIBLE
-        walletProxyAddressEditText?.visibility = if (useBundledTor?.isChecked == true) View.GONE else View.VISIBLE
+        val cachedProxyAddress = ProxyService.instance?.proxyAddress ?: return
+        val cachedProxyPort = ProxyService.instance?.proxyPort ?: return
+        val cachedUsingProxy = ProxyService.instance?.usingProxy == true
+        val cachedUsingBundledTor = ProxyService.instance?.useBundledTor == true
+
+        val useProxyVisibility = if (cachedUsingProxy) View.VISIBLE else View.GONE
+        walletProxyPortEditText?.visibility = if (cachedUsingBundledTor) View.GONE else useProxyVisibility
+        walletProxyAddressEditText?.visibility = if (cachedUsingBundledTor) View.GONE else useProxyVisibility
+        proxySettingsLayout?.visibility = useProxyVisibility
+
         streetModeSwitch?.isChecked = PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false) == true
         monerochanSwitch?.isChecked = PrefService.instance?.getBoolean(Constants.PREF_MONEROCHAN, true) == true
         donationSwitch?.isChecked = PrefService.instance?.getBoolean(Constants.PREF_DONATE_PER_TX, false) == true
+        useBundledTor?.isChecked = cachedUsingBundledTor
+        torSwitch?.isChecked = cachedUsingProxy
+        updateProxy(cachedProxyAddress, cachedProxyPort)
 
-        val usesProxy = ProxyService.instance?.usingProxy == true
-        val cachedProxyAddress = ProxyService.instance?.proxyAddress ?: return
-        val cachedProxyPort = ProxyService.instance?.proxyPort ?: return
-        if (ProxyService.instance?.hasProxySet() == true) {
-            initProxyStuff(cachedProxyAddress, cachedProxyPort)
-        }
-        torSwitch?.isChecked = usesProxy
-        proxySettingsLayout?.visibility = if (usesProxy) View.VISIBLE else View.GONE
         val node = PrefService.instance?.node // shouldn't use default value here
         selectNodeButton?.text = getString(R.string.node_button_text, node?.address)
 
@@ -154,26 +157,32 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
         torSwitch?.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
             mViewModel?.setUseProxy(b)
         }
+
+        walletProxyPortEditText?.addTextChangedListener {
+            mViewModel?.edited = true
+        }
+        walletProxyAddressEditText?.addTextChangedListener {
+            mViewModel?.edited = true
+        }
     }
 
     private fun bindObservers() {
         mViewModel?.useProxy?.observe(viewLifecycleOwner) { b ->
-            if (b) {
-                if (ProxyService.instance?.hasProxySet() == true) {
-                    val proxyAddress = ProxyService.instance?.proxyAddress ?: return@observe
-                    val proxyPort = ProxyService.instance?.proxyPort ?: return@observe
-                    initProxyStuff(proxyAddress, proxyPort)
-                }
-                proxySettingsLayout?.visibility = View.VISIBLE
-            } else {
-                proxySettingsLayout?.visibility = View.GONE
-            }
+            val visibility = if(b) View.VISIBLE else View.GONE
+            proxySettingsLayout?.visibility = visibility
+
+            val useBundledTor = mViewModel?.useBundledTor?.value == true
+            walletProxyPortEditText?.visibility = if (useBundledTor) View.GONE else visibility
+            walletProxyAddressEditText?.visibility = if (useBundledTor) View.GONE else visibility
+
             refreshProxy()
         }
 
         mViewModel?.useBundledTor?.observe(viewLifecycleOwner) { isChecked ->
-            walletProxyPortEditText?.visibility = if (isChecked) View.GONE else View.VISIBLE
-            walletProxyAddressEditText?.visibility = if (isChecked) View.GONE else View.VISIBLE
+            val usingProxy = mViewModel?.useProxy?.value == true
+            val visibility = if(usingProxy) View.VISIBLE else View.GONE
+            walletProxyPortEditText?.visibility = if (isChecked) View.GONE else visibility
+            walletProxyAddressEditText?.visibility = if (isChecked) View.GONE else visibility
         }
 
         val samouraiTorManager = ProxyService.instance?.samouraiTorManager
@@ -186,6 +195,10 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
                 if(mViewModel?.useProxy?.value == true && mViewModel?.useBundledTor?.value == true) {
                     torIcon?.visibility = View.VISIBLE
                     indicatorCircle?.visibility = View.INVISIBLE
+                    val proxyString = socketAddress.toString().substring(1)
+                    val address = proxyString.split(":")[0]
+                    val port = proxyString.split(":")[1]
+                    updateProxy(address, port)
                 }
             }
 
@@ -206,10 +219,18 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
         }
     }
 
+    private fun updateProxy(address: String, port: String) {
+        walletProxyPortEditText?.setText(port)
+        walletProxyAddressEditText?.setText(address)
+        refreshProxy()
+    }
+
     private fun refreshProxy() {
         val proxyAddress = walletProxyAddressEditText?.text.toString()
         val proxyPort = walletProxyPortEditText?.text.toString()
-        ProxyService.instance?.updateProxy(proxyAddress, proxyPort)
+
+        if(mViewModel?.edited == true)
+            ProxyService.instance?.updateProxy(proxyAddress, proxyPort)
     }
 
     private fun displaySeedDialog(password: String) {
@@ -226,14 +247,6 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
 
     override fun onPasswordFail() {
         Toast.makeText(context, R.string.bad_password, Toast.LENGTH_SHORT).show()
-    }
-
-    private fun initProxyStuff(proxyAddress: String, proxyPort: String) {
-        val validIpAddress = Patterns.IP_ADDRESS.matcher(proxyAddress).matches()
-        if (validIpAddress) {
-            walletProxyAddressEditText?.setText(proxyAddress)
-            walletProxyPortEditText?.setText(proxyPort)
-        }
     }
 
     override fun onNodeSelected() {

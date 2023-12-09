@@ -58,7 +58,7 @@ class OnboardingViewModel : ViewModel() {
         if(seedType == SeedType.POLYSEED && (passphrase.isEmpty() || confirmedPassphrase.isEmpty())) return@combineLiveDatas false
         if(useProxy && (proxyAddress.isEmpty() || proxyPort.isEmpty()) && !useBundledTor) return@combineLiveDatas false
         val progress = torState?.progressIndicator ?: 0
-        if(useBundledTor && progress < 100) return@combineLiveDatas false
+        if(useBundledTor && progress < 100 && useProxy) return@combineLiveDatas false
 
         return@combineLiveDatas true
     }
