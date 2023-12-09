@@ -157,13 +157,6 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
         torSwitch?.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
             mViewModel?.setUseProxy(b)
         }
-
-        walletProxyPortEditText?.addTextChangedListener {
-            mViewModel?.edited = true
-        }
-        walletProxyAddressEditText?.addTextChangedListener {
-            mViewModel?.edited = true
-        }
     }
 
     private fun bindObservers() {
@@ -228,8 +221,10 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
     private fun refreshProxy() {
         val proxyAddress = walletProxyAddressEditText?.text.toString()
         val proxyPort = walletProxyPortEditText?.text.toString()
+        val savedProxyAddress = ProxyService.instance?.proxyAddress
+        val savedProxyPort = ProxyService.instance?.proxyPort
 
-        if(mViewModel?.edited == true)
+        if(proxyAddress != savedProxyAddress || proxyPort != savedProxyPort)
             ProxyService.instance?.updateProxy(proxyAddress, proxyPort)
     }
 
