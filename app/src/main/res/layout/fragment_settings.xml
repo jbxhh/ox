@@ -237,11 +237,24 @@
             app:layout_constraintTop_toBottomOf="@id/tor_switch"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
+            <CheckBox
+                android:id="@+id/bundled_tor_checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="@string/use_bundled_tor"
+                android:visibility="visible"
+                android:layout_marginEnd="24dp"
+                android:layout_marginStart="24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/wallet_proxy_address_edittext"
+                app:layout_constraintTop_toTopOf="parent"/>
+
             <EditText
                 android:id="@+id/wallet_proxy_address_edittext"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:layout_marginEnd="24dp"
                 android:layout_marginStart="24dp"
                 android:background="@drawable/edittext_bg"
@@ -250,7 +263,7 @@
                 app:layout_constraintBottom_toTopOf="@id/wallet_proxy_port_edittext"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/bundled_tor_checkbox" />
 
             <EditText
                 android:id="@+id/wallet_proxy_port_edittext"

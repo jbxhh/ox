@@ -1080,7 +1080,7 @@ Java_net_mynero_wallet_model_Wallet_getMaximumAllowedAmount(JNIEnv *env, jclass 
 }
 
 JNIEXPORT void JNICALL
-Java_net_mynero_wallet_model_Wallet_startRefresh(JNIEnv *env, jobject instance) {
+Java_net_mynero_wallet_model_Wallet_startRefreshJ(JNIEnv *env, jobject instance) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     wallet->startRefresh();
 }

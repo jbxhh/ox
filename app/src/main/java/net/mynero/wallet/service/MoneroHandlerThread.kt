@@ -51,7 +51,7 @@ class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet)
 
     override fun run() {
         val prefService = PrefService.instance ?: return
-        val usesTor = prefService.getBoolean(Constants.PREF_USES_TOR, false)
+        val usesTor = ProxyService.instance?.usingProxy == true
         val currentNode = prefService.node
         val isLocalIp =
             currentNode?.address?.startsWith("10.") == true ||

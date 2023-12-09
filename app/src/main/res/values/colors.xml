@@ -30,6 +30,7 @@
     <color name="oled_colorOnError">@color/oled_colorBackground</color>
     <color name="edittext_bg_color">#CCCCCC</color>
     <color name="button_disabled_bg_color">#454545</color>
+    <color name="edittext_bg_color_disabled">#CCCCCC</color>
     <color name="oled_locked_utxo">#B5895A</color>
     <color name="oled_txBackgroundColor">#FBFBFB</color>
     <color name="oled_dialogBackgroundColor">#E8E8E8</color>

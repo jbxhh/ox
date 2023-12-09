@@ -9,9 +9,11 @@ import androidx.lifecycle.ViewModel
 import net.mynero.wallet.MainActivity
 import net.mynero.wallet.MoneroApplication
 import net.mynero.wallet.R
+import net.mynero.wallet.livedata.combineLatestIgnoreNull
 import net.mynero.wallet.model.Wallet
 import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.service.PrefService
+import net.mynero.wallet.service.ProxyService
 import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.RestoreHeight
 import java.io.File
@@ -19,168 +21,179 @@ import java.util.Calendar
 
 class OnboardingViewModel : ViewModel() {
     private val _showMoreOptions = MutableLiveData(false)
-    private val _enableCreateButton = MutableLiveData(true)
+    private val _creatingWallet = MutableLiveData(false)
     private val _seedType = MutableLiveData(SeedType.POLYSEED)
+    private val _useProxy = MutableLiveData(false)
+    val useProxy: LiveData<Boolean> = _useProxy
+    private val _proxyAddress = MutableLiveData("")
+    private val _proxyPort = MutableLiveData("")
+    private val _useBundledTor = MutableLiveData(false)
+    val useBundledTor: LiveData<Boolean> = _useBundledTor
+    private val _passphrase = MutableLiveData("")
+    private val _confirmedPassphrase = MutableLiveData("")
     var showMoreOptions: LiveData<Boolean> = _showMoreOptions
-    var enableCreateButton: LiveData<Boolean> = _enableCreateButton
     var seedType: LiveData<SeedType> = _seedType
-    private var proxyAddress = ""
-    private var proxyPort = ""
+
+    val enableButton = combineLatestIgnoreNull(
+        seedType,
+        _useProxy,
+        _proxyAddress,
+        _proxyPort,
+        _useBundledTor,
+        _passphrase,
+        _confirmedPassphrase,
+        _creatingWallet
+    ) { seedType, useProxy, proxyAddress, proxyPort, useBundledTor, passphrase, confirmedPassphrase, creatingWallet ->
+        if(seedType == null || useProxy == null || proxyAddress == null || proxyPort == null || useBundledTor == null || passphrase == null || confirmedPassphrase == null || creatingWallet == null) return@combineLatestIgnoreNull false
+        if((passphrase.isNotEmpty() || confirmedPassphrase.isNotEmpty()) && passphrase != confirmedPassphrase) return@combineLatestIgnoreNull false
+        if(creatingWallet) return@combineLatestIgnoreNull false
+        if(seedType == SeedType.POLYSEED && passphrase.isEmpty()) return@combineLatestIgnoreNull false
+        if(useProxy && (proxyAddress.isEmpty() || proxyPort.isEmpty())) return@combineLatestIgnoreNull false
+        if(useBundledTor && (proxyAddress.isEmpty() || proxyPort.isEmpty())) return@combineLatestIgnoreNull false
+
+        return@combineLatestIgnoreNull true
+    }
+
     fun onMoreOptionsClicked() {
         val currentValue = showMoreOptions.value ?: false
         val newValue = !currentValue
         _showMoreOptions.value = newValue
     }
 
-    fun updateProxy(application: MoneroApplication) {
-        application.executor?.execute {
-            val usesProxy = PrefService.instance?.getBoolean(Constants.PREF_USES_TOR, false) == true
-            if (!usesProxy) {
-                return@execute
-            }
-            if (proxyAddress.isEmpty()) proxyAddress = "127.0.0.1"
-            if (proxyPort.isEmpty()) proxyPort = "9050"
-            val validIpAddress = Patterns.IP_ADDRESS.matcher(proxyAddress).matches()
-            if (validIpAddress) {
-                val proxy = "$proxyAddress:$proxyPort"
-                PrefService.instance?.edit()?.putString(Constants.PREF_PROXY, proxy)?.apply()
-            }
-        }
-    }
-
     fun setSeedType(seedType: SeedType?) {
         _seedType.value = seedType
     }
 
-    fun setProxyAddress(address: String) {
-        proxyAddress = address
-    }
-
-    fun setProxyPort(port: String) {
-        proxyPort = port
-    }
-
     fun createOrImportWallet(
         mainActivity: Activity,
-        walletPassword: String,
-        confirmedPassword: String,
         walletSeed: String,
         restoreHeightText: String,
         useOffset: Boolean
     ) {
+        val passphrase = _passphrase.value ?: return
+        val confirmedPassphrase = _confirmedPassphrase.value ?: return
+        val useProxy = _useProxy.value ?: return
+
         val application = mainActivity.application as MoneroApplication
-        application.executor?.execute {
-            _enableCreateButton.postValue(false)
-            val offset = if (useOffset) walletPassword else ""
-            if (walletPassword.isNotEmpty()) {
-                if (walletPassword != confirmedPassword) {
-                    _enableCreateButton.postValue(true)
-                    mainActivity.runOnUiThread {
-                        Toast.makeText(
-                            mainActivity,
-                            application.getString(R.string.invalid_confirmed_password),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    return@execute
-                }
-                PrefService.instance?.edit()?.putBoolean(Constants.PREF_USES_PASSWORD, true)
-                    ?.apply()
-            }
-            var restoreHeight = newRestoreHeight
-            val walletFile = File(mainActivity.applicationInfo.dataDir, Constants.WALLET_NAME)
-            var wallet: Wallet? = null
-            if (offset.isNotEmpty()) {
-                PrefService.instance?.edit()?.putBoolean(Constants.PREF_USES_OFFSET, true)?.apply()
-            }
-            val seedTypeValue = seedType.value ?: return@execute
-            if (walletSeed.isEmpty()) {
-                if (seedTypeValue == SeedType.POLYSEED) {
-                    wallet = if (offset.isEmpty()) {
-                        mainActivity.runOnUiThread {
-                            _enableCreateButton.postValue(true)
-                            Toast.makeText(
-                                mainActivity,
-                                application.getString(R.string.invalid_empty_passphrase),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                        return@execute
-                    } else {
-                        WalletManager.instance?.createWalletPolyseed(
-                            walletFile,
-                            walletPassword,
-                            offset,
-                            Constants.MNEMONIC_LANGUAGE
-                        )
-                    }
-                } else if (seedTypeValue == SeedType.LEGACY) {
-                    val tmpWalletFile =
-                        File(mainActivity.applicationInfo.dataDir, Constants.WALLET_NAME + "_tmp")
-                    val tmpWallet =
-                        createTempWallet(tmpWalletFile) //we do this to get seed, then recover wallet so we can use seed offset
-                    tmpWallet?.let {
-                        wallet = WalletManager.instance?.recoveryWallet(
-                            walletFile,
-                            walletPassword,
-                            tmpWallet.getSeed("") ?: return@let,
-                            offset,
-                            restoreHeight
-                        )
-                        tmpWalletFile.delete()
-                    }
-                }
-            } else {
-                if (getMnemonicType(walletSeed) == SeedType.UNKNOWN) {
-                    mainActivity.runOnUiThread {
-                        _enableCreateButton.postValue(true)
-                        Toast.makeText(
-                            mainActivity,
-                            application.getString(R.string.invalid_mnemonic_code),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    return@execute
-                }
-                if (restoreHeightText.isNotEmpty()) {
-                    restoreHeight = restoreHeightText.toLong()
-                }
-                if (seedTypeValue == SeedType.POLYSEED) {
-                    wallet = WalletManager.instance?.recoveryWalletPolyseed(
-                        walletFile,
-                        walletPassword,
-                        walletSeed,
-                        offset
-                    )
-                } else if (seedTypeValue == SeedType.LEGACY) {
-                    wallet = WalletManager.instance?.recoveryWallet(
-                        walletFile,
-                        walletPassword,
-                        walletSeed,
-                        offset,
-                        restoreHeight
-                    )
-                }
-            }
-            val walletStatus = wallet?.status
-            wallet?.close()
-            val ok = walletStatus?.isOk
-            walletFile.delete() // cache is broken for some reason when recovering wallets. delete the file here. this happens in monerujo too.
-            if (ok == true) {
-                (mainActivity as MainActivity).init(walletFile, walletPassword)
-                mainActivity.runOnUiThread { mainActivity.onBackPressed() }
-            } else {
+        _creatingWallet.postValue(true)
+        val offset = if (useOffset) confirmedPassphrase else ""
+        if (passphrase.isNotEmpty()) {
+            if (passphrase != confirmedPassphrase) {
+                _creatingWallet.postValue(false)
                 mainActivity.runOnUiThread {
-                    _enableCreateButton.postValue(true)
                     Toast.makeText(
                         mainActivity,
-                        application.getString(
-                            R.string.create_wallet_failed,
-                            walletStatus?.errorString
-                        ),
+                        application.getString(R.string.invalid_confirmed_password),
                         Toast.LENGTH_SHORT
                     ).show()
                 }
+                return
+            }
+            PrefService.instance?.edit()?.putBoolean(Constants.PREF_USES_PASSWORD, true)
+                ?.apply()
+        }
+        var restoreHeight = newRestoreHeight
+        val walletFile = File(mainActivity.applicationInfo.dataDir, Constants.WALLET_NAME)
+        var wallet: Wallet? = null
+        if (offset.isNotEmpty()) {
+            PrefService.instance?.edit()?.putBoolean(Constants.PREF_USES_OFFSET, true)?.apply()
+        }
+        val seedTypeValue = seedType.value ?: return
+        if (walletSeed.isEmpty()) {
+            if (seedTypeValue == SeedType.POLYSEED) {
+                wallet = if (offset.isEmpty()) {
+                    mainActivity.runOnUiThread {
+                        _creatingWallet.postValue(false)
+                        Toast.makeText(
+                            mainActivity,
+                            application.getString(R.string.invalid_empty_passphrase),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    return
+                } else {
+                    WalletManager.instance?.createWalletPolyseed(
+                        walletFile,
+                        passphrase,
+                        offset,
+                        Constants.MNEMONIC_LANGUAGE
+                    )
+                }
+            } else if (seedTypeValue == SeedType.LEGACY) {
+                val tmpWalletFile =
+                    File(mainActivity.applicationInfo.dataDir, Constants.WALLET_NAME + "_tmp")
+                val tmpWallet =
+                    createTempWallet(tmpWalletFile) //we do this to get seed, then recover wallet so we can use seed offset
+                tmpWallet?.let {
+                    wallet = WalletManager.instance?.recoveryWallet(
+                        walletFile,
+                        passphrase,
+                        tmpWallet.getSeed("") ?: return@let,
+                        offset,
+                        restoreHeight
+                    )
+                    tmpWalletFile.delete()
+                }
+            }
+        } else {
+            if (getMnemonicType(walletSeed) == SeedType.UNKNOWN) {
+                mainActivity.runOnUiThread {
+                    _creatingWallet.postValue(false)
+                    Toast.makeText(
+                        mainActivity,
+                        application.getString(R.string.invalid_mnemonic_code),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                return
+            }
+            if (restoreHeightText.isNotEmpty()) {
+                restoreHeight = restoreHeightText.toLong()
+            }
+            if (seedTypeValue == SeedType.POLYSEED) {
+                wallet = WalletManager.instance?.recoveryWalletPolyseed(
+                    walletFile,
+                    passphrase,
+                    walletSeed,
+                    offset
+                )
+            } else if (seedTypeValue == SeedType.LEGACY) {
+                wallet = WalletManager.instance?.recoveryWallet(
+                    walletFile,
+                    passphrase,
+                    walletSeed,
+                    offset,
+                    restoreHeight
+                )
+            }
+        }
+        val walletStatus = wallet?.status
+        wallet?.close()
+        val ok = walletStatus?.isOk
+        walletFile.delete() // cache is broken for some reason when recovering wallets. delete the file here. this happens in monerujo too.
+        if (ok == true) {
+            var editor = PrefService.instance?.edit()
+                ?.putBoolean(Constants.PREF_USE_BUNDLED_TOR, _useBundledTor.value == true)
+                ?.putBoolean(Constants.PREF_USES_PROXY, useProxy)
+            if(useProxy) {
+                editor = editor?.putString(Constants.PREF_PROXY, "${_proxyAddress.value}:${_proxyPort.value}")
+            }
+
+            editor?.apply()
+
+            (mainActivity as MainActivity).init(walletFile, passphrase)
+            mainActivity.runOnUiThread { mainActivity.onBackPressed() }
+        } else {
+            mainActivity.runOnUiThread {
+                _creatingWallet.postValue(false)
+                Toast.makeText(
+                    mainActivity,
+                    application.getString(
+                        R.string.create_wallet_failed,
+                        walletStatus?.errorString
+                    ),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -211,6 +224,30 @@ class OnboardingViewModel : ViewModel() {
             Constants.MNEMONIC_LANGUAGE,
             0
         )
+    }
+
+    fun setProxyAddress(address: String) {
+        _proxyAddress.value = address
+    }
+
+    fun setProxyPort(port: String) {
+        _proxyPort.value = port
+    }
+
+    fun setUseBundledTor(useBundled: Boolean) {
+        _useBundledTor.value = useBundled
+    }
+
+    fun setUseProxy(useProxy: Boolean) {
+        _useProxy.value = useProxy
+    }
+
+    fun setPassphrase(passphrase: String) {
+        _passphrase.value = passphrase
+    }
+
+    fun setConfirmedPassphrase(confirmedPassphrase: String) {
+        _confirmedPassphrase.value = confirmedPassphrase
     }
 
     enum class SeedType(val descResId: Int) {

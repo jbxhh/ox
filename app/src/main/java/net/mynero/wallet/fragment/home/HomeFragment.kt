@@ -10,6 +10,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
@@ -30,6 +31,8 @@ import net.mynero.wallet.service.DaemonService
 import net.mynero.wallet.service.HistoryService
 import net.mynero.wallet.service.PrefService
 import net.mynero.wallet.service.ProxyService
+import net.mynero.wallet.service.SamouraiTorManager
+import net.mynero.wallet.service.TorKmpManager
 import net.mynero.wallet.util.Constants
 import timber.log.Timber
 
