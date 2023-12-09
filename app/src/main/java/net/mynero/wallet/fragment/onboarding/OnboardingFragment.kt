@@ -169,12 +169,7 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
         samouraiTorManager?.getTorStateLiveData()?.observe(viewLifecycleOwner) { state ->
             samouraiTorManager.getProxy()?.address()?.let { socketAddress ->
                 if(socketAddress.toString().isEmpty()) return@let
-                val proxyString = socketAddress.toString().substring(1)
-                val address = proxyString.split(":")[0]
-                val port = proxyString.split(":")[1]
                 if(mViewModel?.useProxy?.value == true && mViewModel?.useBundledTor?.value == true) {
-                    mViewModel?.setProxyAddress(address)
-                    mViewModel?.setProxyPort(port)
                     torIcon?.visibility = View.VISIBLE
                     indicatorCircle?.visibility = View.INVISIBLE
                 }
@@ -188,11 +183,7 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
                     torIcon?.visibility = View.INVISIBLE
                     indicatorCircle?.visibility = View.INVISIBLE
                 }
-                EnumTorState.STARTING -> {
-                    torIcon?.visibility = View.INVISIBLE
-                    indicatorCircle?.visibility = View.VISIBLE
-                }
-                EnumTorState.STOPPING -> {
+                EnumTorState.STARTING, EnumTorState.STOPPING -> {
                     torIcon?.visibility = View.INVISIBLE
                     indicatorCircle?.visibility = View.VISIBLE
                 }
@@ -290,11 +281,6 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
         }
 
         useBundledTor?.setOnCheckedChangeListener { _, isChecked ->
-            if(!isChecked) {
-                mViewModel?.setProxyAddress("")
-                mViewModel?.setProxyPort("")
-            }
-
             mViewModel?.setUseBundledTor(isChecked)
         }
     }

@@ -3,7 +3,7 @@ package net.mynero.wallet.livedata
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 
-fun <T1, T2, T3, T4, T5, T6, T7, T8, S> combineLiveDatas(
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, S> combineLiveDatas(
     source1: LiveData<T1>,
     source2: LiveData<T2>,
     source3: LiveData<T3>,
@@ -12,7 +12,8 @@ fun <T1, T2, T3, T4, T5, T6, T7, T8, S> combineLiveDatas(
     source6: LiveData<T6>,
     source7: LiveData<T7>,
     source8: LiveData<T8>,
-    func: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?) -> S?
+    source9: LiveData<T9>?,
+    func: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?) -> S?
 ): LiveData<S> {
     val result = MediatorLiveData<S>()
     result.addSource(source1) {
@@ -24,7 +25,8 @@ fun <T1, T2, T3, T4, T5, T6, T7, T8, S> combineLiveDatas(
             source5.value,
             source6.value,
             source7.value,
-            source8.value
+            source8.value,
+            source9?.value
         )?.run { result.value = this }
     }
 
@@ -37,7 +39,8 @@ fun <T1, T2, T3, T4, T5, T6, T7, T8, S> combineLiveDatas(
             source5.value,
             source6.value,
             source7.value,
-            source8.value
+            source8.value,
+            source9?.value
         )?.run { result.value = this }
     }
 
@@ -50,7 +53,8 @@ fun <T1, T2, T3, T4, T5, T6, T7, T8, S> combineLiveDatas(
             source5.value,
             source6.value,
             source7.value,
-            source8.value
+            source8.value,
+            source9?.value
         )?.run { result.value = this }
     }
 
@@ -63,7 +67,8 @@ fun <T1, T2, T3, T4, T5, T6, T7, T8, S> combineLiveDatas(
             source5.value,
             source6.value,
             source7.value,
-            source8.value
+            source8.value,
+            source9?.value
         )?.run { result.value = this }
     }
 
@@ -76,7 +81,8 @@ fun <T1, T2, T3, T4, T5, T6, T7, T8, S> combineLiveDatas(
             source5.value,
             source6.value,
             source7.value,
-            source8.value
+            source8.value,
+            source9?.value
         )?.run { result.value = this }
     }
 
@@ -89,7 +95,8 @@ fun <T1, T2, T3, T4, T5, T6, T7, T8, S> combineLiveDatas(
             source5.value,
             source6.value,
             source7.value,
-            source8.value
+            source8.value,
+            source9?.value
         )?.run { result.value = this }
     }
 
@@ -102,7 +109,8 @@ fun <T1, T2, T3, T4, T5, T6, T7, T8, S> combineLiveDatas(
             source5.value,
             source6.value,
             source7.value,
-            source8.value
+            source8.value,
+            source9?.value
         )?.run { result.value = this }
     }
 
@@ -115,9 +123,27 @@ fun <T1, T2, T3, T4, T5, T6, T7, T8, S> combineLiveDatas(
             source5.value,
             source6.value,
             source7.value,
-            source8.value
+            source8.value,
+            source9?.value
         )?.run { result.value = this }
     }
+
+    source9?.let { src9 ->
+        result.addSource(src9) {
+            func(
+                source1.value,
+                source2.value,
+                source3.value,
+                source4.value,
+                source5.value,
+                source6.value,
+                source7.value,
+                source8.value,
+                src9.value
+            )?.run { result.value = this }
+        }
+    }
+
 
     return result
 }

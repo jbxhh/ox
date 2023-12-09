@@ -2,6 +2,7 @@ package net.mynero.wallet.service
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import net.mynero.wallet.MoneroApplication
 import net.mynero.wallet.data.DefaultNodes
 import net.mynero.wallet.data.Node
@@ -77,6 +78,23 @@ class PrefService(application: MoneroApplication) : ServiceBase(null) {
             return true
         }
         return value == true
+    }
+
+    fun saveProxy(address: String, port: String): String? {
+        if(address.isEmpty() || port.isEmpty()) {
+            deleteProxy()
+            return null
+        }
+        val proxyAddress = "$address:$port"
+        if(proxyAddress == ":") return null
+        Log.d("PrefService", "Setting proxy. proxyAddress=$proxyAddress")
+        edit()?.putString(Constants.PREF_PROXY, proxyAddress)?.apply()
+        return proxyAddress
+    }
+
+    fun deleteProxy() {
+        Log.d("PrefService", "Deleting proxy...")
+        edit()?.putString(Constants.PREF_PROXY, "")?.apply()
     }
 
     companion object {

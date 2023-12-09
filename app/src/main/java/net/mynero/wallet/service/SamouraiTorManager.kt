@@ -1,44 +1,41 @@
 package net.mynero.wallet.service
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import net.mynero.wallet.model.TorState
-import org.json.JSONException
-import org.json.JSONObject
 import java.net.Proxy
 
-class SamouraiTorManager(val appContext: Application?, val torKmpManager: TorKmpManager?) {
+class SamouraiTorManager(private val appContext: Application?, private val torKmpManager: TorKmpManager) {
     fun getTorStateLiveData(): MutableLiveData<TorState> {
-        return torKmpManager!!.torStateLiveData
+        return torKmpManager.torStateLiveData
     }
 
     fun getTorState(): TorState {
-        return torKmpManager!!.torState
+        return torKmpManager.torState
     }
 
     fun isConnected(): Boolean {
-        return torKmpManager?.isConnected() ?: false
+        return torKmpManager.isConnected()
     }
 
     fun isStarting(): Boolean {
-        return torKmpManager?.isStarting() ?: false
+        return torKmpManager.isStarting()
     }
 
     fun stop() {
-        torKmpManager?.torOperationManager?.stopQuietly()
+        torKmpManager.torOperationManager.stopQuietly()
     }
 
     fun start() {
-        torKmpManager?.torOperationManager?.startQuietly()
+        torKmpManager.torOperationManager.startQuietly()
     }
 
     fun getProxy(): Proxy? {
-        return torKmpManager?.proxy
+        return torKmpManager.proxy
     }
 
     fun newIdentity() {
-        torKmpManager?.newIdentity(appContext!!)
+        appContext?.let { torKmpManager.newIdentity(it) }
     }
 
     companion object {

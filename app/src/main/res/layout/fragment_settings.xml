@@ -16,7 +16,6 @@
             android:text="@string/settings"
             android:layout_marginTop="24dp"
             android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp"
             android:textSize="32sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@id/settings_tor_loading_progressindicator"
@@ -28,10 +27,10 @@
             android:layout_height="32dp"
             android:src="@drawable/tor"
             android:visibility="invisible"
-            app:layout_constraintEnd_toEndOf="@id/settings_tor_loading_progressindicator"
-            app:layout_constraintStart_toStartOf="@id/settings_tor_loading_progressindicator"
-            app:layout_constraintTop_toTopOf="@id/settings_tor_loading_progressindicator"
-            app:layout_constraintBottom_toBottomOf="@id/settings_tor_loading_progressindicator"/>
+            android:layout_marginEnd="24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/settings_textview"
+            app:layout_constraintBottom_toBottomOf="@id/settings_textview"/>
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/settings_tor_loading_progressindicator"
@@ -39,9 +38,10 @@
             android:layout_height="32dp"
             android:indeterminate="true"
             android:visibility="invisible"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/settings_textview"
-            app:layout_constraintBottom_toBottomOf="@id/settings_textview"/>
+            app:layout_constraintEnd_toEndOf="@id/settings_tor_icon"
+            app:layout_constraintStart_toStartOf="@id/settings_tor_icon"
+            app:layout_constraintTop_toTopOf="@id/settings_tor_icon"
+            app:layout_constraintBottom_toBottomOf="@id/settings_tor_icon"/>
 
         <TextView
             android:id="@+id/wallet_settings_textview"
