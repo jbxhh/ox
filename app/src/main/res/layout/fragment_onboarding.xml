@@ -23,16 +23,37 @@
             android:paddingTop="24dp">
             <TextView
                 android:id="@+id/create_wallet_textview"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:text="@string/create_wallet"
                 android:textSize="32sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toTopOf="@id/wallet_password_edittext"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/onboarding_tor_loading_progressindicator"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/onboarding_tor_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/tor"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="@id/onboarding_tor_loading_progressindicator"
+                app:layout_constraintStart_toStartOf="@id/onboarding_tor_loading_progressindicator"
+                app:layout_constraintTop_toTopOf="@id/onboarding_tor_loading_progressindicator"
+                app:layout_constraintBottom_toBottomOf="@id/onboarding_tor_loading_progressindicator"/>
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/onboarding_tor_loading_progressindicator"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:indeterminate="true"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/create_wallet_textview"
+                app:layout_constraintBottom_toBottomOf="@id/create_wallet_textview"/>
 
             <EditText
                 android:id="@+id/wallet_password_edittext"
@@ -248,7 +269,6 @@
                         android:layout_height="wrap_content"
                         android:minHeight="48dp"
                         android:text="@string/use_bundled_tor"
-                        android:visibility="gone"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintBottom_toTopOf="@id/wallet_proxy_address_edittext"
@@ -260,7 +280,6 @@
                         android:background="@drawable/edittext_bg"
                         android:hint="@string/wallet_proxy_address_hint"
                         android:minHeight="48dp"
-                        android:visibility="gone"
                         app:layout_constraintBottom_toTopOf="@id/wallet_proxy_port_edittext"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -275,7 +294,6 @@
                         android:layout_marginTop="8dp"
                         android:inputType="number"
                         android:minHeight="48dp"
-                        android:visibility="gone"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"

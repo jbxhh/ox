@@ -1,10 +1,8 @@
 package net.mynero.wallet.fragment.onboarding
 
-import android.app.Activity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,13 +16,12 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import net.mynero.wallet.MoneroApplication
 import net.mynero.wallet.R
 import net.mynero.wallet.data.Node
 import net.mynero.wallet.fragment.dialog.AddNodeBottomSheetDialog
@@ -32,9 +29,9 @@ import net.mynero.wallet.fragment.dialog.AddNodeBottomSheetDialog.AddNodeListene
 import net.mynero.wallet.fragment.dialog.NodeSelectionBottomSheetDialog
 import net.mynero.wallet.fragment.dialog.NodeSelectionBottomSheetDialog.NodeSelectionDialogListener
 import net.mynero.wallet.fragment.onboarding.OnboardingViewModel.SeedType
+import net.mynero.wallet.model.EnumTorState
 import net.mynero.wallet.service.PrefService
 import net.mynero.wallet.service.ProxyService
-import net.mynero.wallet.util.Constants
 
 class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListener {
     private var useOffset = true
@@ -56,6 +53,7 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
     private var xmrchanOnboardingImage: ImageView? = null
     private var seedTypeButton: Button? = null
     private var seedTypeDescTextView: TextView? = null
+    private var useBundledTor: CheckBox? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -83,11 +81,38 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
         xmrchanOnboardingImage = view.findViewById(R.id.xmrchan_onboarding_imageview)
         seedTypeButton = view.findViewById(R.id.seed_type_button)
         seedTypeDescTextView = view.findViewById(R.id.seed_type_desc_textview)
+        useBundledTor = view.findViewById(R.id.bundled_tor_checkbox)
+
+        seedOffsetCheckbox?.isChecked = useOffset
+        showXmrchanSwitch?.isChecked = true
+        val usingProxy = ProxyService.instance?.usingProxy == true
+        val usingBundledTor = ProxyService.instance?.useBundledTor == true
+
+        torSwitch?.isChecked = usingProxy
+        useBundledTor?.isChecked = usingBundledTor
+        useBundledTor?.isEnabled = usingProxy
+        walletProxyAddressEditText?.isEnabled = usingProxy && !usingBundledTor
+        walletProxyPortEditText?.isEnabled = usingProxy && !usingBundledTor
+        walletProxyPortEditText?.visibility = if (usingBundledTor) View.GONE else View.VISIBLE
+        walletProxyAddressEditText?.visibility = if (usingBundledTor) View.GONE else View.VISIBLE
+
+        val node = PrefService.instance?.node // should be using default here
+        selectNodeButton?.text = getString(R.string.node_button_text, node?.address)
+
         bindListeners()
         bindObservers()
     }
 
     private fun bindObservers() {
+        mViewModel?.passphrase?.observe(viewLifecycleOwner) { text ->
+            if (text.isEmpty()) {
+                walletPasswordConfirmEditText?.text = null
+                walletPasswordConfirmEditText?.visibility = View.GONE
+            } else {
+                walletPasswordConfirmEditText?.visibility = View.VISIBLE
+            }
+        }
+
         mViewModel?.showMoreOptions?.observe(viewLifecycleOwner) { show: Boolean ->
             if (show) {
                 moreOptionsChevronImageView?.setImageResource(R.drawable.ic_keyboard_arrow_up)
@@ -97,9 +122,11 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
                 advancedOptionsLayout?.visibility = View.GONE
             }
         }
+
         mViewModel?.enableButton?.observe(viewLifecycleOwner) { enable: Boolean ->
             createWalletButton?.isEnabled = enable
         }
+
         mViewModel?.seedType?.observe(viewLifecycleOwner) { seedType: SeedType ->
             seedTypeButton?.text = seedType.toString()
             seedTypeDescTextView?.text = getText(seedType.descResId)
@@ -116,59 +143,92 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
             }
         }
 
+        mViewModel?.showMonerochan?.observe(viewLifecycleOwner) {
+            if (it) {
+                xmrchanOnboardingImage?.visibility = View.VISIBLE
+            } else {
+                xmrchanOnboardingImage?.visibility = View.GONE
+            }
+        }
+
+        mViewModel?.useBundledTor?.observe(viewLifecycleOwner) { isChecked ->
+            walletProxyPortEditText?.visibility = if (isChecked) View.GONE else View.VISIBLE
+            walletProxyAddressEditText?.visibility = if (isChecked) View.GONE else View.VISIBLE
+        }
+
+        mViewModel?.useProxy?.observe(viewLifecycleOwner) { useProxy ->
+            useBundledTor?.isEnabled = useProxy
+            walletProxyAddressEditText?.isEnabled = useProxy
+            walletProxyPortEditText?.isEnabled = useProxy
+        }
+
         val samouraiTorManager = ProxyService.instance?.samouraiTorManager
-        samouraiTorManager?.getTorStateLiveData()?.observeForever {
-            println("STATE CHANGE:: ${it.state.name}")
+        val indicatorCircle = view?.findViewById<CircularProgressIndicator>(R.id.onboarding_tor_loading_progressindicator)
+        val torIcon = view?.findViewById<ImageView>(R.id.onboarding_tor_icon)
+
+        samouraiTorManager?.getTorStateLiveData()?.observe(viewLifecycleOwner) { state ->
             samouraiTorManager.getProxy()?.address()?.let { socketAddress ->
                 if(socketAddress.toString().isEmpty()) return@let
-                println("PROXY INIT")
                 val proxyString = socketAddress.toString().substring(1)
                 val address = proxyString.split(":")[0]
                 val port = proxyString.split(":")[1]
                 if(mViewModel?.useProxy?.value == true && mViewModel?.useBundledTor?.value == true) {
                     mViewModel?.setProxyAddress(address)
                     mViewModel?.setProxyPort(port)
+                    torIcon?.visibility = View.VISIBLE
+                    indicatorCircle?.visibility = View.INVISIBLE
                 }
+            }
+
+            indicatorCircle?.isIndeterminate = state.progressIndicator == 0
+            indicatorCircle?.progress = state.progressIndicator
+
+            when (state.state) {
+                EnumTorState.OFF -> {
+                    torIcon?.visibility = View.INVISIBLE
+                    indicatorCircle?.visibility = View.INVISIBLE
+                }
+                EnumTorState.STARTING -> {
+                    torIcon?.visibility = View.INVISIBLE
+                    indicatorCircle?.visibility = View.VISIBLE
+                }
+                EnumTorState.STOPPING -> {
+                    torIcon?.visibility = View.INVISIBLE
+                    indicatorCircle?.visibility = View.VISIBLE
+                }
+                else -> {}
             }
         }
     }
 
     private fun bindListeners() {
-        val useBundledTor = view?.findViewById<CheckBox>(R.id.bundled_tor_checkbox)
-
-        seedOffsetCheckbox?.isChecked = useOffset
         // Disable onBack click
         val onBackPressedCallback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {}
         }
-        val activity = activity
         activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, onBackPressedCallback)
+
         moreOptionsDropdownTextView?.setOnClickListener { mViewModel?.onMoreOptionsClicked() }
+
         moreOptionsChevronImageView?.setOnClickListener { mViewModel?.onMoreOptionsClicked() }
+
         seedOffsetCheckbox?.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
             useOffset = b
         }
+
         createWalletButton?.setOnClickListener {
             onBackPressedCallback.isEnabled = false
-            (getActivity()?.application as MoneroApplication).executor?.execute {
-                createOrImportWallet(
-                    walletSeedEditText?.text.toString().trim { it <= ' ' },
-                    walletRestoreHeightEditText?.text.toString().trim { it <= ' ' }
-                )
-            }
+            createOrImportWallet(
+                walletSeedEditText?.text.toString().trim { it <= ' ' },
+                walletRestoreHeightEditText?.text.toString().trim { it <= ' ' }
+            )
         }
+
         walletPasswordEditText?.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun afterTextChanged(editable: Editable) {
-                val text = editable.toString()
-                mViewModel?.setPassphrase(text)
-                if (text.isEmpty()) {
-                    walletPasswordConfirmEditText?.text = null
-                    walletPasswordConfirmEditText?.visibility = View.GONE
-                } else {
-                    walletPasswordConfirmEditText?.visibility = View.VISIBLE
-                }
+                mViewModel?.setPassphrase(editable.toString())
             }
         })
 
@@ -176,10 +236,10 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun afterTextChanged(editable: Editable) {
-                val text = editable.toString()
-                mViewModel?.setConfirmedPassphrase(text)
+                mViewModel?.setConfirmedPassphrase(editable.toString())
             }
         })
+
         walletSeedEditText?.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
@@ -192,19 +252,13 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
                 }
             }
         })
+
         seedTypeButton?.setOnClickListener { toggleSeedType() }
-        torSwitch?.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
-            if (b) {
-                useBundledTor?.visibility = View.VISIBLE
-                walletProxyAddressEditText?.visibility = View.VISIBLE
-                walletProxyPortEditText?.visibility = View.VISIBLE
-            } else {
-                useBundledTor?.visibility = View.GONE
-                walletProxyAddressEditText?.visibility = View.GONE
-                walletProxyPortEditText?.visibility = View.GONE
-            }
+
+        torSwitch?.setOnCheckedChangeListener { _, b: Boolean ->
             mViewModel?.setUseProxy(b)
         }
+
         walletProxyPortEditText?.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
@@ -213,6 +267,7 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
                 mViewModel?.setProxyPort(text)
             }
         })
+
         walletProxyAddressEditText?.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
@@ -221,16 +276,11 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
                 mViewModel?.setProxyAddress(text)
             }
         })
-        showXmrchanSwitch?.isChecked = true
+
         showXmrchanSwitch?.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
-            if (b) {
-                xmrchanOnboardingImage?.visibility = View.VISIBLE
-            } else {
-                xmrchanOnboardingImage?.visibility = View.GONE
-            }
+            mViewModel?.setMonerochan(b)
         }
-        val node = PrefService.instance?.node // should be using default here
-        selectNodeButton?.text = getString(R.string.node_button_text, node?.address)
+
         selectNodeButton?.setOnClickListener {
             activity?.supportFragmentManager?.let { fragmentManager ->
                 val dialog = NodeSelectionBottomSheetDialog()
@@ -240,13 +290,7 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
         }
 
         useBundledTor?.setOnCheckedChangeListener { _, isChecked ->
-            walletProxyPortEditText?.visibility = if (isChecked) View.GONE else View.VISIBLE
-            walletProxyAddressEditText?.visibility = if (isChecked) View.GONE else View.VISIBLE
-
-            if(isChecked) {
-                ProxyService.instance?.samouraiTorManager?.start()
-            } else {
-                ProxyService.instance?.samouraiTorManager?.stop()
+            if(!isChecked) {
                 mViewModel?.setProxyAddress("")
                 mViewModel?.setProxyPort("")
             }
@@ -270,11 +314,10 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
         walletSeed: String,
         restoreHeightText: String
     ) {
-        val activity: Activity? = activity
-        if (activity != null) {
+        activity?.let { act ->
             lifecycleScope.launch(Dispatchers.IO) {
                 mViewModel?.createOrImportWallet(
-                    activity,
+                    act,
                     walletSeed,
                     restoreHeightText,
                     useOffset
@@ -288,10 +331,9 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
         selectNodeButton?.text = getString(R.string.node_button_text, node?.address)
         Toast.makeText(
             activity,
-            getString(R.string.node_selected),
+            getString(R.string.node_selected, node?.name ?: node?.host),
             Toast.LENGTH_SHORT
         ).show()
-        refreshProxy()
     }
 
     override fun onClickedEditNode(node: Node?) {}
@@ -309,11 +351,5 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
             dialog.listener = this
             dialog.show(fragmentManager, "node_selection_dialog")
         }
-    }
-
-    private fun refreshProxy() {
-        val proxyAddress = walletProxyAddressEditText?.text.toString()
-        val proxyPort = walletProxyPortEditText?.text.toString()
-        ProxyService.instance?.updateProxy(proxyAddress, proxyPort)
     }
 }
