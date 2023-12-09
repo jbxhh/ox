@@ -138,6 +138,13 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
+    // Tor
+    def vTor = '4.8.6-0'
+    def vKmpTor = '1.4.4'
+
+    implementation 'io.samourai.code.wallet:android-tor-binary:0.4.7.12'
+    implementation "io.matthewnelson.kotlin-components:kmp-tor:$vTor-$vKmpTor"
+
     //noinspection GradleDependency
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.mockito:mockito-all:1.10.19"

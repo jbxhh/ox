@@ -18,8 +18,12 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.mynero.wallet.MoneroApplication
 import net.mynero.wallet.R
 import net.mynero.wallet.data.Node
@@ -35,26 +39,6 @@ import net.mynero.wallet.util.Constants
 class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListener {
     private var useOffset = true
     private var mViewModel: OnboardingViewModel? = null
-    private var proxyAddressListener: TextWatcher = object : TextWatcher {
-        override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-        override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-        override fun afterTextChanged(editable: Editable) {
-            if (mViewModel != null) {
-                mViewModel?.setProxyAddress(editable.toString())
-                mViewModel?.updateProxy(activity?.application as MoneroApplication)
-            }
-        }
-    }
-    private var proxyPortListener: TextWatcher = object : TextWatcher {
-        override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-        override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-        override fun afterTextChanged(editable: Editable) {
-            if (mViewModel != null) {
-                mViewModel?.setProxyPort(editable.toString())
-                mViewModel?.updateProxy(activity?.application as MoneroApplication)
-            }
-        }
-    }
     private var walletProxyAddressEditText: EditText? = null
     private var walletProxyPortEditText: EditText? = null
     private var walletPasswordEditText: EditText? = null
@@ -113,7 +97,7 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
                 advancedOptionsLayout?.visibility = View.GONE
             }
         }
-        mViewModel?.enableCreateButton?.observe(viewLifecycleOwner) { enable: Boolean ->
+        mViewModel?.enableButton?.observe(viewLifecycleOwner) { enable: Boolean ->
             createWalletButton?.isEnabled = enable
         }
         mViewModel?.seedType?.observe(viewLifecycleOwner) { seedType: SeedType ->
@@ -131,9 +115,27 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
                 walletSeedEditText?.hint = getString(R.string.recovery_phrase_optional_polyseed)
             }
         }
+
+        val samouraiTorManager = ProxyService.instance?.samouraiTorManager
+        samouraiTorManager?.getTorStateLiveData()?.observeForever {
+            println("STATE CHANGE:: ${it.state.name}")
+            samouraiTorManager.getProxy()?.address()?.let { socketAddress ->
+                if(socketAddress.toString().isEmpty()) return@let
+                println("PROXY INIT")
+                val proxyString = socketAddress.toString().substring(1)
+                val address = proxyString.split(":")[0]
+                val port = proxyString.split(":")[1]
+                if(mViewModel?.useProxy?.value == true && mViewModel?.useBundledTor?.value == true) {
+                    mViewModel?.setProxyAddress(address)
+                    mViewModel?.setProxyPort(port)
+                }
+            }
+        }
     }
 
     private fun bindListeners() {
+        val useBundledTor = view?.findViewById<CheckBox>(R.id.bundled_tor_checkbox)
+
         seedOffsetCheckbox?.isChecked = useOffset
         // Disable onBack click
         val onBackPressedCallback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
@@ -147,12 +149,9 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
             useOffset = b
         }
         createWalletButton?.setOnClickListener {
-            prepareDefaultNode()
             onBackPressedCallback.isEnabled = false
             (getActivity()?.application as MoneroApplication).executor?.execute {
                 createOrImportWallet(
-                    walletPasswordEditText?.text.toString(),
-                    walletPasswordConfirmEditText?.text.toString(),
                     walletSeedEditText?.text.toString().trim { it <= ' ' },
                     walletRestoreHeightEditText?.text.toString().trim { it <= ' ' }
                 )
@@ -163,12 +162,22 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun afterTextChanged(editable: Editable) {
                 val text = editable.toString()
+                mViewModel?.setPassphrase(text)
                 if (text.isEmpty()) {
                     walletPasswordConfirmEditText?.text = null
                     walletPasswordConfirmEditText?.visibility = View.GONE
                 } else {
                     walletPasswordConfirmEditText?.visibility = View.VISIBLE
                 }
+            }
+        })
+
+        walletPasswordConfirmEditText?.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+            override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+            override fun afterTextChanged(editable: Editable) {
+                val text = editable.toString()
+                mViewModel?.setConfirmedPassphrase(text)
             }
         })
         walletSeedEditText?.addTextChangedListener(object : TextWatcher {
@@ -185,26 +194,35 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
         })
         seedTypeButton?.setOnClickListener { toggleSeedType() }
         torSwitch?.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
-            PrefService.instance?.edit()?.putBoolean(Constants.PREF_USES_TOR, b)?.apply()
-            removeProxyTextListeners()
             if (b) {
-                if (ProxyService.instance?.hasProxySet() == true) {
-                    val proxyAddress =
-                        ProxyService.instance?.proxyAddress ?: return@setOnCheckedChangeListener
-                    val proxyPort =
-                        ProxyService.instance?.proxyPort ?: return@setOnCheckedChangeListener
-                    initProxyStuff(proxyAddress, proxyPort)
-                } else {
-                    initProxyStuff("127.0.0.1", "9050")
-                }
-                addProxyTextListeners()
+                useBundledTor?.visibility = View.VISIBLE
+                walletProxyAddressEditText?.visibility = View.VISIBLE
+                walletProxyPortEditText?.visibility = View.VISIBLE
+            } else {
+                useBundledTor?.visibility = View.GONE
+                walletProxyAddressEditText?.visibility = View.GONE
+                walletProxyPortEditText?.visibility = View.GONE
             }
-            mViewModel?.updateProxy(getActivity()?.application as MoneroApplication)
+            mViewModel?.setUseProxy(b)
         }
-        showXmrchanSwitch?.isChecked =
-            PrefService.instance?.getBoolean(Constants.PREF_MONEROCHAN, true) == true
+        walletProxyPortEditText?.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+            override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+            override fun afterTextChanged(editable: Editable) {
+                val text = editable.toString()
+                mViewModel?.setProxyPort(text)
+            }
+        })
+        walletProxyAddressEditText?.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+            override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+            override fun afterTextChanged(editable: Editable) {
+                val text = editable.toString()
+                mViewModel?.setProxyAddress(text)
+            }
+        })
+        showXmrchanSwitch?.isChecked = true
         showXmrchanSwitch?.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
-            PrefService.instance?.edit()?.putBoolean(Constants.PREF_MONEROCHAN, b)?.apply()
             if (b) {
                 xmrchanOnboardingImage?.visibility = View.VISIBLE
             } else {
@@ -220,6 +238,21 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
                 dialog.show(fragmentManager, "node_selection_dialog")
             }
         }
+
+        useBundledTor?.setOnCheckedChangeListener { _, isChecked ->
+            walletProxyPortEditText?.visibility = if (isChecked) View.GONE else View.VISIBLE
+            walletProxyAddressEditText?.visibility = if (isChecked) View.GONE else View.VISIBLE
+
+            if(isChecked) {
+                ProxyService.instance?.samouraiTorManager?.start()
+            } else {
+                ProxyService.instance?.samouraiTorManager?.stop()
+                mViewModel?.setProxyAddress("")
+                mViewModel?.setProxyPort("")
+            }
+
+            mViewModel?.setUseBundledTor(isChecked)
+        }
     }
 
     private fun toggleSeedType() {
@@ -233,46 +266,20 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
         mViewModel?.setSeedType(newSeedType)
     }
 
-    private fun prepareDefaultNode() {
-        PrefService.instance?.node
-    }
-
     private fun createOrImportWallet(
-        walletPassword: String,
-        confirmedPassword: String,
         walletSeed: String,
         restoreHeightText: String
     ) {
         val activity: Activity? = activity
         if (activity != null) {
-            mViewModel?.createOrImportWallet(
-                activity,
-                walletPassword,
-                confirmedPassword,
-                walletSeed,
-                restoreHeightText,
-                useOffset
-            )
-        }
-    }
-
-    private fun removeProxyTextListeners() {
-        walletProxyAddressEditText?.removeTextChangedListener(proxyAddressListener)
-        walletProxyPortEditText?.removeTextChangedListener(proxyPortListener)
-    }
-
-    private fun addProxyTextListeners() {
-        walletProxyAddressEditText?.addTextChangedListener(proxyAddressListener)
-        walletProxyPortEditText?.addTextChangedListener(proxyPortListener)
-    }
-
-    private fun initProxyStuff(proxyAddress: String, proxyPort: String) {
-        val validIpAddress = Patterns.IP_ADDRESS.matcher(proxyAddress).matches()
-        if (validIpAddress) {
-            mViewModel?.setProxyAddress(proxyAddress)
-            mViewModel?.setProxyPort(proxyPort)
-            walletProxyAddressEditText?.setText(proxyAddress)
-            walletProxyPortEditText?.setText(proxyPort)
+            lifecycleScope.launch(Dispatchers.IO) {
+                mViewModel?.createOrImportWallet(
+                    activity,
+                    walletSeed,
+                    restoreHeightText,
+                    useOffset
+                )
+            }
         }
     }
 
@@ -284,7 +291,7 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
             getString(R.string.node_selected),
             Toast.LENGTH_SHORT
         ).show()
-        mViewModel?.updateProxy(activity?.application as MoneroApplication)
+        refreshProxy()
     }
 
     override fun onClickedEditNode(node: Node?) {}
@@ -302,5 +309,11 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
             dialog.listener = this
             dialog.show(fragmentManager, "node_selection_dialog")
         }
+    }
+
+    private fun refreshProxy() {
+        val proxyAddress = walletProxyAddressEditText?.text.toString()
+        val proxyPort = walletProxyPortEditText?.text.toString()
+        ProxyService.instance?.updateProxy(proxyAddress, proxyPort)
     }
 }

@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity(), MoneroHandlerThread.Listener, Password
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        ProxyService(this)
         val walletFile = File(applicationInfo.dataDir, Constants.WALLET_NAME)
         val walletKeysFile = File(applicationInfo.dataDir, Constants.WALLET_NAME + ".keys")
         if (walletKeysFile.exists()) {
@@ -87,7 +88,6 @@ class MainActivity : AppCompatActivity(), MoneroHandlerThread.Listener, Password
             historyService = HistoryService(thread)
             blockchainService = BlockchainService(thread)
             daemonService = DaemonService(thread)
-            proxyService = ProxyService(thread)
             utxoService = UTXOService(thread)
             thread.start()
         }

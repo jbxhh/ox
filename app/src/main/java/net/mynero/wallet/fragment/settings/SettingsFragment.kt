@@ -6,21 +6,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.CompoundButton
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import net.mynero.wallet.R
 import net.mynero.wallet.data.Node
 import net.mynero.wallet.data.Node.Companion.fromJson
@@ -33,17 +29,12 @@ import net.mynero.wallet.fragment.dialog.NodeSelectionBottomSheetDialog.NodeSele
 import net.mynero.wallet.fragment.dialog.PasswordBottomSheetDialog
 import net.mynero.wallet.fragment.dialog.PasswordBottomSheetDialog.PasswordListener
 import net.mynero.wallet.fragment.dialog.WalletKeysBottomSheetDialog
-import net.mynero.wallet.model.Wallet.ConnectionStatus
-import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.service.BalanceService
-import net.mynero.wallet.service.BlockchainService
-import net.mynero.wallet.service.DaemonService
 import net.mynero.wallet.service.HistoryService
 import net.mynero.wallet.service.PrefService
 import net.mynero.wallet.service.ProxyService
 import net.mynero.wallet.util.Constants
 import org.json.JSONArray
-import timber.log.Timber
 
 class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListener, AddNodeListener,
     EditNodeListener {
@@ -75,6 +66,12 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
             view.findViewById<ConstraintLayout>(R.id.wallet_proxy_settings_layout)
         walletProxyAddressEditText = view.findViewById(R.id.wallet_proxy_address_edittext)
         walletProxyPortEditText = view.findViewById(R.id.wallet_proxy_port_edittext)
+        val useBundledTor = view.findViewById<CheckBox>(R.id.bundled_tor_checkbox)
+
+        useBundledTor.isChecked = ProxyService.instance?.useBundledTor == true
+        walletProxyPortEditText?.visibility = if (useBundledTor.isChecked) View.GONE else View.VISIBLE
+        walletProxyAddressEditText?.visibility = if (useBundledTor.isChecked) View.GONE else View.VISIBLE
+
         streetModeSwitch.isChecked =
             PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false) == true
         streetModeSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
@@ -93,7 +90,7 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
             PrefService.instance?.edit()?.putBoolean(Constants.PREF_DONATE_PER_TX, b)?.apply()
         }
         val prefService = PrefService.instance ?: return
-        val usesProxy = prefService.getBoolean(Constants.PREF_USES_TOR, false)
+        val usesProxy = ProxyService.instance?.usingProxy == true
         cachedProxyAddress = ProxyService.instance?.proxyAddress ?: return
         cachedProxyPort = ProxyService.instance?.proxyPort ?: return
         if (ProxyService.instance?.hasProxySet() == true) {
@@ -106,7 +103,7 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
             proxySettingsLayout.visibility = View.GONE
         }
         torSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
-            prefService.edit()?.putBoolean(Constants.PREF_USES_TOR, b)?.apply()
+            prefService.edit()?.putBoolean(Constants.PREF_USES_PROXY, b)?.apply()
             if (b) {
                 if (ProxyService.instance?.hasProxySet() == true) {
                     val proxyAddress = ProxyService.instance?.proxyAddress ?: return@setOnCheckedChangeListener
@@ -141,6 +138,18 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
                 val dialog = NodeSelectionBottomSheetDialog()
                 dialog.listener = this
                 dialog.show(fragmentManager, "node_selection_dialog")
+            }
+        }
+
+        useBundledTor?.setOnCheckedChangeListener { _, isChecked ->
+            walletProxyPortEditText?.visibility = if (isChecked) View.GONE else View.VISIBLE
+            walletProxyAddressEditText?.visibility = if (isChecked) View.GONE else View.VISIBLE
+            PrefService.instance?.edit()?.putBoolean(Constants.PREF_USE_BUNDLED_TOR, isChecked)?.apply()
+
+            if(isChecked) {
+                ProxyService.instance?.samouraiTorManager?.start()
+            } else {
+                ProxyService.instance?.samouraiTorManager?.stop()
             }
         }
 

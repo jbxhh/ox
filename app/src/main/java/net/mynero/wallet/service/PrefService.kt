@@ -26,7 +26,7 @@ class PrefService(application: MoneroApplication) : ServiceBase(null) {
 
     val node: Node?
         get() {
-            val usesProxy = getBoolean(Constants.PREF_USES_TOR, false)
+            val usesProxy = ProxyService.instance?.usingProxy == true
             var defaultNode = DefaultNodes.SAMOURAI
             if (usesProxy) {
                 val proxyPort = ProxyService.instance?.proxyPort

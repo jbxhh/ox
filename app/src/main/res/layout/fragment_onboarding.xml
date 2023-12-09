@@ -242,7 +242,17 @@
                         android:minWidth="48dp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
-
+                    <CheckBox
+                        android:id="@+id/bundled_tor_checkbox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:text="@string/use_bundled_tor"
+                        android:visibility="gone"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/wallet_proxy_address_edittext"
+                        app:layout_constraintTop_toBottomOf="@id/tor_onboarding_switch"/>
                     <EditText
                         android:id="@+id/wallet_proxy_address_edittext"
                         android:layout_width="0dp"
@@ -250,10 +260,11 @@
                         android:background="@drawable/edittext_bg"
                         android:hint="@string/wallet_proxy_address_hint"
                         android:minHeight="48dp"
+                        android:visibility="gone"
                         app:layout_constraintBottom_toTopOf="@id/wallet_proxy_port_edittext"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tor_onboarding_switch" />
+                        app:layout_constraintTop_toBottomOf="@id/bundled_tor_checkbox" />
 
                     <EditText
                         android:id="@+id/wallet_proxy_port_edittext"
@@ -264,6 +275,7 @@
                         android:layout_marginTop="8dp"
                         android:inputType="number"
                         android:minHeight="48dp"
+                        android:visibility="gone"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -277,6 +289,7 @@
                 android:layout_marginTop="32dp"
                 android:background="@drawable/button_bg"
                 android:text="@string/create_wallet"
+                android:enabled="false"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/more_options_layout" />

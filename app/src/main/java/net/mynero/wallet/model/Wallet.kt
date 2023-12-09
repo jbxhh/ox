@@ -249,7 +249,10 @@ class Wallet {
         isSynchronized = true
     }
 
-    external fun startRefresh()
+    fun startRefresh() {
+        startRefreshJ()
+    }
+    private external fun startRefreshJ()
     external fun pauseRefresh()
     external fun refresh(): Boolean
     external fun refreshAsync()
