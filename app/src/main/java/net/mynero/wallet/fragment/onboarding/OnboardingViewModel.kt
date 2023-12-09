@@ -1,7 +1,6 @@
 package net.mynero.wallet.fragment.onboarding
 
 import android.app.Activity
-import android.util.Patterns
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -9,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import net.mynero.wallet.MainActivity
 import net.mynero.wallet.MoneroApplication
 import net.mynero.wallet.R
-import net.mynero.wallet.livedata.combineLatestIgnoreNull
+import net.mynero.wallet.livedata.combineLiveDatas
 import net.mynero.wallet.model.Wallet
 import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.service.PrefService
@@ -30,11 +29,19 @@ class OnboardingViewModel : ViewModel() {
     private val _useBundledTor = MutableLiveData(false)
     val useBundledTor: LiveData<Boolean> = _useBundledTor
     private val _passphrase = MutableLiveData("")
+    val passphrase: LiveData<String> = _passphrase
     private val _confirmedPassphrase = MutableLiveData("")
+    private val _showMonerochan = MutableLiveData(true)
+    val showMonerochan: LiveData<Boolean> = _showMonerochan
     var showMoreOptions: LiveData<Boolean> = _showMoreOptions
     var seedType: LiveData<SeedType> = _seedType
 
-    val enableButton = combineLatestIgnoreNull(
+    init {
+        _useProxy.value = ProxyService.instance?.usingProxy
+        _useBundledTor.value = ProxyService.instance?.useBundledTor
+    }
+    
+    val enableButton = combineLiveDatas(
         seedType,
         _useProxy,
         _proxyAddress,
@@ -44,14 +51,14 @@ class OnboardingViewModel : ViewModel() {
         _confirmedPassphrase,
         _creatingWallet
     ) { seedType, useProxy, proxyAddress, proxyPort, useBundledTor, passphrase, confirmedPassphrase, creatingWallet ->
-        if(seedType == null || useProxy == null || proxyAddress == null || proxyPort == null || useBundledTor == null || passphrase == null || confirmedPassphrase == null || creatingWallet == null) return@combineLatestIgnoreNull false
-        if((passphrase.isNotEmpty() || confirmedPassphrase.isNotEmpty()) && passphrase != confirmedPassphrase) return@combineLatestIgnoreNull false
-        if(creatingWallet) return@combineLatestIgnoreNull false
-        if(seedType == SeedType.POLYSEED && passphrase.isEmpty()) return@combineLatestIgnoreNull false
-        if(useProxy && (proxyAddress.isEmpty() || proxyPort.isEmpty())) return@combineLatestIgnoreNull false
-        if(useBundledTor && (proxyAddress.isEmpty() || proxyPort.isEmpty())) return@combineLatestIgnoreNull false
+        if(seedType == null || useProxy == null || proxyAddress == null || proxyPort == null || useBundledTor == null || passphrase == null || confirmedPassphrase == null || creatingWallet == null) return@combineLiveDatas false
+        if((passphrase.isNotEmpty() || confirmedPassphrase.isNotEmpty()) && passphrase != confirmedPassphrase) return@combineLiveDatas false
+        if(creatingWallet) return@combineLiveDatas false
+        if(seedType == SeedType.POLYSEED && (passphrase.isEmpty() || confirmedPassphrase.isEmpty())) return@combineLiveDatas false
+        if(useProxy && (proxyAddress.isEmpty() || proxyPort.isEmpty())) return@combineLiveDatas false
+        if(useBundledTor && (proxyAddress.isEmpty() || proxyPort.isEmpty())) return@combineLiveDatas false
 
-        return@combineLatestIgnoreNull true
+        return@combineLiveDatas true
     }
 
     fun onMoreOptionsClicked() {
@@ -72,7 +79,6 @@ class OnboardingViewModel : ViewModel() {
     ) {
         val passphrase = _passphrase.value ?: return
         val confirmedPassphrase = _confirmedPassphrase.value ?: return
-        val useProxy = _useProxy.value ?: return
 
         val application = mainActivity.application as MoneroApplication
         _creatingWallet.postValue(true)
@@ -172,15 +178,6 @@ class OnboardingViewModel : ViewModel() {
         val ok = walletStatus?.isOk
         walletFile.delete() // cache is broken for some reason when recovering wallets. delete the file here. this happens in monerujo too.
         if (ok == true) {
-            var editor = PrefService.instance?.edit()
-                ?.putBoolean(Constants.PREF_USE_BUNDLED_TOR, _useBundledTor.value == true)
-                ?.putBoolean(Constants.PREF_USES_PROXY, useProxy)
-            if(useProxy) {
-                editor = editor?.putString(Constants.PREF_PROXY, "${_proxyAddress.value}:${_proxyPort.value}")
-            }
-
-            editor?.apply()
-
             (mainActivity as MainActivity).init(walletFile, passphrase)
             mainActivity.runOnUiThread { mainActivity.onBackPressed() }
         } else {
@@ -228,18 +225,42 @@ class OnboardingViewModel : ViewModel() {
 
     fun setProxyAddress(address: String) {
         _proxyAddress.value = address
+        val port = _proxyPort.value ?: return
+        val proxyAddress = "$address:$port"
+        if(proxyAddress == ":") return
+        PrefService.instance?.edit()?.putString(Constants.PREF_PROXY, proxyAddress)?.apply()
     }
 
     fun setProxyPort(port: String) {
         _proxyPort.value = port
+        val address = _proxyAddress.value ?: return
+        val proxyAddress = "$address:$port"
+        if(proxyAddress == ":") return
+        PrefService.instance?.edit()?.putString(Constants.PREF_PROXY, proxyAddress)?.apply()
     }
 
     fun setUseBundledTor(useBundled: Boolean) {
         _useBundledTor.value = useBundled
+        PrefService.instance?.edit()?.putBoolean(Constants.PREF_USE_BUNDLED_TOR, useBundled)?.apply()
+
+        val samouraiTorManager = ProxyService.instance?.samouraiTorManager
+        if(useBundled && useProxy.value == true) {
+            samouraiTorManager?.start()
+        } else {
+            samouraiTorManager?.stop()
+        }
     }
 
     fun setUseProxy(useProxy: Boolean) {
         _useProxy.value = useProxy
+        PrefService.instance?.edit()?.putBoolean(Constants.PREF_USES_PROXY, useProxy)?.apply()
+
+        val samouraiTorManager = ProxyService.instance?.samouraiTorManager
+        if(useProxy && useBundledTor.value == true) {
+            samouraiTorManager?.start()
+        } else {
+            samouraiTorManager?.stop()
+        }
     }
 
     fun setPassphrase(passphrase: String) {
@@ -248,6 +269,11 @@ class OnboardingViewModel : ViewModel() {
 
     fun setConfirmedPassphrase(confirmedPassphrase: String) {
         _confirmedPassphrase.value = confirmedPassphrase
+    }
+
+    fun setMonerochan(b: Boolean) {
+        _showMonerochan.value = b
+        PrefService.instance?.edit()?.putBoolean(Constants.PREF_MONEROCHAN, b)?.apply()
     }
 
     enum class SeedType(val descResId: Int) {

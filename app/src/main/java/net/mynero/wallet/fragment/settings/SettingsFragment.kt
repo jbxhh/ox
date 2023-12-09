@@ -9,6 +9,8 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.CompoundButton
 import android.widget.EditText
+import android.widget.ImageView
+import android.widget.Switch
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.SwitchCompat
@@ -17,6 +19,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import net.mynero.wallet.R
 import net.mynero.wallet.data.Node
 import net.mynero.wallet.data.Node.Companion.fromJson
@@ -29,6 +32,7 @@ import net.mynero.wallet.fragment.dialog.NodeSelectionBottomSheetDialog.NodeSele
 import net.mynero.wallet.fragment.dialog.PasswordBottomSheetDialog
 import net.mynero.wallet.fragment.dialog.PasswordBottomSheetDialog.PasswordListener
 import net.mynero.wallet.fragment.dialog.WalletKeysBottomSheetDialog
+import net.mynero.wallet.model.EnumTorState
 import net.mynero.wallet.service.BalanceService
 import net.mynero.wallet.service.HistoryService
 import net.mynero.wallet.service.PrefService
@@ -44,6 +48,14 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
     private var selectNodeButton: Button? = null
     private var cachedProxyAddress: String = ""
     private var cachedProxyPort: String = ""
+    private var streetModeSwitch: SwitchCompat? = null
+    private var monerochanSwitch: SwitchCompat? = null
+    private var donationSwitch: SwitchCompat? = null
+    private var useBundledTor: CheckBox? = null
+    private var displaySeedButton: Button? = null
+    private var displayUtxosButton: Button? = null
+    private var torSwitch: SwitchCompat? = null
+    private var proxySettingsLayout: ConstraintLayout? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,68 +67,76 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mViewModel = ViewModelProvider(this)[SettingsViewModel::class.java]
-        val displaySeedButton = view.findViewById<Button>(R.id.display_seed_button)
-        val displayUtxosButton = view.findViewById<Button>(R.id.display_utxos_button)
+        displaySeedButton = view.findViewById(R.id.display_seed_button)
+        displayUtxosButton = view.findViewById(R.id.display_utxos_button)
         selectNodeButton = view.findViewById(R.id.select_node_button)
-        val streetModeSwitch = view.findViewById<SwitchCompat>(R.id.street_mode_switch)
-        val monerochanSwitch = view.findViewById<SwitchCompat>(R.id.monerochan_switch)
-        val donationSwitch = view.findViewById<SwitchCompat>(R.id.donate_per_tx_switch)
-        val torSwitch = view.findViewById<SwitchCompat>(R.id.tor_switch)
-        val proxySettingsLayout =
-            view.findViewById<ConstraintLayout>(R.id.wallet_proxy_settings_layout)
+        streetModeSwitch = view.findViewById(R.id.street_mode_switch)
+        monerochanSwitch = view.findViewById(R.id.monerochan_switch)
+        donationSwitch = view.findViewById(R.id.donate_per_tx_switch)
+        torSwitch = view.findViewById(R.id.tor_switch)
+        proxySettingsLayout = view.findViewById(R.id.wallet_proxy_settings_layout)
         walletProxyAddressEditText = view.findViewById(R.id.wallet_proxy_address_edittext)
         walletProxyPortEditText = view.findViewById(R.id.wallet_proxy_port_edittext)
-        val useBundledTor = view.findViewById<CheckBox>(R.id.bundled_tor_checkbox)
+        useBundledTor = view.findViewById(R.id.bundled_tor_checkbox)
 
-        useBundledTor.isChecked = ProxyService.instance?.useBundledTor == true
-        walletProxyPortEditText?.visibility = if (useBundledTor.isChecked) View.GONE else View.VISIBLE
-        walletProxyAddressEditText?.visibility = if (useBundledTor.isChecked) View.GONE else View.VISIBLE
+        useBundledTor?.isChecked = ProxyService.instance?.useBundledTor == true
+        walletProxyPortEditText?.visibility = if (useBundledTor?.isChecked == true) View.GONE else View.VISIBLE
+        walletProxyAddressEditText?.visibility = if (useBundledTor?.isChecked == true) View.GONE else View.VISIBLE
+        streetModeSwitch?.isChecked = PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false) == true
+        monerochanSwitch?.isChecked = PrefService.instance?.getBoolean(Constants.PREF_MONEROCHAN, true) == true
+        donationSwitch?.isChecked = PrefService.instance?.getBoolean(Constants.PREF_DONATE_PER_TX, false) == true
 
-        streetModeSwitch.isChecked =
-            PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false) == true
-        streetModeSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
-            PrefService.instance?.edit()?.putBoolean(Constants.PREF_STREET_MODE, b)?.apply()
-            BalanceService.instance?.refreshBalance()
-        }
-        monerochanSwitch.isChecked =
-            PrefService.instance?.getBoolean(Constants.PREF_MONEROCHAN, true) == true
-        monerochanSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
-            PrefService.instance?.edit()?.putBoolean(Constants.PREF_MONEROCHAN, b)?.apply()
-            HistoryService.instance?.refreshHistory()
-        }
-        donationSwitch.isChecked =
-            PrefService.instance?.getBoolean(Constants.PREF_DONATE_PER_TX, false) == true
-        donationSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
-            PrefService.instance?.edit()?.putBoolean(Constants.PREF_DONATE_PER_TX, b)?.apply()
-        }
-        val prefService = PrefService.instance ?: return
         val usesProxy = ProxyService.instance?.usingProxy == true
         cachedProxyAddress = ProxyService.instance?.proxyAddress ?: return
         cachedProxyPort = ProxyService.instance?.proxyPort ?: return
         if (ProxyService.instance?.hasProxySet() == true) {
             initProxyStuff(cachedProxyAddress, cachedProxyPort)
         }
-        torSwitch.isChecked = usesProxy
-        if (usesProxy) {
-            proxySettingsLayout.visibility = View.VISIBLE
-        } else {
-            proxySettingsLayout.visibility = View.GONE
-        }
-        torSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
-            prefService.edit()?.putBoolean(Constants.PREF_USES_PROXY, b)?.apply()
-            if (b) {
-                if (ProxyService.instance?.hasProxySet() == true) {
-                    val proxyAddress = ProxyService.instance?.proxyAddress ?: return@setOnCheckedChangeListener
-                    val proxyPort = ProxyService.instance?.proxyPort ?: return@setOnCheckedChangeListener
-                    initProxyStuff(proxyAddress, proxyPort)
-                }
-                proxySettingsLayout.visibility = View.VISIBLE
-            } else {
-                proxySettingsLayout.visibility = View.GONE
+        torSwitch?.isChecked = usesProxy
+        proxySettingsLayout?.visibility = if (usesProxy) View.VISIBLE else View.GONE
+        val node = PrefService.instance?.node // shouldn't use default value here
+        selectNodeButton?.text = getString(R.string.node_button_text, node?.address)
+
+        bindListeners()
+        bindObservers()
+    }
+
+    private fun bindListeners() {
+        val onBackPressedCallback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                refreshProxy()
+                findNavController().popBackStack()
             }
-            refreshProxy()
         }
-        displaySeedButton.setOnClickListener {
+        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, onBackPressedCallback)
+
+        donationSwitch?.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PrefService.instance?.edit()?.putBoolean(Constants.PREF_DONATE_PER_TX, b)?.apply()
+        }
+
+        streetModeSwitch?.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PrefService.instance?.edit()?.putBoolean(Constants.PREF_STREET_MODE, b)?.apply()
+            BalanceService.instance?.refreshBalance()
+        }
+
+        monerochanSwitch?.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PrefService.instance?.edit()?.putBoolean(Constants.PREF_MONEROCHAN, b)?.apply()
+            HistoryService.instance?.refreshHistory()
+        }
+
+        selectNodeButton?.setOnClickListener {
+            activity?.supportFragmentManager?.let { fragmentManager ->
+                val dialog = NodeSelectionBottomSheetDialog()
+                dialog.listener = this
+                dialog.show(fragmentManager, "node_selection_dialog")
+            }
+        }
+
+        useBundledTor?.setOnCheckedChangeListener { _, isChecked ->
+            mViewModel?.setUseBundledTor(isChecked)
+        }
+
+        displaySeedButton?.setOnClickListener {
             val usesPassword =
                 PrefService.instance?.getBoolean(Constants.PREF_USES_PASSWORD, false) == true
             if (usesPassword) {
@@ -130,37 +150,66 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
                 displaySeedDialog("")
             }
         }
-        displayUtxosButton.setOnClickListener { navigate(R.id.nav_to_utxos) }
-        val node = PrefService.instance?.node // shouldn't use default value here
-        selectNodeButton?.text = getString(R.string.node_button_text, node?.address)
-        selectNodeButton?.setOnClickListener {
-            activity?.supportFragmentManager?.let { fragmentManager ->
-                val dialog = NodeSelectionBottomSheetDialog()
-                dialog.listener = this
-                dialog.show(fragmentManager, "node_selection_dialog")
+
+        displayUtxosButton?.setOnClickListener { navigate(R.id.nav_to_utxos) }
+
+        torSwitch?.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            mViewModel?.setUseProxy(b)
+        }
+    }
+
+    private fun bindObservers() {
+        mViewModel?.useProxy?.observe(viewLifecycleOwner) { b ->
+            if (b) {
+                if (ProxyService.instance?.hasProxySet() == true) {
+                    val proxyAddress = ProxyService.instance?.proxyAddress ?: return@observe
+                    val proxyPort = ProxyService.instance?.proxyPort ?: return@observe
+                    initProxyStuff(proxyAddress, proxyPort)
+                }
+                proxySettingsLayout?.visibility = View.VISIBLE
+            } else {
+                proxySettingsLayout?.visibility = View.GONE
             }
+            refreshProxy()
         }
 
-        useBundledTor?.setOnCheckedChangeListener { _, isChecked ->
+        mViewModel?.useBundledTor?.observe(viewLifecycleOwner) { isChecked ->
             walletProxyPortEditText?.visibility = if (isChecked) View.GONE else View.VISIBLE
             walletProxyAddressEditText?.visibility = if (isChecked) View.GONE else View.VISIBLE
-            PrefService.instance?.edit()?.putBoolean(Constants.PREF_USE_BUNDLED_TOR, isChecked)?.apply()
-
-            if(isChecked) {
-                ProxyService.instance?.samouraiTorManager?.start()
-            } else {
-                ProxyService.instance?.samouraiTorManager?.stop()
-            }
         }
 
-        val onBackPressedCallback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                refreshProxy()
-                findNavController().popBackStack()
+        val samouraiTorManager = ProxyService.instance?.samouraiTorManager
+        val indicatorCircle = view?.findViewById<CircularProgressIndicator>(R.id.settings_tor_loading_progressindicator)
+        val torIcon = view?.findViewById<ImageView>(R.id.settings_tor_icon)
+
+        samouraiTorManager?.getTorStateLiveData()?.observe(viewLifecycleOwner) { state ->
+            samouraiTorManager.getProxy()?.address()?.let { socketAddress ->
+                if(socketAddress.toString().isEmpty()) return@let
+                if(mViewModel?.useProxy?.value == true && mViewModel?.useBundledTor?.value == true) {
+                    torIcon?.visibility = View.VISIBLE
+                    indicatorCircle?.visibility = View.INVISIBLE
+                }
+            }
+
+            indicatorCircle?.isIndeterminate = state.progressIndicator == 0
+            indicatorCircle?.progress = state.progressIndicator
+
+            when (state.state) {
+                EnumTorState.OFF -> {
+                    torIcon?.visibility = View.INVISIBLE
+                    indicatorCircle?.visibility = View.INVISIBLE
+                }
+                EnumTorState.STARTING -> {
+                    torIcon?.visibility = View.INVISIBLE
+                    indicatorCircle?.visibility = View.VISIBLE
+                }
+                EnumTorState.STOPPING -> {
+                    torIcon?.visibility = View.INVISIBLE
+                    indicatorCircle?.visibility = View.VISIBLE
+                }
+                else -> {}
             }
         }
-
-        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, onBackPressedCallback)
     }
 
     private fun refreshProxy() {

@@ -17,10 +17,8 @@ class ProxyService(activity: MainActivity) : ServiceBase(null) {
 
         activity.runOnUiThread {
             samouraiTorManager?.getTorStateLiveData()?.observeForever {
-                println("STATE CHANGE:: ${it.state.name}")
                 samouraiTorManager?.getProxy()?.address()?.let { socketAddress ->
                     if(socketAddress.toString().isEmpty()) return@let
-                    println("PROXY INIT")
                     val proxyString = socketAddress.toString().substring(1)
                     val address = proxyString.split(":")[0]
                     val port = proxyString.split(":")[1]
