@@ -15,17 +15,6 @@ class ProxyService(application: Application) : ServiceBase(null) {
         instance = this
         samouraiTorManager = SamouraiTorManager(application, TorKmpManager(application))
 
-        samouraiTorManager?.getTorStateLiveData()?.observeForever {
-            samouraiTorManager?.getProxy()?.address()?.let { socketAddress ->
-                if(socketAddress.toString().isEmpty()) return@let
-                val proxyString = socketAddress.toString().substring(1)
-                val address = proxyString.split(":")[0]
-                val port = proxyString.split(":")[1]
-                if(usingProxy && useBundledTor)
-                    updateProxy(address, port)
-            }
-        }
-
         if(useBundledTor && usingProxy) {
             samouraiTorManager?.start()
         }
@@ -54,7 +43,7 @@ class ProxyService(application: Application) : ServiceBase(null) {
         }
     }
 
-    fun hasProxySet(): Boolean {
+    private fun hasProxySet(): Boolean {
         val proxyString = proxy
         return proxyString?.contains(":") == true
     }
@@ -70,7 +59,7 @@ class ProxyService(application: Application) : ServiceBase(null) {
 
     val proxyAddress: String
         get() {
-            if (hasProxySet()) {
+            if (hasProxySet() && usingProxy) {
                 val proxyString = proxy
                 return proxyString?.split(":".toRegex())?.dropLastWhile { it.isEmpty() }
                     ?.toTypedArray()
@@ -80,7 +69,7 @@ class ProxyService(application: Application) : ServiceBase(null) {
         }
     val proxyPort: String
         get() {
-            if (hasProxySet()) {
+            if (hasProxySet() && usingProxy) {
                 val proxyString = proxy
                 return proxyString?.split(":".toRegex())?.dropLastWhile { it.isEmpty() }
                     ?.toTypedArray()

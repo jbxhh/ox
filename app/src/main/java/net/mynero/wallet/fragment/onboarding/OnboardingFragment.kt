@@ -172,6 +172,10 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
                 if(mViewModel?.useProxy?.value == true && mViewModel?.useBundledTor?.value == true) {
                     torIcon?.visibility = View.VISIBLE
                     indicatorCircle?.visibility = View.INVISIBLE
+                    val proxyString = socketAddress.toString().substring(1)
+                    val address = proxyString.split(":")[0]
+                    val port = proxyString.split(":")[1]
+                    updateProxy(address, port)
                 }
             }
 
@@ -190,6 +194,11 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
                 else -> {}
             }
         }
+    }
+
+    private fun updateProxy(address: String, port: String) {
+        walletProxyPortEditText?.setText(port)
+        walletProxyAddressEditText?.setText(address)
     }
 
     private fun bindListeners() {
