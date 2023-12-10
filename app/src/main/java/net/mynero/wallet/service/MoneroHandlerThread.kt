@@ -16,6 +16,7 @@
  */
 package net.mynero.wallet.service
 
+import android.util.Log
 import net.mynero.wallet.model.PendingTransaction
 import net.mynero.wallet.model.TransactionOutput
 import net.mynero.wallet.model.Wallet
@@ -25,7 +26,6 @@ import net.mynero.wallet.model.Wallet.ConnectionStatus
 import net.mynero.wallet.model.WalletListener
 import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.util.Constants
-import timber.log.Timber
 import java.security.SecureRandom
 
 /**
@@ -93,7 +93,7 @@ class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet)
             if (heightDiff >= 2) {
                 tryRestartConnection()
             } else {
-                Timber.d("refreshed() Synchronized")
+                Log.d("MoneroHandlerThread.kt", "refreshed() Synchronized")
                 wallet.setSynchronized()
                 wallet.store()
                 refresh(true)
@@ -103,7 +103,7 @@ class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet)
     }
 
     private fun tryRestartConnection() {
-        Timber.d("refreshed() Starting connection retry")
+        Log.d("MoneroHandlerThread.kt", "refreshed() Starting connection retry")
         listener?.onConnectionFail()
         wallet.init(0)
         wallet.startRefresh()

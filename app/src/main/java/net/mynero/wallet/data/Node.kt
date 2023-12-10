@@ -15,12 +15,12 @@
  */
 package net.mynero.wallet.data
 
+import android.util.Log
 import net.mynero.wallet.model.NetworkType
 import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.util.OnionHelper
 import org.json.JSONException
 import org.json.JSONObject
-import timber.log.Timber
 import java.io.UnsupportedEncodingException
 import java.net.InetSocketAddress
 import java.net.URLDecoder
@@ -93,7 +93,7 @@ class Node {
             try {
                 name = URLDecoder.decode(daParts[2], "UTF-8")
             } catch (ex: UnsupportedEncodingException) {
-                Timber.w(ex) // if we can't encode it, we don't use it
+                Log.w("Node.kt", ex) // if we can't encode it, we don't use it
             }
         }
         this.name = name
@@ -224,7 +224,7 @@ class Node {
         if (name != null) try {
             sb.append("/").append(URLEncoder.encode(name, "UTF-8"))
         } catch (ex: UnsupportedEncodingException) {
-            Timber.w(ex) // if we can't encode it, we don't store it
+            Log.w("Node.kt", ex) // if we can't encode it, we don't store it
         }
         return sb.toString()
     }
@@ -254,7 +254,7 @@ class Node {
             return try {
                 Node(nodeString)
             } catch (ex: IllegalArgumentException) {
-                Timber.w(ex)
+                Log.w("Node.kt", ex)
                 null
             }
         }
@@ -263,13 +263,13 @@ class Node {
             return try {
                 Node(jsonObject)
             } catch (ex: IllegalArgumentException) {
-                Timber.w(ex)
+                Log.w("Node.kt", ex)
                 null
             } catch (ex: UnknownHostException) {
-                Timber.w(ex)
+                Log.w("Node.kt", ex)
                 null
             } catch (ex: JSONException) {
-                Timber.w(ex)
+                Log.w("Node.kt", ex)
                 null
             }
         }
