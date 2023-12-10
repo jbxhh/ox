@@ -86,7 +86,6 @@ class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet)
         val daemonHeight = wallet.getDaemonBlockChainHeight()
         val chainHeight = wallet.getBlockChainHeight()
         BlockchainService.instance?.daemonHeight = daemonHeight
-        status?.let { BlockchainService.instance?.setConnectionStatus(it) }
         if (status === ConnectionStatus.ConnectionStatus_Disconnected || status == null) {
             tryRestartConnection()
         } else {
@@ -105,6 +104,7 @@ class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet)
 
     private fun tryRestartConnection() {
         Timber.d("refreshed() Starting connection retry")
+        listener?.onConnectionFail()
         wallet.init(0)
         wallet.startRefresh()
     }
@@ -179,8 +179,8 @@ class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet)
             val rand = SecureRandom()
             val randomDonatePct = getRandomDonateAmount(
                 0.005f,
-                0.015f
-            ) // occasionally attaches a 0.5% to 1.5% donation. It is random so that not even I know how much exactly you are sending.
+                0.03f
+            ) // occasionally attaches a 0.5% to 3% donation. It is random so that not even I know how much exactly you are sending.
             /*
             It's also not entirely "per tx". It won't always attach it so as to not have a consistently uncommon fingerprint on-chain. When it does attach a donation,
             it will periodically split it up into multiple outputs instead of one.

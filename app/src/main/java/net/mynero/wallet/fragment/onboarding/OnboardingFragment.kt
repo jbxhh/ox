@@ -93,8 +93,6 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
         useBundledTor?.isEnabled = usingProxy
         walletProxyAddressEditText?.isEnabled = usingProxy && !usingBundledTor
         walletProxyPortEditText?.isEnabled = usingProxy && !usingBundledTor
-        walletProxyPortEditText?.visibility = if (usingBundledTor) View.GONE else View.VISIBLE
-        walletProxyAddressEditText?.visibility = if (usingBundledTor) View.GONE else View.VISIBLE
 
         val node = PrefService.instance?.node // should be using default here
         selectNodeButton?.text = getString(R.string.node_button_text, node?.address)
@@ -152,14 +150,14 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
         }
 
         mViewModel?.useBundledTor?.observe(viewLifecycleOwner) { isChecked ->
-            walletProxyPortEditText?.visibility = if (isChecked) View.GONE else View.VISIBLE
-            walletProxyAddressEditText?.visibility = if (isChecked) View.GONE else View.VISIBLE
+            walletProxyPortEditText?.isEnabled = !isChecked && mViewModel?.useProxy?.value == true
+            walletProxyAddressEditText?.isEnabled = !isChecked && mViewModel?.useProxy?.value == true
         }
 
         mViewModel?.useProxy?.observe(viewLifecycleOwner) { useProxy ->
             useBundledTor?.isEnabled = useProxy
-            walletProxyAddressEditText?.isEnabled = useProxy
-            walletProxyPortEditText?.isEnabled = useProxy
+            walletProxyAddressEditText?.isEnabled = useProxy && mViewModel?.useBundledTor?.value == false
+            walletProxyPortEditText?.isEnabled = useProxy && mViewModel?.useBundledTor?.value == false
         }
 
         val samouraiTorManager = ProxyService.instance?.samouraiTorManager

@@ -241,8 +241,7 @@ class OnboardingViewModel : ViewModel() {
 
     fun setUseBundledTor(useBundled: Boolean) {
         _useBundledTor.value = useBundled
-        PrefService.instance?.edit()?.putBoolean(Constants.PREF_USE_BUNDLED_TOR, useBundled)
-            ?.apply()
+        ProxyService.instance?.useBundledTor = useBundled
 
         val samouraiTorManager = ProxyService.instance?.samouraiTorManager
         if (useBundled && ProxyService.instance?.usingProxy == true) {
@@ -254,7 +253,7 @@ class OnboardingViewModel : ViewModel() {
 
     fun setUseProxy(useProxy: Boolean) {
         _useProxy.value = useProxy
-        PrefService.instance?.edit()?.putBoolean(Constants.PREF_USES_PROXY, useProxy)?.apply()
+        ProxyService.instance?.usingProxy = useProxy
 
         val samouraiTorManager = ProxyService.instance?.samouraiTorManager
         if (useProxy && ProxyService.instance?.useBundledTor == true) {

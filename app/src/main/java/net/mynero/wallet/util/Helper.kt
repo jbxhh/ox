@@ -271,22 +271,4 @@ object Helper {
         }
         return null
     }
-
-    fun getShakeAnimation(context: Context?): Animation? {
-        if (ShakeAnimation == null) {
-            synchronized(Helper::class.java) {
-                if (ShakeAnimation == null) {
-                    ShakeAnimation = AnimationUtils.loadAnimation(context, R.anim.shake)
-                }
-            }
-        }
-        return ShakeAnimation
-    }
-
-    // TODO make the log levels refer to the  WalletManagerFactory::LogLevel enum ?
-    fun initLogger(context: Context, level: Int) {
-        val home = getStorage(context, MONERO_DIR).absolutePath
-        WalletManager.initLogger("$home/monerujo", "monerujo.log")
-        if (level >= WalletManager.LOGLEVEL_SILENT) WalletManager.setLogLevel(level)
-    }
 }
