@@ -15,7 +15,7 @@
  */
 package net.mynero.wallet.model
 
-import timber.log.Timber
+import android.util.Log
 
 class Coins(private val handle: Long) {
     var all: List<CoinsInfo> = ArrayList()
@@ -23,7 +23,7 @@ class Coins(private val handle: Long) {
 
     fun refresh() {
         val transactionInfos = refreshJ()
-        Timber.d("refresh size=%d", transactionInfos.size)
+        Log.d("Coins.kt", "refresh size=${transactionInfos.size}")
         all = transactionInfos
     }
 

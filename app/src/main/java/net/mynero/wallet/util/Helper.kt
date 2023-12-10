@@ -29,16 +29,14 @@ import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.VectorDrawable
 import android.os.Build
+import android.util.Log
 import android.view.WindowManager
 import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import net.mynero.wallet.R
-import net.mynero.wallet.model.WalletManager
-import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
@@ -69,12 +67,12 @@ object Helper {
     fun getStorage(context: Context, folderName: String?): File {
         val dir = File(context.filesDir, folderName)
         if (!dir.exists()) {
-            Timber.i("Creating %s", dir.absolutePath)
+            Log.i("Helper.kt", "Creating ${dir.absolutePath}")
             dir.mkdirs() // try to make it
         }
         if (!dir.isDirectory) {
             val msg = "Directory " + dir.absolutePath + " does not exist."
-            Timber.e(msg)
+            Log.e("Helper.kt",msg)
             throw IllegalStateException(msg)
         }
         return dir
@@ -85,7 +83,7 @@ object Helper {
             if (context.checkSelfPermission(Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_DENIED
             ) {
-                Timber.w("Permission denied for CAMERA - requesting it")
+                Log.w("Helper.kt", "Permission denied for CAMERA - requesting it")
                 val permissions = arrayOf(Manifest.permission.CAMERA)
                 context.requestPermissions(
                     permissions,
@@ -105,7 +103,7 @@ object Helper {
             if (context.checkSelfPermission(Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_DENIED
             ) {
-                Timber.w("Permission denied for CAMERA - requesting it")
+                Log.w("Helper.kt", "Permission denied for CAMERA - requesting it")
                 launcher.launch(Manifest.permission.CAMERA)
                 false
             } else {
@@ -119,7 +117,7 @@ object Helper {
     fun getWalletFile(context: Context, aWalletName: String?): File {
         val walletDir = getWalletRoot(context)
         val f = File(walletDir, aWalletName)
-        Timber.d("wallet=%s size= %d", f.absolutePath, f.length())
+        Log.d("Helper.kt", "wallet=${f.absolutePath} size= ${f.length()}")
         return f
     }
 
@@ -230,11 +228,11 @@ object Helper {
             }
             return sb.toString()
         } catch (ex: SocketTimeoutException) {
-            Timber.w("C %s", ex.localizedMessage)
+            Log.w("Helper.kt", "C ${ex.localizedMessage}")
         } catch (ex: MalformedURLException) {
-            Timber.e("A %s", ex.localizedMessage)
+            Log.e("Helper.kt","A ${ex.localizedMessage}")
         } catch (ex: IOException) {
-            Timber.e("B %s", ex.localizedMessage)
+            Log.e("Helper.kt","B ${ex.localizedMessage}")
         } finally {
             urlConnection?.disconnect()
         }

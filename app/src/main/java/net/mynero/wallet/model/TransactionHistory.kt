@@ -15,7 +15,7 @@
  */
 package net.mynero.wallet.model
 
-import timber.log.Timber
+import android.util.Log
 
 class TransactionHistory(private val handle: Long, var accountIndex: Int) {
     var all: List<TransactionInfo> = ArrayList()
@@ -43,7 +43,7 @@ class TransactionHistory(private val handle: Long, var accountIndex: Int) {
 
     private fun refresh() {
         val transactionInfos = refreshJ()
-        Timber.d("refresh size=%d", transactionInfos.size)
+        Log.d("TransactionHistory.kt", "refresh size=${transactionInfos.size}")
         val iterator = transactionInfos.iterator()
         while (iterator.hasNext()) {
             val info = iterator.next()

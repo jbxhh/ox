@@ -2,6 +2,7 @@ package net.mynero.wallet.fragment.receive
 
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +19,7 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import com.journeyapps.barcodescanner.BarcodeEncoder
 import net.mynero.wallet.R
 import net.mynero.wallet.adapter.SubaddressAdapter
 import net.mynero.wallet.adapter.SubaddressAdapter.SubaddressAdapterListener
@@ -25,7 +27,6 @@ import net.mynero.wallet.data.Subaddress
 import net.mynero.wallet.fragment.dialog.EditAddressLabelBottomSheetDialog
 import net.mynero.wallet.fragment.dialog.EditAddressLabelBottomSheetDialog.LabelListener
 import net.mynero.wallet.util.Helper.clipBoardCopy
-import timber.log.Timber
 import java.nio.charset.StandardCharsets
 import java.util.EnumMap
 
@@ -125,11 +126,13 @@ class ReceiveFragment : Fragment() {
             EnumMap(com.google.zxing.EncodeHintType::class.java)
         hints[EncodeHintType.CHARACTER_SET] = StandardCharsets.UTF_8
         hints[EncodeHintType.ERROR_CORRECTION] = ErrorCorrectionLevel.M
+
         try {
-            val bitMatrix = QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, width, height, hints)
-            val pixels = IntArray(width * height)
-            for (i in 0 until height) {
-                for (j in 0 until width) {
+            val barcodeEncoder = BarcodeEncoder()
+            val bitMatrix = barcodeEncoder.encode(text, BarcodeFormat.QR_CODE, width, height, hints)
+            val pixels = IntArray(bitMatrix.width * bitMatrix.height)
+            for (i in 0 until bitMatrix.height) {
+                for (j in 0 until bitMatrix.width) {
                     if (bitMatrix[j, i]) {
                         pixels[i * width + j] = -0x1
                     } else {
@@ -140,9 +143,9 @@ class ReceiveFragment : Fragment() {
                     }
                 }
             }
-            return Bitmap.createBitmap(pixels, 0, width, width, height, Bitmap.Config.RGB_565)
+            return Bitmap.createBitmap(pixels, 0, bitMatrix.width, bitMatrix.width, bitMatrix.height, Bitmap.Config.ARGB_8888)
         } catch (ex: WriterException) {
-            Timber.e(ex)
+            Log.e("ReceiveFragment.kt", ex.toString())
         }
         return null
     }

@@ -15,9 +15,9 @@
  */
 package net.mynero.wallet.model
 
+import android.util.Log
 import net.mynero.wallet.data.Node
 import net.mynero.wallet.util.RestoreHeight
-import timber.log.Timber
 import java.io.File
 import java.util.Calendar
 import java.util.Locale
@@ -35,7 +35,7 @@ class WalletManager {
         private set
 
     private fun manageWallet(wallet: Wallet) {
-        Timber.d("Managing %s", wallet.name)
+        Log.d("WalletManager.kt", "Managing ${wallet.name}")
         this.wallet = wallet
     }
 
@@ -43,7 +43,7 @@ class WalletManager {
         requireNotNull(wallet) { "Cannot unmanage null!" }
         checkNotNull(this.wallet) { "No wallet under management!" }
         check(this.wallet === wallet) { wallet.name + " not under management!" }
-        Timber.d("Unmanaging %s", wallet.name)
+        Log.d("WalletManager.kt", "Unmanaging ${wallet.name}")
         this.wallet = null
     }
 
@@ -62,9 +62,9 @@ class WalletManager {
             if (restoreHeight != null) {
                 wallet.setRestoreHeight(restoreHeight)
             }
-            Timber.d("Changed Restore Height from %d to %d", oldHeight, wallet.getRestoreHeight())
+            Log.d("WalletManager.kt", "Changed Restore Height from $oldHeight to ${wallet.getRestoreHeight()}")
             wallet.setPassword(password) // this rewrites the keys file (which contains the restore height)
-        } else Timber.e(wallet.status.toString())
+        } else Log.e("WalletManager.kt", wallet.status.toString())
         return wallet
     }
 
@@ -93,7 +93,7 @@ class WalletManager {
         manageWallet(wallet)
         if (wallet.status.isOk) {
             wallet.setPassword(password) // this rewrites the keys file (which contains the restore height)
-        } else Timber.e(wallet.status.toString())
+        } else Log.e("WalletManager.kt", wallet.status.toString())
         return wallet
     }
 
@@ -235,27 +235,7 @@ class WalletManager {
         return queryWalletDeviceJ(keysFileName, password) >= 0
     }
 
-    fun queryWalletDevice(keysFileName: String, password: String): Wallet.Device {
-        val device = queryWalletDeviceJ(keysFileName, password)
-        return Wallet.Device.values()[device + 1] // mapping is monero+1=android
-    }
-
     private external fun queryWalletDeviceJ(keysFileName: String, password: String): Int
-    fun findWallets(path: File): List<WalletInfo> {
-        val wallets: MutableList<WalletInfo> = ArrayList()
-        Timber.d("Scanning: %s", path.absolutePath)
-        val found =
-            path.listFiles { _, filename -> filename.endsWith(".keys") } ?: return emptyList()
-        for (i in found.indices) {
-            val filename = found[i].name
-            val f = File(
-                found[i].parent,
-                filename.substring(0, filename.length - 5)
-            ) // 5 is length of ".keys"+1
-            wallets.add(WalletInfo(f))
-        }
-        return wallets
-    }
 
     // this should not be called on the main thread as it connects to the node (and takes a long time)
     fun setDaemon(node: Node?) {
