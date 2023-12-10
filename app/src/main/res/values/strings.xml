@@ -36,10 +36,10 @@
     <string name="street_mode">Street mode (hide balances)</string>
     <string name="option_hide_xmrchan">Show Monerochan</string>
     <string name="option_donate_per_tx">Add occasional donation</string>
-    <string name="option_donate_per_tx_desc">When enabled, there is a 10% chance when sending coins to add a 0.5%-1.5% donation to Mysu. These transaction fingerprints and donation amounts are randomized to preserve anonymity and privacy.</string>
+    <string name="option_donate_per_tx_desc">When enabled, there is a 10% chance when sending coins to add a 0.5%-3% donation to Mysu. These transaction fingerprints and donation amounts are randomized to preserve anonymity and privacy.</string>
     <string name="display_recovery_phrase">Display wallet keys</string>
     <string name="tor_switch_label">SOCKS Proxy</string>
-    <string name="connection_failed">Connection failed</string>
+    <string name="connection_failed">Failed to connect. Retrying…</string>
     <string name="address">87MRtZPrWUCVUgcFHdsVb5MoZUcLtqfD3FvQVGwftFb8eSdMnE39JhAJcbuSW8X2vRaRsB9RQfuCpFciybJFHaz3QYPhCLw</string>
     <string name="amount">0.00</string>
     <string name="sending_all">SENDING ALL</string>

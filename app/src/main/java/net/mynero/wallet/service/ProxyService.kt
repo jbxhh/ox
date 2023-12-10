@@ -10,6 +10,18 @@ import net.mynero.wallet.util.Constants
 class ProxyService(application: Application) : ServiceBase(null) {
     val proxyChangeEvents: SingleLiveEvent<String> = SingleLiveEvent()
     var samouraiTorManager: SamouraiTorManager? = null
+    var usingProxy: Boolean = false
+        get() = PrefService.instance?.getBoolean(Constants.PREF_USES_PROXY, false) == true
+        set(enabled) {
+            PrefService.instance?.edit()?.putBoolean(Constants.PREF_USES_PROXY, enabled)?.apply()
+            field = enabled
+        }
+    var useBundledTor: Boolean = false
+        get() = PrefService.instance?.getBoolean(Constants.PREF_USE_BUNDLED_TOR, false) == true
+        set(enabled) {
+            PrefService.instance?.edit()?.putBoolean(Constants.PREF_USE_BUNDLED_TOR, enabled)?.apply()
+            field = enabled
+        }
 
     init {
         instance = this
@@ -47,12 +59,6 @@ class ProxyService(application: Application) : ServiceBase(null) {
         val proxyString = proxy
         return proxyString?.contains(":") == true
     }
-
-    val useBundledTor: Boolean
-        get() = PrefService.instance?.getBoolean(Constants.PREF_USE_BUNDLED_TOR, false) == true
-
-    val usingProxy: Boolean
-        get() = PrefService.instance?.getBoolean(Constants.PREF_USES_PROXY, false) == true
 
     val proxy: String?
         get() = PrefService.instance?.getString(Constants.PREF_PROXY, "")

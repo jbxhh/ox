@@ -143,10 +143,10 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
                 val textResId: Int
                 val botImgResId = if (wallet != null && wallet.isSynchronized) {
                     textResId = R.string.no_history_nget_some_monero_in_here
-                    R.drawable.xmrchan_empty // img for synchronized
+                    R.drawable.xmrchan_empty2 // img for synchronized
                 } else {
                     textResId = R.string.no_history_loading
-                    R.drawable.xmrchan_loading // img for loading
+                    R.drawable.xmrchan_loading2 // img for loading
                 }
                 txHistoryRecyclerView.visibility = View.GONE
                 displayEmptyHistory(true, view, textResId, botImgResId)
@@ -163,7 +163,7 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
                     false,
                     view,
                     R.string.no_history_nget_some_monero_in_here,
-                    R.drawable.xmrchan_loading
+                    R.drawable.xmrchan_loading2
                 )
             }
         }
@@ -187,7 +187,9 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
     private fun refreshProxy(proxyAddress: String, proxyPort: String) {
         val cachedProxyAddress = ProxyService.instance?.proxyAddress
         val cachedProxyPort = ProxyService.instance?.proxyPort
-        if ((proxyAddress != cachedProxyAddress) || (proxyPort != cachedProxyPort)) {
+        val currentWalletProxy = WalletManager.instance?.proxy
+        val newProxy = "$proxyAddress:$proxyPort"
+        if ((proxyAddress != cachedProxyAddress) || (proxyPort != cachedProxyPort) || (newProxy != currentWalletProxy && newProxy != ":")) {
             ProxyService.instance?.updateProxy(proxyAddress, proxyPort)
         }
     }

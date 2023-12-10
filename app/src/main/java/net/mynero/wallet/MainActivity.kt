@@ -31,7 +31,6 @@ class MainActivity : AppCompatActivity(), MoneroHandlerThread.Listener, Password
     private var balanceService: BalanceService? = null
     private var addressService: AddressService? = null
     private var historyService: HistoryService? = null
-    private var proxyService: ProxyService? = null
     private var daemonService: DaemonService? = null
     private var blockchainService: BlockchainService? = null
     private var utxoService: UTXOService? = null

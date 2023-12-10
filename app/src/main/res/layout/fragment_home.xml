@@ -86,7 +86,7 @@
             android:id="@+id/monerochan_imageview"
             android:layout_width="0dp"
             android:layout_height="400dp"
-            android:src="@drawable/xmrchan_empty"
+            android:src="@drawable/xmrchan_empty2"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/monerochan_empty_tx_textview"
             app:layout_constraintStart_toStartOf="parent" />
