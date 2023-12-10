@@ -4,11 +4,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import net.mynero.wallet.fragment.dialog.PasswordBottomSheetDialog
 import net.mynero.wallet.fragment.dialog.PasswordBottomSheetDialog.PasswordListener
 import net.mynero.wallet.fragment.dialog.SendBottomSheetDialog
@@ -26,7 +22,6 @@ import net.mynero.wallet.service.TxService
 import net.mynero.wallet.service.UTXOService
 import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.UriData
-import timber.log.Timber
 import java.io.File
 
 class MainActivity : AppCompatActivity(), MoneroHandlerThread.Listener, PasswordListener {

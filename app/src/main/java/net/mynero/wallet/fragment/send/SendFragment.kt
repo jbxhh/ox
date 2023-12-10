@@ -148,7 +148,10 @@ class SendFragment : Fragment() {
             }
 
         sendTxSlider?.let { slideToActView ->
-            ViewCompat.addAccessibilityAction(slideToActView, getString(R.string.approve_the_transaction)) { _, _ ->
+            ViewCompat.addAccessibilityAction(
+                slideToActView,
+                getString(R.string.approve_the_transaction)
+            ) { _, _ ->
                 confirmSlider()
                 return@addAccessibilityAction true
             }

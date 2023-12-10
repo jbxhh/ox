@@ -16,7 +16,6 @@
  */
 package net.mynero.wallet.service
 
-import android.util.Log
 import net.mynero.wallet.model.PendingTransaction
 import net.mynero.wallet.model.TransactionOutput
 import net.mynero.wallet.model.Wallet
@@ -37,7 +36,6 @@ import java.security.SecureRandom
 class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet) :
     Thread(null, null, name, THREAD_STACK_SIZE), WalletListener {
     private val wallet: Wallet
-    private var triesLeft = 5
 
     init {
         this.wallet = wallet
@@ -75,7 +73,8 @@ class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet)
     override fun unconfirmedMoneyReceived(txId: String?, amount: Long) {}
     override fun newBlock(height: Long) {
         refresh(false)
-        BlockchainService.instance?.daemonHeight = if (wallet.isSynchronized) height else 0 // when 0 it fetches from C++
+        BlockchainService.instance?.daemonHeight =
+            if (wallet.isSynchronized) height else 0 // when 0 it fetches from C++
     }
 
     override fun updated() {
@@ -89,11 +88,11 @@ class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet)
         BlockchainService.instance?.daemonHeight = daemonHeight
         status?.let { BlockchainService.instance?.setConnectionStatus(it) }
         if (status === ConnectionStatus.ConnectionStatus_Disconnected || status == null) {
-            tryRestartOrFail()
+            tryRestartConnection()
         } else {
             val heightDiff = daemonHeight - chainHeight
-            if(heightDiff >= 2) {
-                tryRestartOrFail()
+            if (heightDiff >= 2) {
+                tryRestartConnection()
             } else {
                 Timber.d("refreshed() Synchronized")
                 wallet.setSynchronized()
@@ -104,16 +103,10 @@ class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet)
         }
     }
 
-    private fun tryRestartOrFail() {
-        Timber.d("refreshed() Disconnected")
-        if (triesLeft > 0) {
-            Timber.d("refreshed() Starting refresh")
-            wallet.startRefresh()
-            triesLeft--
-        } else {
-            Timber.d("refreshed() On connection fail")
-            listener?.onConnectionFail()
-        }
+    private fun tryRestartConnection() {
+        Timber.d("refreshed() Starting connection retry")
+        wallet.init(0)
+        wallet.startRefresh()
     }
 
     private fun refresh(walletSynced: Boolean) {

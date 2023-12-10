@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
     android:background="@color/oled_dialogBackgroundColor"
+    android:fillViewport="true"
     android:padding="24dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -29,24 +29,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/button_bg"
-            android:text="@string/add_node"
-            android:textSize="12sp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            app:layout_constraintStart_toEndOf="@id/nodes_textview"
-            app:layout_constraintTop_toTopOf="parent"
+            android:text="@string/add_node"
+            android:textSize="12sp"
             app:layout_constraintBottom_toTopOf="@id/node_selection_recyclerview"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/nodes_textview"
+            app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/node_selection_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:clipToPadding="false"
-            android:paddingBottom="128dp"
             android:layout_marginTop="16dp"
+            android:clipToPadding="false"
             android:nestedScrollingEnabled="false"
+            android:paddingBottom="128dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

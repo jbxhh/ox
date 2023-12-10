@@ -5,6 +5,7 @@
         android:left="8dp"
         android:right="8dp" />
     <solid android:color="@color/oled_colorSecondary" />
-    <corners android:topRightRadius="16dp"
-        android:bottomRightRadius="16dp"/>
+    <corners
+        android:bottomRightRadius="16dp"
+        android:topRightRadius="16dp" />
 </shape>

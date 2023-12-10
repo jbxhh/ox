@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:padding="24dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="24dp">
 
     <TextView
         android:id="@+id/recv_monero_textview"
@@ -25,13 +24,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        android:src="@drawable/ic_refresh"
+        android:contentDescription="@string/generate_fresh_wallet_address"
         android:minWidth="48dp"
         android:minHeight="48dp"
-        android:contentDescription="@string/generate_fresh_wallet_address"
+        android:src="@drawable/ic_refresh"
+        app:layout_constraintBottom_toBottomOf="@id/recv_monero_textview"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/recv_monero_textview"
-        app:layout_constraintBottom_toBottomOf="@id/recv_monero_textview"
         app:tint="@color/oled_textColorPrimary" />
 
     <ImageView
@@ -58,18 +57,18 @@
         android:id="@+id/address_textview"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
         android:layout_marginTop="16dp"
-        android:textSize="16sp"
-        android:textStyle="bold"
+        android:layout_marginEnd="8dp"
         android:ellipsize="middle"
-        android:singleLine="true"
         android:paddingTop="4dp"
         android:paddingBottom="4dp"
+        android:singleLine="true"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/address_label_textview"
         app:layout_constraintEnd_toStartOf="@id/copy_address_imagebutton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/monero_qr_imageview"
-        app:layout_constraintBottom_toTopOf="@id/address_label_textview"
         tools:text="ADDRESS" />
 
     <TextView
@@ -78,11 +77,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:textSize="14sp"
         android:ellipsize="middle"
-        android:singleLine="true"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
+        android:singleLine="true"
+        android:textSize="14sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/address_textview"
         tools:text="LABEL" />
@@ -91,11 +90,11 @@
         android:id="@+id/copy_address_imagebutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
         android:layout_marginTop="16dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/copy_selected_wallet_address"
         android:minWidth="48dp"
         android:minHeight="48dp"
-        android:contentDescription="@string/copy_selected_wallet_address"
         android:src="@drawable/ic_content_copy_24dp"
         app:layout_constraintBottom_toTopOf="@id/address_list_recyclerview"
         app:layout_constraintEnd_toEndOf="parent"
@@ -108,20 +107,20 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:textSize="14sp"
         android:ellipsize="middle"
         android:singleLine="true"
+        android:text="@string/previous_addresses"
+        android:textSize="14sp"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@id/address_list_recyclerview"
-        android:text="@string/previous_addresses" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/address_list_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@drawable/round_bg"
         android:layout_marginTop="64dp"
+        android:background="@drawable/round_bg"
         android:clipToPadding="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

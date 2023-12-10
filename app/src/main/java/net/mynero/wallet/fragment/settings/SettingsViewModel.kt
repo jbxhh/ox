@@ -1,11 +1,8 @@
 package net.mynero.wallet.fragment.settings
 
-import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import net.mynero.wallet.MoneroApplication
-import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.service.PrefService
 import net.mynero.wallet.service.ProxyService
 import net.mynero.wallet.util.Constants
@@ -26,7 +23,7 @@ class SettingsViewModel : ViewModel() {
         PrefService.instance?.edit()?.putBoolean(Constants.PREF_USES_PROXY, use)?.apply()
 
         val samouraiTorManager = ProxyService.instance?.samouraiTorManager
-        if(use && ProxyService.instance?.useBundledTor == true) {
+        if (use && ProxyService.instance?.useBundledTor == true) {
             samouraiTorManager?.start()
         } else {
             samouraiTorManager?.stop()
@@ -38,7 +35,7 @@ class SettingsViewModel : ViewModel() {
         PrefService.instance?.edit()?.putBoolean(Constants.PREF_USE_BUNDLED_TOR, use)?.apply()
 
         val samouraiTorManager = ProxyService.instance?.samouraiTorManager
-        if(use && ProxyService.instance?.usingProxy == true) {
+        if (use && ProxyService.instance?.usingProxy == true) {
             samouraiTorManager?.start()
         } else {
             samouraiTorManager?.stop()

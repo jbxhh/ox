@@ -52,13 +52,13 @@ class OnboardingViewModel : ViewModel() {
         _creatingWallet,
         ProxyService.instance?.samouraiTorManager?.getTorStateLiveData()
     ) { seedType, useProxy, proxyAddress, proxyPort, useBundledTor, passphrase, confirmedPassphrase, creatingWallet, torState ->
-        if(seedType == null || useProxy == null || proxyAddress == null || proxyPort == null || useBundledTor == null || passphrase == null || confirmedPassphrase == null || creatingWallet == null) return@combineLiveDatas false
-        if((passphrase.isNotEmpty() || confirmedPassphrase.isNotEmpty()) && passphrase != confirmedPassphrase) return@combineLiveDatas false
-        if(creatingWallet) return@combineLiveDatas false
-        if(seedType == SeedType.POLYSEED && (passphrase.isEmpty() || confirmedPassphrase.isEmpty())) return@combineLiveDatas false
-        if(useProxy && (proxyAddress.isEmpty() || proxyPort.isEmpty()) && !useBundledTor) return@combineLiveDatas false
+        if (seedType == null || useProxy == null || proxyAddress == null || proxyPort == null || useBundledTor == null || passphrase == null || confirmedPassphrase == null || creatingWallet == null) return@combineLiveDatas false
+        if ((passphrase.isNotEmpty() || confirmedPassphrase.isNotEmpty()) && passphrase != confirmedPassphrase) return@combineLiveDatas false
+        if (creatingWallet) return@combineLiveDatas false
+        if (seedType == SeedType.POLYSEED && (passphrase.isEmpty() || confirmedPassphrase.isEmpty())) return@combineLiveDatas false
+        if (useProxy && (proxyAddress.isEmpty() || proxyPort.isEmpty()) && !useBundledTor) return@combineLiveDatas false
         val progress = torState?.progressIndicator ?: 0
-        if(useBundledTor && progress < 100 && useProxy) return@combineLiveDatas false
+        if (useBundledTor && progress < 100 && useProxy) return@combineLiveDatas false
 
         return@combineLiveDatas true
     }
@@ -227,24 +227,25 @@ class OnboardingViewModel : ViewModel() {
 
     fun setProxyAddress(address: String) {
         _proxyAddress.value = address
-        if(address.isEmpty()) PrefService.instance?.deleteProxy()
+        if (address.isEmpty()) PrefService.instance?.deleteProxy()
         val port = _proxyPort.value ?: return
         ProxyService.instance?.updateProxy(address, port)
     }
 
     fun setProxyPort(port: String) {
         _proxyPort.value = port
-        if(port.isEmpty()) PrefService.instance?.deleteProxy()
+        if (port.isEmpty()) PrefService.instance?.deleteProxy()
         val address = _proxyAddress.value ?: return
         ProxyService.instance?.updateProxy(address, port)
     }
 
     fun setUseBundledTor(useBundled: Boolean) {
         _useBundledTor.value = useBundled
-        PrefService.instance?.edit()?.putBoolean(Constants.PREF_USE_BUNDLED_TOR, useBundled)?.apply()
+        PrefService.instance?.edit()?.putBoolean(Constants.PREF_USE_BUNDLED_TOR, useBundled)
+            ?.apply()
 
         val samouraiTorManager = ProxyService.instance?.samouraiTorManager
-        if(useBundled && ProxyService.instance?.usingProxy == true) {
+        if (useBundled && ProxyService.instance?.usingProxy == true) {
             samouraiTorManager?.start()
         } else {
             samouraiTorManager?.stop()
@@ -256,7 +257,7 @@ class OnboardingViewModel : ViewModel() {
         PrefService.instance?.edit()?.putBoolean(Constants.PREF_USES_PROXY, useProxy)?.apply()
 
         val samouraiTorManager = ProxyService.instance?.samouraiTorManager
-        if(useProxy && ProxyService.instance?.useBundledTor == true) {
+        if (useProxy && ProxyService.instance?.useBundledTor == true) {
             samouraiTorManager?.start()
         } else {
             samouraiTorManager?.stop()
