@@ -5,7 +5,10 @@ import androidx.lifecycle.MutableLiveData
 import net.mynero.wallet.model.TorState
 import java.net.Proxy
 
-class SamouraiTorManager(private val appContext: Application?, private val torKmpManager: TorKmpManager) {
+class SamouraiTorManager(
+    private val appContext: Application?,
+    private val torKmpManager: TorKmpManager
+) {
     fun getTorStateLiveData(): MutableLiveData<TorState> {
         return torKmpManager.torStateLiveData
     }

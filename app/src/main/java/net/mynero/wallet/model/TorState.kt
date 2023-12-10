@@ -1,14 +1,6 @@
 package net.mynero.wallet.model
 
 class TorState {
-    var state : EnumTorState = EnumTorState.OFF
-        get() = field
-        set(value) {
-            field = value
-        }
-    var progressIndicator : Int = 0
-        get() = field
-        set(value) {
-            field = value
-        }
+    var state: EnumTorState = EnumTorState.OFF
+    var progressIndicator: Int = 0
 }

@@ -1,18 +1,13 @@
 package net.mynero.wallet.fragment.dialog
 
-import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.Toast
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import net.mynero.wallet.R
 import net.mynero.wallet.adapter.NodeSelectionAdapter
 import net.mynero.wallet.adapter.NodeSelectionAdapter.NodeSelectionAdapterListener
@@ -20,7 +15,6 @@ import net.mynero.wallet.data.DefaultNodes
 import net.mynero.wallet.data.Node
 import net.mynero.wallet.data.Node.Companion.fromJson
 import net.mynero.wallet.data.Node.Companion.fromString
-import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.service.DaemonService
 import net.mynero.wallet.service.PrefService
 import net.mynero.wallet.util.Constants

@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/oled_dialogBackgroundColor"
     android:fillViewport="true"
     android:fitsSystemWindows="true"
-    android:background="@color/oled_dialogBackgroundColor"
     android:padding="24dp">
 
 
@@ -32,9 +32,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
+            android:text="@string/wallet_seed_label"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:text="@string/wallet_seed_label"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/recv_monero_textview" />
@@ -44,24 +44,24 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textSize="12sp"
-            android:textColor="#f00"
             android:text="@string/wallet_seed_desc"
-            app:layout_constraintVertical_bias="0.0"
+            android:textColor="#f00"
+            android:textSize="12sp"
             app:layout_constraintBottom_toTopOf="@id/information_textview"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/wallet_seed_label_textview" />
+            app:layout_constraintTop_toBottomOf="@id/wallet_seed_label_textview"
+            app:layout_constraintVertical_bias="0.0" />
 
         <TextView
             android:id="@+id/wallet_seed_offset_textview"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textSize="11sp"
-            android:textColor="#f80"
-            android:visibility="gone"
             android:text="@string/wallet_seed_offset_desc"
+            android:textColor="#f80"
+            android:textSize="11sp"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/information_textview" />
@@ -82,9 +82,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
+            android:text="@string/wallet_viewkey_label"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:text="@string/wallet_viewkey_label"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/wallet_seed_offset_textview" />
@@ -94,14 +94,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textSize="12sp"
-            android:textColor="#f80"
             android:text="@string/wallet_viewkey_desc"
-            app:layout_constraintVertical_bias="0.0"
+            android:textColor="#f80"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toTopOf="@id/copy_viewkey_imagebutton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/copy_viewkey_imagebutton"
-            app:layout_constraintTop_toBottomOf="@id/wallet_viewkey_label_textview" />
+            app:layout_constraintTop_toBottomOf="@id/wallet_viewkey_label_textview"
+            app:layout_constraintVertical_bias="0.0" />
 
         <TextView
             android:id="@+id/viewkey_textview"
@@ -109,10 +109,10 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@id/copy_viewkey_imagebutton"
             app:layout_constraintEnd_toStartOf="@id/copy_viewkey_imagebutton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/copy_viewkey_imagebutton"
-            app:layout_constraintBottom_toBottomOf="@id/copy_viewkey_imagebutton"
             tools:text="INFORMATION" />
 
         <ImageButton
@@ -120,26 +120,28 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
+            android:contentDescription="@string/copy_wallet_s_private_view_key"
             android:minWidth="48dp"
             android:minHeight="48dp"
-            android:contentDescription="@string/copy_wallet_s_private_view_key"
             android:src="@drawable/ic_content_copy_24dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintVertical_bias="0.0"
             app:layout_constraintBottom_toTopOf="@id/wallet_restore_height_label_textview"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/viewkey_textview"
-            app:layout_constraintTop_toBottomOf="@id/wallet_viewkey_desc_textview" />
+            app:layout_constraintTop_toBottomOf="@id/wallet_viewkey_desc_textview"
+            app:layout_constraintVertical_bias="0.0" />
+
         <TextView
             android:id="@+id/wallet_restore_height_label_textview"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:text="@string/wallet_restore_height_label"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:text="@string/wallet_restore_height_label"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/copy_viewkey_imagebutton" />
+
         <TextView
             android:id="@+id/restore_height_textview"
             android:layout_width="0dp"

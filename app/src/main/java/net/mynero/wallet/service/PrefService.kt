@@ -81,12 +81,12 @@ class PrefService(application: MoneroApplication) : ServiceBase(null) {
     }
 
     fun saveProxy(address: String, port: String): String? {
-        if(address.isEmpty() || port.isEmpty()) {
+        if (address.isEmpty() || port.isEmpty()) {
             deleteProxy()
             return null
         }
         val proxyAddress = "$address:$port"
-        if(proxyAddress == ":") return null
+        if (proxyAddress == ":") return null
         Log.d("PrefService", "Setting proxy. proxyAddress=$proxyAddress")
         edit()?.putString(Constants.PREF_PROXY, proxyAddress)?.apply()
         return proxyAddress

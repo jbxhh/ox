@@ -235,7 +235,7 @@ std::vector<std::string> java2cpp(JNIEnv *env, jobject arrayList) {
 
 jlong getElement(JNIEnv *env, jlongArray arr_j, int element) {
     jlong result;
-    env->GetLongArrayRegion(arr_j, element,1, &result);
+    env->GetLongArrayRegion(arr_j, element, 1, &result);
     return result;
 }
 
@@ -326,9 +326,9 @@ extern "C"
 /**********************************/
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_WalletManager_createWalletJ(JNIEnv *env, jobject instance,
-                                                            jstring path, jstring password,
-                                                            jstring language,
-                                                            jint networkType) {
+                                                         jstring path, jstring password,
+                                                         jstring language,
+                                                         jint networkType) {
     const char *_path = env->GetStringUTFChars(path, nullptr);
     const char *_password = env->GetStringUTFChars(password, nullptr);
     const char *_language = env->GetStringUTFChars(language, nullptr);
@@ -349,9 +349,10 @@ Java_net_mynero_wallet_model_WalletManager_createWalletJ(JNIEnv *env, jobject in
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_WalletManager_createWalletPolyseedJ(JNIEnv *env, jobject instance,
-                                                            jstring path, jstring password, jstring passpharse,
-                                                            jstring language,
-                                                            jint networkType) {
+                                                                 jstring path, jstring password,
+                                                                 jstring passpharse,
+                                                                 jstring language,
+                                                                 jint networkType) {
     std::string seed_words;
     std::string err;
     bool _polyseedCreate = Monero::Wallet::createPolyseed(seed_words, err);
@@ -384,8 +385,8 @@ Java_net_mynero_wallet_model_WalletManager_createWalletPolyseedJ(JNIEnv *env, jo
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_WalletManager_openWalletJ(JNIEnv *env, jobject instance,
-                                                          jstring path, jstring password,
-                                                          jint networkType) {
+                                                       jstring path, jstring password,
+                                                       jint networkType) {
     const char *_path = env->GetStringUTFChars(path, nullptr);
     const char *_password = env->GetStringUTFChars(password, nullptr);
     Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
@@ -403,10 +404,10 @@ Java_net_mynero_wallet_model_WalletManager_openWalletJ(JNIEnv *env, jobject inst
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_WalletManager_recoveryWalletJ(JNIEnv *env, jobject instance,
-                                                              jstring path, jstring password,
-                                                              jstring mnemonic, jstring offset,
-                                                              jint networkType,
-                                                              jlong restoreHeight) {
+                                                           jstring path, jstring password,
+                                                           jstring mnemonic, jstring offset,
+                                                           jint networkType,
+                                                           jlong restoreHeight) {
     const char *_path = env->GetStringUTFChars(path, nullptr);
     const char *_password = env->GetStringUTFChars(password, nullptr);
     const char *_mnemonic = env->GetStringUTFChars(mnemonic, nullptr);
@@ -432,9 +433,9 @@ Java_net_mynero_wallet_model_WalletManager_recoveryWalletJ(JNIEnv *env, jobject 
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_WalletManager_recoveryWalletPolyseedJ(JNIEnv *env, jobject instance,
-                                                                      jstring path, jstring password,
-                                                                      jstring mnemonic, jstring offset,
-                                                                      jint networkType) {
+                                                                   jstring path, jstring password,
+                                                                   jstring mnemonic, jstring offset,
+                                                                   jint networkType) {
     const char *_path = env->GetStringUTFChars(path, nullptr);
     const char *_password = env->GetStringUTFChars(password, nullptr);
     const char *_mnemonic = env->GetStringUTFChars(mnemonic, nullptr);
@@ -459,13 +460,13 @@ Java_net_mynero_wallet_model_WalletManager_recoveryWalletPolyseedJ(JNIEnv *env, 
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_WalletManager_createWalletFromKeysJ(JNIEnv *env, jobject instance,
-                                                                    jstring path, jstring password,
-                                                                    jstring language,
-                                                                    jint networkType,
-                                                                    jlong restoreHeight,
-                                                                    jstring addressString,
-                                                                    jstring viewKeyString,
-                                                                    jstring spendKeyString) {
+                                                                 jstring path, jstring password,
+                                                                 jstring language,
+                                                                 jint networkType,
+                                                                 jlong restoreHeight,
+                                                                 jstring addressString,
+                                                                 jstring viewKeyString,
+                                                                 jstring spendKeyString) {
     const char *_path = env->GetStringUTFChars(path, nullptr);
     const char *_password = env->GetStringUTFChars(password, nullptr);
     const char *_language = env->GetStringUTFChars(language, nullptr);
@@ -499,12 +500,12 @@ Java_net_mynero_wallet_model_WalletManager_createWalletFromKeysJ(JNIEnv *env, jo
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_WalletManager_createWalletFromDeviceJ(JNIEnv *env, jobject instance,
-                                                                      jstring path,
-                                                                      jstring password,
-                                                                      jint networkType,
-                                                                      jstring deviceName,
-                                                                      jlong restoreHeight,
-                                                                      jstring subaddressLookahead) {
+                                                                   jstring path,
+                                                                   jstring password,
+                                                                   jint networkType,
+                                                                   jstring deviceName,
+                                                                   jlong restoreHeight,
+                                                                   jstring subaddressLookahead) {
     const char *_path = env->GetStringUTFChars(path, nullptr);
     const char *_password = env->GetStringUTFChars(password, nullptr);
     Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
@@ -529,7 +530,7 @@ Java_net_mynero_wallet_model_WalletManager_createWalletFromDeviceJ(JNIEnv *env, 
 
 JNIEXPORT jboolean JNICALL
 Java_net_mynero_wallet_model_WalletManager_walletExists(JNIEnv *env, jobject instance,
-                                                           jstring path) {
+                                                        jstring path) {
     const char *_path = env->GetStringUTFChars(path, nullptr);
     bool exists =
             Monero::WalletManagerFactory::getWalletManager()->walletExists(std::string(_path));
@@ -539,9 +540,9 @@ Java_net_mynero_wallet_model_WalletManager_walletExists(JNIEnv *env, jobject ins
 
 JNIEXPORT jboolean JNICALL
 Java_net_mynero_wallet_model_WalletManager_verifyWalletPassword(JNIEnv *env, jobject instance,
-                                                                   jstring keys_file_name,
-                                                                   jstring password,
-                                                                   jboolean watch_only) {
+                                                                jstring keys_file_name,
+                                                                jstring password,
+                                                                jboolean watch_only) {
     const char *_keys_file_name = env->GetStringUTFChars(keys_file_name, nullptr);
     const char *_password = env->GetStringUTFChars(password, nullptr);
     bool passwordOk =
@@ -555,8 +556,8 @@ Java_net_mynero_wallet_model_WalletManager_verifyWalletPassword(JNIEnv *env, job
 //virtual int queryWalletHardware(const std::string &keys_file_name, const std::string &password) const = 0;
 JNIEXPORT jint JNICALL
 Java_net_mynero_wallet_model_WalletManager_queryWalletDeviceJ(JNIEnv *env, jobject instance,
-                                                                 jstring keys_file_name,
-                                                                 jstring password) {
+                                                              jstring keys_file_name,
+                                                              jstring password) {
     const char *_keys_file_name = env->GetStringUTFChars(keys_file_name, nullptr);
     const char *_password = env->GetStringUTFChars(password, nullptr);
     Monero::Wallet::Device device_type;
@@ -572,7 +573,7 @@ Java_net_mynero_wallet_model_WalletManager_queryWalletDeviceJ(JNIEnv *env, jobje
 
 JNIEXPORT jobject JNICALL
 Java_net_mynero_wallet_model_WalletManager_findWallets(JNIEnv *env, jobject instance,
-                                                          jstring path) {
+                                                       jstring path) {
     const char *_path = env->GetStringUTFChars(path, nullptr);
     std::vector<std::string> walletPaths =
             Monero::WalletManagerFactory::getWalletManager()->findWallets(std::string(_path));
@@ -584,7 +585,7 @@ Java_net_mynero_wallet_model_WalletManager_findWallets(JNIEnv *env, jobject inst
 
 JNIEXPORT void JNICALL
 Java_net_mynero_wallet_model_WalletManager_setDaemonAddressJ(JNIEnv *env, jobject instance,
-                                                                jstring address) {
+                                                             jstring address) {
     const char *_address = env->GetStringUTFChars(address, nullptr);
     Monero::WalletManagerFactory::getWalletManager()->setDaemonAddress(std::string(_address));
     env->ReleaseStringUTFChars(address, _address);
@@ -593,7 +594,7 @@ Java_net_mynero_wallet_model_WalletManager_setDaemonAddressJ(JNIEnv *env, jobjec
 // returns whether the daemon can be reached, and its version number
 JNIEXPORT jint JNICALL
 Java_net_mynero_wallet_model_WalletManager_getDaemonVersion(JNIEnv *env,
-                                                               jobject instance) {
+                                                            jobject instance) {
     uint32_t version;
     bool isConnected =
             Monero::WalletManagerFactory::getWalletManager()->connected(&version);
@@ -608,7 +609,7 @@ Java_net_mynero_wallet_model_WalletManager_getBlockchainHeight(JNIEnv *env, jobj
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_WalletManager_getBlockchainTargetHeight(JNIEnv *env,
-                                                                        jobject instance) {
+                                                                     jobject instance) {
     return Monero::WalletManagerFactory::getWalletManager()->blockchainTargetHeight();
 }
 
@@ -634,9 +635,9 @@ Java_net_mynero_wallet_model_WalletManager_isMining(JNIEnv *env, jobject instanc
 
 JNIEXPORT jboolean JNICALL
 Java_net_mynero_wallet_model_WalletManager_startMining(JNIEnv *env, jobject instance,
-                                                          jstring address,
-                                                          jboolean background_mining,
-                                                          jboolean ignore_battery) {
+                                                       jstring address,
+                                                       jboolean background_mining,
+                                                       jboolean ignore_battery) {
     const char *_address = env->GetStringUTFChars(address, nullptr);
     bool success =
             Monero::WalletManagerFactory::getWalletManager()->startMining(std::string(_address),
@@ -653,8 +654,8 @@ Java_net_mynero_wallet_model_WalletManager_stopMining(JNIEnv *env, jobject insta
 
 JNIEXPORT jstring JNICALL
 Java_net_mynero_wallet_model_WalletManager_resolveOpenAlias(JNIEnv *env, jobject instance,
-                                                               jstring address,
-                                                               jboolean dnssec_valid) {
+                                                            jstring address,
+                                                            jboolean dnssec_valid) {
     const char *_address = env->GetStringUTFChars(address, nullptr);
     bool _dnssec_valid = (bool) dnssec_valid;
     std::string resolvedAlias =
@@ -667,7 +668,7 @@ Java_net_mynero_wallet_model_WalletManager_resolveOpenAlias(JNIEnv *env, jobject
 
 JNIEXPORT jboolean JNICALL
 Java_net_mynero_wallet_model_WalletManager_setProxyJ(JNIEnv *env, jobject instance,
-                                                        jstring address) {
+                                                     jstring address) {
     const char *_address = env->GetStringUTFChars(address, nullptr);
     bool rc =
             Monero::WalletManagerFactory::getWalletManager()->setProxy(std::string(_address));
@@ -680,7 +681,7 @@ Java_net_mynero_wallet_model_WalletManager_setProxyJ(JNIEnv *env, jobject instan
 
 JNIEXPORT jboolean JNICALL
 Java_net_mynero_wallet_model_WalletManager_closeJ(JNIEnv *env, jobject instance,
-                                                     jobject walletInstance) {
+                                                  jobject walletInstance) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, walletInstance);
     bool closeSuccess = Monero::WalletManagerFactory::getWalletManager()->closeWallet(wallet,
                                                                                       false);
@@ -728,7 +729,8 @@ Java_net_mynero_wallet_model_Wallet_getSeed(JNIEnv *env, jobject instance, jstri
 }
 
 JNIEXPORT jstring JNICALL
-Java_net_mynero_wallet_model_Wallet_getLegacySeed(JNIEnv *env, jobject instance, jstring seedOffset) {
+Java_net_mynero_wallet_model_Wallet_getLegacySeed(JNIEnv *env, jobject instance,
+                                                  jstring seedOffset) {
     const char *_seedOffset = env->GetStringUTFChars(seedOffset, nullptr);
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
 
@@ -743,7 +745,8 @@ Java_net_mynero_wallet_model_Wallet_getLegacySeed(JNIEnv *env, jobject instance,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_net_mynero_wallet_model_Wallet_isPolyseedSupported(JNIEnv *env, jobject instance, jstring seedOffset) {
+Java_net_mynero_wallet_model_Wallet_isPolyseedSupported(JNIEnv *env, jobject instance,
+                                                        jstring seedOffset) {
     const char *_seedOffset = env->GetStringUTFChars(seedOffset, nullptr);
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
 
@@ -764,7 +767,7 @@ Java_net_mynero_wallet_model_Wallet_getSeedLanguage(JNIEnv *env, jobject instanc
 
 JNIEXPORT void JNICALL
 Java_net_mynero_wallet_model_Wallet_setSeedLanguage(JNIEnv *env, jobject instance,
-                                                       jstring language) {
+                                                    jstring language) {
     const char *_language = env->GetStringUTFChars(language, nullptr);
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     wallet->setSeedLanguage(std::string(_language));
@@ -800,7 +803,7 @@ Java_net_mynero_wallet_model_Wallet_statusWithErrorString(JNIEnv *env, jobject i
 
 JNIEXPORT jboolean JNICALL
 Java_net_mynero_wallet_model_Wallet_setPassword(JNIEnv *env, jobject instance,
-                                                   jstring password) {
+                                                jstring password) {
     const char *_password = env->GetStringUTFChars(password, nullptr);
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     bool success = wallet->setPassword(std::string(_password));
@@ -810,8 +813,8 @@ Java_net_mynero_wallet_model_Wallet_setPassword(JNIEnv *env, jobject instance,
 
 JNIEXPORT jstring JNICALL
 Java_net_mynero_wallet_model_Wallet_getAddressJ(JNIEnv *env, jobject instance,
-                                                   jint accountIndex,
-                                                   jint addressIndex) {
+                                                jint accountIndex,
+                                                jint addressIndex) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     return env->NewStringUTF(
             wallet->address((uint32_t) accountIndex, (uint32_t) addressIndex).c_str());
@@ -834,7 +837,7 @@ Java_net_mynero_wallet_model_Wallet_nettype(JNIEnv *env, jobject instance) {
 
 JNIEXPORT jstring JNICALL
 Java_net_mynero_wallet_model_Wallet_getIntegratedAddress(JNIEnv *env, jobject instance,
-                                                            jstring payment_id) {
+                                                         jstring payment_id) {
     const char *_payment_id = env->GetStringUTFChars(payment_id, nullptr);
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     std::string address = wallet->integratedAddress(_payment_id);
@@ -856,7 +859,7 @@ Java_net_mynero_wallet_model_Wallet_getSecretSpendKey(JNIEnv *env, jobject insta
 
 JNIEXPORT jboolean JNICALL
 Java_net_mynero_wallet_model_Wallet_store(JNIEnv *env, jobject instance,
-                                             jstring path) {
+                                          jstring path) {
     const char *_path = env->GetStringUTFChars(path, nullptr);
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     bool success = wallet->store(std::string(_path));
@@ -877,10 +880,10 @@ Java_net_mynero_wallet_model_Wallet_getFilename(JNIEnv *env, jobject instance) {
 
 JNIEXPORT jboolean JNICALL
 Java_net_mynero_wallet_model_Wallet_initJ(JNIEnv *env, jobject instance,
-                                             jstring daemon_address,
-                                             jlong upper_transaction_size_limit,
-                                             jstring daemon_username, jstring daemon_password,
-                                             jstring proxy) {
+                                          jstring daemon_address,
+                                          jlong upper_transaction_size_limit,
+                                          jstring daemon_username, jstring daemon_password,
+                                          jstring proxy) {
     const char *_daemon_address = env->GetStringUTFChars(daemon_address, nullptr);
     const char *_daemon_username = env->GetStringUTFChars(daemon_username, nullptr);
     const char *_daemon_password = env->GetStringUTFChars(daemon_password, nullptr);
@@ -901,7 +904,7 @@ Java_net_mynero_wallet_model_Wallet_initJ(JNIEnv *env, jobject instance,
 
 JNIEXPORT void JNICALL
 Java_net_mynero_wallet_model_Wallet_setRestoreHeight(JNIEnv *env, jobject instance,
-                                                        jlong height) {
+                                                     jlong height) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     wallet->setRefreshFromBlockHeight((uint64_t) height);
 }
@@ -921,7 +924,8 @@ Java_net_mynero_wallet_model_Wallet_getConnectionStatusJ(JNIEnv *env, jobject in
     return wallet->connected();
 }
 JNIEXPORT void JNICALL
-Java_net_mynero_wallet_model_Wallet_setTrustedDaemonJ(JNIEnv *env, jobject instance, jboolean trusted) {
+Java_net_mynero_wallet_model_Wallet_setTrustedDaemonJ(JNIEnv *env, jobject instance,
+                                                      jboolean trusted) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     if (trusted) {
         wallet->setTrustedDaemon(true);
@@ -939,7 +943,7 @@ Java_net_mynero_wallet_model_Wallet_isTrustedDaemonJ(JNIEnv *env, jobject instan
 
 JNIEXPORT jboolean JNICALL
 Java_net_mynero_wallet_model_Wallet_setProxyJ(JNIEnv *env, jobject instance,
-                                                jstring address) {
+                                              jstring address) {
     const char *_address = env->GetStringUTFChars(address, nullptr);
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     bool rc = wallet->setProxy(std::string(_address));
@@ -949,7 +953,7 @@ Java_net_mynero_wallet_model_Wallet_setProxyJ(JNIEnv *env, jobject instance,
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_Wallet_getBalance(JNIEnv *env, jobject instance,
-                                                  jint accountIndex) {
+                                               jint accountIndex) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     return wallet->balance((uint32_t) accountIndex);
 }
@@ -962,7 +966,7 @@ Java_net_mynero_wallet_model_Wallet_getBalanceAll(JNIEnv *env, jobject instance)
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_Wallet_getUnlockedBalance(JNIEnv *env, jobject instance,
-                                                          jint accountIndex) {
+                                                       jint accountIndex) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     return wallet->unlockedBalance((uint32_t) accountIndex);
 }
@@ -987,7 +991,7 @@ Java_net_mynero_wallet_model_Wallet_getBlockChainHeightJ(JNIEnv *env, jobject in
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_Wallet_getApproximateBlockChainHeight(JNIEnv *env,
-                                                                      jobject instance) {
+                                                                   jobject instance) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     return wallet->approximateBlockChainHeight();
 }
@@ -1000,7 +1004,7 @@ Java_net_mynero_wallet_model_Wallet_getDaemonBlockChainHeightJ(JNIEnv *env, jobj
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_Wallet_getDaemonBlockChainTargetHeight(JNIEnv *env,
-                                                                       jobject instance) {
+                                                                    jobject instance) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     return wallet->daemonBlockChainTargetHeight();
 }
@@ -1020,13 +1024,13 @@ Java_net_mynero_wallet_model_Wallet_getDeviceTypeJ(JNIEnv *env, jobject instance
 
 JNIEXPORT jstring JNICALL
 Java_net_mynero_wallet_model_Wallet_getDisplayAmount(JNIEnv *env, jclass clazz,
-                                                        jlong amount) {
+                                                     jlong amount) {
     return env->NewStringUTF(Monero::Wallet::displayAmount(amount).c_str());
 }
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_Wallet_getAmountFromString(JNIEnv *env, jclass clazz,
-                                                           jstring amount) {
+                                                        jstring amount) {
     const char *_amount = env->GetStringUTFChars(amount, nullptr);
     uint64_t x = Monero::Wallet::amountFromString(_amount);
     env->ReleaseStringUTFChars(amount, _amount);
@@ -1035,7 +1039,7 @@ Java_net_mynero_wallet_model_Wallet_getAmountFromString(JNIEnv *env, jclass claz
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_Wallet_getAmountFromDouble(JNIEnv *env, jclass clazz,
-                                                           jdouble amount) {
+                                                        jdouble amount) {
     return Monero::Wallet::amountFromDouble(amount);
 }
 
@@ -1046,7 +1050,7 @@ Java_net_mynero_wallet_model_Wallet_generatePaymentId(JNIEnv *env, jclass clazz)
 
 JNIEXPORT jboolean JNICALL
 Java_net_mynero_wallet_model_Wallet_isPaymentIdValid(JNIEnv *env, jclass clazz,
-                                                        jstring payment_id) {
+                                                     jstring payment_id) {
     const char *_payment_id = env->GetStringUTFChars(payment_id, nullptr);
     bool isValid = Monero::Wallet::paymentIdValid(_payment_id);
     env->ReleaseStringUTFChars(payment_id, _payment_id);
@@ -1055,7 +1059,7 @@ Java_net_mynero_wallet_model_Wallet_isPaymentIdValid(JNIEnv *env, jclass clazz,
 
 JNIEXPORT jboolean JNICALL
 Java_net_mynero_wallet_model_Wallet_isAddressValid(JNIEnv *env, jclass clazz,
-                                                      jstring address, jint networkType) {
+                                                   jstring address, jint networkType) {
     const char *_address = env->GetStringUTFChars(address, nullptr);
     Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
     bool isValid = Monero::Wallet::addressValid(_address, _networkType);
@@ -1065,8 +1069,8 @@ Java_net_mynero_wallet_model_Wallet_isAddressValid(JNIEnv *env, jclass clazz,
 
 JNIEXPORT jstring JNICALL
 Java_net_mynero_wallet_model_Wallet_getPaymentIdFromAddress(JNIEnv *env, jclass clazz,
-                                                               jstring address,
-                                                               jint networkType) {
+                                                            jstring address,
+                                                            jint networkType) {
     Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
     const char *_address = env->GetStringUTFChars(address, nullptr);
     std::string payment_id = Monero::Wallet::paymentIdFromAddress(_address, _networkType);
@@ -1118,10 +1122,10 @@ Java_net_mynero_wallet_model_Wallet_rescanBlockchainAsyncJ(JNIEnv *env, jobject 
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_Wallet_createTransactionJ(JNIEnv *env, jobject instance,
-                                                          jstring dst_addr, jstring payment_id,
-                                                          jlong amount, jint mixin_count,
-                                                          jint priority,
-                                                          jint accountIndex, jobject key_images) {
+                                                       jstring dst_addr, jstring payment_id,
+                                                       jlong amount, jint mixin_count,
+                                                       jint priority,
+                                                       jint accountIndex, jobject key_images) {
     const std::set<std::string> _key_images = java2cpp_set(env, key_images);
     const char *_dst_addr = env->GetStringUTFChars(dst_addr, nullptr);
     const char *_payment_id = env->GetStringUTFChars(payment_id, nullptr);
@@ -1132,7 +1136,8 @@ Java_net_mynero_wallet_model_Wallet_createTransactionJ(JNIEnv *env, jobject inst
     Monero::PendingTransaction *tx = wallet->createTransaction(_dst_addr, _payment_id,
                                                                amount, (uint32_t) mixin_count,
                                                                _priority,
-                                                               (uint32_t) accountIndex, {}, _key_images);
+                                                               (uint32_t) accountIndex, {},
+                                                               _key_images);
 
     env->ReleaseStringUTFChars(dst_addr, _dst_addr);
     env->ReleaseStringUTFChars(payment_id, _payment_id);
@@ -1141,10 +1146,12 @@ Java_net_mynero_wallet_model_Wallet_createTransactionJ(JNIEnv *env, jobject inst
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_Wallet_createTransactionMultDestJ(JNIEnv *env, jobject instance,
-                                                       jobject dst_addrs, jstring payment_id,
-                                                       jlongArray amounts, jint mixin_count,
-                                                       jint priority,
-                                                       jint accountIndex, jobject key_images) {
+                                                               jobject dst_addrs,
+                                                               jstring payment_id,
+                                                               jlongArray amounts, jint mixin_count,
+                                                               jint priority,
+                                                               jint accountIndex,
+                                                               jobject key_images) {
     const std::set<std::string> _key_images = java2cpp_set(env, key_images);
     const std::vector<std::string> _dst_addrs = java2cpp(env, dst_addrs);
     const std::vector<std::uint64_t> _dst_amounts = java2cpp_long(env, amounts);
@@ -1154,9 +1161,11 @@ Java_net_mynero_wallet_model_Wallet_createTransactionMultDestJ(JNIEnv *env, jobj
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
 
     Monero::PendingTransaction *tx = wallet->createTransactionMultDest(_dst_addrs, _payment_id,
-                                                                       _dst_amounts, (uint32_t) mixin_count,
-                                                               _priority,
-                                                               (uint32_t) accountIndex, {}, _key_images);
+                                                                       _dst_amounts,
+                                                                       (uint32_t) mixin_count,
+                                                                       _priority,
+                                                                       (uint32_t) accountIndex, {},
+                                                                       _key_images);
 
     env->ReleaseStringUTFChars(payment_id, _payment_id);
     return reinterpret_cast<jlong>(tx);
@@ -1165,7 +1174,8 @@ Java_net_mynero_wallet_model_Wallet_createTransactionMultDestJ(JNIEnv *env, jobj
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_Wallet_estimateTransactionFee(JNIEnv *env, jobject instance,
                                                            jobject destinations, jint priority) {
-    std::vector<std::pair<std::string, uint64_t>> dest_vector = java2cpp_pairvector(env, destinations);
+    std::vector<std::pair<std::string, uint64_t>> dest_vector = java2cpp_pairvector(env,
+                                                                                    destinations);
     Monero::PendingTransaction::Priority _priority = static_cast<Monero::PendingTransaction::Priority>(priority);
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     uint64_t fee = wallet->estimateTransactionFee(dest_vector, _priority);
@@ -1174,10 +1184,10 @@ Java_net_mynero_wallet_model_Wallet_estimateTransactionFee(JNIEnv *env, jobject 
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_Wallet_createSweepTransaction(JNIEnv *env, jobject instance,
-                                                              jstring dst_addr, jstring payment_id,
-                                                              jint mixin_count,
-                                                              jint priority,
-                                                              jint accountIndex, jobject key_images) {
+                                                           jstring dst_addr, jstring payment_id,
+                                                           jint mixin_count,
+                                                           jint priority,
+                                                           jint accountIndex, jobject key_images) {
     const std::set<std::string> _key_images = java2cpp_set(env, key_images);
     const char *_dst_addr = env->GetStringUTFChars(dst_addr, nullptr);
     const char *_payment_id = env->GetStringUTFChars(payment_id, nullptr);
@@ -1190,7 +1200,8 @@ Java_net_mynero_wallet_model_Wallet_createSweepTransaction(JNIEnv *env, jobject 
     Monero::PendingTransaction *tx = wallet->createTransaction(_dst_addr, _payment_id,
                                                                empty, (uint32_t) mixin_count,
                                                                _priority,
-                                                               (uint32_t) accountIndex, {}, _key_images);
+                                                               (uint32_t) accountIndex, {},
+                                                               _key_images);
 
     env->ReleaseStringUTFChars(dst_addr, _dst_addr);
     env->ReleaseStringUTFChars(payment_id, _payment_id);
@@ -1199,7 +1210,7 @@ Java_net_mynero_wallet_model_Wallet_createSweepTransaction(JNIEnv *env, jobject 
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_Wallet_createSweepUnmixableTransactionJ(JNIEnv *env,
-                                                                        jobject instance) {
+                                                                     jobject instance) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     Monero::PendingTransaction *tx = wallet->createSweepUnmixableTransaction();
     return reinterpret_cast<jlong>(tx);
@@ -1210,7 +1221,7 @@ Java_net_mynero_wallet_model_Wallet_createSweepUnmixableTransactionJ(JNIEnv *env
 
 JNIEXPORT void JNICALL
 Java_net_mynero_wallet_model_Wallet_disposeTransaction(JNIEnv *env, jobject instance,
-                                                          jobject pendingTransaction) {
+                                                       jobject pendingTransaction) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     Monero::PendingTransaction *_pendingTransaction =
             getHandle<Monero::PendingTransaction>(env, pendingTransaction);
@@ -1281,7 +1292,8 @@ Java_net_mynero_wallet_model_Coins_refreshJ(JNIEnv *env, jobject instance) {
 }
 
 JNIEXPORT void JNICALL
-Java_net_mynero_wallet_model_Coins_setFrozen(JNIEnv *env, jobject instance, jstring publicKey, jboolean frozen) {
+Java_net_mynero_wallet_model_Coins_setFrozen(JNIEnv *env, jobject instance, jstring publicKey,
+                                             jboolean frozen) {
     Monero::Coins *coins = getHandle<Monero::Coins>(env, instance);
     const char *_publicKey = env->GetStringUTFChars(publicKey, nullptr);
     if (frozen) {
@@ -1303,7 +1315,7 @@ Java_net_mynero_wallet_model_Wallet_getHistoryJ(JNIEnv *env, jobject instance) {
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_Wallet_setListenerJ(JNIEnv *env, jobject instance,
-                                                    jobject javaListener) {
+                                                 jobject javaListener) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     wallet->setListener(nullptr); // clear old listener
     // delete old listener
@@ -1337,7 +1349,7 @@ Java_net_mynero_wallet_model_Wallet_setDefaultMixin(JNIEnv *env, jobject instanc
 
 JNIEXPORT jboolean JNICALL
 Java_net_mynero_wallet_model_Wallet_setUserNote(JNIEnv *env, jobject instance,
-                                                   jstring txid, jstring note) {
+                                                jstring txid, jstring note) {
 
     const char *_txid = env->GetStringUTFChars(txid, nullptr);
     const char *_note = env->GetStringUTFChars(note, nullptr);
@@ -1354,7 +1366,7 @@ Java_net_mynero_wallet_model_Wallet_setUserNote(JNIEnv *env, jobject instance,
 
 JNIEXPORT jstring JNICALL
 Java_net_mynero_wallet_model_Wallet_getUserNote(JNIEnv *env, jobject instance,
-                                                   jstring txid) {
+                                                jstring txid) {
 
     const char *_txid = env->GetStringUTFChars(txid, nullptr);
 
@@ -1368,7 +1380,7 @@ Java_net_mynero_wallet_model_Wallet_getUserNote(JNIEnv *env, jobject instance,
 
 JNIEXPORT jstring JNICALL
 Java_net_mynero_wallet_model_Wallet_getTxKey(JNIEnv *env, jobject instance,
-                                                jstring txid) {
+                                             jstring txid) {
 
     const char *_txid = env->GetStringUTFChars(txid, nullptr);
 
@@ -1383,7 +1395,7 @@ Java_net_mynero_wallet_model_Wallet_getTxKey(JNIEnv *env, jobject instance,
 //virtual void addSubaddressAccount(const std::string& label) = 0;
 JNIEXPORT void JNICALL
 Java_net_mynero_wallet_model_Wallet_addAccount(JNIEnv *env, jobject instance,
-                                                  jstring label) {
+                                               jstring label) {
 
     const char *_label = env->GetStringUTFChars(label, nullptr);
 
@@ -1396,7 +1408,7 @@ Java_net_mynero_wallet_model_Wallet_addAccount(JNIEnv *env, jobject instance,
 //virtual std::string getSubaddressLabel(uint32_t accountIndex, uint32_t addressIndex) const = 0;
 JNIEXPORT jstring JNICALL
 Java_net_mynero_wallet_model_Wallet_getSubaddressLabel(JNIEnv *env, jobject instance,
-                                                          jint accountIndex, jint addressIndex) {
+                                                       jint accountIndex, jint addressIndex) {
 
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
 
@@ -1409,8 +1421,8 @@ Java_net_mynero_wallet_model_Wallet_getSubaddressLabel(JNIEnv *env, jobject inst
 //virtual void setSubaddressLabel(uint32_t accountIndex, uint32_t addressIndex, const std::string &label) = 0;
 JNIEXPORT void JNICALL
 Java_net_mynero_wallet_model_Wallet_setSubaddressLabel(JNIEnv *env, jobject instance,
-                                                          jint accountIndex, jint addressIndex,
-                                                          jstring label) {
+                                                       jint accountIndex, jint addressIndex,
+                                                       jstring label) {
 
     const char *_label = env->GetStringUTFChars(label, nullptr);
 
@@ -1430,7 +1442,7 @@ Java_net_mynero_wallet_model_Wallet_getNumAccounts(JNIEnv *env, jobject instance
 //virtual size_t numSubaddresses(uint32_t accountIndex) const = 0;
 JNIEXPORT jint JNICALL
 Java_net_mynero_wallet_model_Wallet_getNumSubaddresses(JNIEnv *env, jobject instance,
-                                                          jint accountIndex) {
+                                                       jint accountIndex) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     return static_cast<jint>(wallet->numSubaddresses(accountIndex));
 }
@@ -1438,8 +1450,8 @@ Java_net_mynero_wallet_model_Wallet_getNumSubaddresses(JNIEnv *env, jobject inst
 //virtual void addSubaddress(uint32_t accountIndex, const std::string &label) = 0;
 JNIEXPORT void JNICALL
 Java_net_mynero_wallet_model_Wallet_addSubaddress(JNIEnv *env, jobject instance,
-                                                     jint accountIndex,
-                                                     jstring label) {
+                                                  jint accountIndex,
+                                                  jstring label) {
 
     const char *_label = env->GetStringUTFChars(label, nullptr);
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
@@ -1579,7 +1591,7 @@ Java_net_mynero_wallet_model_PendingTransaction_getErrorString(JNIEnv *env, jobj
 // commit transaction or save to file if filename is provided.
 JNIEXPORT jboolean JNICALL
 Java_net_mynero_wallet_model_PendingTransaction_commit(JNIEnv *env, jobject instance,
-                                                          jstring filename, jboolean overwrite) {
+                                                       jstring filename, jboolean overwrite) {
 
     const char *_filename = env->GetStringUTFChars(filename, nullptr);
 
@@ -1635,8 +1647,8 @@ Java_net_mynero_wallet_model_PendingTransaction_getTxCount(JNIEnv *env, jobject 
 //static void error(const std::string &category, const std::string &str);
 JNIEXPORT void JNICALL
 Java_net_mynero_wallet_model_WalletManager_initLogger(JNIEnv *env, jclass clazz,
-                                                         jstring argv0,
-                                                         jstring default_log_base_name) {
+                                                      jstring argv0,
+                                                      jstring default_log_base_name) {
 
     const char *_argv0 = env->GetStringUTFChars(argv0, nullptr);
     const char *_default_log_base_name = env->GetStringUTFChars(default_log_base_name, nullptr);
@@ -1649,7 +1661,7 @@ Java_net_mynero_wallet_model_WalletManager_initLogger(JNIEnv *env, jclass clazz,
 
 JNIEXPORT void JNICALL
 Java_net_mynero_wallet_model_WalletManager_logDebug(JNIEnv *env, jclass clazz,
-                                                       jstring category, jstring message) {
+                                                    jstring category, jstring message) {
 
     const char *_category = env->GetStringUTFChars(category, nullptr);
     const char *_message = env->GetStringUTFChars(message, nullptr);
@@ -1662,7 +1674,7 @@ Java_net_mynero_wallet_model_WalletManager_logDebug(JNIEnv *env, jclass clazz,
 
 JNIEXPORT void JNICALL
 Java_net_mynero_wallet_model_WalletManager_logInfo(JNIEnv *env, jclass clazz,
-                                                      jstring category, jstring message) {
+                                                   jstring category, jstring message) {
 
     const char *_category = env->GetStringUTFChars(category, nullptr);
     const char *_message = env->GetStringUTFChars(message, nullptr);
@@ -1675,7 +1687,7 @@ Java_net_mynero_wallet_model_WalletManager_logInfo(JNIEnv *env, jclass clazz,
 
 JNIEXPORT void JNICALL
 Java_net_mynero_wallet_model_WalletManager_logWarning(JNIEnv *env, jclass clazz,
-                                                         jstring category, jstring message) {
+                                                      jstring category, jstring message) {
 
     const char *_category = env->GetStringUTFChars(category, nullptr);
     const char *_message = env->GetStringUTFChars(message, nullptr);
@@ -1688,7 +1700,7 @@ Java_net_mynero_wallet_model_WalletManager_logWarning(JNIEnv *env, jclass clazz,
 
 JNIEXPORT void JNICALL
 Java_net_mynero_wallet_model_WalletManager_logError(JNIEnv *env, jclass clazz,
-                                                       jstring category, jstring message) {
+                                                    jstring category, jstring message) {
 
     const char *_category = env->GetStringUTFChars(category, nullptr);
     const char *_message = env->GetStringUTFChars(message, nullptr);
@@ -1701,7 +1713,7 @@ Java_net_mynero_wallet_model_WalletManager_logError(JNIEnv *env, jclass clazz,
 
 JNIEXPORT void JNICALL
 Java_net_mynero_wallet_model_WalletManager_setLogLevel(JNIEnv *env, jclass clazz,
-                                                          jint level) {
+                                                       jint level) {
     Monero::WalletManagerFactory::setLogLevel(level);
 }
 

@@ -18,7 +18,6 @@ package net.mynero.wallet.model
 import android.util.Log
 import android.util.Pair
 import net.mynero.wallet.data.Subaddress
-import timber.log.Timber
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -212,16 +211,19 @@ class Wallet {
     fun setTrustedDaemon(trusted: Boolean) {
         setTrustedDaemonJ(trusted)
     }
+
     private external fun setTrustedDaemonJ(trusted: Boolean)
 
     fun isTrustedDaemon(): Boolean {
-        return isTrustedDaemonJ();
+        return isTrustedDaemonJ()
     }
+
     private external fun isTrustedDaemonJ(): Boolean
 
     fun setProxy(address: String?): Boolean {
         return setProxyJ(address)
     }
+
     private external fun setProxyJ(address: String?): Boolean
     val balance: Long
         get() = getBalance(accountIndex)
@@ -238,11 +240,13 @@ class Wallet {
     fun getBlockChainHeight(): Long {
         return getBlockChainHeightJ().minus(1)
     }
+
     private external fun getBlockChainHeightJ(): Long
     external fun getApproximateBlockChainHeight(): Long
     fun getDaemonBlockChainHeight(): Long {
         return getDaemonBlockChainHeightJ().minus(1)
     }
+
     private external fun getDaemonBlockChainHeightJ(): Long
     external fun getDaemonBlockChainTargetHeight(): Long
 
@@ -253,6 +257,7 @@ class Wallet {
     fun startRefresh() {
         startRefreshJ()
     }
+
     private external fun startRefreshJ()
     external fun pauseRefresh()
     external fun refresh(): Boolean

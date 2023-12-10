@@ -1,7 +1,6 @@
 package net.mynero.wallet.fragment.settings
 
 import android.os.Bundle
-import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,12 +9,10 @@ import android.widget.CheckBox
 import android.widget.CompoundButton
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.Switch
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
@@ -84,13 +81,18 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
         val cachedUsingBundledTor = ProxyService.instance?.useBundledTor == true
 
         val useProxyVisibility = if (cachedUsingProxy) View.VISIBLE else View.GONE
-        walletProxyPortEditText?.visibility = if (cachedUsingBundledTor) View.GONE else useProxyVisibility
-        walletProxyAddressEditText?.visibility = if (cachedUsingBundledTor) View.GONE else useProxyVisibility
+        walletProxyPortEditText?.visibility =
+            if (cachedUsingBundledTor) View.GONE else useProxyVisibility
+        walletProxyAddressEditText?.visibility =
+            if (cachedUsingBundledTor) View.GONE else useProxyVisibility
         proxySettingsLayout?.visibility = useProxyVisibility
 
-        streetModeSwitch?.isChecked = PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false) == true
-        monerochanSwitch?.isChecked = PrefService.instance?.getBoolean(Constants.PREF_MONEROCHAN, true) == true
-        donationSwitch?.isChecked = PrefService.instance?.getBoolean(Constants.PREF_DONATE_PER_TX, false) == true
+        streetModeSwitch?.isChecked =
+            PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false) == true
+        monerochanSwitch?.isChecked =
+            PrefService.instance?.getBoolean(Constants.PREF_MONEROCHAN, true) == true
+        donationSwitch?.isChecked =
+            PrefService.instance?.getBoolean(Constants.PREF_DONATE_PER_TX, false) == true
         useBundledTor?.isChecked = cachedUsingBundledTor
         torSwitch?.isChecked = cachedUsingProxy
         updateProxy(cachedProxyAddress, cachedProxyPort)
@@ -161,7 +163,7 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
 
     private fun bindObservers() {
         mViewModel?.useProxy?.observe(viewLifecycleOwner) { b ->
-            val visibility = if(b) View.VISIBLE else View.GONE
+            val visibility = if (b) View.VISIBLE else View.GONE
             proxySettingsLayout?.visibility = visibility
 
             val useBundledTor = mViewModel?.useBundledTor?.value == true
@@ -173,19 +175,20 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
 
         mViewModel?.useBundledTor?.observe(viewLifecycleOwner) { isChecked ->
             val usingProxy = mViewModel?.useProxy?.value == true
-            val visibility = if(usingProxy) View.VISIBLE else View.GONE
+            val visibility = if (usingProxy) View.VISIBLE else View.GONE
             walletProxyPortEditText?.visibility = if (isChecked) View.GONE else visibility
             walletProxyAddressEditText?.visibility = if (isChecked) View.GONE else visibility
         }
 
         val samouraiTorManager = ProxyService.instance?.samouraiTorManager
-        val indicatorCircle = view?.findViewById<CircularProgressIndicator>(R.id.settings_tor_loading_progressindicator)
+        val indicatorCircle =
+            view?.findViewById<CircularProgressIndicator>(R.id.settings_tor_loading_progressindicator)
         val torIcon = view?.findViewById<ImageView>(R.id.settings_tor_icon)
 
         samouraiTorManager?.getTorStateLiveData()?.observe(viewLifecycleOwner) { state ->
             samouraiTorManager.getProxy()?.address()?.let { socketAddress ->
-                if(socketAddress.toString().isEmpty()) return@let
-                if(mViewModel?.useProxy?.value == true && mViewModel?.useBundledTor?.value == true) {
+                if (socketAddress.toString().isEmpty()) return@let
+                if (mViewModel?.useProxy?.value == true && mViewModel?.useBundledTor?.value == true) {
                     torIcon?.visibility = View.VISIBLE
                     indicatorCircle?.visibility = View.INVISIBLE
                     val proxyString = socketAddress.toString().substring(1)
@@ -203,10 +206,12 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
                     torIcon?.visibility = View.INVISIBLE
                     indicatorCircle?.visibility = View.INVISIBLE
                 }
+
                 EnumTorState.STARTING, EnumTorState.STOPPING -> {
                     torIcon?.visibility = View.INVISIBLE
                     indicatorCircle?.visibility = View.VISIBLE
                 }
+
                 else -> {}
             }
         }
@@ -224,7 +229,7 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
         val savedProxyAddress = ProxyService.instance?.proxyAddress
         val savedProxyPort = ProxyService.instance?.proxyPort
 
-        if(proxyAddress != savedProxyAddress || proxyPort != savedProxyPort)
+        if (proxyAddress != savedProxyAddress || proxyPort != savedProxyPort)
             ProxyService.instance?.updateProxy(proxyAddress, proxyPort)
     }
 

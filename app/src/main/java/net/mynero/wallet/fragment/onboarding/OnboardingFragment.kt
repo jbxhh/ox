@@ -163,13 +163,14 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
         }
 
         val samouraiTorManager = ProxyService.instance?.samouraiTorManager
-        val indicatorCircle = view?.findViewById<CircularProgressIndicator>(R.id.onboarding_tor_loading_progressindicator)
+        val indicatorCircle =
+            view?.findViewById<CircularProgressIndicator>(R.id.onboarding_tor_loading_progressindicator)
         val torIcon = view?.findViewById<ImageView>(R.id.onboarding_tor_icon)
 
         samouraiTorManager?.getTorStateLiveData()?.observe(viewLifecycleOwner) { state ->
             samouraiTorManager.getProxy()?.address()?.let { socketAddress ->
-                if(socketAddress.toString().isEmpty()) return@let
-                if(mViewModel?.useProxy?.value == true && mViewModel?.useBundledTor?.value == true) {
+                if (socketAddress.toString().isEmpty()) return@let
+                if (mViewModel?.useProxy?.value == true && mViewModel?.useBundledTor?.value == true) {
                     torIcon?.visibility = View.VISIBLE
                     indicatorCircle?.visibility = View.INVISIBLE
                     val proxyString = socketAddress.toString().substring(1)
@@ -187,10 +188,12 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
                     torIcon?.visibility = View.INVISIBLE
                     indicatorCircle?.visibility = View.INVISIBLE
                 }
+
                 EnumTorState.STARTING, EnumTorState.STOPPING -> {
                     torIcon?.visibility = View.INVISIBLE
                     indicatorCircle?.visibility = View.VISIBLE
                 }
+
                 else -> {}
             }
         }

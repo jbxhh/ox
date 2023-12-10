@@ -15,7 +15,7 @@ class ProxyService(application: Application) : ServiceBase(null) {
         instance = this
         samouraiTorManager = SamouraiTorManager(application, TorKmpManager(application))
 
-        if(useBundledTor && usingProxy) {
+        if (useBundledTor && usingProxy) {
             samouraiTorManager?.start()
         }
     }

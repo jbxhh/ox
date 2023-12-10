@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp"
-    android:layout_marginBottom="8dp">
+    android:layout_marginBottom="8dp"
+    android:padding="8dp">
+
     <ImageView
         android:id="@+id/anonymity_network_imageview"
         android:layout_width="20dp"
@@ -13,58 +13,62 @@
         android:layout_marginEnd="8dp"
         android:src="@drawable/ic_fingerprint"
         android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/node_uri_textview"
+        app:layout_constraintEnd_toStartOf="@id/node_name_textview"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/node_name_textview"/>
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/node_name_textview"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Node Name"
-        android:textStyle="bold"
         android:textSize="16sp"
-        app:layout_constraintStart_toEndOf="@id/anonymity_network_imageview"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/node_uri_textview"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/anonymity_network_imageview"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/node_uri_textview"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="NODE::"
         android:ellipsize="middle"
-        app:layout_constraintTop_toBottomOf="@id/node_name_textview"
-        app:layout_constraintStart_toStartOf="parent"
+        android:singleLine="true"
+        android:text="NODE::"
         app:layout_constraintEnd_toEndOf="parent"
-        android:singleLine="true" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/node_name_textview" />
+
     <TextView
         android:id="@+id/authenticated_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/auth"
-        android:textColor="@color/oled_addressListColor"
-        android:ellipsize="middle"
-        android:visibility="gone"
         android:layout_marginStart="4dp"
         android:layout_marginEnd="4dp"
-        app:layout_constraintTop_toBottomOf="@id/node_uri_textview"
+        android:ellipsize="middle"
+        android:singleLine="true"
+        android:text="@string/auth"
+        android:textColor="@color/oled_addressListColor"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/trusted_node_textview"
-        android:singleLine="true" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/node_uri_textview" />
+
     <TextView
         android:id="@+id/trusted_node_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/trusted"
-        android:textColor="@color/oled_addressListColor"
-        android:ellipsize="middle"
-        android:visibility="gone"
         android:layout_marginStart="4dp"
         android:layout_marginEnd="4dp"
-        app:layout_constraintTop_toBottomOf="@id/node_uri_textview"
+        android:ellipsize="middle"
+        android:singleLine="true"
+        android:text="@string/trusted"
+        android:textColor="@color/oled_addressListColor"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/authenticated_textview"
-        android:singleLine="true" />
+        app:layout_constraintTop_toBottomOf="@id/node_uri_textview" />
 </androidx.constraintlayout.widget.ConstraintLayout>

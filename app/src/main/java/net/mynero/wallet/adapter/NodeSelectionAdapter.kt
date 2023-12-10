@@ -107,7 +107,7 @@ class NodeSelectionAdapter(val listener: NodeSelectionAdapterListener?) :
             if (node.password.isNotEmpty()) {
                 authTextView.visibility = View.VISIBLE
             }
-            if(node.trusted) {
+            if (node.trusted) {
                 trustedTextView.visibility = View.VISIBLE
             }
             val nodeAnonymityNetworkImageView =

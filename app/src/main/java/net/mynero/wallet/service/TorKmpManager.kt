@@ -5,7 +5,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import net.mynero.wallet.model.TorState
 import io.matthewnelson.kmp.tor.KmpTorLoaderAndroid
 import io.matthewnelson.kmp.tor.TorConfigProviderAndroid
 import io.matthewnelson.kmp.tor.common.address.*
@@ -26,11 +25,11 @@ import io.matthewnelson.kmp.tor.manager.common.state.isStarting
 import io.matthewnelson.kmp.tor.manager.common.state.isStopping
 import kotlinx.coroutines.*
 import net.mynero.wallet.model.EnumTorState
-import java.lang.Exception
+import net.mynero.wallet.model.TorState
 import java.net.InetSocketAddress
 import java.net.Proxy
 
-class TorKmpManager(application : Application) {
+class TorKmpManager(application: Application) {
 
     private val TAG = "TorListener"
 
@@ -61,11 +60,15 @@ class TorKmpManager(application : Application) {
                     put(socks.set(AorDorPort.Value(PortProxy(9263))))
 
                     // Set Flags
-                    socks.setFlags(setOf(
-                        Ports.Socks.Flag.OnionTrafficOnly
-                    )).setIsolationFlags(setOf(
-                        Ports.IsolationFlag.IsolateClientAddr,
-                    )).set(AorDorPort.Value(PortProxy(9264)))
+                    socks.setFlags(
+                        setOf(
+                            Ports.Socks.Flag.OnionTrafficOnly
+                        )
+                    ).setIsolationFlags(
+                        setOf(
+                            Ports.IsolationFlag.IsolateClientAddr,
+                        )
+                    ).set(AorDorPort.Value(PortProxy(9264)))
                     put(socks)
 
                     // reset our socks object to defaults
@@ -142,23 +145,36 @@ class TorKmpManager(application : Application) {
                         addSegment("test_service")
                     }
                     // Add Hidden services
-                    put(HiddenService()
-                        .setPorts(ports = setOf(
-                            // Use a unix domain socket to communicate via IPC instead of over TCP
-                            HiddenService.UnixSocket(virtualPort = Port(80), targetUnixSocket = hsPath.builder {
-                                addSegment(HiddenService.UnixSocket.DEFAULT_UNIX_SOCKET_NAME)
-                            }),
-                        ))
-                        .setMaxStreams(maxStreams = HiddenService.MaxStreams(value = 2))
-                        .setMaxStreamsCloseCircuit(value = TorF.True)
-                        .set(FileSystemDir(path = hsPath))
+                    put(
+                        HiddenService()
+                            .setPorts(
+                                ports = setOf(
+                                    // Use a unix domain socket to communicate via IPC instead of over TCP
+                                    HiddenService.UnixSocket(
+                                        virtualPort = Port(80),
+                                        targetUnixSocket = hsPath.builder {
+                                            addSegment(HiddenService.UnixSocket.DEFAULT_UNIX_SOCKET_NAME)
+                                        }),
+                                )
+                            )
+                            .setMaxStreams(maxStreams = HiddenService.MaxStreams(value = 2))
+                            .setMaxStreamsCloseCircuit(value = TorF.True)
+                            .set(FileSystemDir(path = hsPath))
                     )
 
                     put(HiddenService()
-                        .setPorts(ports = setOf(
-                            HiddenService.Ports(virtualPort = Port(80), targetPort = Port(1030)), // http
-                            HiddenService.Ports(virtualPort = Port(443), targetPort = Port(1030)) // https
-                        ))
+                        .setPorts(
+                            ports = setOf(
+                                HiddenService.Ports(
+                                    virtualPort = Port(80),
+                                    targetPort = Port(1030)
+                                ), // http
+                                HiddenService.Ports(
+                                    virtualPort = Port(443),
+                                    targetPort = Port(1030)
+                                ) // https
+                            )
+                        )
                         .set(FileSystemDir(path =
                         workDir.builder {
                             addSegment(HiddenService.DEFAULT_PARENT_DIR_NAME)
@@ -176,7 +192,11 @@ class TorKmpManager(application : Application) {
     }
 
     private val manager: TorManager by lazy {
-        TorManager.newInstance(application = application, loader = loaderAndroid, requiredEvents = null)
+        TorManager.newInstance(
+            application = application,
+            loader = loaderAndroid,
+            requiredEvents = null
+        )
     }
 
     // only expose necessary interfaces
@@ -192,12 +212,9 @@ class TorKmpManager(application : Application) {
     }
 
     val torStateLiveData: MutableLiveData<TorState> = MutableLiveData()
-        get() = field
     var torState: TorState = TorState()
-        get() = field
 
     var proxy: Proxy? = null
-        get() = field
 
     init {
         manager.debug(true)
@@ -210,7 +227,7 @@ class TorKmpManager(application : Application) {
     }
 
     fun isStarting(): Boolean {
-        return manager.state.isStarting();
+        return manager.state.isStarting()
     }
 
 
@@ -231,7 +248,7 @@ class TorKmpManager(application : Application) {
         }
     }
 
-    private inner class TorListener: TorManagerEvent.Listener() {
+    private inner class TorListener : TorManagerEvent.Listener() {
         private val _eventLines: MutableLiveData<String> = MutableLiveData("")
         val eventLines: LiveData<String> = _eventLines
         private val events: MutableList<String> = ArrayList(50)
@@ -313,7 +330,8 @@ class TorKmpManager(application : Application) {
             } else {
                 info.socksInfoToProxyAddressOrNull()?.firstOrNull()?.let { proxyAddress ->
                     @Suppress("UNUSED_VARIABLE")
-                    val socket = InetSocketAddress(proxyAddress.address.value, proxyAddress.port.value)
+                    val socket =
+                        InetSocketAddress(proxyAddress.address.value, proxyAddress.port.value)
                     proxy = Proxy(Proxy.Type.SOCKS, socket)
                 }
             }

@@ -9,9 +9,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
@@ -24,9 +22,7 @@ import net.mynero.wallet.MainActivity
 import net.mynero.wallet.R
 import net.mynero.wallet.adapter.TransactionInfoAdapter
 import net.mynero.wallet.adapter.TransactionInfoAdapter.TxInfoAdapterListener
-import net.mynero.wallet.model.EnumTorState
 import net.mynero.wallet.model.TransactionInfo
-import net.mynero.wallet.model.Wallet
 import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.service.BalanceService
 import net.mynero.wallet.service.BlockchainService
@@ -34,10 +30,7 @@ import net.mynero.wallet.service.DaemonService
 import net.mynero.wallet.service.HistoryService
 import net.mynero.wallet.service.PrefService
 import net.mynero.wallet.service.ProxyService
-import net.mynero.wallet.service.SamouraiTorManager
-import net.mynero.wallet.service.TorKmpManager
 import net.mynero.wallet.util.Constants
-import timber.log.Timber
 
 class HomeFragment : Fragment(), TxInfoAdapterListener {
     private var startHeight: Long = 0
@@ -82,7 +75,8 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
         ProxyService.instance?.proxyChangeEvents?.observe(viewLifecycleOwner) { proxy ->
             lifecycleScope.launch(Dispatchers.IO) {
                 Log.d("HomeFragment", "Updating proxy, restarting wallet. proxy=$proxy")
-                val finalProxy = if(proxy.isNotEmpty() && ProxyService.instance?.usingProxy == true) proxy else ""
+                val finalProxy =
+                    if (proxy.isNotEmpty() && ProxyService.instance?.usingProxy == true) proxy else ""
                 WalletManager.instance?.setProxy(finalProxy)
                 WalletManager.instance?.wallet?.setProxy(finalProxy)
                 WalletManager.instance?.wallet?.init(0)
@@ -177,13 +171,13 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
         val samouraiTorManager = ProxyService.instance?.samouraiTorManager
         samouraiTorManager?.getTorStateLiveData()?.observe(viewLifecycleOwner) {
             samouraiTorManager.getProxy()?.address()?.let { socketAddress ->
-                if(socketAddress.toString().isEmpty()) return@let
-                if(ProxyService.instance?.usingProxy == true && ProxyService.instance?.useBundledTor == true) {
+                if (socketAddress.toString().isEmpty()) return@let
+                if (ProxyService.instance?.usingProxy == true && ProxyService.instance?.useBundledTor == true) {
                     val proxyString = socketAddress.toString().substring(1)
                     val address = proxyString.split(":")[0]
                     val port = proxyString.split(":")[1]
 
-                    if(WalletManager.instance?.proxy != proxyString)
+                    if (WalletManager.instance?.proxy != proxyString)
                         refreshProxy(address, port)
                 }
             }
@@ -193,7 +187,7 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
     private fun refreshProxy(proxyAddress: String, proxyPort: String) {
         val cachedProxyAddress = ProxyService.instance?.proxyAddress
         val cachedProxyPort = ProxyService.instance?.proxyPort
-        if((proxyAddress != cachedProxyAddress) || (proxyPort != cachedProxyPort)) {
+        if ((proxyAddress != cachedProxyAddress) || (proxyPort != cachedProxyPort)) {
             ProxyService.instance?.updateProxy(proxyAddress, proxyPort)
         }
     }
