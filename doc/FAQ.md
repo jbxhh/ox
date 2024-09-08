@@ -5,7 +5,7 @@
 
 ## What features does it have?
 
-- Uses Monero v0.18.3.1
+- Uses Monero v0.18.3.4
 - Support for Android >= 5.0
 - Generate new wallets
 - Recover wallets from mnemonic seed

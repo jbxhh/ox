@@ -7,3 +7,4 @@ for the purpose of processing transactions in the Monero Network in encrypted fo
 - INTERNET : Connect to the Monero Network via Monero Daemon Node
 - READ_EXTERNAL_STORAGE : Read wallets
 - CAMERA : Scan QR Codes
+- POST_NOTIFICATIONS : Required by Tor dependency
