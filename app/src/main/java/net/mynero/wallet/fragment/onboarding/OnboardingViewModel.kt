@@ -31,7 +31,7 @@ class OnboardingViewModel : ViewModel() {
     private val _passphrase = MutableLiveData("")
     val passphrase: LiveData<String> = _passphrase
     private val _confirmedPassphrase = MutableLiveData("")
-    private val _showMonerochan = MutableLiveData(true)
+    private val _showMonerochan = MutableLiveData(Constants.DEFAULT_PREF_MONEROCHAN)
     val showMonerochan: LiveData<Boolean> = _showMonerochan
     var showMoreOptions: LiveData<Boolean> = _showMoreOptions
     var seedType: LiveData<SeedType> = _seedType
