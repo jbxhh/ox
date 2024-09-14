@@ -84,7 +84,6 @@ class OnboardingFragment : Fragment(), NodeSelectionDialogListener, AddNodeListe
         useBundledTor = view.findViewById(R.id.bundled_tor_checkbox)
 
         seedOffsetCheckbox?.isChecked = useOffset
-        showXmrchanSwitch?.isChecked = true
         val usingProxy = ProxyService.instance?.usingProxy == true
         val usingBundledTor = ProxyService.instance?.useBundledTor == true
 
