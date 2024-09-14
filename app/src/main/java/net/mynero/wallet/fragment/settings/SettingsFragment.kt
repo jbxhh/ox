@@ -87,7 +87,7 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
         streetModeSwitch?.isChecked =
             PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false) == true
         monerochanSwitch?.isChecked =
-            PrefService.instance?.getBoolean(Constants.PREF_MONEROCHAN, true) == true
+            PrefService.instance?.getBoolean(Constants.PREF_MONEROCHAN, Constants.DEFAULT_PREF_MONEROCHAN) == true
         donationSwitch?.isChecked =
             PrefService.instance?.getBoolean(Constants.PREF_DONATE_PER_TX, false) == true
         useBundledTor?.isChecked = cachedUsingBundledTor
