@@ -28,15 +28,13 @@ class PrefService(application: MoneroApplication) : ServiceBase(null) {
     val node: Node?
         get() {
             val usesProxy = ProxyService.instance?.usingProxy == true
-            var defaultNode = DefaultNodes.SAMOURAI
+            var defaultNode = DefaultNodes.MONERUJO
             if (usesProxy) {
                 val proxyPort = ProxyService.instance?.proxyPort
                 if (proxyPort?.isNotEmpty() == true) {
                     val port = proxyPort.toInt()
-                    defaultNode = if (port == 4447) {
-                        DefaultNodes.MYNERO_I2P
-                    } else {
-                        DefaultNodes.MYNERO_ONION
+                    if (port == 9050) {
+                        defaultNode = DefaultNodes.MONERUJO_ONION
                     }
                 }
             }

@@ -25,17 +25,35 @@ enum class DefaultNodes(
     private val network: String,
     private val nodeName: String
 ) {
-    SAMOURAI("163.172.56.213", 18089, "mainnet", "SamouraiWallet"), MONERUJO(
+    MONERUJO(
         "nodex.monerujo.io",
         18081,
         "mainnet",
         "monerujo"
     ),
-    SUPPORTXMR(
-        "node.supportxmr.com",
+    SETHFORPRIVACY(
+        "node.sethforprivacy.com",
+        18089,
+        "mainnet",
+        "sethforprivacy"
+    ),
+    RUCKNIUM(
+        "rucknium.me",
         18081,
         "mainnet",
-        "SupportXMR"
+        "Rucknium"
+    ),
+    STACKWALLET(
+        "monero.stackwallet.com",
+        18081,
+        "mainnet",
+        "StackWallet"
+    ),
+    CAKEWALLET(
+        "xmr-node.cakewallet.com",
+        18081,
+        "mainnet",
+        "CakeWallet"
     ),
     HASHVAULT(
         "nodes.hashvault.pro",
@@ -55,41 +73,35 @@ enum class DefaultNodes(
         "mainnet",
         "XMRTW"
     ),
-    MYNERO_I2P(
-        "ynk3hrwte23asonojqeskoulek2g2cd6tqg4neghnenfyljrvhga.b32.i2p",
-        0,
-        "mainnet",
-        "node.mysu.i2p"
-    ),
-    MYNERO_ONION(
-        "tiopyrxseconw73thwlv2pf5hebfcqxj5zdolym7z6pbq6gl4z7xz4ad.onion",
-        18081,
-        "mainnet",
-        "node.mysu.onion"
-    ),
-    SAMOURAI_ONION(
-        "446unwib5vc7pfbzflosy6m6vtyuhddnalr3hutyavwe4esfuu5g6ryd.onion",
-        18089,
-        "mainnet",
-        "SamouraiWallet.onion"
-    ),
     MONERUJO_ONION(
         "monerujods7mbghwe6cobdr6ujih6c22zu5rl7zshmizz2udf7v7fsad.onion",
         18081,
         "mainnet",
         "monerujo.onion"
     ),
-    Criminales78(
-        "56wl7y2ebhamkkiza4b7il4mrzwtyvpdym7bm2bkg3jrei2je646k3qd.onion",
+    SETHFORPRIVACY_ONION(
+        "sfprpc5klzs5vyitq2mrooicgk2wcs5ho2nm3niqduvzn5o6ylaslaqd.onion",
         18089,
         "mainnet",
-        "Criminales78.onion"
+        "sethforprivacy.onion"
     ),
-    Xmrfail(
-        "mxcd4577fldb3ppzy7obmmhnu3tf57gbcbd4qhwr2kxyjj2qi3dnbfqd.onion",
+    RUCKNIUM_ONION(
+        "rucknium757bokwv3ss35ftgc3gzb7hgbvvglbg3hisp7tsj2fkd2nyd.onion",
         18081,
         "mainnet",
-        "xmrfail.onion"
+        "rucknium.onion"
+    ),
+    PLOWSOF_ONION1(
+        "plowsofe6cleftfmk2raiw5h2x66atrik3nja4bfd3zrfa2hdlgworad.onion",
+        18089,
+        "mainnet",
+        "plowsof.onion.1"
+    ),
+    PLOWSOF_ONION2(
+        "plowsoffjexmxalw73tkjmf422gq6575fc7vicuu4javzn2ynnte6tyd.onion",
+        18089,
+        "mainnet",
+        "plowsof.onion.2"
     ),
     Boldsuck(
         "6dsdenp6vjkvqzy4wzsnzn6wixkdzihx3khiumyzieauxuxslmcaeiad.onion",
