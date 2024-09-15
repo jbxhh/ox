@@ -21,12 +21,9 @@ import net.mynero.wallet.model.PendingTransaction
 import net.mynero.wallet.model.TransactionOutput
 import net.mynero.wallet.model.Wallet
 import net.mynero.wallet.model.Wallet.Companion.getAmountFromString
-import net.mynero.wallet.model.Wallet.Companion.getPaymentIdFromAddress
 import net.mynero.wallet.model.Wallet.ConnectionStatus
 import net.mynero.wallet.model.WalletListener
 import net.mynero.wallet.model.WalletManager
-import net.mynero.wallet.util.Constants
-import java.security.SecureRandom
 
 /**
  * Handy class for starting a new thread that has a looper. The looper can then be
@@ -158,65 +155,7 @@ class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet)
             val address = dest.component1()
             return wallet.createSweepTransaction(address, feePriority, preferredInputs)
         }
-        val finalOutputs = maybeAddDonationOutputs(totalAmount, outputs, preferredInputs)
-        return wallet.createTransactionMultDest(finalOutputs, feePriority, preferredInputs)
-    }
-
-    @Throws(Exception::class)
-    private fun maybeAddDonationOutputs(
-        amount: Long,
-        outputs: List<TransactionOutput>,
-        preferredInputs: List<String>
-    ): List<TransactionOutput> {
-        val newOutputs = ArrayList(outputs)
-        val networkType = WalletManager.instance?.networkType ?: return newOutputs
-        val mainDestination =
-            outputs[0] // at this point, for now, we should only have one item in the list. TODO: add multi-dest/pay-to-many feature in the UI
-        val paymentId =
-            getPaymentIdFromAddress(mainDestination.destination, networkType.value)
-        val donatePerTx = PrefService.instance?.getBoolean(Constants.PREF_DONATE_PER_TX, false)
-        if (donatePerTx == true && paymentId?.isEmpty() == true) { // only attach donation when no payment id is needed (i.e. integrated address)
-            val rand = SecureRandom()
-            val randomDonatePct = getRandomDonateAmount(
-                0.005f,
-                0.03f
-            ) // occasionally attaches a 0.5% to 3% donation. It is random so that not even I know how much exactly you are sending.
-            /*
-            It's also not entirely "per tx". It won't always attach it so as to not have a consistently uncommon fingerprint on-chain. When it does attach a donation,
-            it will periodically split it up into multiple outputs instead of one.
-             */
-            val attachDonationRoll = rand.nextInt(100)
-            if (attachDonationRoll > 90) { // 10% chance of being added
-                val splitDonationRoll = rand.nextInt(100)
-                val donateAmount = (amount * randomDonatePct).toLong()
-                if (splitDonationRoll > 50) { // 50% chance of being split
-                    // split
-                    val split = genRandomDonationSplit(
-                        1,
-                        4
-                    ) // splits into at most 4 outputs, for a total of 6 outputs in the transaction (real dest + change. we don't add donations to send-all/sweep transactions)
-                    val splitAmount = donateAmount / split
-                    for (i in 0 until split) {
-                        // TODO this can be expanded upon into the future to perform an auto-splitting/auto-churning for the user if their wallet is fresh and has few utxos.
-                        // randomly split between multiple wallets
-                        val randomDonationAddress = rand.nextInt(Constants.DONATION_ADDRESSES.size)
-                        val donationAddress = Constants.DONATION_ADDRESSES[randomDonationAddress]
-                        newOutputs.add(TransactionOutput(donationAddress, splitAmount))
-                    }
-                } else {
-                    // just add one output, for a total of 3 (real dest + change)
-                    newOutputs.add(TransactionOutput(Constants.DONATE_ADDRESS, donateAmount))
-                }
-                val total = amount + donateAmount
-                checkSelectedAmounts(
-                    preferredInputs,
-                    total,
-                    false
-                ) // check that the selected UTXOs satisfy the new amount total
-            }
-        }
-        newOutputs.shuffle() // shuffle the outputs just in case. i think the monero library handles this for us anyway
-        return newOutputs
+        return wallet.createTransactionMultDest(outputs, feePriority, preferredInputs)
     }
 
     @Throws(Exception::class)
@@ -238,16 +177,6 @@ class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet)
 
     fun sendTx(pendingTx: PendingTransaction): Boolean {
         return pendingTx.commit("", true)
-    }
-
-    private fun getRandomDonateAmount(min: Float, max: Float): Float {
-        val rand = SecureRandom()
-        return rand.nextFloat() * (max - min) + min
-    }
-
-    private fun genRandomDonationSplit(min: Int, max: Int): Int {
-        val rand = SecureRandom()
-        return rand.nextInt(max) + min
     }
 
     interface Listener {

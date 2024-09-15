@@ -88,67 +88,19 @@
             app:layout_constraintTop_toBottomOf="@id/display_seed_button" />
 
         <TextView
-            android:id="@+id/transaction_settings_textview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginEnd="24dp"
-            android:text="@string/transactions"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/display_utxos_button" />
-
-        <TextView
-            android:id="@+id/donate_per_tx_label_textview"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="@string/option_donate_per_tx"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@id/donate_per_tx_switch"
-            app:layout_constraintEnd_toStartOf="@id/donate_per_tx_switch"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/donate_per_tx_switch" />
-
-        <TextView
-            android:id="@+id/donate_per_tx_desc_textview"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp"
-            android:text="@string/option_donate_per_tx_desc"
-            android:textColor="@color/oled_addressListColor"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/donate_per_tx_switch" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/donate_per_tx_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/transaction_settings_textview" />
-
-        <TextView
             android:id="@+id/appearance_settings_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="24dp"
             android:layout_marginEnd="24dp"
             android:text="@string/appearance"
             android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/donate_per_tx_desc_textview" />
+            app:layout_constraintTop_toBottomOf="@+id/display_utxos_button" />
 
         <TextView
             android:id="@+id/street_mode_label_textview"

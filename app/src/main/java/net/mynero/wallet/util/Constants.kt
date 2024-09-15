@@ -11,7 +11,6 @@ object Constants {
     const val PREF_USES_OFFSET = "pref_uses_offset"
     const val PREF_STREET_MODE = "pref_street_mode"
     const val PREF_MONEROCHAN = "pref_monerochan"
-    const val PREF_DONATE_PER_TX = "pref_donate_per_tx"
     const val PREF_FROZEN_COINS = "pref_frozen_coins"
     const val PREF_USE_BUNDLED_TOR = "pref_use_bundled_tor"
 
@@ -23,11 +22,7 @@ object Constants {
 
     const val DEFAULT_PREF_MONEROCHAN = false
 
-    val DONATION_ADDRESSES = arrayOf(
-        "87BqQYkugEzh6Tuyotm2uc3DzJzKM6MuZaC161e6u1TsQxxPmXVPHpdNRyK47JY4d1hhbe25YVz4e9vTXCLDxvHkRXEAeBC",  // primary Mysu Donation address
-        "89QoPxs4cQSGbJrJddwzV3Ca7s2gVYHE1Xd1hGZafuVJVyNKt2LCQhxUdBF57PemxQiX3dmGUZLRRAzfeYyh9pq3GiWsDVo",  // second Mysu Donation address
-        "855acibBehTQJdC1f41BHWGq1FiQ5ztiAU7LiJgDUmmyJfDtRpJoo6Mc1en73duUScdeUYjLirACnZpv2C6pPbcZKgumdCS" // third Mysu Donation address
-    )
+    // Donation address is also specified in strings.xml, it is used as a tooltip in address fields
     const val DONATE_ADDRESS =
         "87BqQYkugEzh6Tuyotm2uc3DzJzKM6MuZaC161e6u1TsQxxPmXVPHpdNRyK47JY4d1hhbe25YVz4e9vTXCLDxvHkRXEAeBC"
 }

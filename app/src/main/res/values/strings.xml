@@ -35,12 +35,10 @@
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="street_mode">Street mode (hide balances)</string>
     <string name="option_hide_xmrchan">Show Monerochan</string>
-    <string name="option_donate_per_tx">Add occasional donation</string>
-    <string name="option_donate_per_tx_desc" formatted="false">When enabled, there is a 10% chance when sending coins to add a 0.5%-3% donation to Mysu. These transaction fingerprints and donation amounts are randomized to preserve anonymity and privacy.</string>
     <string name="display_recovery_phrase">Display wallet keys</string>
     <string name="tor_switch_label">SOCKS Proxy</string>
     <string name="connection_failed">Failed to connect. Retrying…</string>
-    <string name="address">87MRtZPrWUCVUgcFHdsVb5MoZUcLtqfD3FvQVGwftFb8eSdMnE39JhAJcbuSW8X2vRaRsB9RQfuCpFciybJFHaz3QYPhCLw</string>
+    <string name="address">87BqQYkugEzh6Tuyotm2uc3DzJzKM6MuZaC161e6u1TsQxxPmXVPHpdNRyK47JY4d1hhbe25YVz4e9vTXCLDxvHkRXEAeBC</string>
     <string name="amount">0.00</string>
     <string name="sending_all">SENDING ALL</string>
     <string name="send">Send</string>
@@ -131,6 +129,7 @@
     <string name="subbaddress_info_subtitle" translatable="false">#%1$d: %2$s</string>
     <string name="previous_addresses">Previous addresses</string>
     <string name="donate_label">Donate to Mysu</string>
+    <string name="donating_label">Donating to Mysu. Thank you!</string>
     <string name="transactions">Transactions</string>
     <string name="auth">[ auth ]</string>
     <string name="trusted">[ trusted ]</string>
