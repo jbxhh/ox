@@ -31,6 +31,7 @@ import net.mynero.wallet.model.PendingTransaction
 import net.mynero.wallet.model.Wallet
 import net.mynero.wallet.service.BalanceService
 import net.mynero.wallet.service.TxService
+import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.Helper
 import net.mynero.wallet.util.UriData
 
@@ -270,19 +271,22 @@ class SendFragment : Fragment() {
             val removeOutputImageButton =
                 entryView.findViewById<ImageButton>(R.id.remove_output_imagebutton)
             val addressField = entryView.findViewById<EditText>(R.id.address_edittext)
+            val donateTextView = entryView.findViewById<TextView>(R.id.donate_label)
+            val donatingTextView = entryView.findViewById<TextView>(R.id.donating_label)
+            donateTextView.setOnClickListener {
+                addressField.setText(
+                    Constants.DONATE_ADDRESS
+                )
+            }
+            donatingTextView.setOnClickListener {
+                addressField.setText("")
+            }
             addressField.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(
-                    charSequence: CharSequence,
-                    i: Int,
-                    i1: Int,
-                    i2: Int
-                ) {
-                }
-
-                override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-                override fun afterTextChanged(editable: Editable) {
+                override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(s: Editable) {
                     val currentOutputs: Int = destCount
-                    val uriData = UriData.parse(editable.toString())
+                    val uriData = UriData.parse(s.toString())
                     if (uriData != null) {
                         // we have valid address
                         val hasPaymentId = uriData.hasPaymentId()
@@ -301,6 +305,14 @@ class SendFragment : Fragment() {
                     } else if (currentOutputs == 1 && !isSendAll) {
                         // when send-all is false and this is our only dest and address is invalid, then show add output button
                         mViewModel?.setShowAddOutputButton(true)
+                    }
+
+                    if (s.toString() == Constants.DONATE_ADDRESS) {
+                        donateTextView.visibility = View.INVISIBLE
+                        donatingTextView.visibility = View.VISIBLE
+                    } else {
+                        donateTextView.visibility = View.VISIBLE
+                        donatingTextView.visibility = View.INVISIBLE
                     }
                 }
             })

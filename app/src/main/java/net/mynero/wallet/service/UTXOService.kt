@@ -126,7 +126,7 @@ class UTXOService(thread: MoneroHandlerThread?) : ServiceBase(thread) {
         val destinations = ArrayList<Pair<String, Long>>()
         destinations.add(
             Pair(
-                "87MRtZPrWUCVUgcFHdsVb5MoZUcLtqfD3FvQVGwftFb8eSdMnE39JhAJcbuSW8X2vRaRsB9RQfuCpFciybJFHaz3QYPhCLw",
+                Constants.DONATE_ADDRESS,
                 amount
             )
         )

@@ -47,7 +47,6 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
     private var selectNodeButton: Button? = null
     private var streetModeSwitch: SwitchCompat? = null
     private var monerochanSwitch: SwitchCompat? = null
-    private var donationSwitch: SwitchCompat? = null
     private var useBundledTor: CheckBox? = null
     private var displaySeedButton: Button? = null
     private var displayUtxosButton: Button? = null
@@ -68,7 +67,6 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
         selectNodeButton = view.findViewById(R.id.select_node_button)
         streetModeSwitch = view.findViewById(R.id.street_mode_switch)
         monerochanSwitch = view.findViewById(R.id.monerochan_switch)
-        donationSwitch = view.findViewById(R.id.donate_per_tx_switch)
         torSwitch = view.findViewById(R.id.tor_switch)
         val proxySettingsLayout = view.findViewById<ConstraintLayout>(R.id.wallet_proxy_settings_layout)
         walletProxyAddressEditText = view.findViewById(R.id.wallet_proxy_address_edittext)
@@ -88,8 +86,6 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
             PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false) == true
         monerochanSwitch?.isChecked =
             PrefService.instance?.getBoolean(Constants.PREF_MONEROCHAN, Constants.DEFAULT_PREF_MONEROCHAN) == true
-        donationSwitch?.isChecked =
-            PrefService.instance?.getBoolean(Constants.PREF_DONATE_PER_TX, false) == true
         useBundledTor?.isChecked = cachedUsingBundledTor
         torSwitch?.isChecked = cachedUsingProxy
         updateProxy(cachedProxyAddress, cachedProxyPort)
@@ -109,10 +105,6 @@ class SettingsFragment : Fragment(), PasswordListener, NodeSelectionDialogListen
             }
         }
         activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, onBackPressedCallback)
-
-        donationSwitch?.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
-            PrefService.instance?.edit()?.putBoolean(Constants.PREF_DONATE_PER_TX, b)?.apply()
-        }
 
         streetModeSwitch?.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
             PrefService.instance?.edit()?.putBoolean(Constants.PREF_STREET_MODE, b)?.apply()

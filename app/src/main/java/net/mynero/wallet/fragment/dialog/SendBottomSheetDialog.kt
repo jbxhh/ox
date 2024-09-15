@@ -2,6 +2,8 @@ package net.mynero.wallet.fragment.dialog
 
 import android.app.Activity
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -78,6 +80,7 @@ class SendBottomSheetDialog : BottomSheetDialogFragment() {
     private var scanAddressImageButton: ImageButton? = null
     private var feeRadioGroup: RadioGroup? = null
     private var donateTextView: TextView? = null
+    private var donatingTextView: TextView? = null
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -103,11 +106,28 @@ class SendBottomSheetDialog : BottomSheetDialogFragment() {
         feeRadioGroupLabelTextView = view.findViewById(R.id.tx_fee_radiogroup_label_textview)
         selectedUtxosValueTextView = view.findViewById(R.id.selected_utxos_value_textview)
         donateTextView = view.findViewById(R.id.donate_label_textview)
+        donatingTextView = view.findViewById(R.id.donating_label_textview)
         donateTextView?.setOnClickListener {
             addressEditText?.setText(
                 Constants.DONATE_ADDRESS
             )
         }
+        donatingTextView?.setOnClickListener {
+            addressEditText?.setText("")
+        }
+        addressEditText?.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable) {
+                if (s.toString() == Constants.DONATE_ADDRESS) {
+                    donatingTextView?.visibility = View.VISIBLE
+                    donateTextView?.visibility = View.INVISIBLE
+                } else {
+                    donatingTextView?.visibility = View.INVISIBLE
+                    donateTextView?.visibility = View.VISIBLE
+                }
+            }
+        })
         if (uriData != null) {
             addressEditText?.setText(uriData?.address)
             if (uriData?.hasAmount() == true) {
