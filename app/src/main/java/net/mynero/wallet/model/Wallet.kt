@@ -19,9 +19,6 @@ import android.util.Log
 import android.util.Pair
 import net.mynero.wallet.data.Subaddress
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class Wallet {
     var isSynchronized = false
@@ -418,16 +415,6 @@ class Wallet {
         get() = getNumSubaddresses(accountIndex)
 
     private external fun getNumSubaddresses(accountIndex: Int): Int
-    val newSubaddress: String
-        get() = getNewSubaddress(accountIndex)
-
-    private fun getNewSubaddress(accountIndex: Int): String {
-        val timeStamp = SimpleDateFormat("yyyy-MM-dd-HH:mm:ss", Locale.US).format(Date())
-        addSubaddress(accountIndex, timeStamp)
-        val subaddress = getLastSubaddress(accountIndex)
-        Log.d("Wallet.kt", "${(getNumSubaddresses(accountIndex) - 1)}: $subaddress")
-        return subaddress
-    }
 
     external fun addSubaddress(accountIndex: Int, label: String?)
     private fun getLastSubaddress(accountIndex: Int): String {

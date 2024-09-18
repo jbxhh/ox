@@ -11,23 +11,25 @@ import java.util.Collections
 class ReceiveViewModel : ViewModel() {
     private val _address = MutableLiveData<Subaddress?>()
     private val _addresses = MutableLiveData<List<Subaddress>>()
-    var address: LiveData<Subaddress?> = _address
-    var addresses: LiveData<List<Subaddress>> = _addresses
+    val address: LiveData<Subaddress?> = _address
+    val addresses: LiveData<List<Subaddress>> = _addresses
+
     fun init() {
-        _address.value = AddressService.instance?.currentSubaddress()
         _addresses.value = subaddresses
+        _address.value = addresses.value?.lastOrNull()
     }
 
     private val subaddresses: List<Subaddress>
         get() {
             val wallet = WalletManager.instance?.wallet
             val subaddresses = ArrayList<Subaddress>()
-            val addressesSize = AddressService.instance?.latestAddressIndex ?: 0
-            for (i in addressesSize - 1 downTo 0) {
+            val numAddresses = AddressService.instance?.numAddresses ?: 1
+            for (i in 0 until numAddresses) {
                 wallet?.getSubaddressObject(i)?.let { subaddresses.add(it) }
             }
             return Collections.unmodifiableList(subaddresses)
         }
+
     val freshSubaddress: Unit
         get() {
             _address.value = AddressService.instance?.freshSubaddress()

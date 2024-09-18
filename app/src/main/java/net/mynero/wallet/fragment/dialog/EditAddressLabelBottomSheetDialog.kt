@@ -10,7 +10,6 @@ import android.widget.ImageButton
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import net.mynero.wallet.R
 import net.mynero.wallet.model.WalletManager
-import net.mynero.wallet.service.AddressService
 import net.mynero.wallet.util.Helper.getClipBoardText
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -30,7 +29,6 @@ class EditAddressLabelBottomSheetDialog : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val wallet = WalletManager.instance?.wallet
-        val addressService = AddressService.instance
         val pasteButton = view.findViewById<ImageButton>(R.id.paste_password_imagebutton)
         val labelEditText = view.findViewById<EditText>(R.id.wallet_password_edittext)
         val saveLabelButton = view.findViewById<Button>(R.id.unlock_wallet_button)
@@ -50,9 +48,6 @@ class EditAddressLabelBottomSheetDialog : BottomSheetDialogFragment() {
         pasteButton.setOnClickListener { labelEditText.setText(getClipBoardText(view.context)) }
         saveLabelButton.setOnClickListener {
             val label = labelEditText.text.toString()
-            if (addressService?.latestAddressIndex == addressIndex) {
-                addressService.freshSubaddress()
-            }
             wallet?.setSubaddressLabel(addressIndex, label)
             wallet?.store()
             if (listener != null) {

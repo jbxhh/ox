@@ -127,7 +127,7 @@
     <string name="trusted_daemon">Trusted daemon</string>
     <string name="use_bundled_tor">Let Mysu start and manage a Tor daemon</string>
     <string name="subbaddress_info_subtitle" translatable="false">#%1$d: %2$s</string>
-    <string name="previous_addresses">Previous addresses</string>
+    <string name="all_addresses">All addresses</string>
     <string name="donate_label">Donate to Mysu</string>
     <string name="donating_label">Donating to Mysu. Thank you!</string>
     <string name="transactions">Transactions</string>

@@ -109,7 +109,7 @@
         android:layout_marginBottom="8dp"
         android:ellipsize="middle"
         android:singleLine="true"
-        android:text="@string/previous_addresses"
+        android:text="@string/all_addresses"
         android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/address_list_recyclerview"

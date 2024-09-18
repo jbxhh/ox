@@ -15,6 +15,7 @@
  */
 package net.mynero.wallet.adapter
 
+import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,19 +27,19 @@ import net.mynero.wallet.service.PrefService
 import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.Helper
 
-class SubaddressAdapter(val listener: SubaddressAdapterListener?) :
-    RecyclerView.Adapter<SubaddressAdapter.ViewHolder>() {
-    private var localDataSet: List<Subaddress>
+class SubaddressAdapter(
+    private var addresses: List<Subaddress>,
+    private var selectedAddress: Subaddress?,
+    val listener: SubaddressAdapterListener?
+): RecyclerView.Adapter<SubaddressAdapter.ViewHolder>() {
 
-    /**
-     * Initialize the dataset of the Adapter.
-     */
-    init {
-        localDataSet = ArrayList()
+    fun submitAddresses(addresses: List<Subaddress>) {
+        this.addresses = addresses
+        notifyDataSetChanged()
     }
 
-    fun submitList(dataSet: List<Subaddress>) {
-        localDataSet = dataSet
+    fun submitSelectedAddress(selectedAddress: Subaddress?) {
+        this.selectedAddress = selectedAddress
         notifyDataSetChanged()
     }
 
@@ -52,13 +53,13 @@ class SubaddressAdapter(val listener: SubaddressAdapterListener?) :
 
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        val subaddress = localDataSet[position]
-        viewHolder.bind(subaddress)
+        val address = addresses[position]
+        viewHolder.bind(address, selectedAddress != null && address == selectedAddress)
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount(): Int {
-        return localDataSet.size
+        return addresses.size
     }
 
     interface SubaddressAdapterListener {
@@ -71,17 +72,20 @@ class SubaddressAdapter(val listener: SubaddressAdapterListener?) :
      * (custom ViewHolder).
      */
     class ViewHolder(view: View, val listener: SubaddressAdapterListener?) :
-        RecyclerView.ViewHolder(
-            view
-        ) {
+        RecyclerView.ViewHolder(view) {
 
-        fun bind(subaddress: Subaddress) {
+        fun bind(subaddress: Subaddress, isSelected: Boolean) {
             val addressTextView =
                 itemView.findViewById<TextView>(R.id.address_item_address_textview)
             val addressLabelTextView = itemView.findViewById<TextView>(R.id.address_label_textview)
             val addressAmountTextView =
                 itemView.findViewById<TextView>(R.id.address_amount_textview)
             addressTextView.text = subaddress.address
+            if (isSelected) {
+                addressTextView.setTypeface(null, Typeface.BOLD)
+            } else {
+                addressTextView.setTypeface(null, Typeface.NORMAL)
+            }
             val label = subaddress.displayLabel
             val address = itemView.context.getString(
                 R.string.subbaddress_info_subtitle,

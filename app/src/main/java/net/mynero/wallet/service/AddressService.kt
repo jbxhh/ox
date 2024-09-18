@@ -7,7 +7,7 @@ import java.util.Date
 import java.util.Locale
 
 class AddressService(thread: MoneroHandlerThread) : ServiceBase(thread) {
-    var latestAddressIndex = 1
+    var numAddresses = 1
         private set
 
     init {
@@ -15,7 +15,7 @@ class AddressService(thread: MoneroHandlerThread) : ServiceBase(thread) {
     }
 
     fun refreshAddresses() {
-        WalletManager.instance?.wallet?.numSubaddresses?.let { latestAddressIndex = it }
+        WalletManager.instance?.wallet?.numSubaddresses?.let { numAddresses = it }
     }
 
     fun freshSubaddress(): Subaddress? {
@@ -24,12 +24,12 @@ class AddressService(thread: MoneroHandlerThread) : ServiceBase(thread) {
         wallet?.addSubaddress(wallet.getAccountIndex(), timeStamp)
         refreshAddresses()
         wallet?.store()
-        return wallet?.getSubaddressObject(latestAddressIndex)
+        return wallet?.getSubaddressObject(numAddresses - 1)
     }
 
     fun currentSubaddress(): Subaddress? {
         val wallet = WalletManager.instance?.wallet
-        return wallet?.getSubaddressObject(latestAddressIndex)
+        return wallet?.getSubaddressObject(numAddresses - 1)
     }
 
     companion object {
