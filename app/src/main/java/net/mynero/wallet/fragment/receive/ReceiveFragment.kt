@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.WriterException
-import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import net.mynero.wallet.R
@@ -36,6 +35,7 @@ class ReceiveFragment : Fragment() {
     private var addressImageView: ImageView? = null
     private var copyAddressImageButton: ImageButton? = null
     private var mViewModel: ReceiveViewModel? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -61,7 +61,7 @@ class ReceiveFragment : Fragment() {
     }
 
     private fun bindObservers(view: View) {
-        val adapter = SubaddressAdapter(object : SubaddressAdapterListener {
+        val subaddressAdapterListener = object : SubaddressAdapterListener {
             override fun onSubaddressSelected(subaddress: Subaddress?) {
                 mViewModel?.selectAddress(subaddress)
             }
@@ -69,19 +69,18 @@ class ReceiveFragment : Fragment() {
             override fun onSubaddressEditLabel(subaddress: Subaddress?) {
                 editAddressLabel(subaddress)
             }
-        })
+        }
+        val adapter = SubaddressAdapter(emptyList(), null, subaddressAdapterListener)
         val recyclerView = view.findViewById<RecyclerView>(R.id.address_list_recyclerview)
         recyclerView.layoutManager = LinearLayoutManager(activity)
         recyclerView.adapter = adapter
-        mViewModel?.address?.observe(viewLifecycleOwner) { subaddress: Subaddress? ->
-            setAddress(
-                subaddress
-            )
+        mViewModel?.address?.observe(viewLifecycleOwner) { address: Subaddress? ->
+            setAddress(address)
+            adapter.submitSelectedAddress(address)
         }
-        mViewModel?.addresses?.observe(viewLifecycleOwner) { dataSet: List<Subaddress> ->
-            adapter.submitList(
-                dataSet
-            )
+        mViewModel?.addresses?.observe(viewLifecycleOwner) { addresses: List<Subaddress> ->
+            // We want newer addresses addresses to be shown first
+            adapter.submitAddresses(addresses.reversed())
         }
     }
 
