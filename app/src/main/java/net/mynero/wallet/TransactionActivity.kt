@@ -1,4 +1,4 @@
-package net.mynero.wallet.fragment.transaction
+package net.mynero.wallet
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,10 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import net.mynero.wallet.R
 import net.mynero.wallet.model.TransactionInfo
 import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.service.HistoryService
@@ -21,62 +20,55 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Objects
 
-class TransactionFragment : Fragment() {
-    private var mViewModel: TransactionViewModel? = null
+class TransactionActivity : AppCompatActivity() {
     private var transactionInfo: TransactionInfo? = null
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_transaction, container, false)
-    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_transaction)
+
         val cal = Calendar.getInstance()
         val tz = cal.timeZone //get the local time zone.
         DateHelper.DATETIME_FORMATTER.timeZone = tz
-        mViewModel = ViewModelProvider(this)[TransactionViewModel::class.java]
-        val args = arguments
-        if (args != null) {
-            transactionInfo = arguments?.getParcelable(Constants.NAV_ARG_TXINFO)
-        }
-        bindObservers(view)
-        bindListeners(view)
+
+        transactionInfo = intent.extras?.getParcelable(Constants.NAV_ARG_TXINFO)
+
+        bindObservers()
+        bindListeners()
     }
 
-    private fun bindListeners(view: View) {
-        val copyTxHashImageButton = view.findViewById<ImageButton>(R.id.copy_txhash_imagebutton)
+    private fun bindListeners() {
+        val copyTxHashImageButton = findViewById<ImageButton>(R.id.copy_txhash_imagebutton)
         copyTxHashImageButton.setOnClickListener {
             val txInfo = transactionInfo
             if (txInfo != null) {
-                Helper.clipBoardCopy(context, "transaction_hash", txInfo.hash)
+                Helper.clipBoardCopy(this, "transaction_hash", txInfo.hash)
             }
         }
         val copyTxAddressImageButton =
-            view.findViewById<ImageButton>(R.id.copy_txaddress_imagebutton)
-        val addressTextView = view.findViewById<TextView>(R.id.transaction_address_textview)
+            findViewById<ImageButton>(R.id.copy_txaddress_imagebutton)
+        val addressTextView = findViewById<TextView>(R.id.transaction_address_textview)
         copyTxAddressImageButton.setOnClickListener {
             val txInfo = transactionInfo
             if (txInfo != null) {
                 val destination = addressTextView.text.toString()
-                Helper.clipBoardCopy(context, "transaction_address", destination)
+                Helper.clipBoardCopy(this, "transaction_address", destination)
             }
         }
     }
 
-    private fun bindObservers(view: View) {
-        val txActionTextView = view.findViewById<TextView>(R.id.transaction_action_textview)
-        val confLabel2 = view.findViewById<TextView>(R.id.transaction_conf_label2_textview)
-        val txHashTextView = view.findViewById<TextView>(R.id.transaction_hash_textview)
-        val txConfTextView = view.findViewById<TextView>(R.id.transaction_conf_textview)
-        val txAddressTextView = view.findViewById<TextView>(R.id.transaction_address_textview)
+    private fun bindObservers() {
+        val txActionTextView = findViewById<TextView>(R.id.transaction_action_textview)
+        val confLabel2 = findViewById<TextView>(R.id.transaction_conf_label2_textview)
+        val txHashTextView = findViewById<TextView>(R.id.transaction_hash_textview)
+        val txConfTextView = findViewById<TextView>(R.id.transaction_conf_textview)
+        val txAddressTextView = findViewById<TextView>(R.id.transaction_address_textview)
         val copyTxAddressImageButton =
-            view.findViewById<ImageButton>(R.id.copy_txaddress_imagebutton)
-        val txDateTextView = view.findViewById<TextView>(R.id.transaction_date_textview)
-        val txAmountTextView = view.findViewById<TextView>(R.id.transaction_amount_textview)
-        val blockHeightTextView = view.findViewById<TextView>(R.id.tx_block_height_textview)
-        HistoryService.instance?.history?.observe(viewLifecycleOwner) { transactionInfos: List<TransactionInfo> ->
+            findViewById<ImageButton>(R.id.copy_txaddress_imagebutton)
+        val txDateTextView = findViewById<TextView>(R.id.transaction_date_textview)
+        val txAmountTextView = findViewById<TextView>(R.id.transaction_amount_textview)
+        val blockHeightTextView = findViewById<TextView>(R.id.tx_block_height_textview)
+        HistoryService.instance?.history?.observe(this) { transactionInfos: List<TransactionInfo> ->
             val newTransactionInfo = findNewestVersionOfTransaction(
                 transactionInfo, transactionInfos
             )
@@ -96,34 +88,31 @@ class TransactionFragment : Fragment() {
                 blockHeightTextView.visibility = View.GONE
                 confLabel2.text = getString(R.string.transaction_conf_desc2_unconfirmed)
             }
-            val ctx = context
-            if (ctx != null) {
-                val streetModeEnabled =
-                    PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false) == true
-                val balanceString =
-                    if (streetModeEnabled) Constants.STREET_MODE_BALANCE else Helper.getDisplayAmount(
-                        newTransactionInfo.amount,
-                        12
+            val streetModeEnabled =
+                PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false) == true
+            val balanceString =
+                if (streetModeEnabled) Constants.STREET_MODE_BALANCE else Helper.getDisplayAmount(
+                    newTransactionInfo.amount,
+                    12
+                )
+            if (newTransactionInfo.direction === TransactionInfo.Direction.Direction_In) {
+                txActionTextView.text = getString(R.string.transaction_action_recv)
+                txAmountTextView.setTextColor(
+                    ContextCompat.getColor(
+                        this,
+                        R.color.oled_positiveColor
                     )
-                if (newTransactionInfo.direction === TransactionInfo.Direction.Direction_In) {
-                    txActionTextView.text = getString(R.string.transaction_action_recv)
-                    txAmountTextView.setTextColor(
-                        ContextCompat.getColor(
-                            ctx,
-                            R.color.oled_positiveColor
-                        )
+                )
+            } else {
+                txActionTextView.text = getString(R.string.transaction_action_sent)
+                txAmountTextView.setTextColor(
+                    ContextCompat.getColor(
+                        this,
+                        R.color.oled_negativeColor
                     )
-                } else {
-                    txActionTextView.text = getString(R.string.transaction_action_sent)
-                    txAmountTextView.setTextColor(
-                        ContextCompat.getColor(
-                            ctx,
-                            R.color.oled_negativeColor
-                        )
-                    )
-                }
-                txAmountTextView.text = balanceString
+                )
             }
+            txAmountTextView.text = balanceString
             var destination: String? = "-"
             val wallet = WalletManager.instance?.wallet
             if (newTransactionInfo.txKey == null) {

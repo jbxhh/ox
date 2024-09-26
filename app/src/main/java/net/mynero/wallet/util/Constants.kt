@@ -20,6 +20,14 @@ object Constants {
     const val NAV_ARG_TXINFO = "nav_arg_txinfo"
     const val STREET_MODE_BALANCE = "#.############"
 
+    const val EXTRA_PREVENT_GOING_BACK = "prevent_going_back"
+    const val EXTRA_WALLET_NAME = "wallet_name"
+    const val EXTRA_WALLET_PASSWORD = "wallet_password"
+    const val EXTRA_SEND_ADDRESS = "send_address"
+    const val EXTRA_SEND_AMOUNT = "send_amount"
+    const val EXTRA_SEND_MAX = "send_max"
+    const val EXTRA_SEND_UTXOS = "send_utxos"
+
     const val DEFAULT_PREF_MONEROCHAN = false
 
     // Donation address is also specified in strings.xml, it is used as a tooltip in address fields
