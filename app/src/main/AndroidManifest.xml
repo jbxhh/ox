@@ -19,14 +19,16 @@
         android:supportsRtl="true"
         android:theme="@style/MyMaterialThemeOled"
         android:usesCleartextTraffic="true">
+
         <activity
-            android:name=".MainActivity"
+            android:name=".StartActivity"
             android:exported="true">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -36,6 +38,48 @@
                 <data android:scheme="monero" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".OnboardingActivity"
+            android:exported="true">
+        </activity>
+
+        <activity
+            android:name=".PasswordActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+        </activity>
+
+        <activity
+            android:name=".HomeActivity"
+            android:exported="true">
+        </activity>
+
+        <activity
+            android:name=".SendActivity"
+            android:exported="true">
+        </activity>
+
+        <activity
+            android:name=".ReceiveActivity"
+            android:exported="true">
+        </activity>
+
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="true">
+        </activity>
+
+        <activity
+            android:name=".TransactionActivity"
+            android:exported="true">
+        </activity>
+
+        <activity
+            android:name=".UtxosActivity"
+            android:exported="true">
+        </activity>
+
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="portrait"

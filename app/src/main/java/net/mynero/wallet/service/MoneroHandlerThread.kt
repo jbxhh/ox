@@ -16,7 +16,11 @@
  */
 package net.mynero.wallet.service
 
+import android.content.Context
+import android.os.Handler
 import android.util.Log
+import android.widget.Toast
+import net.mynero.wallet.R
 import net.mynero.wallet.model.PendingTransaction
 import net.mynero.wallet.model.TransactionOutput
 import net.mynero.wallet.model.Wallet
@@ -24,24 +28,42 @@ import net.mynero.wallet.model.Wallet.Companion.getAmountFromString
 import net.mynero.wallet.model.Wallet.ConnectionStatus
 import net.mynero.wallet.model.WalletListener
 import net.mynero.wallet.model.WalletManager
+import java.io.File
 
 /**
  * Handy class for starting a new thread that has a looper. The looper can then be
  * used to create handler classes. Note that start() must still be called.
  * The started Thread has a stck size of STACK_SIZE (=5MB)
  */
-class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet) :
-    Thread(null, null, name, THREAD_STACK_SIZE), WalletListener {
-    private val wallet: Wallet
+class MoneroHandlerThread(val wallet: Wallet, val context: Context) : Thread(null, null, "WalletService", THREAD_STACK_SIZE), WalletListener {
 
-    init {
-        this.wallet = wallet
+    private val handler = Handler(context.mainLooper)
+
+    companion object {
+        // from src/cryptonote_config.h
+        const val THREAD_STACK_SIZE = (5 * 1024 * 1024).toLong()
+
+        fun init(walletFile: File, password: String?, context: Context) {
+            val wallet = WalletManager.instance!!.openWallet(walletFile.absolutePath, password ?: "")
+            val thread = MoneroHandlerThread(wallet, context)
+
+            TxService(thread)
+            BalanceService(thread)
+            AddressService(thread)
+            HistoryService(thread)
+            BlockchainService(thread)
+            DaemonService(thread)
+            UTXOService(thread)
+            thread.start()
+        }
     }
 
     @Synchronized
     override fun start() {
+        println("HERE1")
         super.start()
-        listener?.onRefresh(false)
+        println("HERE2")
+        onRefresh(false)
     }
 
     override fun run() {
@@ -101,7 +123,7 @@ class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet)
 
     private fun tryRestartConnection() {
         Log.d("MoneroHandlerThread.kt", "refreshed() Starting connection retry")
-        listener?.onConnectionFail()
+        onConnectionFail()
         wallet.init(0)
         wallet.startRefresh()
     }
@@ -111,7 +133,7 @@ class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet)
         if (walletSynced) {
             wallet.refreshCoins()
         }
-        listener?.onRefresh(walletSynced)
+        onRefresh(walletSynced)
     }
 
     @Throws(Exception::class)
@@ -179,13 +201,20 @@ class MoneroHandlerThread(name: String, val listener: Listener?, wallet: Wallet)
         return pendingTx.commit("", true)
     }
 
-    interface Listener {
-        fun onRefresh(walletSynced: Boolean)
-        fun onConnectionFail()
+    fun onRefresh(walletSynced: Boolean) {
+        println("onRefresh")
+        if (walletSynced) {
+            UTXOService.instance?.refreshUtxos()
+        }
+        HistoryService.instance?.refreshHistory()
+        BalanceService.instance?.refreshBalance()
+        BlockchainService.instance?.refreshBlockchain()
+        AddressService.instance?.refreshAddresses()
     }
 
-    companion object {
-        // from src/cryptonote_config.h
-        const val THREAD_STACK_SIZE = (5 * 1024 * 1024).toLong()
+    fun onConnectionFail() {
+        handler.post {
+            Toast.makeText(context, R.string.connection_failed, Toast.LENGTH_SHORT).show()
+        }
     }
 }

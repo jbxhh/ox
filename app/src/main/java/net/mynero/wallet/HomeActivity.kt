@@ -1,27 +1,20 @@
-package net.mynero.wallet.fragment.home
+package net.mynero.wallet
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavDirections
-import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import net.mynero.wallet.MainActivity
-import net.mynero.wallet.R
 import net.mynero.wallet.adapter.TransactionInfoAdapter
-import net.mynero.wallet.adapter.TransactionInfoAdapter.TxInfoAdapterListener
 import net.mynero.wallet.model.TransactionInfo
 import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.service.BalanceService
@@ -32,47 +25,37 @@ import net.mynero.wallet.service.PrefService
 import net.mynero.wallet.service.ProxyService
 import net.mynero.wallet.util.Constants
 
-class HomeFragment : Fragment(), TxInfoAdapterListener {
+class HomeActivity : AppCompatActivity() {
+
     private var startHeight: Long = 0
-    private var mViewModel: HomeViewModel? = null
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_home, container, false)
-    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_home)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        val mainActivity = activity as MainActivity?
-        mViewModel = ViewModelProvider(this)[HomeViewModel::class.java]
-        bindObservers(view)
-        bindListeners(view)
-        mainActivity?.restartEvents?.observe(viewLifecycleOwner) {
-            bindObservers(view)
-            bindListeners(view)
-        }
-    }
+        val settingsImageView = findViewById<ImageView>(R.id.settings_imageview)
+        val sendButton = findViewById<Button>(R.id.send_button)
+        val receiveButton = findViewById<Button>(R.id.receive_button)
 
-    private fun bindListeners(view: View) {
-        val settingsImageView = view.findViewById<ImageView>(R.id.settings_imageview)
-        val sendButton = view.findViewById<Button>(R.id.send_button)
-        val receiveButton = view.findViewById<Button>(R.id.receive_button)
-        settingsImageView.setOnClickListener { navigate(HomeFragmentDirections.navToSettings()) }
-        sendButton.setOnClickListener { navigate(HomeFragmentDirections.navToSend()) }
-        receiveButton.setOnClickListener { navigate(HomeFragmentDirections.navToReceive()) }
-    }
-
-    private fun bindObservers(view: View) {
         val txHistoryRecyclerView =
-            view.findViewById<RecyclerView>(R.id.transaction_history_recyclerview)
-        val unlockedBalanceTextView = view.findViewById<TextView>(R.id.balance_unlocked_textview)
-        val lockedBalanceTextView = view.findViewById<TextView>(R.id.balance_locked_textview)
+            findViewById<RecyclerView>(R.id.transaction_history_recyclerview)
+        val unlockedBalanceTextView = findViewById<TextView>(R.id.balance_unlocked_textview)
+        val lockedBalanceTextView = findViewById<TextView>(R.id.balance_locked_textview)
         val balanceService = BalanceService.instance
         val historyService = HistoryService.instance
         val blockchainService = BlockchainService.instance
 
-        ProxyService.instance?.proxyChangeEvents?.observe(viewLifecycleOwner) { proxy ->
+
+        settingsImageView.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+        sendButton.setOnClickListener {
+            startActivity(Intent(this, SendActivity::class.java))
+        }
+        receiveButton.setOnClickListener {
+            startActivity(Intent(this, ReceiveActivity::class.java))
+        }
+
+        ProxyService.instance?.proxyChangeEvents?.observe(this) { proxy ->
             lifecycleScope.launch(Dispatchers.IO) {
                 Log.d("HomeFragment", "Updating proxy, restarting wallet. proxy=$proxy")
                 val finalProxy =
@@ -84,7 +67,7 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
             }
         }
 
-        DaemonService.instance?.daemonChangeEvents?.observe(viewLifecycleOwner) { daemon ->
+        DaemonService.instance?.daemonChangeEvents?.observe(this) { daemon ->
             lifecycleScope.launch(Dispatchers.IO) {
                 Log.d("HomeFragment", "Updating daemon, restarting wallet. daemon=$daemon")
                 WalletManager.instance?.setDaemon(daemon)
@@ -94,7 +77,7 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
             }
         }
 
-        balanceService?.balanceInfo?.observe(viewLifecycleOwner) { balanceInfo ->
+        balanceService?.balanceInfo?.observe(this) { balanceInfo ->
             if (balanceInfo != null) {
                 unlockedBalanceTextView.text = balanceInfo.unlockedDisplay
                 if (balanceInfo.lockedDisplay == Constants.STREET_MODE_BALANCE || balanceInfo.isLockedBalanceZero) {
@@ -108,9 +91,9 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
                 }
             }
         }
-        val progressBar = view.findViewById<ProgressBar>(R.id.sync_progress_bar)
-        val progressBarText = view.findViewById<TextView>(R.id.sync_progress_text)
-        blockchainService?.height?.observe(viewLifecycleOwner) { height: Long ->
+        val progressBar = findViewById<ProgressBar>(R.id.sync_progress_bar)
+        val progressBarText = findViewById<TextView>(R.id.sync_progress_text)
+        blockchainService?.height?.observe(this) { height: Long ->
             val wallet = WalletManager.instance?.wallet
             if (wallet?.isSynchronized == false) {
                 if (startHeight == 0L && height != 1L) {
@@ -133,10 +116,17 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
                 progressBarText.text = "Synchronized at $height"
             }
         }
-        val adapter = TransactionInfoAdapter(this)
-        txHistoryRecyclerView.layoutManager = LinearLayoutManager(activity)
+        val activity = this
+        val adapter = TransactionInfoAdapter(object : TransactionInfoAdapter.TxInfoAdapterListener {
+            override fun onClickTransaction(txInfo: TransactionInfo?) {
+                val intent = Intent(activity, TransactionActivity::class.java)
+                intent.putExtra(Constants.NAV_ARG_TXINFO, txInfo)
+                startActivity(intent)
+            }
+        })
+        txHistoryRecyclerView.layoutManager = LinearLayoutManager(this)
         txHistoryRecyclerView.adapter = adapter
-        historyService?.history?.observe(viewLifecycleOwner) { history: List<TransactionInfo> ->
+        historyService?.history?.observe(this) { history: List<TransactionInfo> ->
             if (history.isEmpty()) {
                 // DISPLAYING EMPTY WALLET HISTORY
                 val wallet = WalletManager.instance?.wallet
@@ -149,7 +139,7 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
                     R.drawable.xmrchan_loading2 // img for loading
                 }
                 txHistoryRecyclerView.visibility = View.GONE
-                displayEmptyHistory(true, view, textResId, botImgResId)
+                displayEmptyHistory(true, this, textResId, botImgResId)
             } else {
                 // POPULATED WALLET HISTORY
                 val sortedHistory = history.sortedByDescending { it.timestamp }
@@ -161,7 +151,7 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
                 txHistoryRecyclerView.visibility = View.VISIBLE
                 displayEmptyHistory(
                     false,
-                    view,
+                    this,
                     R.string.no_history_nget_some_monero_in_here,
                     R.drawable.xmrchan_loading2
                 )
@@ -169,7 +159,7 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
         }
 
         val samouraiTorManager = ProxyService.instance?.samouraiTorManager
-        samouraiTorManager?.getTorStateLiveData()?.observe(viewLifecycleOwner) {
+        samouraiTorManager?.getTorStateLiveData()?.observe(this) {
             samouraiTorManager.getProxy()?.address()?.let { socketAddress ->
                 if (socketAddress.toString().isEmpty()) return@let
                 if (ProxyService.instance?.usingProxy == true && ProxyService.instance?.useBundledTor == true) {
@@ -182,6 +172,7 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
                 }
             }
         }
+
     }
 
     private fun refreshProxy(proxyAddress: String, proxyPort: String) {
@@ -194,23 +185,9 @@ class HomeFragment : Fragment(), TxInfoAdapterListener {
         }
     }
 
-    override fun onClickTransaction(txInfo: TransactionInfo?) {
-        val directions: NavDirections = HomeFragmentDirections.navToTransaction(txInfo)
-        navigate(directions)
-    }
-
-    private fun navigate(destination: NavDirections) {
-        val activity = activity
-        if (activity != null) {
-            val fm = activity.supportFragmentManager
-            val navHostFragment = fm.findFragmentById(R.id.nav_host_fragment) as NavHostFragment?
-            navHostFragment?.navController?.navigate(destination)
-        }
-    }
-
     private fun displayEmptyHistory(
         display: Boolean,
-        view: View,
+        view: HomeActivity,
         textResId: Int,
         botImgResId: Int
     ) {
