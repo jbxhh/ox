@@ -68,8 +68,8 @@ class NodeSelectionAdapter(val listener: NodeSelectionAdapterListener?) :
     }
 
     interface NodeSelectionAdapterListener {
-        fun onSelectNode(node: Node?)
-        fun onSelectEditNode(node: Node?): Boolean
+        fun onSelectNode(node: Node)
+        fun onSelectEditNode(node: Node): Boolean
     }
 
     /**
@@ -81,7 +81,7 @@ class NodeSelectionAdapter(val listener: NodeSelectionAdapterListener?) :
             view
         ) {
         fun bind(node: Node) {
-            val currentNode = PrefService.instance?.node
+            val currentNode = PrefService.instance.node
             val match = node == currentNode
             if (match) {
                 itemView.setBackgroundColor(

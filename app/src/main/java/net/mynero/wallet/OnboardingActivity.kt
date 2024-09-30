@@ -26,9 +26,8 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import net.mynero.wallet.data.Node
-import net.mynero.wallet.fragment.dialog.AddNodeBottomSheetDialog
 import net.mynero.wallet.fragment.dialog.NodeSelectionBottomSheetDialog
+import net.mynero.wallet.listener.NodeSelectionDialogListenerAdapter
 import net.mynero.wallet.livedata.combineLiveDatas
 import net.mynero.wallet.model.EnumTorState
 import net.mynero.wallet.model.Wallet
@@ -97,7 +96,7 @@ class OnboardingActivity : AppCompatActivity() {
         walletProxyAddressEditText.isEnabled = usingProxy && !usingBundledTor
         walletProxyPortEditText.isEnabled = usingProxy && !usingBundledTor
 
-        val node = PrefService.instance?.node // should be using default here
+        val node = PrefService.instance.node // should be using default here
         selectNodeButton.text = getString(R.string.node_button_text, node?.address)
 
         bindListeners()
@@ -285,24 +284,14 @@ class OnboardingActivity : AppCompatActivity() {
         }
 
         selectNodeButton.setOnClickListener {
-            val activity = this
-            supportFragmentManager.let { fragmentManager ->
-                val dialog = NodeSelectionBottomSheetDialog()
-                dialog.listener = object : NodeSelectionBottomSheetDialog.NodeSelectionDialogListener {
-                    override fun onNodeSelected() {
-                        val node = PrefService.instance?.node
-                        selectNodeButton.text = getString(R.string.node_button_text, node?.address)
-                        Toast.makeText(
-                            activity,
-                            getString(R.string.node_selected, node?.name ?: node?.host),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    override fun onClickedEditNode(node: Node?) {}
-                    override fun onClickedAddNode() {}
-                }
-                dialog.show(fragmentManager, "node_selection_dialog")
-            }
+            val listener = NodeSelectionDialogListenerAdapter(
+                activity = this,
+                setSelectNodeButtonText = { selectNodeButton.text = it },
+                getProxyAndPortValues = { Pair(walletProxyAddressEditText.text.toString(), walletProxyPortEditText.text.toString()) }
+            )
+
+            val dialog = NodeSelectionBottomSheetDialog(listener)
+            dialog.show(supportFragmentManager, "node_selection_dialog")
         }
 
         useBundledTor.setOnCheckedChangeListener { _, isChecked ->
@@ -420,14 +409,13 @@ internal class OnboardingViewModel : ViewModel() {
                 }
                 return
             }
-            PrefService.instance?.edit()?.putBoolean(Constants.PREF_USES_PASSWORD, true)
-                ?.apply()
+            PrefService.instance.edit().putBoolean(Constants.PREF_USES_PASSWORD, true).apply()
         }
         var restoreHeight = newRestoreHeight
         val walletFile = File(mainActivity.applicationInfo.dataDir, Constants.WALLET_NAME)
         var wallet: Wallet? = null
         if (offset.isNotEmpty()) {
-            PrefService.instance?.edit()?.putBoolean(Constants.PREF_USES_OFFSET, true)?.apply()
+            PrefService.instance.edit().putBoolean(Constants.PREF_USES_OFFSET, true).apply()
         }
         val seedTypeValue = seedType.value ?: return
         if (walletSeed.isEmpty()) {
@@ -503,7 +491,6 @@ internal class OnboardingViewModel : ViewModel() {
         val ok = walletStatus?.isOk
         walletFile.delete() // cache is broken for some reason when recovering wallets. delete the file here. this happens in monerujo too.
         if (ok == true) {
-            println("KEK")
             MoneroHandlerThread.init(walletFile, passphrase, context)
             val intent = Intent(mainActivity, HomeActivity::class.java)
             mainActivity.startActivity(intent)
@@ -553,14 +540,14 @@ internal class OnboardingViewModel : ViewModel() {
 
     fun setProxyAddress(address: String) {
         _proxyAddress.value = address
-        if (address.isEmpty()) PrefService.instance?.deleteProxy()
+        if (address.isEmpty()) PrefService.instance.deleteProxy()
         val port = _proxyPort.value ?: return
         ProxyService.instance?.updateProxy(address, port)
     }
 
     fun setProxyPort(port: String) {
         _proxyPort.value = port
-        if (port.isEmpty()) PrefService.instance?.deleteProxy()
+        if (port.isEmpty()) PrefService.instance.deleteProxy()
         val address = _proxyAddress.value ?: return
         ProxyService.instance?.updateProxy(address, port)
     }

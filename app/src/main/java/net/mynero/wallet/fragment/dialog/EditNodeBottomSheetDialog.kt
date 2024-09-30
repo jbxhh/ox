@@ -19,9 +19,7 @@ import net.mynero.wallet.util.Helper.getClipBoardText
 import org.json.JSONException
 import org.json.JSONObject
 
-class EditNodeBottomSheetDialog : BottomSheetDialogFragment() {
-    var listener: EditNodeListener? = null
-    var node: Node? = null
+class EditNodeBottomSheetDialog(val listener: EditNodeListener, val node: Node) : BottomSheetDialogFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,14 +41,13 @@ class EditNodeBottomSheetDialog : BottomSheetDialogFragment() {
         val trustedDaemonCheckBox = view.findViewById<CheckBox>(R.id.trusted_node_checkbox)
         val pastePasswordImageButton =
             view.findViewById<ImageButton>(R.id.paste_password_imagebutton)
-        if (node == null) return
-        addressEditText.setText(node?.host)
-        portEditText.setText("${node?.rpcPort}")
-        nodeNameEditText.setText(node?.name)
-        usernameEditText.setText(node?.username)
-        trustedDaemonCheckBox.isChecked = node?.trusted ?: false
-        if (node?.password?.isNotEmpty() == true) {
-            passwordEditText.setText(node?.password)
+        addressEditText.setText(node.host)
+        portEditText.setText("${node.rpcPort}")
+        nodeNameEditText.setText(node.name)
+        usernameEditText.setText(node.username)
+        trustedDaemonCheckBox.isChecked = node.trusted ?: false
+        if (node.password.isNotEmpty()) {
+            passwordEditText.setText(node.password)
             passwordEditText.visibility = View.VISIBLE
             pastePasswordImageButton.visibility = View.VISIBLE
         }
@@ -72,7 +69,7 @@ class EditNodeBottomSheetDialog : BottomSheetDialogFragment() {
         addPasteListener(view, usernameEditText, R.id.paste_username_imagebutton)
         addPasteListener(view, passwordEditText, R.id.paste_password_imagebutton)
         deleteNodeButton.setOnClickListener {
-            listener?.onNodeDeleted(node)
+            listener.onNodeDeleted(node)
             dismiss()
         }
         doneEditingButton.setOnClickListener {
@@ -106,7 +103,7 @@ class EditNodeBottomSheetDialog : BottomSheetDialogFragment() {
                 jsonObject.put("network", "mainnet")
                 jsonObject.put("name", nodeName)
                 jsonObject.put("trusted", trusted)
-                listener?.onNodeEdited(node, fromJson(jsonObject))
+                listener.onNodeEdited(node, fromJson(jsonObject))
                 dismiss()
             } catch (e: JSONException) {
                 throw RuntimeException(e)
@@ -125,7 +122,7 @@ class EditNodeBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     interface EditNodeListener {
-        fun onNodeDeleted(node: Node?)
+        fun onNodeDeleted(node: Node)
         fun onNodeEdited(oldNode: Node?, newNode: Node?)
     }
 }

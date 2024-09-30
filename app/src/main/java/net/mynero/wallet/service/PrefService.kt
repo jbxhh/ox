@@ -13,16 +13,18 @@ import org.json.JSONException
 import org.json.JSONObject
 
 class PrefService(application: MoneroApplication) : ServiceBase(null) {
+
+    private val preferences = application.getSharedPreferences(
+        application.applicationInfo.packageName,
+        Context.MODE_PRIVATE
+    )
+
     init {
-        preferences = application.getSharedPreferences(
-            application.applicationInfo.packageName,
-            Context.MODE_PRIVATE
-        )
         instance = this
     }
 
-    fun edit(): SharedPreferences.Editor? {
-        return preferences?.edit()
+    fun edit(): SharedPreferences.Editor {
+        return preferences.edit()
     }
 
     val node: Node?
@@ -52,7 +54,7 @@ class PrefService(application: MoneroApplication) : ServiceBase(null) {
         if (nodeString.isNotEmpty()) {
             val node = fromString(nodeString)
             if (node != null) {
-                edit()?.putString(Constants.PREF_NODE_2, node.toJson().toString())?.apply()
+                edit().putString(Constants.PREF_NODE_2, node.toJson().toString())?.apply()
                 return node
             }
         }
@@ -60,22 +62,22 @@ class PrefService(application: MoneroApplication) : ServiceBase(null) {
     }
 
     fun getString(key: String?, defaultValue: String): String? {
-        val value = preferences?.getString(key, "")
+        val value = preferences.getString(key, "")
         if (value?.isEmpty() == true && defaultValue.isNotEmpty()) {
-            edit()?.putString(key, defaultValue)?.apply()
+            edit().putString(key, defaultValue)?.apply()
             return defaultValue
         }
         return value
     }
 
     fun getBoolean(key: String?, defaultValue: Boolean): Boolean {
-        val containsKey = preferences?.contains(key)
-        val value = preferences?.getBoolean(key, false)
-        if (value == false && defaultValue && containsKey == false) {
-            edit()?.putBoolean(key, true)?.apply()
+        val containsKey = preferences.contains(key)
+        val value = preferences.getBoolean(key, false)
+        if (!value && defaultValue && !containsKey) {
+            edit().putBoolean(key, true)?.apply()
             return true
         }
-        return value == true
+        return value
     }
 
     fun saveProxy(address: String, port: String): String? {
@@ -86,19 +88,17 @@ class PrefService(application: MoneroApplication) : ServiceBase(null) {
         val proxyAddress = "$address:$port"
         if (proxyAddress == ":") return null
         Log.d("PrefService", "Setting proxy. proxyAddress=$proxyAddress")
-        edit()?.putString(Constants.PREF_PROXY, proxyAddress)?.apply()
+        edit().putString(Constants.PREF_PROXY, proxyAddress)?.apply()
         return proxyAddress
     }
 
     fun deleteProxy() {
         Log.d("PrefService", "Deleting proxy...")
-        edit()?.putString(Constants.PREF_PROXY, "")?.apply()
+        edit().putString(Constants.PREF_PROXY, "")?.apply()
     }
 
     companion object {
-        private var preferences: SharedPreferences? = null
-
-        var instance: PrefService? = null
+        lateinit var instance: PrefService
             private set
     }
 }
