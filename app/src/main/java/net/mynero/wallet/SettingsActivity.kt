@@ -8,7 +8,6 @@ import android.widget.CheckBox
 import android.widget.CompoundButton
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -19,22 +18,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.progressindicator.CircularProgressIndicator
-import net.mynero.wallet.data.Node
-import net.mynero.wallet.data.Node.Companion.fromJson
-import net.mynero.wallet.fragment.dialog.AddNodeBottomSheetDialog
-import net.mynero.wallet.fragment.dialog.EditNodeBottomSheetDialog
 import net.mynero.wallet.fragment.dialog.NodeSelectionBottomSheetDialog
 import net.mynero.wallet.fragment.dialog.WalletKeysBottomSheetDialog
+import net.mynero.wallet.listener.NodeSelectionDialogListenerAdapter
 import net.mynero.wallet.model.EnumTorState
-import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.service.BalanceService
 import net.mynero.wallet.service.HistoryService
-import net.mynero.wallet.service.MoneroHandlerThread
 import net.mynero.wallet.service.PrefService
 import net.mynero.wallet.service.ProxyService
 import net.mynero.wallet.util.Constants
-import org.json.JSONArray
-import java.io.File
+import net.mynero.wallet.util.Utils
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -82,14 +75,14 @@ class SettingsActivity : AppCompatActivity() {
         proxySettingsLayout.visibility = View.VISIBLE
 
         streetModeSwitch.isChecked =
-            PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false) == true
+            PrefService.instance.getBoolean(Constants.PREF_STREET_MODE, false) == true
         monerochanSwitch.isChecked =
-            PrefService.instance?.getBoolean(Constants.PREF_MONEROCHAN, Constants.DEFAULT_PREF_MONEROCHAN) == true
+            PrefService.instance.getBoolean(Constants.PREF_MONEROCHAN, Constants.DEFAULT_PREF_MONEROCHAN) == true
         useBundledTor.isChecked = cachedUsingBundledTor
         torSwitch.isChecked = cachedUsingProxy
         updateProxy(cachedProxyAddress, cachedProxyPort)
 
-        val node = PrefService.instance?.node // shouldn't use default value here
+        val node = PrefService.instance.node // shouldn't use default value here
         selectNodeButton.text = getString(R.string.node_button_text, node?.address)
 
         bindListeners()
@@ -97,97 +90,33 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun bindListeners() {
-        val activity = this
         val onBackPressedCallback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                refreshProxy()
+                Utils.refreshProxy(walletProxyAddressEditText.text.toString(), walletProxyPortEditText.text.toString())
                 finish()
             }
         }
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         streetModeSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
-            PrefService.instance?.edit()?.putBoolean(Constants.PREF_STREET_MODE, b)?.apply()
+            PrefService.instance.edit().putBoolean(Constants.PREF_STREET_MODE, b).apply()
             BalanceService.instance?.refreshBalance()
         }
 
         monerochanSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
-            PrefService.instance?.edit()?.putBoolean(Constants.PREF_MONEROCHAN, b)?.apply()
+            PrefService.instance.edit().putBoolean(Constants.PREF_MONEROCHAN, b).apply()
             HistoryService.instance?.refreshHistory()
         }
 
         selectNodeButton.setOnClickListener {
-            supportFragmentManager.let { fragmentManager ->
-                val dialog = NodeSelectionBottomSheetDialog()
-                dialog.listener = object : NodeSelectionBottomSheetDialog.NodeSelectionDialogListener {
-                    override fun onNodeSelected() {
-                        val node = PrefService.instance?.node
-                        selectNodeButton.text = getString(R.string.node_button_text, node?.address)
-                        refreshProxy()
+            val listener = NodeSelectionDialogListenerAdapter(
+                activity = this,
+                setSelectNodeButtonText = { selectNodeButton.text = it },
+                getProxyAndPortValues = { Pair(walletProxyAddressEditText.text.toString(), walletProxyPortEditText.text.toString()) }
+            )
 
-                        runOnUiThread {
-                            Toast.makeText(
-                                activity,
-                                activity.getString(R.string.node_selected, node?.name ?: node?.host),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-
-                    override fun onClickedEditNode(node: Node?) {
-                        val editNodeDialog = EditNodeBottomSheetDialog()
-                        editNodeDialog.listener = object : EditNodeBottomSheetDialog.EditNodeListener {
-                            override fun onNodeDeleted(node: Node?) {
-                                try {
-                                    val nodesArray = PrefService.instance?.getString(Constants.PREF_CUSTOM_NODES, "[]")
-                                    val jsonArray = JSONArray(nodesArray)
-                                    for (i in 0 until jsonArray.length()) {
-                                        val nodeJsonObject = jsonArray.getJSONObject(i)
-                                        val savedNode = fromJson(nodeJsonObject)
-                                        if (savedNode?.toNodeString() == node?.toNodeString()) jsonArray.remove(i)
-                                    }
-                                    saveNodesAndReopen(jsonArray)
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                }
-                            }
-
-                            override fun onNodeEdited(oldNode: Node?, newNode: Node?) {
-                                try {
-                                    val nodesArray = PrefService.instance?.getString(Constants.PREF_CUSTOM_NODES, "[]")
-                                    val jsonArray = JSONArray(nodesArray)
-                                    for (i in 0 until jsonArray.length()) {
-                                        val nodeJsonObject = jsonArray.getJSONObject(i)
-                                        val savedNode = fromJson(nodeJsonObject)
-                                        if (savedNode?.toNodeString() == oldNode?.toNodeString()) jsonArray.put(
-                                            i,
-                                            newNode?.toJson()
-                                        )
-                                    }
-                                    saveNodesAndReopen(jsonArray)
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                }
-                            }
-
-                        }
-                        editNodeDialog.node = node
-                        editNodeDialog.show(fragmentManager, "edit_node_dialog")
-                    }
-
-                    override fun onClickedAddNode() {
-                        activity.supportFragmentManager.let { fragmentManager ->
-                            val addNodeDialog = AddNodeBottomSheetDialog()
-                            addNodeDialog.listener = object : AddNodeBottomSheetDialog.AddNodeListener {
-                                override fun onNodeAdded() {}
-                            }
-                            addNodeDialog.show(fragmentManager, "add_node_dialog")
-                        }
-                    }
-
-                }
-                dialog.show(fragmentManager, "node_selection_dialog")
-            }
+            val dialog = NodeSelectionBottomSheetDialog(listener)
+            dialog.show(supportFragmentManager, "node_selection_dialog")
         }
 
         useBundledTor.setOnCheckedChangeListener { _, isChecked ->
@@ -195,8 +124,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         displaySeedButton.setOnClickListener {
-            val usesPassword =
-                PrefService.instance?.getBoolean(Constants.PREF_USES_PASSWORD, false) == true
+            val usesPassword = PrefService.instance.getBoolean(Constants.PREF_USES_PASSWORD, false)
             if (usesPassword) {
                 val intent = Intent(this, PasswordActivity::class.java)
                 askForWalletPasswordAndDisplayWalletKeys.launch(intent)
@@ -220,7 +148,7 @@ class SettingsActivity : AppCompatActivity() {
             walletProxyPortEditText.isEnabled = useProxy && mViewModel.useBundledTor.value == false
             walletProxyAddressEditText.isEnabled = useProxy && mViewModel.useBundledTor.value == false
 
-            refreshProxy()
+            Utils.refreshProxy(walletProxyAddressEditText.text.toString(), walletProxyPortEditText.text.toString())
         }
 
         mViewModel.useBundledTor.observe(this) { isChecked ->
@@ -268,29 +196,13 @@ class SettingsActivity : AppCompatActivity() {
     private fun updateProxy(address: String, port: String) {
         walletProxyPortEditText.setText(port)
         walletProxyAddressEditText.setText(address)
-        refreshProxy()
-    }
-
-    private fun refreshProxy() {
-        val proxyAddress = walletProxyAddressEditText.text.toString()
-        val proxyPort = walletProxyPortEditText.text.toString()
-        val savedProxyAddress = ProxyService.instance?.proxyAddress
-        val savedProxyPort = ProxyService.instance?.proxyPort
-        val currentWalletProxy = WalletManager.instance?.proxy
-        val newProxy = "$proxyAddress:$proxyPort"
-        if (proxyAddress != savedProxyAddress || proxyPort != savedProxyPort || (newProxy != currentWalletProxy && newProxy != ":"))
-            ProxyService.instance?.updateProxy(proxyAddress, proxyPort)
+        Utils.refreshProxy(address, port)
     }
 
     private fun displaySeedDialog(password: String) {
         val informationDialog = WalletKeysBottomSheetDialog()
         informationDialog.password = password
         informationDialog.show(supportFragmentManager, "information_seed_dialog")
-    }
-
-    private fun saveNodesAndReopen(jsonArray: JSONArray) {
-        PrefService.instance?.edit()?.putString(Constants.PREF_CUSTOM_NODES, jsonArray.toString())
-            ?.apply()
     }
 }
 

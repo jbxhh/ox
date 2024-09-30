@@ -11,15 +11,15 @@ class ProxyService(application: Application) : ServiceBase(null) {
     val proxyChangeEvents: SingleLiveEvent<String> = SingleLiveEvent()
     var samouraiTorManager: SamouraiTorManager? = null
     var usingProxy: Boolean = false
-        get() = PrefService.instance?.getBoolean(Constants.PREF_USES_PROXY, false) == true
+        get() = PrefService.instance.getBoolean(Constants.PREF_USES_PROXY, false)
         set(enabled) {
-            PrefService.instance?.edit()?.putBoolean(Constants.PREF_USES_PROXY, enabled)?.apply()
+            PrefService.instance.edit().putBoolean(Constants.PREF_USES_PROXY, enabled).apply()
             field = enabled
         }
     var useBundledTor: Boolean = false
-        get() = PrefService.instance?.getBoolean(Constants.PREF_USE_BUNDLED_TOR, false) == true
+        get() = PrefService.instance.getBoolean(Constants.PREF_USE_BUNDLED_TOR, false)
         set(enabled) {
-            PrefService.instance?.edit()?.putBoolean(Constants.PREF_USE_BUNDLED_TOR, enabled)?.apply()
+            PrefService.instance.edit().putBoolean(Constants.PREF_USE_BUNDLED_TOR, enabled).apply()
             field = enabled
         }
 
@@ -35,7 +35,7 @@ class ProxyService(application: Application) : ServiceBase(null) {
     fun updateProxy(proxyAddress: String, proxyPort: String) {
         var finalProxyAddress = proxyAddress
         var finalProxyPort = proxyPort
-        val curretNode = PrefService.instance?.node
+        val curretNode = PrefService.instance.node
         val isNodeLocalIp =
             curretNode?.address?.startsWith("10.") == true || curretNode?.address?.startsWith("192.168.") == true || curretNode?.address == "localhost" || curretNode?.address == "127.0.0.1"
         curretNode?.trusted?.let { WalletManager.instance?.wallet?.setTrustedDaemon(it) }
@@ -50,7 +50,7 @@ class ProxyService(application: Application) : ServiceBase(null) {
         if (proxyPort.isEmpty()) finalProxyPort = "9050"
         val validIpAddress = Patterns.IP_ADDRESS.matcher(finalProxyAddress).matches()
         if (validIpAddress) {
-            val proxy = PrefService.instance?.saveProxy(finalProxyAddress, finalProxyPort)
+            val proxy = PrefService.instance.saveProxy(finalProxyAddress, finalProxyPort)
             proxy?.let { proxyChangeEvents.postValue(it) }
         }
     }
@@ -61,7 +61,7 @@ class ProxyService(application: Application) : ServiceBase(null) {
     }
 
     val proxy: String?
-        get() = PrefService.instance?.getString(Constants.PREF_PROXY, "")
+        get() = PrefService.instance.getString(Constants.PREF_PROXY, "")
 
     val proxyAddress: String
         get() {

@@ -22,8 +22,7 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
-class NodeSelectionBottomSheetDialog : BottomSheetDialogFragment(), NodeSelectionAdapterListener {
-    var listener: NodeSelectionDialogListener? = null
+class NodeSelectionBottomSheetDialog(val listener: NodeSelectionDialogListener) : BottomSheetDialogFragment(), NodeSelectionAdapterListener {
     private var adapter: NodeSelectionAdapter? = null
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,12 +41,10 @@ class NodeSelectionBottomSheetDialog : BottomSheetDialogFragment(), NodeSelectio
         recyclerView.adapter = adapter
         val addNodeButton = view.findViewById<Button>(R.id.add_node_button)
         addNodeButton.setOnClickListener {
-            if (listener != null) {
-                listener?.onClickedAddNode()
-            }
+            listener.onClickedAddNode()
             dismiss()
         }
-        val nodesArray = PrefService.instance?.getString(Constants.PREF_CUSTOM_NODES, "[]")
+        val nodesArray = PrefService.instance.getString(Constants.PREF_CUSTOM_NODES, "[]")
         val jsonArray: JSONArray = try {
             JSONArray(nodesArray)
         } catch (e: JSONException) {
@@ -79,35 +76,31 @@ class NodeSelectionBottomSheetDialog : BottomSheetDialogFragment(), NodeSelectio
                 }
             }
         }
-        PrefService.instance?.edit()?.putString(Constants.PREF_CUSTOM_NODES, jsonArray.toString())
-            ?.apply()
+        PrefService.instance.edit().putString(Constants.PREF_CUSTOM_NODES, jsonArray.toString()).apply()
         for (defaultNode in DefaultNodes.values()) {
             fromJson(defaultNode.json)?.let { nodes.add(it) }
         }
         adapter?.submitList(nodes)
     }
 
-    override fun onSelectNode(node: Node?) {
-        PrefService.instance?.edit()?.putString(Constants.PREF_NODE_2, node?.toJson().toString())
-            ?.apply()
-        node?.let { DaemonService.instance?.setDaemon(it) }
+    override fun onSelectNode(node: Node) {
+        PrefService.instance.edit().putString(Constants.PREF_NODE_2, node.toJson().toString()).apply()
+        DaemonService.instance?.setDaemon(node)
         activity?.runOnUiThread {
             adapter?.updateSelectedNode()
         }
-        listener?.onNodeSelected()
+        listener.onNodeSelected()
     }
 
-    override fun onSelectEditNode(node: Node?): Boolean {
-        if (listener != null) {
-            listener?.onClickedEditNode(node)
-        }
+    override fun onSelectEditNode(node: Node): Boolean {
+        listener.onClickedEditNode(node)
         dismiss()
         return true
     }
 
     interface NodeSelectionDialogListener {
         fun onNodeSelected()
-        fun onClickedEditNode(node: Node?)
+        fun onClickedEditNode(node: Node)
         fun onClickedAddNode()
     }
 }

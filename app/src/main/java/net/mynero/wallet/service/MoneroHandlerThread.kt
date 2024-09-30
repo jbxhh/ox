@@ -60,9 +60,7 @@ class MoneroHandlerThread(val wallet: Wallet, val context: Context) : Thread(nul
 
     @Synchronized
     override fun start() {
-        println("HERE1")
         super.start()
-        println("HERE2")
         onRefresh(false)
     }
 
@@ -202,7 +200,6 @@ class MoneroHandlerThread(val wallet: Wallet, val context: Context) : Thread(nul
     }
 
     fun onRefresh(walletSynced: Boolean) {
-        println("onRefresh")
         if (walletSynced) {
             UTXOService.instance?.refreshUtxos()
         }
