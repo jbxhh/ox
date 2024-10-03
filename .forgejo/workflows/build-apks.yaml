@@ -224,6 +224,8 @@ jobs:
       - run: curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh
       - run: sudo bash nodesource_setup.sh
       - run: sudo apt install -y nodejs
+      - run: mkdir -p "$HOME/.android"
+      - run: echo "${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}" | base64 -d > "$HOME/.android/debug.keystore"
       - name: Checkout
         uses: actions/checkout@v4
       - uses: actions/download-artifact@v3
