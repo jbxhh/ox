@@ -1,53 +1,49 @@
-FLAVOUR = monero
 NPROC=16
 
-all: arm64-v8a armeabi-v7a x86_64 include/wallet2_api.h VERSION
-debug: arm64-v8a armeabi-v7a include/wallet2_api.h VERSION
+all: arm64-v8a armeabi-v7a x86_64 include/wallet2_api.h
+debug: arm64-v8a armeabi-v7a include/wallet2_api.h
 
-arm64-v8a: $(FLAVOUR) android64.Dockerfile
+arm64-v8a: monero android64.Containerfile
 	-rm -rf arm64-v8a
-	-docker container rm $(FLAVOUR)-android-arm64 -f
-	docker build -f android64.Dockerfile -t $(FLAVOUR)-android-arm64 $(FLAVOUR) --build-arg NPROC=$(NPROC)
-	docker create -it --name $(FLAVOUR)-android-arm64 $(FLAVOUR)-android-arm64 bash
+	-podman container rm monero-android-arm64 -f
+	podman build -f android64.Containerfile -t monero-android-arm64 monero --build-arg NPROC=$(NPROC)
+	podman create -it --name monero-android-arm64 monero-android-arm64 bash
 	mkdir arm64-v8a
-	docker cp $(FLAVOUR)-android-arm64:/opt/android/prefix/lib/. arm64-v8a/
-	docker cp $(FLAVOUR)-android-arm64:/src/build/release/lib/. arm64-v8a/$(FLAVOUR)
+	podman cp monero-android-arm64:/opt/android/prefix/lib/. arm64-v8a/
+	podman cp monero-android-arm64:/src/build/release/lib/. arm64-v8a/monero
 
-armeabi-v7a: $(FLAVOUR) android32.Dockerfile
+armeabi-v7a: monero android32.Containerfile
 	-rm -rf armeabi-v7a
-	-docker container rm $(FLAVOUR)-android-arm32 -f
-	docker build -f android32.Dockerfile -t $(FLAVOUR)-android-arm32 $(FLAVOUR) --build-arg NPROC=$(NPROC)
-	docker create -it --name $(FLAVOUR)-android-arm32 $(FLAVOUR)-android-arm32 bash
+	-podman container rm monero-android-arm32 -f
+	podman build -f android32.Containerfile -t monero-android-arm32 monero --build-arg NPROC=$(NPROC)
+	podman create -it --name monero-android-arm32 monero-android-arm32 bash
 	mkdir armeabi-v7a
-	docker cp $(FLAVOUR)-android-arm32:/opt/android/prefix/lib/. armeabi-v7a
-	docker cp $(FLAVOUR)-android-arm32:/src/build/release/lib/. armeabi-v7a/$(FLAVOUR)
+	podman cp monero-android-arm32:/opt/android/prefix/lib/. armeabi-v7a
+	podman cp monero-android-arm32:/src/build/release/lib/. armeabi-v7a/monero
 
-x86_64: $(FLAVOUR) android64_x86.Dockerfile
+x86_64: monero android64_x86.Containerfile
 	-rm -rf x86_64
-	-docker container rm $(FLAVOUR)-android-x86_64 -f
-	docker build -f android64_x86.Dockerfile -t $(FLAVOUR)-android-x86_64 $(FLAVOUR) --build-arg NPROC=$(NPROC)
-	docker create -it --name $(FLAVOUR)-android-x86_64 $(FLAVOUR)-android-x86_64 bash
+	-podman container rm monero-android-x86_64 -f
+	podman build -f android64_x86.Containerfile -t monero-android-x86_64 monero --build-arg NPROC=$(NPROC)
+	podman create -it --name monero-android-x86_64 monero-android-x86_64 bash
 	mkdir x86_64
-	docker cp $(FLAVOUR)-android-x86_64:/opt/android/prefix/lib/. x86_64
-	docker cp $(FLAVOUR)-android-x86_64:/src/build/release/lib/. x86_64/$(FLAVOUR)
+	podman cp monero-android-x86_64:/opt/android/prefix/lib/. x86_64
+	podman cp monero-android-x86_64:/src/build/release/lib/. x86_64/monero
 
-x86: $(FLAVOUR) android32_x86.Dockerfile
+x86: monero android32_x86.Containerfile
 	-rm -rf x86
-	-docker container rm $(FLAVOUR)-android-x86 -f
-	docker build -f android32_x86.Dockerfile -t $(FLAVOUR)-android-x86 $(FLAVOUR) --build-arg NPROC=$(NPROC)
-	docker create -it --name $(FLAVOUR)-android-x86 $(FLAVOUR)-android-x86 bash
+	-podman container rm monero-android-x86 -f
+	podman build -f android32_x86.Containerfile -t monero-android-x86 monero --build-arg NPROC=$(NPROC)
+	podman create -it --name monero-android-x86 monero-android-x86 bash
 	mkdir x86
-	docker cp $(FLAVOUR)-android-x86:/opt/android/prefix/lib/. x86
-	docker cp $(FLAVOUR)-android-x86:/src/build/release/lib/. x86/$(FLAVOUR)
+	podman cp monero-android-x86:/opt/android/prefix/lib/. x86
+	podman cp monero-android-x86:/src/build/release/lib/. x86/monero
 
-include/wallet2_api.h: $(FLAVOUR) include $(FLAVOUR)/src/wallet/api/wallet2_api.h
-	cp $(FLAVOUR)/src/wallet/api/wallet2_api.h include/wallet2_api.h
+include/wallet2_api.h: monero include monero/src/wallet/api/wallet2_api.h
+	cp monero/src/wallet/api/wallet2_api.h include/wallet2_api.h
 
 include:
 	mkdir include
-
-VERSION:
-	echo MONERUJO_$(FLAVOUR) `git -C . branch | grep "^\*" | sed 's/^..//'` with $(FLAVOUR) `git -C $(FLAVOUR) branch | grep "^\*" | sed 's/^..//'` > VERSION
 
 clean:
 	-rm -rf arm64-v8a
@@ -58,17 +54,13 @@ clean:
 	-rm -f VERSION
 
 distclean: clean
-	-docker container rm $(FLAVOUR)-android-arm64 -f
-	-docker container rm $(FLAVOUR)-android-arm32 -f
-	-docker container rm $(FLAVOUR)-android-x86_64 -f
-	-docker container rm $(FLAVOUR)-android-x86 -f
-	-docker image rm $(FLAVOUR)-android-arm64 -f
-	-docker image rm $(FLAVOUR)-android-arm32 -f
-	-docker image rm $(FLAVOUR)-android-x86_64 -f
-	-docker image rm $(FLAVOUR)-android-x86 -f
-	-rm $(FLAVOUR)
-
-$(FLAVOUR):
-	$(error Please ln -s $(FLAVOUR))
+	-podman container rm monero-android-arm64 -f
+	-podman container rm monero-android-arm32 -f
+	-podman container rm monero-android-x86_64 -f
+	-podman container rm monero-android-x86 -f
+	-podman image rm monero-android-arm64 -f
+	-podman image rm monero-android-arm32 -f
+	-podman image rm monero-android-x86_64 -f
+	-podman image rm monero-android-x86 -f
 
 .PHONY: all clean distclean
