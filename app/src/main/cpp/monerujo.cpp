@@ -38,7 +38,6 @@ static jclass class_ArrayList;
 static jclass class_WalletListener;
 static jclass class_TransactionInfo;
 static jclass class_Transfer;
-static jclass class_Ledger;
 static jclass class_WalletStatus;
 static jclass class_CoinsInfo;
 static jclass class_Pair;
@@ -1720,91 +1719,6 @@ Java_net_mynero_wallet_model_WalletManager_setLogLevel(JNIEnv *env, jclass clazz
 JNIEXPORT jstring JNICALL
 Java_net_mynero_wallet_model_WalletManager_moneroVersion(JNIEnv *env, jclass clazz) {
     return env->NewStringUTF(MONERO_VERSION);
-}
-
-//
-// Ledger Stuff
-//
-
-/**
- * @brief LedgerExchange - exchange data with Ledger Device
- * @param command        - buffer for data to send
- * @param cmd_len        - length of send to send
- * @param response       - buffer for received data
- * @param max_resp_len   - size of receive buffer
- *
- * @return length of received data in response or -1 if error
- */
-int LedgerExchange(
-        unsigned char *command,
-        unsigned int cmd_len,
-        unsigned char *response,
-        unsigned int max_resp_len) {
-    LOGD("LedgerExchange");
-    JNIEnv *jenv;
-    int envStat = attachJVM(&jenv);
-    if (envStat == JNI_ERR) return -1;
-
-    jmethodID exchangeMethod = jenv->GetStaticMethodID(class_Ledger, "Exchange", "([B)[B");
-
-    jsize sendLen = static_cast<jsize>(cmd_len);
-    jbyteArray dataSend = jenv->NewByteArray(sendLen);
-    jenv->SetByteArrayRegion(dataSend, 0, sendLen, (jbyte *) command);
-    jbyteArray dataRecv = (jbyteArray) jenv->CallStaticObjectMethod(class_Ledger, exchangeMethod,
-                                                                    dataSend);
-    jenv->DeleteLocalRef(dataSend);
-    if (dataRecv == nullptr) {
-        detachJVM(jenv, envStat);
-        LOGD("LedgerExchange SCARD_E_NO_READERS_AVAILABLE");
-        return -1;
-    }
-    jsize len = jenv->GetArrayLength(dataRecv);
-    LOGD("LedgerExchange SCARD_S_SUCCESS %u/%d", cmd_len, len);
-    if (len <= max_resp_len) {
-        jenv->GetByteArrayRegion(dataRecv, 0, len, (jbyte *) response);
-        jenv->DeleteLocalRef(dataRecv);
-        detachJVM(jenv, envStat);
-        return static_cast<int>(len);;
-    } else {
-        jenv->DeleteLocalRef(dataRecv);
-        detachJVM(jenv, envStat);
-        LOGE("LedgerExchange SCARD_E_INSUFFICIENT_BUFFER");
-        return -1;
-    }
-}
-
-/**
- * @brief LedgerFind - find Ledger Device and return it's name
- * @param buffer - buffer for name of found device
- * @param len    - length of buffer
- * @return  0 - success
- *         -1 - no device connected / found
- *         -2 - JVM not found
- */
-int LedgerFind(char *buffer, size_t len) {
-    LOGD("LedgerName");
-    JNIEnv *jenv;
-    int envStat = attachJVM(&jenv);
-    if (envStat == JNI_ERR) return -2;
-
-    jmethodID nameMethod = jenv->GetStaticMethodID(class_Ledger, "Name", "()Ljava/lang/String;");
-    jstring name = (jstring) jenv->CallStaticObjectMethod(class_Ledger, nameMethod);
-
-    int ret;
-    if (name != nullptr) {
-        const char *_name = jenv->GetStringUTFChars(name, nullptr);
-        strncpy(buffer, _name, len);
-        jenv->ReleaseStringUTFChars(name, _name);
-        buffer[len - 1] = 0; // terminate in case _name is bigger
-        ret = 0;
-        LOGD("LedgerName is %s", buffer);
-    } else {
-        buffer[0] = 0;
-        ret = -1;
-    }
-
-    detachJVM(jenv, envStat);
-    return ret;
 }
 
 #ifdef __cplusplus
