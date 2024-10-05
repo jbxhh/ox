@@ -235,5 +235,5 @@ jobs:
       - run: ./gradlew -PdbgBld assembleDebug
       - uses: actions/upload-artifact@v3
         with:
-          name: apk-arm64-v8a
-          path: app/build/outputs/apk/beta/
+          name: apks
+          path: app/build/outputs/apk/beta/debug/*.apk
