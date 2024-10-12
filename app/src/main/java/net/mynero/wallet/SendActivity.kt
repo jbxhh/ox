@@ -29,6 +29,7 @@ import com.ncorti.slidetoact.SlideToActView.OnSlideCompleteListener
 import net.mynero.wallet.model.PendingTransaction
 import net.mynero.wallet.model.Wallet
 import net.mynero.wallet.service.BalanceService
+import net.mynero.wallet.service.PrefService
 import net.mynero.wallet.service.TxService
 import net.mynero.wallet.service.UTXOService
 import net.mynero.wallet.util.Constants
@@ -37,7 +38,7 @@ import net.mynero.wallet.util.UriData
 
 class SendActivity : AppCompatActivity() {
 
-    var priority: PendingTransaction.Priority = PendingTransaction.Priority.Priority_Low
+    var priority: PendingTransaction.Priority = PendingTransaction.Priority.Priority_Default
     private lateinit var mViewModel: SendViewModel
     private lateinit var sendMaxButton: Button
     private lateinit var addOutputImageView: ImageButton
@@ -125,14 +126,21 @@ class SendActivity : AppCompatActivity() {
     }
 
     private fun bindListeners() {
-        feeRadioGroup.check(R.id.low_fee_radiobutton)
-        priority = PendingTransaction.Priority.Priority_Low
+        feeRadioGroup.check(R.id.default_fee_radiobutton)
+        priority = PendingTransaction.Priority.Priority_Default
         feeRadioGroup.setOnCheckedChangeListener { _: RadioGroup?, i: Int ->
             when (i) {
-                R.id.low_fee_radiobutton -> priority = PendingTransaction.Priority.Priority_Low
-                R.id.med_fee_radiobutton -> priority = PendingTransaction.Priority.Priority_Medium
+                R.id.default_fee_radiobutton -> priority = PendingTransaction.Priority.Priority_Default
+                R.id.medium_fee_radiobutton -> priority = PendingTransaction.Priority.Priority_Medium
                 R.id.high_fee_radiobutton -> priority = PendingTransaction.Priority.Priority_High
             }
+        }
+        if (PrefService.instance.getBoolean(Constants.PREF_ALLOW_FEE_OVERRIDE, false)) {
+            feeRadioGroup.visibility = View.VISIBLE
+            feeRadioGroupLabelTextView.visibility = View.VISIBLE
+        } else {
+            feeRadioGroup.visibility = View.GONE
+            feeRadioGroupLabelTextView.visibility = View.GONE
         }
         addOutputImageView.setOnClickListener {
             sendMaxButton.visibility = View.GONE
@@ -430,8 +438,13 @@ class SendActivity : AppCompatActivity() {
             setAddOutputButtonVisibility(View.VISIBLE)
             sendMaxButton.visibility = View.VISIBLE
             createButton.visibility = View.VISIBLE
-            feeRadioGroup.visibility = View.VISIBLE
-            feeRadioGroupLabelTextView.visibility = View.VISIBLE
+            if (PrefService.instance.getBoolean(Constants.PREF_ALLOW_FEE_OVERRIDE, false)) {
+                feeRadioGroup.visibility = View.VISIBLE
+                feeRadioGroupLabelTextView.visibility = View.VISIBLE
+            } else {
+                feeRadioGroup.visibility = View.GONE
+                feeRadioGroupLabelTextView.visibility = View.GONE
+            }
             sendTxSlider.visibility = View.GONE
             feeTextView.visibility = View.GONE
             addressTextView.visibility = View.GONE

@@ -11,6 +11,7 @@ object Constants {
     const val PREF_USES_OFFSET = "pref_uses_offset"
     const val PREF_STREET_MODE = "pref_street_mode"
     const val PREF_MONEROCHAN = "pref_monerochan"
+    const val PREF_ALLOW_FEE_OVERRIDE = "pref_allow_fee_override"
     const val PREF_FROZEN_COINS = "pref_frozen_coins"
     const val PREF_USE_BUNDLED_TOR = "pref_use_bundled_tor"
 

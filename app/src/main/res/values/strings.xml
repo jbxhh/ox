@@ -35,6 +35,7 @@
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="street_mode">Street mode (hide balances)</string>
     <string name="option_hide_xmrchan">Show Monerochan</string>
+    <string name="option_allow_fee_override">Manual fee selection</string>
     <string name="display_recovery_phrase">Display wallet keys</string>
     <string name="tor_switch_label">SOCKS Proxy</string>
     <string name="connection_failed">Failed to connect. Retrying…</string>
@@ -97,10 +98,10 @@
     <string name="transaction_conf_1_desc2_confirmed">time, and was mined in block</string>
     <string name="transaction_on_date_label">on</string>
     <string name="node_selected">Using node: %1$s</string>
-    <string name="fee_priority">Fee priority:</string>
-    <string name="low">Low</string>
-    <string name="medium">Medium</string>
-    <string name="high">High</string>
+    <string name="fee_priority">Fee:</string>
+    <string name="default_fee">Default</string>
+    <string name="medium_fee">Medium</string>
+    <string name="high_fee">High</string>
     <string name="view_utxos">View coins</string>
     <string name="selected_utxos_value">Selected value: %1$s XMR</string>
     <string name="selected_utxos_value_churning">Selected value: %1$s XMR\n\nThe anonymity benefits of churning are still being researched. Only proceed if you know what you are doing.</string>

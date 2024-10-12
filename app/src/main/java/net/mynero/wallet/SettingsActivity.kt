@@ -37,6 +37,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var selectNodeButton: Button
     private lateinit var streetModeSwitch: SwitchCompat
     private lateinit var monerochanSwitch: SwitchCompat
+    private lateinit var allowFeeOverrideSwitch: SwitchCompat
     private lateinit var useBundledTor: CheckBox
     private lateinit var displaySeedButton: Button
     private lateinit var displayUtxosButton: Button
@@ -59,6 +60,7 @@ class SettingsActivity : AppCompatActivity() {
         selectNodeButton = findViewById(R.id.select_node_button)
         streetModeSwitch = findViewById(R.id.street_mode_switch)
         monerochanSwitch = findViewById(R.id.monerochan_switch)
+        allowFeeOverrideSwitch = findViewById(R.id.allow_fee_override_switch)
         torSwitch = findViewById(R.id.tor_switch)
         val proxySettingsLayout = findViewById<ConstraintLayout>(R.id.wallet_proxy_settings_layout)
         walletProxyAddressEditText = findViewById(R.id.wallet_proxy_address_edittext)
@@ -74,10 +76,9 @@ class SettingsActivity : AppCompatActivity() {
         walletProxyAddressEditText.isEnabled = !cachedUsingBundledTor && cachedUsingProxy
         proxySettingsLayout.visibility = View.VISIBLE
 
-        streetModeSwitch.isChecked =
-            PrefService.instance.getBoolean(Constants.PREF_STREET_MODE, false) == true
-        monerochanSwitch.isChecked =
-            PrefService.instance.getBoolean(Constants.PREF_MONEROCHAN, Constants.DEFAULT_PREF_MONEROCHAN) == true
+        streetModeSwitch.isChecked = PrefService.instance.getBoolean(Constants.PREF_STREET_MODE, false)
+        monerochanSwitch.isChecked = PrefService.instance.getBoolean(Constants.PREF_MONEROCHAN, Constants.DEFAULT_PREF_MONEROCHAN)
+        allowFeeOverrideSwitch.isChecked = PrefService.instance.getBoolean(Constants.PREF_ALLOW_FEE_OVERRIDE, false)
         useBundledTor.isChecked = cachedUsingBundledTor
         torSwitch.isChecked = cachedUsingProxy
         updateProxy(cachedProxyAddress, cachedProxyPort)
@@ -105,6 +106,11 @@ class SettingsActivity : AppCompatActivity() {
 
         monerochanSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
             PrefService.instance.edit().putBoolean(Constants.PREF_MONEROCHAN, b).apply()
+            HistoryService.instance?.refreshHistory()
+        }
+
+        allowFeeOverrideSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PrefService.instance.edit().putBoolean(Constants.PREF_ALLOW_FEE_OVERRIDE, b).apply()
             HistoryService.instance?.refreshHistory()
         }
 
