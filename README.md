@@ -26,7 +26,7 @@ We are NOT responsible for lost or stolen funds.
 ## HOW TO BUILD
 
 See [the instructions](doc/BUILDING-external-libs.md)  
-Then, fire up Android Studio and build the APK.  
+Then, fire up Android Studio and build the APK like any other android app.  
 
 ## Donations
 
