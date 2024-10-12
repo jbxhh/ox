@@ -137,6 +137,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/monerochan_switch" />
 
+        <TextView
+            android:id="@+id/monerochan_label_textview2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:text="@string/option_allow_fee_override"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@id/allow_fee_override_switch"
+            app:layout_constraintEnd_toStartOf="@+id/allow_fee_override_switch"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/allow_fee_override_switch" />
+
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/monerochan_switch"
             android:layout_width="wrap_content"
@@ -147,19 +160,29 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/street_mode_switch" />
 
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/allow_fee_override_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/monerochan_switch" />
+
         <TextView
             android:id="@+id/network_settings_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="12dp"
             android:layout_marginEnd="24dp"
             android:text="@string/network"
             android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/monerochan_switch" />
+            app:layout_constraintTop_toBottomOf="@+id/allow_fee_override_switch" />
 
         <Button
             android:id="@+id/select_node_button"

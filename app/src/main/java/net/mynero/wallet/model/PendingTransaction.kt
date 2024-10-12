@@ -48,6 +48,7 @@ class PendingTransaction internal constructor(var handle: Long) {
                     1 -> return Priority_Low
                     2 -> return Priority_Medium
                     3 -> return Priority_High
+                    4 -> return Priority_Last
                 }
                 return null
             }

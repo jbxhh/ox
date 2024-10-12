@@ -98,19 +98,19 @@
         app:layout_constraintStart_toEndOf="@id/tx_fee_radiogroup_label_textview">
 
         <RadioButton
-            android:id="@+id/low_fee_radiobutton"
+            android:id="@+id/default_fee_radiobutton"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:checked="true"
-            android:text="@string/low"
+            android:text="@string/default_fee"
             android:textSize="16sp" />
 
         <RadioButton
-            android:id="@+id/med_fee_radiobutton"
+            android:id="@+id/medium_fee_radiobutton"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:checked="false"
-            android:text="@string/medium"
+            android:text="@string/medium_fee"
             android:textSize="16sp" />
 
         <RadioButton
@@ -118,7 +118,7 @@
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:checked="false"
-            android:text="@string/high"
+            android:text="@string/high_fee"
             android:textSize="16sp" />
     </RadioGroup>
 
