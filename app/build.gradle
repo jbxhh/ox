@@ -9,8 +9,8 @@ android {
         minSdkVersion 22
         targetSdkVersion 34
         compileSdk 34
-        versionCode 51003
-        versionName "0.5.10.3 'Fluorine Fermi'"
+        versionCode 51004
+        versionName "0.5.10.4 'Fluorine Fermi'"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
