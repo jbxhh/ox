@@ -2,7 +2,7 @@ package net.mynero.wallet.service
 
 import net.mynero.wallet.model.PendingTransaction
 
-class TxService(thread: MoneroHandlerThread) : ServiceBase(thread) {
+class TxService(val thread: MoneroHandlerThread) {
     init {
         instance = this
     }
@@ -15,7 +15,7 @@ class TxService(thread: MoneroHandlerThread) : ServiceBase(thread) {
         feePriority: PendingTransaction.Priority,
         selectedUtxos: ArrayList<String>
     ): PendingTransaction? {
-        return thread?.createTx(address, amount, sendAll, feePriority, selectedUtxos)
+        return thread.createTx(address, amount, sendAll, feePriority, selectedUtxos)
     }
 
     @Throws(Exception::class)
@@ -25,11 +25,11 @@ class TxService(thread: MoneroHandlerThread) : ServiceBase(thread) {
         feePriority: PendingTransaction.Priority,
         selectedUtxos: ArrayList<String>
     ): PendingTransaction? {
-        return thread?.createTx(dests, sendAll, feePriority, selectedUtxos)
+        return thread.createTx(dests, sendAll, feePriority, selectedUtxos)
     }
 
     fun sendTx(pendingTransaction: PendingTransaction): Boolean {
-        return thread?.sendTx(pendingTransaction) == true
+        return thread.sendTx(pendingTransaction)
     }
 
     companion object {

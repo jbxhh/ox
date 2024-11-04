@@ -3,7 +3,7 @@ package net.mynero.wallet.service
 import net.mynero.wallet.data.Node
 import net.mynero.wallet.livedata.SingleLiveEvent
 
-class DaemonService(thread: MoneroHandlerThread) : ServiceBase(thread) {
+class DaemonService {
     val daemonChangeEvents: SingleLiveEvent<Node> = SingleLiveEvent()
 
 

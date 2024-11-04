@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class AddressService(thread: MoneroHandlerThread) : ServiceBase(thread) {
+class AddressService {
     var numAddresses = 1
         private set
 

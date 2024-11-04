@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import net.mynero.wallet.model.TransactionInfo
 import net.mynero.wallet.model.WalletManager
 
-class HistoryService(thread: MoneroHandlerThread) : ServiceBase(thread) {
+class HistoryService {
     private val _history = MutableLiveData<List<TransactionInfo>>()
     var history: LiveData<List<TransactionInfo>> = _history
 

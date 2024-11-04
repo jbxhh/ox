@@ -12,7 +12,7 @@ import org.json.JSONArray
 import org.json.JSONException
 import java.util.Collections
 
-class UTXOService(thread: MoneroHandlerThread?) : ServiceBase(thread) {
+class UTXOService {
     private val _utxos = MutableLiveData<List<CoinsInfo>>()
     var utxos: LiveData<List<CoinsInfo>> = _utxos
     private var internalCachedUtxos: List<CoinsInfo> = ArrayList()

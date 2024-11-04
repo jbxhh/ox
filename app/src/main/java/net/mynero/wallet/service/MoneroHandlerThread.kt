@@ -48,12 +48,12 @@ class MoneroHandlerThread(val wallet: Wallet, val context: Context) : Thread(nul
             val thread = MoneroHandlerThread(wallet, context)
 
             TxService(thread)
-            BalanceService(thread)
-            AddressService(thread)
-            HistoryService(thread)
-            BlockchainService(thread)
-            DaemonService(thread)
-            UTXOService(thread)
+            BalanceService()
+            AddressService()
+            HistoryService()
+            BlockchainService()
+            DaemonService()
+            UTXOService()
             thread.start()
         }
     }
@@ -65,7 +65,7 @@ class MoneroHandlerThread(val wallet: Wallet, val context: Context) : Thread(nul
     }
 
     override fun run() {
-        val prefService = PrefService.instance ?: return
+        val prefService = PrefService.instance
         val usesTor = ProxyService.instance?.usingProxy == true
         val currentNode = prefService.node
         val isLocalIp =

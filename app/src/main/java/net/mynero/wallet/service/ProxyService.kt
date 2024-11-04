@@ -7,7 +7,7 @@ import net.mynero.wallet.livedata.SingleLiveEvent
 import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.util.Constants
 
-class ProxyService(application: Application) : ServiceBase(null) {
+class ProxyService(application: Application) {
     val proxyChangeEvents: SingleLiveEvent<String> = SingleLiveEvent()
     var samouraiTorManager: SamouraiTorManager? = null
     var usingProxy: Boolean = false

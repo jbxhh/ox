@@ -12,7 +12,7 @@ import net.mynero.wallet.util.Constants
 import org.json.JSONException
 import org.json.JSONObject
 
-class PrefService(application: MoneroApplication) : ServiceBase(null) {
+class PrefService(application: MoneroApplication) {
 
     private val preferences = application.getSharedPreferences(
         application.applicationInfo.packageName,
