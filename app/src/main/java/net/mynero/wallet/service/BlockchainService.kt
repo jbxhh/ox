@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import net.mynero.wallet.model.Wallet.ConnectionStatus
 import net.mynero.wallet.model.WalletManager
 
-class BlockchainService(thread: MoneroHandlerThread) : ServiceBase(thread) {
+class BlockchainService {
     private val _currentHeight = MutableLiveData(0L)
     var height: LiveData<Long> = _currentHeight
     var daemonHeight: Long = 0

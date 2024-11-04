@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import net.mynero.wallet.model.BalanceInfo
 
-class BalanceService(thread: MoneroHandlerThread) : ServiceBase(thread) {
+class BalanceService {
     private val _balanceInfo = MutableLiveData<BalanceInfo?>(null)
     var balanceInfo: LiveData<BalanceInfo?> = _balanceInfo
 
