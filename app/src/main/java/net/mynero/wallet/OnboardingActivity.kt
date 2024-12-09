@@ -97,7 +97,7 @@ class OnboardingActivity : AppCompatActivity() {
         walletProxyPortEditText.isEnabled = usingProxy && !usingBundledTor
 
         val node = PrefService.instance.node // should be using default here
-        selectNodeButton.text = getString(R.string.node_button_text, node?.address)
+        selectNodeButton.text = getString(R.string.node_button_text, node?.name)
 
         bindListeners()
         bindObservers()

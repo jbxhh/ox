@@ -21,7 +21,7 @@ class NodeSelectionDialogListenerAdapter(
 
     override fun onNodeSelected() {
         val node = PrefService.instance.node
-        setSelectNodeButtonText(activity.getString(R.string.node_button_text, node?.address))
+        setSelectNodeButtonText(activity.getString(R.string.node_button_text, node?.name))
 
         val (proxyAddress, proxyPort) = getProxyAndPortValues()
         Utils.refreshProxy(proxyAddress, proxyPort)
