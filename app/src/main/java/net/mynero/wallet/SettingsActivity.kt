@@ -84,7 +84,7 @@ class SettingsActivity : AppCompatActivity() {
         updateProxy(cachedProxyAddress, cachedProxyPort)
 
         val node = PrefService.instance.node // shouldn't use default value here
-        selectNodeButton.text = getString(R.string.node_button_text, node?.address)
+        selectNodeButton.text = getString(R.string.node_button_text, node?.name)
 
         bindListeners()
         bindObservers()
