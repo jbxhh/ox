@@ -254,19 +254,17 @@ object Helper {
     }
 
     fun getClipBoardText(context: Context): String? {
-        val clipboardManager =
-            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        try {
-            if (clipboardManager.hasPrimaryClip()
-                && clipboardManager.primaryClipDescription?.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN) == true
-            ) {
-                val item = clipboardManager.primaryClip?.getItemAt(0)
-                return item?.text.toString()
+        val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val primaryClip = clipboardManager.primaryClip
+        return primaryClip?.let {
+            val description = it.description
+            // some apps for some reason store clipboard text as html
+            if (description.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN) || description.hasMimeType(ClipDescription.MIMETYPE_TEXT_HTML)) {
+                // getItemAt may throw IndexOutOfBoundsException and there is no safe version of it
+                kotlin.runCatching { it.getItemAt(0) }.getOrNull()?.text?.toString()
+            } else {
+                null
             }
-        } catch (ex: NullPointerException) {
-            // if we have don't find a text in the clipboard
-            return null
         }
-        return null
     }
 }
