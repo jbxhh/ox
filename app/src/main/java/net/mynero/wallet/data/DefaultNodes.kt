@@ -61,18 +61,6 @@ enum class DefaultNodes(
         "mainnet",
         "Hashvault"
     ),
-    MONEROWORLD(
-        "node.moneroworld.com",
-        18089,
-        "mainnet",
-        "MoneroWorld"
-    ),
-    XMRTW(
-        "opennode.xmr-tw.org",
-        18089,
-        "mainnet",
-        "XMRTW"
-    ),
     MONERUJO_ONION(
         "monerujods7mbghwe6cobdr6ujih6c22zu5rl7zshmizz2udf7v7fsad.onion",
         18081,
