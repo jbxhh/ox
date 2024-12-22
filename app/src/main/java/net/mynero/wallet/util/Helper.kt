@@ -22,6 +22,7 @@ import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -37,6 +38,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import net.mynero.wallet.R
+import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader

@@ -18,6 +18,8 @@ package net.mynero.wallet.model
 import android.util.Log
 import android.util.Pair
 import net.mynero.wallet.data.Subaddress
+import net.mynero.wallet.util.TransactionDestination
+import timber.log.Timber
 import java.io.File
 
 class Wallet {
@@ -65,7 +67,7 @@ class Wallet {
     val name: String
         get() = getPath()?.let { File(it).name }.toString()
 
-    external fun getSeed(offset: String?): String?
+    external fun getSeed(offset: String): String
     external fun getLegacySeed(offset: String?): String?
     external fun isPolyseedSupported(offset: String?): Boolean
     external fun getSeedLanguage(): String?
@@ -80,6 +82,10 @@ class Wallet {
         }
 
     private external fun statusWithErrorString(): Status
+
+    fun getTransactionHistory(): TransactionHistory {
+        return TransactionHistory(getHistoryJ(), accountIndex)
+    }
 
     @Synchronized
     external fun setPassword(password: String?): Boolean
@@ -124,8 +130,7 @@ class Wallet {
     }
 
     external fun getPath(): String?
-    val networkType: NetworkType?
-        get() = NetworkType.fromInteger(nettype())
+    fun networkType(): NetworkType? = NetworkType.fromInteger(nettype())
 
     external fun nettype(): Int
 
@@ -145,52 +150,12 @@ class Wallet {
     external fun store(path: String?): Boolean
     fun close(): Boolean {
         disposePendingTransaction()
-        return WalletManager.instance?.close(this) == true
+        return WalletManager.instance.closeJ(this)
     }
 
     external fun getFilename(): String
 
-    //    virtual std::string keysFilename() const = 0;
-    fun init(upperTransactionSizeLimit: Long): Boolean {
-        var daemonAddress = WalletManager.instance?.getDaemonAddress()
-        var daemonUsername = WalletManager.instance?.daemonUsername
-        var daemonPassword = WalletManager.instance?.daemonPassword
-        var proxyAddress = WalletManager.instance?.proxy
-        Log.d("Wallet.kt", "init(")
-        if (daemonAddress != null) {
-            Log.d("Wallet.kt", daemonAddress.toString())
-        } else {
-            Log.d("Wallet.kt", "daemon_address == null")
-            daemonAddress = ""
-        }
-        Log.d("Wallet.kt", "upper_transaction_size_limit = 0 (probably)")
-        if (daemonUsername != null) {
-            Log.d("Wallet.kt", daemonUsername)
-        } else {
-            Log.d("Wallet.kt", "daemon_username == null")
-            daemonUsername = ""
-        }
-        if (daemonPassword != null) {
-            Log.d("Wallet.kt", daemonPassword)
-        } else {
-            Log.d("Wallet.kt", "daemon_password == null")
-            daemonPassword = ""
-        }
-        if (proxyAddress != null) {
-            Log.d("Wallet.kt", proxyAddress)
-        } else {
-            Log.d("Wallet.kt", "proxy_address == null")
-            proxyAddress = ""
-        }
-        Log.d("Wallet.kt", ");")
-        return initJ(
-            daemonAddress, upperTransactionSizeLimit,
-            daemonUsername, daemonPassword,
-            proxyAddress
-        )
-    }
-
-    private external fun initJ(
+    external fun initJ(
         daemonAddress: String, upperTransactionSizeLimit: Long,
         daemonUsername: String, daemonPassword: String, proxyAddress: String
     ): Boolean
@@ -198,7 +163,7 @@ class Wallet {
     external fun getRestoreHeight(): Long
     external fun setRestoreHeight(height: Long)
 
-    private val connectionStatus: ConnectionStatus
+    val connectionStatus: ConnectionStatus
         get() {
             val s = getConnectionStatusJ()
             return ConnectionStatus.values()[s]
@@ -234,17 +199,11 @@ class Wallet {
 
     external fun getUnlockedBalance(accountIndex: Int): Long
     external fun isWatchOnly(): Boolean
-    fun getBlockChainHeight(): Long {
-        return getBlockChainHeightJ().minus(1)
-    }
 
-    private external fun getBlockChainHeightJ(): Long
+    external fun getBlockChainHeightJ(): Long
     external fun getApproximateBlockChainHeight(): Long
-    fun getDaemonBlockChainHeight(): Long {
-        return getDaemonBlockChainHeightJ().minus(1)
-    }
 
-    private external fun getDaemonBlockChainHeightJ(): Long
+    external fun getDaemonBlockChainHeightJ(): Long
     external fun getDaemonBlockChainTargetHeight(): Long
 
     fun setSynchronized() {
@@ -291,26 +250,26 @@ class Wallet {
         dstAddr: String,
         priority: PendingTransaction.Priority,
         keyImages: ArrayList<String>
-    ): PendingTransaction? {
+    ): PendingTransaction {
         disposePendingTransaction()
         val _priority = priority.ordinal
         val txHandle = createSweepTransaction(dstAddr, "", 0, _priority, accountIndex, keyImages)
         pendingTransaction = PendingTransaction(txHandle)
-        return pendingTransaction
+        return pendingTransaction!!
     }
 
     fun createTransactionMultDest(
-        outputs: List<TransactionOutput>,
+        outputs: List<TransactionDestination>,
         priority: PendingTransaction.Priority,
         keyImages: ArrayList<String>
-    ): PendingTransaction? {
+    ): PendingTransaction {
         disposePendingTransaction()
         val _priority = priority.ordinal
         val destinations = ArrayList<String>()
         val amounts = LongArray(outputs.size)
         for (i in outputs.indices) {
             val output = outputs[i]
-            destinations.add(output.destination)
+            destinations.add(output.address)
             amounts[i] = output.amount
         }
         val txHandle = createTransactionMultDestJ(
@@ -318,7 +277,7 @@ class Wallet {
             accountIndex, keyImages
         )
         pendingTransaction = PendingTransaction(txHandle)
-        return pendingTransaction
+        return pendingTransaction!!
     }
 
     private external fun createTransactionMultDestJ(
@@ -462,10 +421,6 @@ class Wallet {
     companion object {
         const val SWEEP_ALL = Long.MAX_VALUE
         private const val NEW_ACCOUNT_NAME = "Untitled account" // src/wallet/wallet2.cpp:941
-
-        init {
-            System.loadLibrary("monerujo")
-        }
 
         @JvmStatic
         external fun getDisplayAmount(amount: Long): String

@@ -15,6 +15,7 @@
  */
 package net.mynero.wallet.adapter
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,7 +24,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import net.mynero.wallet.R
 import net.mynero.wallet.model.TransactionInfo
-import net.mynero.wallet.service.PrefService
 import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.DateHelper
 import net.mynero.wallet.util.Helper
@@ -31,20 +31,23 @@ import net.mynero.wallet.util.ThemeHelper
 import java.util.Calendar
 import java.util.Date
 
-class TransactionInfoAdapter(val listener: TxInfoAdapterListener?) :
-    RecyclerView.Adapter<TransactionInfoAdapter.ViewHolder>() {
-    private var localDataSet: List<TransactionInfo>
+class TransactionInfoAdapter(
+    private var streetMode: Boolean,
+    val listener: TxInfoAdapterListener,
+) : RecyclerView.Adapter<TransactionInfoAdapter.ViewHolder>() {
 
-    /**
-     * Initialize the dataset of the Adapter.
-     */
-    init {
-        localDataSet = ArrayList()
-    }
+    private var localDataSet: List<TransactionInfo> = emptyList()
 
     fun submitList(dataSet: List<TransactionInfo>) {
         localDataSet = dataSet
         notifyDataSetChanged()
+    }
+
+    fun submitStreetMode(newStreetMode: Boolean) {
+        if (streetMode != newStreetMode) {
+            streetMode = newStreetMode
+            notifyDataSetChanged()
+        }
     }
 
     // Create new views (invoked by the layout manager)
@@ -58,7 +61,7 @@ class TransactionInfoAdapter(val listener: TxInfoAdapterListener?) :
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val tx = localDataSet[position]
-        viewHolder.bind(tx)
+        viewHolder.bind(tx, streetMode)
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -67,7 +70,7 @@ class TransactionInfoAdapter(val listener: TxInfoAdapterListener?) :
     }
 
     interface TxInfoAdapterListener {
-        fun onClickTransaction(txInfo: TransactionInfo?)
+        fun onClickTransaction(txInfo: TransactionInfo)
     }
 
     /**
@@ -80,6 +83,7 @@ class TransactionInfoAdapter(val listener: TxInfoAdapterListener?) :
         private val inboundColour: Int
         private val pendingColour: Int
         private val failedColour: Int
+        private val selfColour: Int
         private var amountTextView: TextView? = null
 
         init {
@@ -87,16 +91,15 @@ class TransactionInfoAdapter(val listener: TxInfoAdapterListener?) :
             outboundColour = ThemeHelper.getThemedColor(view.context, R.attr.negativeColor)
             pendingColour = ThemeHelper.getThemedColor(view.context, R.attr.neutralColor)
             failedColour = ThemeHelper.getThemedColor(view.context, R.attr.neutralColor)
+            selfColour = ThemeHelper.getThemedColor(view.context, R.attr.softFavouriteColor)
             val cal = Calendar.getInstance()
             val tz = cal.timeZone //get the local time zone.
             DateHelper.DATETIME_FORMATTER.timeZone = tz
         }
 
-        fun bind(txInfo: TransactionInfo) {
-            val streetModeEnabled =
-                PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false) == true
+        fun bind(txInfo: TransactionInfo, streetMode: Boolean) {
             val displayAmount =
-                if (streetModeEnabled) Constants.STREET_MODE_BALANCE else Helper.getDisplayAmount(
+                if (streetMode) Constants.STREET_MODE_BALANCE else Helper.getDisplayAmount(
                     txInfo.amount,
                     Helper.DISPLAY_DIGITS_INFO
                 )
@@ -135,8 +138,22 @@ class TransactionInfoAdapter(val listener: TxInfoAdapterListener?) :
                 }
             } else {
                 setTxColour(outboundColour)
-                confirmationsProgressBar.visibility = View.GONE
-                confirmationsTextView.visibility = View.GONE
+                if (txInfo.amount == 0L) {
+                    setTxColour(Color.CYAN)
+                }
+                if (!txInfo.isConfirmed) {
+                    confirmationsProgressBar.visibility = View.VISIBLE
+                    val confirmations = txInfo.confirmations.toInt()
+                    confirmationsProgressBar.setProgressCompat(confirmations, true)
+                    val confCount = confirmations.toString()
+                    confirmationsTextView.text = confCount
+                    if (confCount.length == 1) // we only have space for character in the progress circle
+                        confirmationsTextView.visibility =
+                            View.VISIBLE else confirmationsTextView.visibility = View.GONE
+                } else {
+                    confirmationsProgressBar.visibility = View.GONE
+                    confirmationsTextView.visibility = View.GONE
+                }
             }
             if (txInfo.direction == TransactionInfo.Direction.Direction_Out) {
                 amountTextView?.text =

@@ -4,10 +4,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import net.mynero.wallet.MoneroApplication
-import net.mynero.wallet.data.DefaultNodes
+import net.mynero.wallet.data.DefaultNode
 import net.mynero.wallet.data.Node
 import net.mynero.wallet.data.Node.Companion.fromJson
-import net.mynero.wallet.data.Node.Companion.fromString
 import net.mynero.wallet.util.Constants
 import org.json.JSONException
 import org.json.JSONObject
@@ -27,40 +26,6 @@ class PrefService(application: MoneroApplication) {
         return preferences.edit()
     }
 
-    val node: Node?
-        get() {
-            val usesProxy = ProxyService.instance?.usingProxy == true
-            var defaultNode = DefaultNodes.MONERUJO
-            if (usesProxy) {
-                val proxyPort = ProxyService.instance?.proxyPort
-                if (proxyPort?.isNotEmpty() == true) {
-                    val port = proxyPort.toInt()
-                    if (port == 9050) {
-                        defaultNode = DefaultNodes.MONERUJO_ONION
-                    }
-                }
-            }
-            val nodeString = getString(Constants.PREF_NODE_2, defaultNode.nodeString)
-            return try {
-                val nodeJson = nodeString?.let { JSONObject(it) }
-                fromJson(nodeJson)
-            } catch (e: JSONException) {
-                // stored node is not json format, upgrade if possible
-                nodeString?.let { upgradeOldNode(it) }
-            }
-        }
-
-    private fun upgradeOldNode(nodeString: String): Node? {
-        if (nodeString.isNotEmpty()) {
-            val node = fromString(nodeString)
-            if (node != null) {
-                edit().putString(Constants.PREF_NODE_2, node.toJson().toString())?.apply()
-                return node
-            }
-        }
-        return null
-    }
-
     fun getString(key: String?, defaultValue: String): String? {
         val value = preferences.getString(key, "")
         if (value?.isEmpty() == true && defaultValue.isNotEmpty()) {
@@ -78,18 +43,6 @@ class PrefService(application: MoneroApplication) {
             return true
         }
         return value
-    }
-
-    fun saveProxy(address: String, port: String): String? {
-        if (address.isEmpty() || port.isEmpty()) {
-            deleteProxy()
-            return null
-        }
-        val proxyAddress = "$address:$port"
-        if (proxyAddress == ":") return null
-        Log.d("PrefService", "Setting proxy. proxyAddress=$proxyAddress")
-        edit().putString(Constants.PREF_PROXY, proxyAddress)?.apply()
-        return proxyAddress
     }
 
     fun deleteProxy() {

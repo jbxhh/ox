@@ -51,7 +51,6 @@
             android:src="@drawable/ic_content_paste_24dp"
             app:layout_constraintBottom_toBottomOf="@id/address_edittext"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/node_port_edittext"
             app:layout_constraintTop_toTopOf="@id/address_edittext"
             tools:ignore="SpeakableTextPresentCheck" />
 
@@ -65,23 +64,9 @@
             android:hint="@string/node_address_hint"
             android:inputType="text"
             app:layout_constraintBottom_toTopOf="@id/trusted_node_checkbox"
-            app:layout_constraintEnd_toStartOf="@id/node_port_edittext"
+            app:layout_constraintEnd_toStartOf="@+id/paste_address_imagebutton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/node_name_edittext" />
-
-        <EditText
-            android:id="@+id/node_port_edittext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:background="@drawable/edittext_bg"
-            android:digits="-QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890.:"
-            android:hint="@string/node_port_hint"
-            android:inputType="number"
-            app:layout_constraintBottom_toBottomOf="@id/address_edittext"
-            app:layout_constraintEnd_toStartOf="@id/paste_address_imagebutton"
-            app:layout_constraintStart_toEndOf="@id/address_edittext"
-            app:layout_constraintTop_toTopOf="@id/address_edittext" />
 
         <CheckBox
             android:id="@+id/trusted_node_checkbox"

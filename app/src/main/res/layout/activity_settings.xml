@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="net.mynero.wallet.fragment.settings.SettingsFragment">
+    tools:context="net.mynero.wallet.SettingsActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -81,11 +81,25 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="24dp"
             android:background="@drawable/button_bg"
-            android:text="@string/view_utxos"
+            android:text="@string/view_enotes"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/display_seed_button" />
+
+        <Button
+            android:id="@+id/save_proxy_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="24dp"
+            android:background="@drawable/button_bg"
+            android:text="@string/settings_save_proxy"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/wallet_proxy_settings_layout" />
 
         <TextView
             android:id="@+id/appearance_settings_textview"
@@ -126,19 +140,7 @@
             app:layout_constraintTop_toBottomOf="@id/appearance_settings_textview" />
 
         <TextView
-            android:id="@+id/monerochan_label_textview"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="@string/option_hide_xmrchan"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@id/monerochan_switch"
-            app:layout_constraintEnd_toStartOf="@id/monerochan_switch"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/monerochan_switch" />
-
-        <TextView
-            android:id="@+id/monerochan_label_textview2"
+            android:id="@+id/allow_fee_override_label_textview"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
@@ -151,16 +153,6 @@
             app:layout_constraintTop_toTopOf="@+id/allow_fee_override_switch" />
 
         <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/monerochan_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/street_mode_switch" />
-
-        <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/allow_fee_override_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -168,7 +160,7 @@
             android:minWidth="48dp"
             android:minHeight="48dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/monerochan_switch" />
+            app:layout_constraintTop_toBottomOf="@+id/street_mode_switch" />
 
         <TextView
             android:id="@+id/network_settings_textview"
@@ -210,13 +202,13 @@
             android:layout_marginStart="24dp"
             android:text="@string/tor_switch_label"
             android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@id/tor_switch"
-            app:layout_constraintEnd_toStartOf="@id/tor_switch"
+            app:layout_constraintBottom_toBottomOf="@id/proxy_switch"
+            app:layout_constraintEnd_toStartOf="@id/proxy_switch"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/tor_switch" />
+            app:layout_constraintTop_toTopOf="@id/proxy_switch" />
 
         <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/tor_switch"
+            android:id="@+id/proxy_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -233,7 +225,7 @@
             android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tor_switch">
+            app:layout_constraintTop_toBottomOf="@id/proxy_switch">
 
             <CheckBox
                 android:id="@+id/bundled_tor_checkbox"

@@ -15,75 +15,66 @@
  */
 package net.mynero.wallet.adapter
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import net.mynero.wallet.R
-import net.mynero.wallet.data.DefaultNodes
 import net.mynero.wallet.data.Node
-import net.mynero.wallet.service.PrefService
 
-class NodeSelectionAdapter(val listener: NodeSelectionAdapterListener?) :
-    RecyclerView.Adapter<NodeSelectionAdapter.ViewHolder>() {
-    private var localDataSet: List<Node>
+class NodeSelectionAdapter(
+    private var nodes: List<Node>,
+    private var selectedNode: Node,
+    private val listener: NodeSelectionAdapterListener
+) : RecyclerView.Adapter<NodeSelectionAdapter.ViewHolder>() {
 
-    /**
-     * Initialize the dataset of the Adapter.
-     */
-    init {
-        localDataSet = ArrayList()
-    }
-
-    fun submitList(dataSet: List<Node>) {
-        localDataSet = dataSet
+    @SuppressLint("NotifyDataSetChanged")
+    fun setNodes(nodes: List<Node>) {
+        this.nodes = nodes
         notifyDataSetChanged()
     }
 
-    fun updateSelectedNode() {
-        notifyDataSetChanged()
+    fun setSelectedNode(selectedNode: Node) {
+        val oldSelectedNodePosition = nodes.indexOf(this.selectedNode)
+        val newSelectedNodePosition = nodes.indexOf(selectedNode)
+        this.selectedNode = selectedNode
+        if (oldSelectedNodePosition >= 0) {
+            notifyItemChanged(oldSelectedNodePosition)
+        }
+        if (newSelectedNodePosition >= 0) {
+            notifyItemChanged(newSelectedNodePosition)
+        }
     }
 
-    // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        // Create a new view, which defines the UI of the list item
-        val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.node_selection_item, viewGroup, false)
+        val view = LayoutInflater.from(viewGroup.context).inflate(R.layout.node_selection_item, viewGroup, false)
         return ViewHolder(listener, view)
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        val node = localDataSet[position]
-        viewHolder.bind(node)
+        val node = nodes[position]
+        viewHolder.bind(node, node == selectedNode)
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount(): Int {
-        return localDataSet.size
+        return nodes.size
     }
 
     interface NodeSelectionAdapterListener {
         fun onSelectNode(node: Node)
-        fun onSelectEditNode(node: Node): Boolean
+        fun onEditNode(node: Node)
     }
 
-    /**
-     * Provide a reference to the type of views that you are using
-     * (custom ViewHolder).
-     */
-    class ViewHolder(private val listener: NodeSelectionAdapterListener?, view: View) :
+    class ViewHolder(private val listener: NodeSelectionAdapterListener, view: View) :
         RecyclerView.ViewHolder(
             view
         ) {
-        fun bind(node: Node) {
-            val currentNode = PrefService.instance.node
-            val match = node == currentNode
-            if (match) {
+        fun bind(node: Node, isSelected: Boolean) {
+            if (isSelected) {
                 itemView.setBackgroundColor(
                     ContextCompat.getColor(
                         itemView.context,
@@ -104,7 +95,7 @@ class NodeSelectionAdapter(val listener: NodeSelectionAdapterListener?) :
             val trustedTextView = itemView.findViewById<TextView>(R.id.trusted_node_textview)
             nodeNameTextView.text = node.name
             nodeAddressTextView.text = node.address
-            if (node.password.isNotEmpty()) {
+            if (!node.password.isNullOrBlank()) {
                 authTextView.visibility = View.VISIBLE
             }
             if (node.trusted) {
@@ -122,33 +113,10 @@ class NodeSelectionAdapter(val listener: NodeSelectionAdapterListener?) :
                 nodeAnonymityNetworkImageView.visibility = View.GONE
             }
             itemView.setOnLongClickListener {
-                if (match) {
-                    Toast.makeText(
-                        itemView.context,
-                        itemView.resources.getString(R.string.cant_edit_current_node),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@setOnLongClickListener true
-                } else if (isDefaultNode(node)) {
-                    Toast.makeText(
-                        itemView.context,
-                        itemView.resources.getString(R.string.cant_edit_default_nodes),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@setOnLongClickListener true
-                } else {
-                    return@setOnLongClickListener listener?.onSelectEditNode(node) == true
-                }
+                listener.onEditNode(node)
+                return@setOnLongClickListener true
             }
-            itemView.setOnClickListener { listener?.onSelectNode(node) }
-        }
-
-        private fun isDefaultNode(currentNode: Node): Boolean {
-            var isDefault = false
-            for (defaultNode in DefaultNodes.values()) {
-                if (currentNode.toNodeString() == defaultNode.nodeString) isDefault = true
-            }
-            return isDefault
+            itemView.setOnClickListener { listener.onSelectNode(node) }
         }
     }
 }

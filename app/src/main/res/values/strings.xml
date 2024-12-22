@@ -75,8 +75,7 @@
     <string name="add_node">Add Node</string>
     <string name="nodes">Nodes</string>
     <string name="node_name_hint">My Monero Node</string>
-    <string name="node_address_hint">127.0.0.1</string>
-    <string name="node_port_hint">18081</string>
+    <string name="node_address_hint">127.0.0.1:18081</string>
     <string name="node_username_hint">Username (optional)</string>
     <string name="node_password_hint">Passphrase</string>
     <string name="transaction_action_sent">You sent</string>
@@ -102,7 +101,8 @@
     <string name="default_fee">Default</string>
     <string name="medium_fee">Medium</string>
     <string name="high_fee">High</string>
-    <string name="view_utxos">View coins</string>
+    <string name="view_enotes">View enotes</string>
+    <string name="settings_save_proxy">Save &amp; update</string>
     <string name="selected_utxos_value">Selected value: %1$s XMR</string>
     <string name="selected_utxos_value_churning">Selected value: %1$s XMR\n\nThe anonymity benefits of churning are still being researched. Only proceed if you know what you are doing.</string>
     <string name="global_index_text">%1$d</string>
@@ -111,7 +111,6 @@
     <string name="churn">Churn</string>
     <string name="freeze">Freeze</string>
     <string name="unfreeze">Unfreeze</string>
-    <string name="toggle_freeze">(Un)freeze</string>
     <string name="wallet_keys_label">Wallet Keys</string>
     <string name="done">Done</string>
     <string name="delete">Delete</string>
@@ -154,5 +153,5 @@
     <string name="approve_the_transaction">Send transaction</string>
     <string name="paste_clipboard_into_passphrase_field">Paste clipboard into passphrase field</string>
     <string name="slide_to_send_transaction">Slide to send transaction</string>
-
+    <string name="service_description">Wallet is open</string>
 </resources>

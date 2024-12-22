@@ -1,9 +1,13 @@
 package net.mynero.wallet
 
-import android.app.Activity
+import android.content.ComponentName
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -13,13 +17,13 @@ import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.google.zxing.client.android.Intents
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanIntentResult
@@ -28,18 +32,22 @@ import com.ncorti.slidetoact.SlideToActView
 import com.ncorti.slidetoact.SlideToActView.OnSlideCompleteListener
 import net.mynero.wallet.model.PendingTransaction
 import net.mynero.wallet.model.Wallet
-import net.mynero.wallet.service.BalanceService
-import net.mynero.wallet.service.PrefService
-import net.mynero.wallet.service.TxService
-import net.mynero.wallet.service.UTXOService
+import net.mynero.wallet.service.wallet.WalletServiceObserver
+import net.mynero.wallet.service.wallet.WalletService
 import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.Helper
+import net.mynero.wallet.util.PreferenceUtils
+import net.mynero.wallet.util.TransactionDestination
 import net.mynero.wallet.util.UriData
 
-class SendActivity : AppCompatActivity() {
+class SendActivity : AppCompatActivity(), WalletServiceObserver {
 
     var priority: PendingTransaction.Priority = PendingTransaction.Priority.Priority_Default
-    private lateinit var mViewModel: SendViewModel
+
+    private val viewModel: SendViewModel by viewModels()
+
+    private var walletService: WalletService? = null
+
     private lateinit var sendMaxButton: Button
     private lateinit var addOutputImageView: ImageButton
     private lateinit var destList: LinearLayout
@@ -77,7 +85,6 @@ class SendActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_send)
 
-        mViewModel = ViewModelProvider(this)[SendViewModel::class.java]
         sendMaxButton = findViewById(R.id.send_max_button)
         addOutputImageView = findViewById(R.id.add_output_button)
         destList = findViewById(R.id.transaction_destination_list)
@@ -95,34 +102,7 @@ class SendActivity : AppCompatActivity() {
         bindObservers()
         init()
 
-        val selectedUtxos = mViewModel.utxos.value
-        if (selectedUtxos?.isNotEmpty() == true) {
-            var selectedValue: Long = 0
-            val utxos = UTXOService.instance?.getUtxos() ?: return
-            for (coinsInfo in utxos) {
-                if (selectedUtxos.contains(coinsInfo.keyImage)) {
-                    selectedValue += coinsInfo.amount
-                }
-            }
-            val valueString = Wallet.getDisplayAmount(selectedValue)
-            selectedUtxosValueTextView.visibility = View.VISIBLE
-            selectedUtxosValueTextView.text = resources.getString(
-                R.string.selected_utxos_value,
-                valueString
-            )
-        } else {
-            selectedUtxosValueTextView.visibility = View.GONE
-        }
-    }
-
-    private fun init() {
-        val address = intent.getStringExtra(Constants.EXTRA_SEND_ADDRESS)
-        val amount = intent.getStringExtra(Constants.EXTRA_SEND_AMOUNT)
-        val max = intent.getBooleanExtra(Constants.EXTRA_SEND_MAX, false)
-        val utxos = intent.getStringArrayListExtra(Constants.EXTRA_SEND_UTXOS) ?: ArrayList()
-        addOutput(true, address, amount)
-        mViewModel.setSendingMax(max)
-        mViewModel.setUtxos(utxos)
+        connectWalletService()
     }
 
     private fun bindListeners() {
@@ -135,7 +115,7 @@ class SendActivity : AppCompatActivity() {
                 R.id.high_fee_radiobutton -> priority = PendingTransaction.Priority.Priority_High
             }
         }
-        if (PrefService.instance.getBoolean(Constants.PREF_ALLOW_FEE_OVERRIDE, false)) {
+        if (PreferenceUtils.isAllowFeeOverride(this)) {
             feeRadioGroup.visibility = View.VISIBLE
             feeRadioGroupLabelTextView.visibility = View.VISIBLE
         } else {
@@ -155,14 +135,14 @@ class SendActivity : AppCompatActivity() {
                 ).show()
             }
         }
-        sendMaxButton.setOnClickListener { mViewModel.setSendingMax(!isSendAll) }
+        sendMaxButton.setOnClickListener { viewModel.setSendingMax(!isSendAll) }
         createButton.setOnClickListener {
             val outputsValid = checkDestsValidity(isSendAll)
             if (outputsValid) {
                 Toast.makeText(this, getString(R.string.creating_tx), Toast.LENGTH_SHORT).show()
                 createButton.isEnabled = false
                 sendMaxButton.isEnabled = false
-                createTx(rawDests, isSendAll, priority, mViewModel.utxos.value ?: ArrayList())
+                createTx(rawDests, isSendAll, priority, viewModel.enotes.value ?: ArrayList())
             } else {
                 Toast.makeText(
                     this,
@@ -189,8 +169,93 @@ class SendActivity : AppCompatActivity() {
         }
     }
 
+    private fun bindObservers() {
+        viewModel.sendingMax.observe(this) { sendingMax: Boolean? ->
+            if (viewModel.pendingTransaction.value == null) {
+                if (sendingMax == true) {
+                    prepareOutputsForMaxSend()
+                    sendMaxButton.text = getText(R.string.undo)
+                } else {
+                    unprepareMaxSend()
+                    sendMaxButton.text = getText(R.string.send_max)
+                }
+            }
+        }
+        viewModel.showAddOutputButton.observe(this) { show: Boolean? ->
+            setAddOutputButtonVisibility(
+                if (show == true && !destsHasPaymentId()) View.VISIBLE else View.INVISIBLE
+            )
+        }
+        viewModel.pendingTransaction.observe(this) { pendingTx: PendingTransaction? ->
+            showConfirmationLayout(pendingTx != null)
+            if (pendingTx != null) {
+                val address = if (destCount == 1) getAddressField(0).text.toString() else "Multiple"
+                addressTextView.text = getString(R.string.tx_address_text, address)
+                amountTextView.text =
+                    getString(
+                        R.string.tx_amount_text,
+                        Helper.getDisplayAmount(pendingTx.getAmount())
+                    )
+                feeTextView.text =
+                    getString(R.string.tx_fee_text, Helper.getDisplayAmount(pendingTx.getFee()))
+            }
+        }
+    }
+
+    private fun init() {
+        val address = intent.getStringExtra(Constants.EXTRA_SEND_ADDRESS)
+        val amount = intent.getStringExtra(Constants.EXTRA_SEND_AMOUNT)
+        val max = intent.getBooleanExtra(Constants.EXTRA_SEND_MAX, false)
+        val enotes = intent.getStringArrayListExtra(Constants.EXTRA_SEND_ENOTES) ?: ArrayList()
+        addOutput(true, address, amount)
+        viewModel.setSendingMax(max)
+        viewModel.setEnotes(enotes)
+    }
+
+    private fun connectWalletService() {
+        val intent = Intent(applicationContext, WalletService::class.java)
+        startService(intent)
+        bindService(intent, connection, BIND_AUTO_CREATE)
+    }
+
+    private val connection: ServiceConnection = object : ServiceConnection {
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            val walletService = (service as WalletService.WalletServiceBinder).service
+            this@SendActivity.walletService = walletService
+            walletService.addObserver(this@SendActivity)
+            updateEnotesLabel()
+        }
+
+        override fun onServiceDisconnected(className: ComponentName) {
+            walletService = null
+        }
+    }
+
+    private fun updateEnotesLabel() {
+        walletService?.let { walletService ->
+            val selectedUtxos = viewModel.enotes.value
+            if (selectedUtxos?.isNotEmpty() == true) {
+                var selectedValue: Long = 0
+                val enotes = walletService.getWalletOrThrow().coins!!.all
+                for (coinsInfo in enotes) {
+                    if (selectedUtxos.contains(coinsInfo.keyImage)) {
+                        selectedValue += coinsInfo.amount
+                    }
+                }
+                val valueString = Wallet.getDisplayAmount(selectedValue)
+                selectedUtxosValueTextView.visibility = View.VISIBLE
+                selectedUtxosValueTextView.text = resources.getString(
+                    R.string.selected_utxos_value,
+                    valueString
+                )
+            } else {
+                selectedUtxosValueTextView.visibility = View.GONE
+            }
+        }
+    }
+
     private fun confirmSlider() {
-        val pendingTx = mViewModel.pendingTransaction.value ?: return
+        val pendingTx = viewModel.pendingTransaction.value ?: return
         Toast.makeText(this, getString(R.string.sending_tx), Toast.LENGTH_SHORT)
             .show()
         sendTx(pendingTx)
@@ -211,7 +276,7 @@ class SendActivity : AppCompatActivity() {
                     return false
                 }
                 val amountRaw = Wallet.getAmountFromString(amount)
-                val balance = BalanceService.instance?.unlockedBalanceRaw ?: 0
+                val balance = walletService!!.getWalletOrThrow().unlockedBalance
                 if (amountRaw >= balance || amountRaw <= 0) {
                     Toast.makeText(
                         this,
@@ -260,39 +325,6 @@ class SendActivity : AppCompatActivity() {
         return false
     }
 
-    private fun bindObservers() {
-        mViewModel.sendingMax.observe(this) { sendingMax: Boolean? ->
-            if (mViewModel.pendingTransaction.value == null) {
-                if (sendingMax == true) {
-                    prepareOutputsForMaxSend()
-                    sendMaxButton.text = getText(R.string.undo)
-                } else {
-                    unprepareMaxSend()
-                    sendMaxButton.text = getText(R.string.send_max)
-                }
-            }
-        }
-        mViewModel.showAddOutputButton.observe(this) { show: Boolean? ->
-            setAddOutputButtonVisibility(
-                if (show == true && !destsHasPaymentId()) View.VISIBLE else View.INVISIBLE
-            )
-        }
-        mViewModel.pendingTransaction.observe(this) { pendingTx: PendingTransaction? ->
-            showConfirmationLayout(pendingTx != null)
-            if (pendingTx != null) {
-                val address = if (destCount == 1) getAddressField(0).text.toString() else "Multiple"
-                addressTextView.text = getString(R.string.tx_address_text, address)
-                amountTextView.text =
-                    getString(
-                        R.string.tx_amount_text,
-                        Helper.getDisplayAmount(pendingTx.getAmount())
-                    )
-                feeTextView.text =
-                    getString(R.string.tx_fee_text, Helper.getDisplayAmount(pendingTx.getFee()))
-            }
-        }
-    }
-
     private fun addOutput(initial: Boolean, address: String? = null, amount: String? = null) {
         val index = destCount
         val entryView =
@@ -333,11 +365,11 @@ class SendActivity : AppCompatActivity() {
                         addressField.text = null
                     } else if (currentOutputs == 1 && hasPaymentId) {
                         // show add output button: we are sending to integrated address
-                        mViewModel.setShowAddOutputButton(false)
+                        viewModel.setShowAddOutputButton(false)
                     }
                 } else if (currentOutputs == 1 && !isSendAll) {
                     // when send-all is false and this is our only dest and address is invalid, then show add output button
-                    mViewModel.setShowAddOutputButton(true)
+                    viewModel.setShowAddOutputButton(true)
                 }
 
                 if (s.toString() == Constants.DONATE_ADDRESS) {
@@ -397,7 +429,7 @@ class SendActivity : AppCompatActivity() {
             return dests
         }
     private val isSendAll: Boolean
-        get() = mViewModel.sendingMax.value ?: false
+        get() = viewModel.sendingMax.value ?: false
 
     private fun getDestView(pos: Int): ConstraintLayout {
         return destList.getChildAt(pos) as ConstraintLayout
@@ -438,7 +470,7 @@ class SendActivity : AppCompatActivity() {
             setAddOutputButtonVisibility(View.VISIBLE)
             sendMaxButton.visibility = View.VISIBLE
             createButton.visibility = View.VISIBLE
-            if (PrefService.instance.getBoolean(Constants.PREF_ALLOW_FEE_OVERRIDE, false)) {
+            if (PreferenceUtils.isAllowFeeOverride(this)) {
                 feeRadioGroup.visibility = View.VISIBLE
                 feeRadioGroupLabelTextView.visibility = View.VISIBLE
             } else {
@@ -493,7 +525,7 @@ class SendActivity : AppCompatActivity() {
                 ).show()
                 return
             } else if (currentOutputs == 1 && uriData.hasPaymentId()) {
-                mViewModel.setShowAddOutputButton(false)
+                viewModel.setShowAddOutputButton(false)
             }
             val addressField = entryView.findViewById<EditText>(R.id.address_edittext)
             addressField.setText(uriData.address)
@@ -518,60 +550,44 @@ class SendActivity : AppCompatActivity() {
         feePriority: PendingTransaction.Priority,
         utxos: ArrayList<String> = ArrayList()
     ) {
-        (application as MoneroApplication).executor?.execute {
-            try {
-                val pendingTx =
-                    TxService.instance?.createTx(dests, sendAll, feePriority, utxos)
-                if (pendingTx != null && pendingTx.status === PendingTransaction.Status.Status_Ok) {
-                    mViewModel.setPendingTransaction(pendingTx)
-                } else {
-                    val activity: Activity = this
-                    if (pendingTx != null) {
-                        activity.runOnUiThread {
-                            createButton.isEnabled = true
-                            sendMaxButton.isEnabled = true
-                            if (pendingTx.getErrorString() != null) Toast.makeText(
-                                activity,
-                                getString(R.string.error_creating_tx, pendingTx.getErrorString()),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                val activity: Activity = this
-                activity.runOnUiThread {
-                    createButton.isEnabled = true
-                    sendMaxButton.isEnabled = true
-                    Toast.makeText(
-                        activity,
-                        getString(R.string.error_creating_tx, e.message),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
+        if (sendAll) {
+            walletService?.createSweepTransaction(dests[0].first, feePriority, utxos)
+        } else {
+            val destinations = dests.map { TransactionDestination(it.first, Wallet.getAmountFromString(it.second)) }
+            walletService?.createTransaction(destinations, feePriority, utxos)
         }
     }
 
     private fun sendTx(pendingTx: PendingTransaction) {
-        (application as MoneroApplication).executor?.execute {
-            val success = TxService.instance?.sendTx(pendingTx)
-            val activity: Activity = this
-            activity.runOnUiThread {
-                if (success == true) {
-                    Toast.makeText(this, getString(R.string.sent_tx), Toast.LENGTH_SHORT)
-                        .show()
-                    activity.onBackPressed()
-                } else {
-                    sendTxSlider.resetSlider()
-                    Toast.makeText(
-                        this,
-                        getString(R.string.error_sending_tx),
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
-                }
+        walletService?.sendTransaction(pendingTx)
+    }
+
+    override fun onTransactionCreated(pendingTransaction: PendingTransaction) {
+        if (pendingTransaction.status === PendingTransaction.Status.Status_Ok) {
+            viewModel.setPendingTransaction(pendingTransaction)
+        } else {
+            runOnUiThread {
+                createButton.isEnabled = true
+                sendMaxButton.isEnabled = true
+                if (pendingTransaction.getErrorString() != null) Toast.makeText(
+                    this,
+                    getString(R.string.error_creating_tx, pendingTransaction.getErrorString()),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    override fun onTransactionSent(pendingTransaction: PendingTransaction, success: Boolean) {
+        walletService?.refreshTransactionsHistory()
+        runOnUiThread {
+            if (success) {
+                Toast.makeText(this, getString(R.string.sent_tx), Toast.LENGTH_SHORT).show()
+                finish()
+            } else {
+                sendTxSlider.resetSlider()
+                Toast.makeText(this, getString(R.string.error_sending_tx), Toast.LENGTH_SHORT).show()
+                Log.e("SA", "pts = ${pendingTransaction.status}")
             }
         }
     }
@@ -584,11 +600,11 @@ class SendActivity : AppCompatActivity() {
 class SendViewModel : ViewModel() {
     private val _sendingMax = MutableLiveData(false)
     private val _showAddOutputButton = MutableLiveData(true)
-    private val _utxos = MutableLiveData<ArrayList<String>>(ArrayList())
+    private val _enotes = MutableLiveData<ArrayList<String>>(ArrayList())
     private val _pendingTransaction = MutableLiveData<PendingTransaction?>(null)
     var sendingMax: LiveData<Boolean?> = _sendingMax
     var showAddOutputButton: LiveData<Boolean?> = _showAddOutputButton
-    var utxos: LiveData<ArrayList<String>> = _utxos
+    var enotes: LiveData<ArrayList<String>> = _enotes
     var pendingTransaction: LiveData<PendingTransaction?> = _pendingTransaction
     fun setSendingMax(value: Boolean) {
         _sendingMax.value = value
@@ -599,8 +615,8 @@ class SendViewModel : ViewModel() {
         _showAddOutputButton.value = value
     }
 
-    fun setUtxos(value: ArrayList<String>) {
-        _utxos.value = value
+    fun setEnotes(value: ArrayList<String>) {
+        _enotes.value = value
     }
 
     fun setPendingTransaction(pendingTx: PendingTransaction?) {
