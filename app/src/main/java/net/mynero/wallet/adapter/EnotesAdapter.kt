@@ -28,53 +28,46 @@ import net.mynero.wallet.model.Wallet
 import net.mynero.wallet.util.Constants
 
 class EnotesAdapter(
-    val streetMode: Boolean,
-    val listener: EnotesAdapterListener
+    private var enotes: List<CoinsInfo>,
+    private val streetMode: Boolean,
+    private val listener: EnotesAdapterListener
 ) : RecyclerView.Adapter<EnotesAdapter.ViewHolder>() {
 
-    private var enotes: List<CoinsInfo> = listOf()
-    val selectedUtxos // <public-key, coinsinfo>
-            : MutableMap<String?, CoinsInfo>
+    private val selectedEnotes: MutableMap<String, CoinsInfo> = HashMap()
     private var editing = false
-
-    /**
-     * Initialize the dataset of the Adapter.
-     */
-    init {
-        selectedUtxos = HashMap()
-    }
 
     fun submitList(enotes: List<CoinsInfo>) {
         this.enotes = enotes
         notifyDataSetChanged()
     }
 
-    fun deselectUtxo(coinsInfo: CoinsInfo) {
-        selectedUtxos.remove(coinsInfo.pubKey)
-        if (selectedUtxos.size == 0) {
+    fun getSelectedEnotes(): Map<String, CoinsInfo> = selectedEnotes
+
+    fun deselectEnote(coinsInfo: CoinsInfo) {
+        selectedEnotes.remove(coinsInfo.pubKey)
+        if (selectedEnotes.size == 0) {
             editing = false
         }
         notifyDataSetChanged()
     }
 
-    fun selectUtxo(coinsInfo: CoinsInfo) {
+    fun selectEnote(coinsInfo: CoinsInfo) {
         editing = true
-        selectedUtxos[coinsInfo.pubKey] = coinsInfo
+        selectedEnotes[coinsInfo.pubKey!!] = coinsInfo
         notifyDataSetChanged()
     }
 
     operator fun contains(coinsInfo: CoinsInfo): Boolean {
-        return selectedUtxos.containsKey(coinsInfo.pubKey)
+        return selectedEnotes.containsKey(coinsInfo.pubKey)
     }
 
     fun clear() {
-        selectedUtxos.clear()
+        selectedEnotes.clear()
         editing = false
         notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        // Create a new view, which defines the UI of the list item
         val view = LayoutInflater.from(viewGroup.context)
             .inflate(R.layout.enote_selection_item, viewGroup, false)
         return ViewHolder(listener, view, streetMode)
@@ -82,7 +75,7 @@ class EnotesAdapter(
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val tx = enotes[position]
-        viewHolder.bind(editing, tx, selectedUtxos)
+        viewHolder.bind(editing, tx, selectedEnotes)
     }
 
     override fun getItemCount(): Int {
@@ -106,11 +99,11 @@ class EnotesAdapter(
         fun bind(
             editing: Boolean,
             coinsInfo: CoinsInfo,
-            selectedUtxos: Map<String?, CoinsInfo>
+            selectedEnotes: Map<String, CoinsInfo>
         ) {
             this.editing = editing
             this.coinsInfo = coinsInfo
-            val selected = selectedUtxos.containsKey(coinsInfo.pubKey)
+            val selected = selectedEnotes.containsKey(coinsInfo.pubKey)
             val pubKeyTextView = itemView.findViewById<TextView>(R.id.utxo_pub_key_textview)
             val amountTextView = itemView.findViewById<TextView>(R.id.utxo_amount_textview)
             val addressTextView = itemView.findViewById<TextView>(R.id.utxo_address_textview)
