@@ -45,24 +45,24 @@ class EnotesActivity : AppCompatActivity(), WalletServiceObserver {
         enotesRecyclerView = findViewById(R.id.transaction_history_recyclerview)
 
         val streetMode = PreferenceUtils.isStreetMode(this)
-        adapter = EnotesAdapter(streetMode, object : EnotesAdapter.EnotesAdapterListener {
+        adapter = EnotesAdapter(listOf(), streetMode, object : EnotesAdapter.EnotesAdapterListener {
             override fun onEnoteSelected(coinsInfo: CoinsInfo) {
                 val selected = adapter.contains(coinsInfo)
                 if (selected) {
-                    adapter.deselectUtxo(coinsInfo)
+                    adapter.deselectEnote(coinsInfo)
                 } else {
-                    adapter.selectUtxo(coinsInfo)
+                    adapter.selectEnote(coinsInfo)
                 }
                 var frozenExists = false
                 var unfrozenExists = false
-                for (selectedUtxo in adapter.selectedUtxos.values) {
+                for (selectedUtxo in adapter.getSelectedEnotes().values) {
                     if (selectedUtxo.isFrozen)
                         frozenExists = true
                     else {
                         unfrozenExists = true
                     }
                 }
-                if (adapter.selectedUtxos.isEmpty()) {
+                if (adapter.getSelectedEnotes().isEmpty()) {
                     sendUtxosButton.isEnabled = false
                     freezeUtxosButton.isEnabled = false
                     unfreezeUtxosButton.isEnabled = false
@@ -96,7 +96,7 @@ class EnotesActivity : AppCompatActivity(), WalletServiceObserver {
     private fun bindListeners() {
         sendUtxosButton.setOnClickListener {
             val selectedKeyImages = ArrayList<String>()
-            for (coinsInfo in adapter.selectedUtxos.values) {
+            for (coinsInfo in adapter.getSelectedEnotes().values) {
                 coinsInfo.keyImage?.let { keyImage -> selectedKeyImages.add(keyImage) }
             }
             val intent = Intent(this, SendActivity::class.java)
@@ -107,13 +107,13 @@ class EnotesActivity : AppCompatActivity(), WalletServiceObserver {
         freezeUtxosButton.setOnClickListener {
             Toast.makeText(this, "Freezing enotes, please wait.", Toast.LENGTH_SHORT)
                 .show()
-            walletService?.freezeEnote(adapter.selectedUtxos.keys.filterNotNull().toList())
+            walletService?.freezeEnote(adapter.getSelectedEnotes().keys.filterNotNull().toList())
         }
 
         unfreezeUtxosButton.setOnClickListener {
             Toast.makeText(this, "Thawing enotes, please wait.", Toast.LENGTH_SHORT)
                 .show()
-            walletService?.thawEnote(adapter.selectedUtxos.keys.filterNotNull().toList())
+            walletService?.thawEnote(adapter.getSelectedEnotes().keys.filterNotNull().toList())
         }
     }
 
