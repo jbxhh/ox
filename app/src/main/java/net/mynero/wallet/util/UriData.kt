@@ -1,14 +1,13 @@
 package net.mynero.wallet.util
 
+import net.mynero.wallet.model.NetworkType
 import net.mynero.wallet.model.Wallet.Companion.getPaymentIdFromAddress
 import net.mynero.wallet.model.Wallet.Companion.isAddressValid
-import net.mynero.wallet.model.WalletManager.Companion.instance
 
 class UriData(val address: String, val params: HashMap<String, String>) {
 
     fun hasPaymentId(): Boolean {
-        return instance?.wallet?.nettype()?.let { getPaymentIdFromAddress(address, it) }
-            ?.isNotEmpty() == true
+        return getPaymentIdFromAddress(address, NetworkType.NetworkType_Mainnet.value)?.isNotEmpty() == true
     }
 
     val amount: String?

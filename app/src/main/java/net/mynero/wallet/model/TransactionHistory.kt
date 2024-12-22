@@ -54,11 +54,6 @@ class TransactionHistory(private val handle: Long, var accountIndex: Int) {
         all = transactionInfos
     }
 
-    private external fun refreshJ(): MutableList<TransactionInfo>
-
-    companion object {
-        init {
-            System.loadLibrary("monerujo")
-        }
-    }
+    external fun refreshJ(): MutableList<TransactionInfo>
+    external fun getAllJ(): MutableList<TransactionInfo>
 }

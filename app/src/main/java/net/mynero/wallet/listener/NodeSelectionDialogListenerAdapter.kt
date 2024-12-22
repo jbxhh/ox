@@ -2,72 +2,59 @@ package net.mynero.wallet.listener
 
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
-import net.mynero.wallet.R
 import net.mynero.wallet.data.Node
-import net.mynero.wallet.data.Node.Companion.fromJson
 import net.mynero.wallet.fragment.dialog.AddNodeBottomSheetDialog
 import net.mynero.wallet.fragment.dialog.EditNodeBottomSheetDialog
 import net.mynero.wallet.fragment.dialog.NodeSelectionBottomSheetDialog
-import net.mynero.wallet.service.PrefService
-import net.mynero.wallet.util.Constants
-import net.mynero.wallet.util.Utils
-import org.json.JSONArray
+import net.mynero.wallet.util.PreferenceUtils
+import timber.log.Timber
 
-class NodeSelectionDialogListenerAdapter(
-    val activity: FragmentActivity,
-    val setSelectNodeButtonText: (String) -> Unit,
-    val getProxyAndPortValues: () -> Pair<String, String>,
+abstract class NodeSelectionDialogListenerAdapter(
+    private val activity: FragmentActivity,
+    private var nodes: List<Node>,
 ) : NodeSelectionBottomSheetDialog.NodeSelectionDialogListener {
 
-    override fun onNodeSelected() {
-        val node = PrefService.instance.node
-        setSelectNodeButtonText(activity.getString(R.string.node_button_text, node?.name))
+    abstract fun trySelectNode(self: NodeSelectionBottomSheetDialog, node: Node): Boolean
 
-        val (proxyAddress, proxyPort) = getProxyAndPortValues()
-        Utils.refreshProxy(proxyAddress, proxyPort)
-
-        activity.runOnUiThread {
-            Toast.makeText(
-                activity,
-                activity.getString(R.string.node_selected, node?.name ?: node?.host),
-                Toast.LENGTH_SHORT
-            ).show()
+    final override fun onSelectNode(self: NodeSelectionBottomSheetDialog, node: Node) {
+        if (trySelectNode(self, node)) {
+            self.setSelectedNode(node)
         }
     }
 
-    override fun onClickedEditNode(node: Node) {
+    final override fun onEditNode(self: NodeSelectionBottomSheetDialog, node: Node) {
         val listener = object : EditNodeBottomSheetDialog.EditNodeListener {
-            override fun onNodeDeleted(node: Node) {
-                try {
-                    val nodesArray = PrefService.instance.getString(Constants.PREF_CUSTOM_NODES, "[]")
-                    val jsonArray = JSONArray(nodesArray)
-                    for (i in 0 until jsonArray.length()) {
-                        val nodeJsonObject = jsonArray.getJSONObject(i)
-                        val savedNode = fromJson(nodeJsonObject)
-                        if (savedNode?.toNodeString() == node.toNodeString()) jsonArray.remove(i)
+            override fun onDeleteNode(self: EditNodeBottomSheetDialog, node: Node) {
+                val newNodes = nodes.toMutableList()
+                newNodes.remove(node)
+                PreferenceUtils.setNodes(activity, newNodes).fold(
+                    {
+                        Toast.makeText(activity, "Node delete", Toast.LENGTH_SHORT).show()
+                        self.dismiss()
+                    },
+                    {
+                        Timber.e(it, "Failed to delete node")
+                        Toast.makeText(activity, "Failed to delete node", Toast.LENGTH_SHORT).show()
                     }
-                    saveNodes(jsonArray)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+                )
             }
 
-            override fun onNodeEdited(oldNode: Node?, newNode: Node?) {
-                try {
-                    val nodesArray = PrefService.instance.getString(Constants.PREF_CUSTOM_NODES, "[]")
-                    val jsonArray = JSONArray(nodesArray)
-                    for (i in 0 until jsonArray.length()) {
-                        val nodeJsonObject = jsonArray.getJSONObject(i)
-                        val savedNode = fromJson(nodeJsonObject)
-                        if (savedNode?.toNodeString() == oldNode?.toNodeString()) jsonArray.put(
-                            i,
-                            newNode?.toJson()
-                        )
+            override fun onEditNode(
+                self: EditNodeBottomSheetDialog,
+                oldNode: Node,
+                newNode: Node,
+            ) {
+                val newNodes = nodes.map { node -> if (node != oldNode) node else newNode }
+                PreferenceUtils.setNodes(activity, newNodes).fold(
+                    {
+                        Toast.makeText(activity, "Node saved", Toast.LENGTH_SHORT).show()
+                        self.dismiss()
+                    },
+                    {
+                        Timber.e(it, "Failed to save node")
+                        Toast.makeText(activity, "Failed to save node", Toast.LENGTH_SHORT).show()
                     }
-                    saveNodes(jsonArray)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+                )
             }
         }
 
@@ -76,15 +63,29 @@ class NodeSelectionDialogListenerAdapter(
         editNodeDialog.show(activity.supportFragmentManager, "edit_node_dialog")
     }
 
-    override fun onClickedAddNode() {
-        val addNodeDialog = AddNodeBottomSheetDialog()
-        addNodeDialog.listener = object : AddNodeBottomSheetDialog.AddNodeListener {
-            override fun onNodeAdded() {}
-        }
+    final override fun onAddNode(self: NodeSelectionBottomSheetDialog) {
+        val addNodeDialog = AddNodeBottomSheetDialog(object : AddNodeBottomSheetDialog.AddNodeListener {
+            override fun onAddNode(self: AddNodeBottomSheetDialog, node: Node) {
+                if (nodes.any { it.name == node.name }) {
+                    Timber.i("Failed to add nodes due to node with the same name already existing")
+                    Toast.makeText(activity, "Node with this name already exists", Toast.LENGTH_SHORT).show()
+                } else {
+                    val newNodes = nodes.toMutableList()
+                    newNodes.add(node)
+                    PreferenceUtils.setNodes(activity, newNodes).fold(
+                        {
+                            Timber.i("New node ${node.name} added successfully")
+                            Toast.makeText(activity, "Node added", Toast.LENGTH_SHORT).show()
+                            self.dismiss()
+                        },
+                        {
+                            Timber.e(it, "Failed to add new node")
+                            Toast.makeText(activity, "Failed to add node: ${it.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
+            }
+        })
         addNodeDialog.show(activity.supportFragmentManager, "add_node_dialog")
-    }
-
-    private fun saveNodes(jsonArray: JSONArray) {
-        PrefService.instance.edit().putString(Constants.PREF_CUSTOM_NODES, jsonArray.toString()).apply()
     }
 }

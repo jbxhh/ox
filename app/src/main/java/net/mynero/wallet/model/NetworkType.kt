@@ -15,17 +15,16 @@
  */
 package net.mynero.wallet.model
 
-enum class NetworkType(val value: Int) {
-    NetworkType_Mainnet(0), NetworkType_Testnet(1), NetworkType_Stagenet(2);
+enum class NetworkType(val value: Int, val string: String) {
+
+    NetworkType_Mainnet(0, "mainnet"),
+    NetworkType_Testnet(1, "mainnet"),
+    NetworkType_Stagenet(2, "mainnet");
 
     companion object {
-        fun fromInteger(n: Int): NetworkType? {
-            when (n) {
-                0 -> return NetworkType_Mainnet
-                1 -> return NetworkType_Testnet
-                2 -> return NetworkType_Stagenet
-            }
-            return null
-        }
+
+        fun fromInteger(n: Int): NetworkType? = entries.find { it.value == n }
+
+        fun fromString(s: String): NetworkType? = entries.find { it.string == s }
     }
 }

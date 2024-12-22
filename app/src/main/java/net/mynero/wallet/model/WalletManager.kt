@@ -18,39 +18,19 @@ package net.mynero.wallet.model
 import android.util.Log
 import net.mynero.wallet.data.Node
 import net.mynero.wallet.util.RestoreHeight
+import timber.log.Timber
 import java.io.File
 import java.util.Calendar
 import java.util.Locale
 
 class WalletManager {
     val networkType = NetworkType.NetworkType_Mainnet
-    var wallet: Wallet? = null
-        private set
-    private var daemonAddress: String? = null
-    var daemonUsername = ""
-        private set
-    var daemonPassword = ""
-        private set
     var proxy = ""
         private set
-
-    private fun manageWallet(wallet: Wallet) {
-        Log.d("WalletManager.kt", "Managing ${wallet.name}")
-        this.wallet = wallet
-    }
-
-    private fun unmanageWallet(wallet: Wallet?) {
-        requireNotNull(wallet) { "Cannot unmanage null!" }
-        checkNotNull(this.wallet) { "No wallet under management!" }
-        check(this.wallet === wallet) { wallet.name + " not under management!" }
-        Log.d("WalletManager.kt", "Unmanaging ${wallet.name}")
-        this.wallet = null
-    }
 
     fun createWallet(aFile: File, password: String, language: String, height: Long): Wallet {
         val walletHandle = createWalletJ(aFile.absolutePath, password, language, networkType.value)
         val wallet = Wallet(walletHandle)
-        manageWallet(wallet)
         if (wallet.status.isOk) {
             // (Re-)Estimate restore height based on what we know
             val oldHeight = wallet.getRestoreHeight()
@@ -90,7 +70,6 @@ class WalletManager {
             networkType.value
         )
         val wallet = Wallet(walletHandle)
-        manageWallet(wallet)
         if (wallet.status.isOk) {
             wallet.setPassword(password) // this rewrites the keys file (which contains the restore height)
         } else Log.e("WalletManager.kt", wallet.status.toString())
@@ -105,18 +84,10 @@ class WalletManager {
         networkType: Int
     ): Long
 
-    fun openAccount(path: String, accountIndex: Int, password: String): Wallet {
-        val walletHandle = openWalletJ(path, password, networkType.value)
-        val wallet = Wallet(walletHandle, accountIndex)
-        manageWallet(wallet)
-        return wallet
-    }
-
     //TODO virtual bool checkPayment(const std::string &address, const std::string &txid, const std::string &txkey, const std::string &daemon_address, uint64_t &received, uint64_t &height, std::string &error) const = 0;
     fun openWallet(path: String, password: String): Wallet {
         val walletHandle = openWalletJ(path, password, networkType.value)
         val wallet = Wallet(walletHandle)
-        manageWallet(wallet)
         return wallet
     }
 
@@ -132,7 +103,6 @@ class WalletManager {
             networkType.value, restoreHeight
         )
         val wallet = Wallet(walletHandle)
-        manageWallet(wallet)
         return wallet
     }
 
@@ -152,7 +122,6 @@ class WalletManager {
             networkType.value
         )
         val wallet = Wallet(walletHandle)
-        manageWallet(wallet)
         return wallet
     }
 
@@ -172,7 +141,6 @@ class WalletManager {
             addressString, viewKeyString, spendKeyString
         )
         val wallet = Wallet(walletHandle)
-        manageWallet(wallet)
         return wallet
     }
 
@@ -186,20 +154,6 @@ class WalletManager {
         spendKeyString: String
     ): Long
 
-    fun createWalletFromDevice(
-        aFile: File, password: String, restoreHeight: Long,
-        deviceName: String
-    ): Wallet {
-        val walletHandle = createWalletFromDeviceJ(
-            aFile.absolutePath, password,
-            networkType.value, deviceName, restoreHeight,
-            "5:20"
-        )
-        val wallet = Wallet(walletHandle)
-        manageWallet(wallet)
-        return wallet
-    }
-
     private external fun createWalletFromDeviceJ(
         path: String, password: String,
         networkType: Int,
@@ -208,17 +162,7 @@ class WalletManager {
         subaddressLookahead: String
     ): Long
 
-    private external fun closeJ(wallet: Wallet?): Boolean
-    fun close(wallet: Wallet): Boolean {
-        unmanageWallet(wallet)
-        val closed = closeJ(wallet)
-        if (!closed) {
-            // in case we could not close it
-            // we manage it again
-            manageWallet(wallet)
-        }
-        return closed
-    }
+    external fun closeJ(wallet: Wallet?): Boolean
 
     fun walletExists(aFile: File): Boolean {
         return walletExists(aFile.absolutePath)
@@ -237,29 +181,7 @@ class WalletManager {
 
     private external fun queryWalletDeviceJ(keysFileName: String, password: String): Int
 
-    // this should not be called on the main thread as it connects to the node (and takes a long time)
-    fun setDaemon(node: Node?) {
-        if (node != null) {
-            daemonAddress = node.address
-            require(networkType === node.networkType) { "network type does not match" }
-            daemonUsername = node.username
-            daemonPassword = node.password
-            daemonAddress?.let { addr -> setDaemonAddressJ(addr) }
-        } else {
-            daemonAddress = null
-            daemonUsername = ""
-            daemonPassword = ""
-            //setDaemonAddressJ(""); // don't disconnect as monero code blocks for many seconds!
-            //TODO: need to do something about that later
-        }
-    }
-
-    fun getDaemonAddress(): String? {
-        checkNotNull(daemonAddress) { "use setDaemon() to initialise daemon and net first!" }
-        return daemonAddress
-    }
-
-    private external fun setDaemonAddressJ(address: String)
+    external fun setDaemonAddressJ(address: String)
     external fun getDaemonVersion(): Int
     external fun getBlockchainHeight(): Long
     external fun getBlockchainTargetHeight(): Long
@@ -306,20 +228,7 @@ class WalletManager {
         var LOGLEVEL_TRACE = 3
         var LOGLEVEL_MAX = 4
 
-        // no need to keep a reference to the REAL WalletManager (we get it every tvTime we need it)
-        @get:Synchronized
-        var instance: WalletManager? = null
-            get() {
-                if (field == null) {
-                    field = WalletManager()
-                }
-                return field
-            }
-            private set
-
-        init {
-            System.loadLibrary("monerujo")
-        }
+        val instance: WalletManager = WalletManager()
 
         fun addressPrefix(networkType: NetworkType): String {
             return when (networkType) {

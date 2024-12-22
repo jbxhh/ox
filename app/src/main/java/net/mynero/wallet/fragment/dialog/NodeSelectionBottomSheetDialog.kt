@@ -11,19 +11,18 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import net.mynero.wallet.R
 import net.mynero.wallet.adapter.NodeSelectionAdapter
 import net.mynero.wallet.adapter.NodeSelectionAdapter.NodeSelectionAdapterListener
-import net.mynero.wallet.data.DefaultNodes
 import net.mynero.wallet.data.Node
-import net.mynero.wallet.data.Node.Companion.fromJson
-import net.mynero.wallet.data.Node.Companion.fromString
-import net.mynero.wallet.service.DaemonService
-import net.mynero.wallet.service.PrefService
-import net.mynero.wallet.util.Constants
-import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
 
-class NodeSelectionBottomSheetDialog(val listener: NodeSelectionDialogListener) : BottomSheetDialogFragment(), NodeSelectionAdapterListener {
-    private var adapter: NodeSelectionAdapter? = null
+class NodeSelectionBottomSheetDialog(
+    private val nodes: List<Node>,
+    private var selectedNode: Node,
+    private val listener: NodeSelectionDialogListener,
+) : BottomSheetDialogFragment(), NodeSelectionAdapterListener {
+
+    private lateinit var addNodeButton: Button
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: NodeSelectionAdapter
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -34,73 +33,41 @@ class NodeSelectionBottomSheetDialog(val listener: NodeSelectionDialogListener) 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val nodes = ArrayList<Node>()
-        adapter = NodeSelectionAdapter(this)
-        val recyclerView = view.findViewById<RecyclerView>(R.id.node_selection_recyclerview)
+
+        recyclerView = view.findViewById(R.id.node_selection_recyclerview)
+        addNodeButton = view.findViewById(R.id.add_node_button)
+        adapter = NodeSelectionAdapter(nodes, selectedNode, this)
+
         recyclerView.layoutManager = LinearLayoutManager(activity)
         recyclerView.adapter = adapter
-        val addNodeButton = view.findViewById<Button>(R.id.add_node_button)
+
+        bindListeners()
+
+        adapter.setNodes(nodes)
+    }
+
+    private fun bindListeners() {
         addNodeButton.setOnClickListener {
-            listener.onClickedAddNode()
-            dismiss()
+            listener.onAddNode(this)
         }
-        val nodesArray = PrefService.instance.getString(Constants.PREF_CUSTOM_NODES, "[]")
-        val jsonArray: JSONArray = try {
-            JSONArray(nodesArray)
-        } catch (e: JSONException) {
-            return
-        }
-        for (i in 0 until jsonArray.length()) {
-            var nodeJsonObject: JSONObject?
-            try {
-                nodeJsonObject = jsonArray.getJSONObject(i)
-                if (nodeJsonObject != null) {
-                    val node = fromJson(nodeJsonObject)
-                    if (node != null) {
-                        nodes.add(node)
-                    }
-                }
-            } catch (e: JSONException) {
-                // if stored node is old string format, try parse and upgrade, if fail then remove
-                try {
-                    val nodeString = jsonArray.getString(i)
-                    val node = fromString(nodeString)
-                    if (node != null) {
-                        nodes.add(node)
-                        jsonArray.put(i, node.toJson())
-                    } else {
-                        jsonArray.remove(i)
-                    }
-                } catch (ex: JSONException) {
-                    throw RuntimeException(ex)
-                }
-            }
-        }
-        PrefService.instance.edit().putString(Constants.PREF_CUSTOM_NODES, jsonArray.toString()).apply()
-        for (defaultNode in DefaultNodes.values()) {
-            fromJson(defaultNode.json)?.let { nodes.add(it) }
-        }
-        adapter?.submitList(nodes)
+    }
+
+    fun setSelectedNode(selectedNode: Node) {
+        this.selectedNode = selectedNode
+        adapter.setSelectedNode(selectedNode)
     }
 
     override fun onSelectNode(node: Node) {
-        PrefService.instance.edit().putString(Constants.PREF_NODE_2, node.toJson().toString()).apply()
-        DaemonService.instance?.setDaemon(node)
-        activity?.runOnUiThread {
-            adapter?.updateSelectedNode()
-        }
-        listener.onNodeSelected()
+        listener.onSelectNode(this, node)
     }
 
-    override fun onSelectEditNode(node: Node): Boolean {
-        listener.onClickedEditNode(node)
-        dismiss()
-        return true
+    override fun onEditNode(node: Node) {
+        listener.onEditNode(this, node)
     }
 
     interface NodeSelectionDialogListener {
-        fun onNodeSelected()
-        fun onClickedEditNode(node: Node)
-        fun onClickedAddNode()
+        fun onSelectNode(self: NodeSelectionBottomSheetDialog, node: Node)
+        fun onEditNode(self: NodeSelectionBottomSheetDialog, node: Node)
+        fun onAddNode(self: NodeSelectionBottomSheetDialog)
     }
 }

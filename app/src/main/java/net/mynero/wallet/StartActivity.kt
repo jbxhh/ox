@@ -4,10 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import net.mynero.wallet.service.MoneroHandlerThread
-import net.mynero.wallet.service.PrefService
 import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.UriData
+import timber.log.Timber
 import java.io.File
 
 class StartActivity : AppCompatActivity() {
@@ -19,10 +18,10 @@ class StartActivity : AppCompatActivity() {
             val walletName = result.data?.extras?.getString(Constants.EXTRA_WALLET_NAME)
             val walletPassword = result.data?.extras?.getString(Constants.EXTRA_WALLET_PASSWORD)
             if (walletName != null && walletPassword != null) {
-                val walletFile = File(applicationInfo.dataDir, walletName)
-                openWallet(walletFile, walletPassword)
+                openWallet(walletName, walletPassword)
             } else {
                 // if we ever get here, it's a bug ¯\_(ツ)_/¯ so let's just recreate the activity
+                Timber.e("Password activity returned null wallet name or password")
                 recreate()
             }
         }
@@ -31,38 +30,38 @@ class StartActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         intent.data?.let { uriData = UriData.parse(it.toString()) }
-        val walletFile = File(applicationInfo.dataDir, Constants.WALLET_NAME)
-        val walletKeysFile = File(applicationInfo.dataDir, Constants.WALLET_NAME + ".keys")
+        // TODO: multiple wallets support
+        val walletName = Constants.DEFAULT_WALLET_NAME
+        val walletKeysFile = File(applicationInfo.dataDir, "$walletName.keys")
         if (walletKeysFile.exists()) {
-            val usesPassword = PrefService.instance?.getBoolean(Constants.PREF_USES_PASSWORD, false) == true
-            if (!usesPassword) {
-                openWallet(walletFile, "")
-                return
-            } else {
-                val intent = Intent(this, PasswordActivity::class.java)
-                intent.putExtra(Constants.EXTRA_PREVENT_GOING_BACK, true)
-                startPasswordActivityForOpeningWallet.launch(intent)
-                return
-            }
+            Timber.d("Wallet keys file exists, launching password activity")
+            val intent = Intent(this, PasswordActivity::class.java)
+            intent.putExtra(Constants.EXTRA_PREVENT_GOING_BACK, true)
+            intent.putExtra(Constants.EXTRA_WALLET_NAME, walletName)
+            startPasswordActivityForOpeningWallet.launch(intent)
+            return
         } else {
+            Timber.d("Wallet keys file does not exist, launching onboarding activity")
             startActivity(Intent(this, OnboardingActivity::class.java))
             finish()
             return
         }
     }
 
-    private fun openWallet(walletFile: File, password: String) {
-        MoneroHandlerThread.init(walletFile, password, applicationContext)
-
+    private fun openWallet(walletName: String, walletPassword: String) {
+        val homeActivityIntent = Intent(this, HomeActivity::class.java)
+        homeActivityIntent.putExtra(Constants.EXTRA_WALLET_NAME, walletName)
+        homeActivityIntent.putExtra(Constants.EXTRA_WALLET_PASSWORD, walletPassword)
         if (uriData == null) {
             // the app was NOT started with a monero uri payment data, proceed to the home activity
-            startActivity(Intent(this, HomeActivity::class.java))
+            Timber.d("Uri payment data not present, launching home activity")
+            startActivity(homeActivityIntent)
         } else {
             // the app was started with a monero uri payment data, we proceed to the send activity but launch the home activity as well
             // so that when users press back button they go to home activity instead of closing the app
-            val homeIntent = Intent(this, HomeActivity::class.java)
-            homeIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
-            startActivity(homeIntent)
+            Timber.d("Uri payment data present, launching home and send activities")
+            homeActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+            startActivity(homeActivityIntent)
 
             val sendIntent = Intent(this, SendActivity::class.java)
             sendIntent.putExtra(Constants.EXTRA_SEND_ADDRESS, uriData!!.address)

@@ -15,8 +15,10 @@ import java.io.File
 // Finishes and returns the wallet's name and password in extra when user enters valid password
 class PasswordActivity : AppCompatActivity() {
 
-    private var preventGoingBack = false
-    private lateinit var passwordEdittext: EditText
+    private var preventGoingBack: Boolean = false
+    private lateinit var walletName: String
+
+    private lateinit var passwordEditText: EditText
     private lateinit var unlockButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,8 +26,9 @@ class PasswordActivity : AppCompatActivity() {
         setContentView(R.layout.activity_password)
 
         preventGoingBack = intent.getBooleanExtra(Constants.EXTRA_PREVENT_GOING_BACK, false)
+        walletName = intent.getStringExtra(Constants.EXTRA_WALLET_NAME)!!
 
-        passwordEdittext = findViewById(R.id.wallet_password_edittext)
+        passwordEditText = findViewById(R.id.wallet_password_edittext)
         unlockButton = findViewById(R.id.unlock_wallet_button)
 
         onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
@@ -36,18 +39,16 @@ class PasswordActivity : AppCompatActivity() {
             }
         })
 
-        val walletFile = File(applicationInfo.dataDir, Constants.WALLET_NAME)
-
         unlockButton.setOnClickListener {
-            onUnlockClicked(walletFile, passwordEdittext.text.toString())
+            onUnlockClicked(passwordEditText.text.toString())
         }
     }
 
-    private fun onUnlockClicked(walletFile: File, password: String) {
-        if (checkPassword(walletFile, password)) {
+    private fun onUnlockClicked(walletPassword: String) {
+        if (checkPassword(walletPassword)) {
             val intent = Intent()
-            intent.putExtra(Constants.EXTRA_WALLET_NAME, walletFile.name)
-            intent.putExtra(Constants.EXTRA_WALLET_PASSWORD, password)
+            intent.putExtra(Constants.EXTRA_WALLET_NAME, walletName)
+            intent.putExtra(Constants.EXTRA_WALLET_PASSWORD, walletPassword)
             setResult(RESULT_OK, intent)
             finish()
         } else {
@@ -55,10 +56,12 @@ class PasswordActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkPassword(walletFile: File, password: String): Boolean {
-        return WalletManager.instance?.verifyWalletPasswordOnly(
+    private fun checkPassword(walletPassword: String): Boolean {
+        val walletFile = File(applicationInfo.dataDir, walletName)
+
+        return WalletManager.instance.verifyWalletPasswordOnly(
             walletFile.absolutePath + ".keys",
-            password
-        ) == true
+            walletPassword
+        )
     }
 }

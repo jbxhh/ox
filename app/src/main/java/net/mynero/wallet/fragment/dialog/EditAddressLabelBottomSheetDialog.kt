@@ -15,49 +15,38 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class EditAddressLabelBottomSheetDialog : BottomSheetDialogFragment() {
-    var listener: LabelListener? = null
-    var addressIndex = 0
+class EditAddressLabelBottomSheetDialog(
+    private val currentLabel: String,
+    private val onSave: (String) -> Unit
+) : BottomSheetDialogFragment() {
+
+    private lateinit var pasteButton: ImageButton
+    private lateinit var labelEditText: EditText
+    private lateinit var saveLabelButton: Button
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.bottom_sheet_dialog_edit_address_label, null)
+    ): View {
+        return inflater.inflate(R.layout.bottom_sheet_dialog_edit_address_label, container)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val wallet = WalletManager.instance?.wallet
-        val pasteButton = view.findViewById<ImageButton>(R.id.paste_password_imagebutton)
-        val labelEditText = view.findViewById<EditText>(R.id.wallet_password_edittext)
-        val saveLabelButton = view.findViewById<Button>(R.id.unlock_wallet_button)
-        var isDate = false
-        try {
-            wallet?.getSubaddressLabel(
-                addressIndex
-            )?.let {
-                SimpleDateFormat("yyyy-MM-dd-HH:mm:ss", Locale.US).parse(
-                    it
-                )
-                isDate = true
-            }
-        } catch (ignored: ParseException) {
+
+        pasteButton = view.findViewById(R.id.paste_password_imagebutton)
+        labelEditText = view.findViewById(R.id.wallet_password_edittext)
+        saveLabelButton = view.findViewById(R.id.unlock_wallet_button)
+
+        labelEditText.setText(currentLabel)
+        pasteButton.setOnClickListener {
+            labelEditText.setText(getClipBoardText(view.context))
         }
-        labelEditText.setText(if (isDate) null else wallet?.getSubaddressLabel(addressIndex))
-        pasteButton.setOnClickListener { labelEditText.setText(getClipBoardText(view.context)) }
         saveLabelButton.setOnClickListener {
             val label = labelEditText.text.toString()
-            wallet?.setSubaddressLabel(addressIndex, label)
-            wallet?.store()
-            if (listener != null) {
-                listener?.onDismiss()
-            }
+            onSave(label)
             dismiss()
         }
-    }
-
-    interface LabelListener {
-        fun onDismiss()
     }
 }

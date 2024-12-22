@@ -25,28 +25,27 @@ import androidx.recyclerview.widget.RecyclerView
 import net.mynero.wallet.R
 import net.mynero.wallet.model.CoinsInfo
 import net.mynero.wallet.model.Wallet
-import net.mynero.wallet.service.PrefService
-import net.mynero.wallet.service.UTXOService
 import net.mynero.wallet.util.Constants
 
-class CoinsInfoAdapter(val listener: CoinsInfoAdapterListener?) :
-    RecyclerView.Adapter<CoinsInfoAdapter.ViewHolder>() {
-    private var localDataSet // <public-key, coinsinfo>
-            : List<CoinsInfo>
+class EnotesAdapter(
+    val streetMode: Boolean,
+    val listener: EnotesAdapterListener
+) : RecyclerView.Adapter<EnotesAdapter.ViewHolder>() {
+
+    private var enotes: List<CoinsInfo> = listOf()
     val selectedUtxos // <public-key, coinsinfo>
-            : HashMap<String?, CoinsInfo>
+            : MutableMap<String?, CoinsInfo>
     private var editing = false
 
     /**
      * Initialize the dataset of the Adapter.
      */
     init {
-        localDataSet = ArrayList()
         selectedUtxos = HashMap()
     }
 
-    fun submitList(dataSet: HashMap<String?, CoinsInfo>) {
-        localDataSet = ArrayList(dataSet.values)
+    fun submitList(enotes: List<CoinsInfo>) {
+        this.enotes = enotes
         notifyDataSetChanged()
     }
 
@@ -74,34 +73,27 @@ class CoinsInfoAdapter(val listener: CoinsInfoAdapterListener?) :
         notifyDataSetChanged()
     }
 
-    // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         // Create a new view, which defines the UI of the list item
         val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.utxo_selection_item, viewGroup, false)
-        return ViewHolder(listener, view)
+            .inflate(R.layout.enote_selection_item, viewGroup, false)
+        return ViewHolder(listener, view, streetMode)
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        val tx = localDataSet[position]
+        val tx = enotes[position]
         viewHolder.bind(editing, tx, selectedUtxos)
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount(): Int {
-        return localDataSet.size
+        return enotes.size
     }
 
-    interface CoinsInfoAdapterListener {
-        fun onUtxoSelected(coinsInfo: CoinsInfo)
+    interface EnotesAdapterListener {
+        fun onEnoteSelected(coinsInfo: CoinsInfo)
     }
 
-    /**
-     * Provide a reference to the type of views that you are using
-     * (custom ViewHolder).
-     */
-    class ViewHolder(private val listener: CoinsInfoAdapterListener?, view: View) :
+    class ViewHolder(private val listener: EnotesAdapterListener?, view: View, private val streetMode: Boolean) :
         RecyclerView.ViewHolder(view), View.OnClickListener, OnLongClickListener {
         private var coinsInfo: CoinsInfo? = null
         private var editing = false
@@ -114,7 +106,7 @@ class CoinsInfoAdapter(val listener: CoinsInfoAdapterListener?) :
         fun bind(
             editing: Boolean,
             coinsInfo: CoinsInfo,
-            selectedUtxos: HashMap<String?, CoinsInfo>
+            selectedUtxos: Map<String?, CoinsInfo>
         ) {
             this.editing = editing
             this.coinsInfo = coinsInfo
@@ -124,10 +116,8 @@ class CoinsInfoAdapter(val listener: CoinsInfoAdapterListener?) :
             val addressTextView = itemView.findViewById<TextView>(R.id.utxo_address_textview)
             val globalIdxTextView = itemView.findViewById<TextView>(R.id.utxo_global_index_textview)
             val outpointTextView = itemView.findViewById<TextView>(R.id.utxo_outpoint_textview)
-            val streetModeEnabled =
-                PrefService.instance?.getBoolean(Constants.PREF_STREET_MODE, false) == true
             val balanceString =
-                if (streetModeEnabled) Constants.STREET_MODE_BALANCE else Wallet.getDisplayAmount(
+                if (streetMode) Constants.STREET_MODE_BALANCE else Wallet.getDisplayAmount(
                     coinsInfo.amount
                 )
             amountTextView.text =
@@ -146,7 +136,7 @@ class CoinsInfoAdapter(val listener: CoinsInfoAdapterListener?) :
             if (selected) {
                 itemView.backgroundTintList =
                     ContextCompat.getColorStateList(itemView.context, R.color.oled_colorSecondary)
-            } else if (coinsInfo.isFrozen || UTXOService.instance?.isCoinFrozen(coinsInfo) == true) {
+            } else if (coinsInfo.isFrozen) {
                 itemView.backgroundTintList =
                     ContextCompat.getColorStateList(itemView.context, R.color.oled_frozen_utxo)
             } else if (!coinsInfo.isUnlocked) {
@@ -165,7 +155,7 @@ class CoinsInfoAdapter(val listener: CoinsInfoAdapterListener?) :
             if (!editing) return
             val unlocked = coinsInfo?.isUnlocked == true
             if (unlocked) {
-                coinsInfo?.let { listener?.onUtxoSelected(it) }
+                coinsInfo?.let { listener?.onEnoteSelected(it) }
             }
         }
 
@@ -173,7 +163,7 @@ class CoinsInfoAdapter(val listener: CoinsInfoAdapterListener?) :
             if (editing) return false
             val unlocked = coinsInfo?.isUnlocked == true
             if (unlocked) {
-                coinsInfo?.let { listener?.onUtxoSelected(it) }
+                coinsInfo?.let { listener?.onEnoteSelected(it) }
             }
             return unlocked
         }

@@ -101,11 +101,6 @@ class TransactionInfo : Parcelable, Comparable<TransactionInfo> {
 
     val isConfirmed: Boolean
         get() = confirmations >= CONFIRMATION
-    val displayLabel: String?
-        get() = if (subaddressLabel?.isEmpty() == true || Subaddress.DEFAULT_LABEL_FORMATTER.matcher(
-                subaddressLabel.toString()
-            ).matches()
-        ) "#$addressIndex" else subaddressLabel
 
     override fun toString(): String {
         return "$direction@$blockheight $amount"

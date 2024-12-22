@@ -145,6 +145,19 @@ struct MyWalletListener : Monero::WalletListener {
         if (jlistener == nullptr) return;
         LOGD("moneySpent %"
                      PRIu64, amount);
+        JNIEnv *jenv;
+
+        int envStat = attachJVM(&jenv);
+        if (envStat == JNI_ERR) return;
+
+        jmethodID listenerClass_moneySpent = jenv->GetMethodID(class_WalletListener, "moneySpent",
+                                                                  "(Ljava/lang/String;J)V");
+
+        jstring jTxId = jenv->NewStringUTF(txId.c_str());
+        jlong jAmount = static_cast<jlong>(amount);
+        jenv->CallVoidMethod(jlistener, listenerClass_moneySpent, jTxId, jAmount);
+        jenv->DeleteLocalRef(jTxId);
+        detachJVM(jenv, envStat);
     }
 
     /**
@@ -157,6 +170,19 @@ struct MyWalletListener : Monero::WalletListener {
         if (jlistener == nullptr) return;
         LOGD("moneyReceived %"
                      PRIu64, amount);
+        JNIEnv *jenv;
+
+        int envStat = attachJVM(&jenv);
+        if (envStat == JNI_ERR) return;
+
+        jmethodID listenerClass_moneyReceived = jenv->GetMethodID(class_WalletListener, "moneyReceived",
+                                                                             "(Ljava/lang/String;J)V");
+
+        jstring jTxId = jenv->NewStringUTF(txId.c_str());
+        jlong jAmount = static_cast<jlong>(amount);
+        jenv->CallVoidMethod(jlistener, listenerClass_moneyReceived, jTxId, jAmount);
+        jenv->DeleteLocalRef(jTxId);
+        detachJVM(jenv, envStat);
     }
 
     /**
@@ -169,6 +195,20 @@ struct MyWalletListener : Monero::WalletListener {
         if (jlistener == nullptr) return;
         LOGD("unconfirmedMoneyReceived %"
                      PRIu64, amount);
+        JNIEnv *jenv;
+
+        int envStat = attachJVM(&jenv);
+        if (envStat == JNI_ERR) return;
+
+        jmethodID listenerClass_unconfirmedMoneyReceived = jenv->GetMethodID(class_WalletListener, "unconfirmedMoneyReceived",
+                                                              "(Ljava/lang/String;J)V");
+
+        jstring jTxId = jenv->NewStringUTF(txId.c_str());
+        jlong jAmount = static_cast<jlong>(amount);
+        jenv->CallVoidMethod(jlistener, listenerClass_unconfirmedMoneyReceived, jTxId, jAmount);
+        jenv->DeleteLocalRef(jTxId);
+        detachJVM(jenv, envStat);
+
     }
 
     /**
@@ -1570,6 +1610,13 @@ Java_net_mynero_wallet_model_TransactionHistory_refreshJ(JNIEnv *env, jobject in
     Monero::TransactionHistory *history = getHandle<Monero::TransactionHistory>(env,
                                                                                 instance);
     history->refresh();
+    return cpp2java(env, history->getAll());
+}
+
+JNIEXPORT jobject JNICALL
+Java_net_mynero_wallet_model_TransactionHistory_getAllJ(JNIEnv *env, jobject instance) {
+    Monero::TransactionHistory *history = getHandle<Monero::TransactionHistory>(env,
+                                                                                instance);
     return cpp2java(env, history->getAll());
 }
 

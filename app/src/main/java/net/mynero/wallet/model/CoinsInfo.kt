@@ -90,9 +90,5 @@ class CoinsInfo : Parcelable, Comparable<CoinsInfo> {
                 return arrayOfNulls(size)
             }
         }
-
-        init {
-            System.loadLibrary("monerujo")
-        }
     }
 }

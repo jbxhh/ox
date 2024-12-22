@@ -28,12 +28,6 @@ class Coins(private val handle: Long) {
     }
 
     external fun setFrozen(publicKey: String?, frozen: Boolean)
-    private external fun refreshJ(): List<CoinsInfo>
+    external fun refreshJ(): List<CoinsInfo>
     external fun getCount(): Int
-
-    companion object {
-        init {
-            System.loadLibrary("monerujo")
-        }
-    }
 }
