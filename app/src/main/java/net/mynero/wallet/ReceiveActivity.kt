@@ -6,7 +6,6 @@ import android.content.ServiceConnection
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -14,16 +13,18 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.AtomicReference
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.EncodeHintType
-import com.google.zxing.WriterException
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
-import com.journeyapps.barcodescanner.BarcodeEncoder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.mynero.wallet.adapter.SubaddressAdapter
 import net.mynero.wallet.adapter.SubaddressAdapter.SubaddressAdapterListener
 import net.mynero.wallet.data.Subaddress
@@ -32,8 +33,10 @@ import net.mynero.wallet.service.wallet.WalletServiceObserver
 import net.mynero.wallet.service.wallet.WalletService
 import net.mynero.wallet.util.Helper.clipBoardCopy
 import net.mynero.wallet.util.PreferenceUtils
-import java.nio.charset.StandardCharsets
-import java.util.EnumMap
+import net.mynero.wallet.util.QrCodeHelper
+import timber.log.Timber
+import kotlin.time.DurationUnit
+import kotlin.time.measureTimedValue
 
 class ReceiveActivity : AppCompatActivity(), WalletServiceObserver {
 
@@ -50,7 +53,6 @@ class ReceiveActivity : AppCompatActivity(), WalletServiceObserver {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setVisible(false)
         setContentView(R.layout.activity_receive)
 
         addressImageView = findViewById(R.id.monero_qr_imageview)
@@ -71,7 +73,7 @@ class ReceiveActivity : AppCompatActivity(), WalletServiceObserver {
             val walletService = (service as WalletService.WalletServiceBinder).service
             this@ReceiveActivity.walletService = walletService
             walletService.addObserver(this@ReceiveActivity)
-            viewModel.refreshSubaddresses(walletService)
+            viewModel.refreshSubaddresses(walletService, qrCodeBackgroundColor())
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
@@ -88,7 +90,7 @@ class ReceiveActivity : AppCompatActivity(), WalletServiceObserver {
     private fun bindObservers() {
         val subaddressAdapterListener = object : SubaddressAdapterListener {
             override fun onSubaddressSelected(subaddress: Subaddress) {
-                viewModel.selectAddress(subaddress)
+                viewModel.selectAddress(subaddress, qrCodeBackgroundColor())
             }
 
             override fun onSubaddressEditLabel(subaddress: Subaddress) {
@@ -105,6 +107,14 @@ class ReceiveActivity : AppCompatActivity(), WalletServiceObserver {
                 adapter.submitSelectedAddress(address)
             }
         }
+        viewModel.qrCode.observe(this) { bitmap: Bitmap? ->
+            if (bitmap == null) {
+                addressImageView.visibility = View.INVISIBLE
+            } else {
+                addressImageView.setImageBitmap(bitmap)
+                addressImageView.visibility = View.VISIBLE
+            }
+        }
         viewModel.subaddresses.observe(this) { addresses: List<Subaddress> ->
             // We want newer addresses addresses to be shown first
             adapter.submitAddresses(addresses.reversed())
@@ -113,9 +123,11 @@ class ReceiveActivity : AppCompatActivity(), WalletServiceObserver {
 
     override fun onSubaddressesUpdated() {
         walletService?.let { walletService ->
-            viewModel.refreshSubaddresses(walletService)
+            viewModel.refreshSubaddresses(walletService, qrCodeBackgroundColor())
         }
     }
+
+    private fun qrCodeBackgroundColor(): Int = ContextCompat.getColor(this, R.color.oled_colorBackground)
 
     private fun editAddressLabel(subaddress: Subaddress) {
         val dialog = EditAddressLabelBottomSheetDialog(subaddress.label) {
@@ -134,9 +146,6 @@ class ReceiveActivity : AppCompatActivity(), WalletServiceObserver {
         addressLabelTextView.visibility = View.VISIBLE
         addressTextView.text = subaddress.address
         addressTextView.visibility = View.VISIBLE
-        // TODO: this takes a few hundred milliseconds, do something about it
-        addressImageView.setImageBitmap(generate(subaddress.address, 256, 256))
-        addressImageView.visibility = View.VISIBLE
         copyAddressImageButton.setOnClickListener {
             clipBoardCopy(
                 this, "address", subaddress.address
@@ -151,43 +160,21 @@ class ReceiveActivity : AppCompatActivity(), WalletServiceObserver {
             true
         }
     }
-
-    private fun generate(text: String, width: Int, height: Int): Bitmap? {
-        if (width <= 0 || height <= 0) return null
-        val hints: MutableMap<EncodeHintType, Any?> =
-            EnumMap(com.google.zxing.EncodeHintType::class.java)
-        hints[EncodeHintType.CHARACTER_SET] = StandardCharsets.UTF_8
-        hints[EncodeHintType.ERROR_CORRECTION] = ErrorCorrectionLevel.M
-
-        try {
-            val barcodeEncoder = BarcodeEncoder()
-            val bitMatrix = barcodeEncoder.encode(text, BarcodeFormat.QR_CODE, width, height, hints)
-            val pixels = IntArray(bitMatrix.width * bitMatrix.height)
-            for (i in 0 until bitMatrix.height) {
-                for (j in 0 until bitMatrix.width) {
-                    if (bitMatrix[j, i]) {
-                        pixels[i * width + j] = -0x1
-                    } else {
-                        pixels[i * height + j] = ContextCompat.getColor(this, R.color.oled_colorBackground)
-                    }
-                }
-            }
-            return Bitmap.createBitmap(pixels, 0, bitMatrix.width, bitMatrix.width, bitMatrix.height, Bitmap.Config.ARGB_8888)
-        } catch (ex: WriterException) {
-            Log.e("ReceiveFragment.kt", ex.toString())
-        }
-        return null
-    }
 }
 
 class ReceiveViewModel : ViewModel() {
+    private var qrCodeJob: AtomicReference<Job?> = AtomicReference(null)
+
     private val _selectedSubaddress = MutableLiveData<Subaddress?>()
     val selectedSubaddress: LiveData<Subaddress?> = _selectedSubaddress
 
     private val _subaddresses = MutableLiveData<List<Subaddress>>()
     val subaddresses: LiveData<List<Subaddress>> = _subaddresses
 
-    fun refreshSubaddresses(walletService: WalletService) {
+    private val _qrCode = MutableLiveData<Bitmap?>()
+    val qrCode: LiveData<Bitmap?> = _qrCode
+
+    fun refreshSubaddresses(walletService: WalletService, backgroundColor: Int) {
         val wallet = walletService.getWalletOrThrow()
 
         val newSubaddresses = (0 until wallet.numSubaddresses).map { wallet.getSubaddressObject(it) }
@@ -195,13 +182,30 @@ class ReceiveViewModel : ViewModel() {
 
         val currentSelectedSubaddress = selectedSubaddress.value
         if (currentSelectedSubaddress == null) {
-            _selectedSubaddress.postValue(newSubaddresses.lastOrNull())
+            selectAddress(newSubaddresses.lastOrNull(), backgroundColor)
         } else {
-            _selectedSubaddress.postValue(newSubaddresses.getOrNull(currentSelectedSubaddress.addressIndex))
+            selectAddress(newSubaddresses.getOrNull(currentSelectedSubaddress.addressIndex), backgroundColor)
         }
     }
 
-    fun selectAddress(subaddress: Subaddress?) {
-        _selectedSubaddress.value = subaddress
+    fun selectAddress(subaddress: Subaddress?, backgroundColor: Int) {
+        qrCodeJob.getAndUpdate { job ->
+            job?.cancel()
+            _selectedSubaddress.postValue(subaddress)
+            _qrCode.postValue(null)
+            subaddress?.let {
+                viewModelScope.launch {
+                    withContext(Dispatchers.Default) {
+                        val (bitmap, time) = measureTimedValue {
+                            QrCodeHelper.generateQrCode(subaddress.address, 256, 256, backgroundColor)
+                        }
+                        Timber.d("Generated QR code bitmap in ${time.toInt(DurationUnit.MILLISECONDS)} milliseconds")
+                        if (isActive) {
+                            _qrCode.postValue(bitmap)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
