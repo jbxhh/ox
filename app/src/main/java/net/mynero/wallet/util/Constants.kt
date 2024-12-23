@@ -12,7 +12,6 @@ object Constants {
     const val PREF_PROXY = "pref_proxy"
     // _3 can be removed after preferences key is changed
     const val PREF_NODE_3 = "pref_node_3"
-    const val PREF_CUSTOM_NODES = "pref_custom_nodes"
     const val PREF_NODES = "pref_custom_nodes"
     const val PREF_USES_OFFSET = "pref_uses_offset"
     const val PREF_STREET_MODE = "pref_street_mode"

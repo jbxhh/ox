@@ -15,7 +15,6 @@
  */
 package net.mynero.wallet.adapter
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,7 +32,7 @@ import java.util.Date
 
 class TransactionInfoAdapter(
     private var streetMode: Boolean,
-    val listener: TxInfoAdapterListener,
+    private val listener: TxInfoAdapterListener,
 ) : RecyclerView.Adapter<TransactionInfoAdapter.ViewHolder>() {
 
     private var localDataSet: List<TransactionInfo> = emptyList()
@@ -50,21 +49,17 @@ class TransactionInfoAdapter(
         }
     }
 
-    // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        // Create a new view, which defines the UI of the list item
         val view = LayoutInflater.from(viewGroup.context)
             .inflate(R.layout.transaction_history_item, viewGroup, false)
         return ViewHolder(listener, view)
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val tx = localDataSet[position]
         viewHolder.bind(tx, streetMode)
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount(): Int {
         return localDataSet.size
     }
@@ -73,46 +68,42 @@ class TransactionInfoAdapter(
         fun onClickTransaction(txInfo: TransactionInfo)
     }
 
-    /**
-     * Provide a reference to the type of views that you are using
-     * (custom ViewHolder).
-     */
-    class ViewHolder(val listener: TxInfoAdapterListener?, view: View) :
-        RecyclerView.ViewHolder(view) {
-        private val outboundColour: Int
-        private val inboundColour: Int
-        private val pendingColour: Int
-        private val failedColour: Int
-        private val selfColour: Int
-        private var amountTextView: TextView? = null
+    class ViewHolder(val listener: TxInfoAdapterListener?, view: View) : RecyclerView.ViewHolder(view) {
+
+        private val outboundColour: Int = ThemeHelper.getThemedColor(view.context, R.attr.negativeColor)
+        private val inboundColour: Int = ThemeHelper.getThemedColor(view.context, R.attr.positiveColor)
+        private val pendingColour: Int = ThemeHelper.getThemedColor(view.context, R.attr.neutralColor)
+        private val failedColour: Int = ThemeHelper.getThemedColor(view.context, R.attr.neutralColor)
+
+        private lateinit var amountTextView: TextView
+        private lateinit var confirmationsTextView: TextView
+        private lateinit var confirmationsProgressBar: CircularProgressIndicator
+        private lateinit var txFailedTextView: TextView
+        private lateinit var txDateTimeTextView: TextView
 
         init {
-            inboundColour = ThemeHelper.getThemedColor(view.context, R.attr.positiveColor)
-            outboundColour = ThemeHelper.getThemedColor(view.context, R.attr.negativeColor)
-            pendingColour = ThemeHelper.getThemedColor(view.context, R.attr.neutralColor)
-            failedColour = ThemeHelper.getThemedColor(view.context, R.attr.neutralColor)
-            selfColour = ThemeHelper.getThemedColor(view.context, R.attr.softFavouriteColor)
             val cal = Calendar.getInstance()
             val tz = cal.timeZone //get the local time zone.
             DateHelper.DATETIME_FORMATTER.timeZone = tz
         }
 
         fun bind(txInfo: TransactionInfo, streetMode: Boolean) {
+            confirmationsTextView = itemView.findViewById(R.id.tvConfirmations)
+            confirmationsProgressBar = itemView.findViewById(R.id.pbConfirmations)
+            amountTextView = itemView.findViewById(R.id.tx_amount)
+            txFailedTextView = itemView.findViewById(R.id.tx_failed)
+            txDateTimeTextView = itemView.findViewById(R.id.tx_datetime)
+
             val displayAmount =
                 if (streetMode) Constants.STREET_MODE_BALANCE else Helper.getDisplayAmount(
                     txInfo.amount,
                     Helper.DISPLAY_DIGITS_INFO
                 )
-            val confirmationsTextView = itemView.findViewById<TextView>(R.id.tvConfirmations)
-            val confirmationsProgressBar =
-                itemView.findViewById<CircularProgressIndicator>(R.id.pbConfirmations)
             confirmationsProgressBar.max = TransactionInfo.CONFIRMATION
-            amountTextView = itemView.findViewById(R.id.tx_amount)
-            itemView.findViewById<View>(R.id.tx_failed).visibility = View.GONE
+            txFailedTextView.visibility = View.GONE
             if (txInfo.isFailed) {
-                amountTextView?.text =
-                    itemView.context.getString(R.string.tx_list_amount_negative, displayAmount)
-                itemView.findViewById<View>(R.id.tx_failed).visibility = View.VISIBLE
+                amountTextView.text = itemView.context.getString(R.string.tx_list_amount_negative, displayAmount)
+                txFailedTextView.visibility = View.VISIBLE
                 setTxColour(failedColour)
                 confirmationsTextView.visibility = View.GONE
                 confirmationsProgressBar.visibility = View.GONE
@@ -138,9 +129,6 @@ class TransactionInfoAdapter(
                 }
             } else {
                 setTxColour(outboundColour)
-                if (txInfo.amount == 0L) {
-                    setTxColour(Color.CYAN)
-                }
                 if (!txInfo.isConfirmed) {
                     confirmationsProgressBar.visibility = View.VISIBLE
                     val confirmations = txInfo.confirmations.toInt()
@@ -156,19 +144,18 @@ class TransactionInfoAdapter(
                 }
             }
             if (txInfo.direction == TransactionInfo.Direction.Direction_Out) {
-                amountTextView?.text =
+                amountTextView.text =
                     itemView.context.getString(R.string.tx_list_amount_negative, displayAmount)
             } else {
-                amountTextView?.text =
+                amountTextView.text =
                     itemView.context.getString(R.string.tx_list_amount_positive, displayAmount)
             }
-            (itemView.findViewById<View>(R.id.tx_datetime) as TextView).text =
-                getDateTime(txInfo.timestamp)
+            txDateTimeTextView.text = getDateTime(txInfo.timestamp)
             itemView.setOnClickListener { _: View? -> listener?.onClickTransaction(txInfo) }
         }
 
         private fun setTxColour(clr: Int) {
-            amountTextView?.setTextColor(clr)
+            amountTextView.setTextColor(clr)
         }
 
         private fun getDateTime(time: Long): String {

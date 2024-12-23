@@ -31,7 +31,7 @@ class SubaddressAdapter(
     private var addresses: List<Subaddress>,
     private var selectedAddress: Subaddress?,
     private val streetMode: Boolean,
-    val listener: SubaddressAdapterListener?
+    private val listener: SubaddressAdapterListener
 ): RecyclerView.Adapter<SubaddressAdapter.ViewHolder>() {
 
     fun submitAddresses(addresses: List<Subaddress>) {
@@ -72,7 +72,7 @@ class SubaddressAdapter(
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder).
      */
-    class ViewHolder(view: View, val listener: SubaddressAdapterListener?) :
+    class ViewHolder(view: View, val listener: SubaddressAdapterListener) :
         RecyclerView.ViewHolder(view) {
 
         fun bind(subaddress: Subaddress, isSelected: Boolean, streetMode: Boolean) {
@@ -108,9 +108,9 @@ class SubaddressAdapter(
                     )
                 }
             } else addressAmountTextView.text = ""
-            itemView.setOnClickListener { listener?.onSubaddressSelected(subaddress) }
+            itemView.setOnClickListener { listener.onSubaddressSelected(subaddress) }
             itemView.setOnLongClickListener { _: View? ->
-                listener?.onSubaddressEditLabel(subaddress)
+                listener.onSubaddressEditLabel(subaddress)
                 true
             }
         }
