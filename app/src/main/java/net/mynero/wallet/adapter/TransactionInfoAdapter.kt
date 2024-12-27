@@ -27,6 +27,7 @@ import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.DateHelper
 import net.mynero.wallet.util.Helper
 import net.mynero.wallet.util.ThemeHelper
+import timber.log.Timber
 import java.util.Calendar
 import java.util.Date
 
@@ -38,8 +39,10 @@ class TransactionInfoAdapter(
     private var localDataSet: List<TransactionInfo> = emptyList()
 
     fun submitList(dataSet: List<TransactionInfo>) {
-        localDataSet = dataSet
-        notifyDataSetChanged()
+        if (localDataSet != dataSet) {
+            localDataSet = dataSet
+            notifyDataSetChanged()
+        }
     }
 
     fun submitStreetMode(newStreetMode: Boolean) {

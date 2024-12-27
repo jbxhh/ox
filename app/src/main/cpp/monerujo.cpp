@@ -66,7 +66,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
     class_WalletStatus = static_cast<jclass>(jenv->NewGlobalRef(
             jenv->FindClass("net/mynero/wallet/model/Wallet$Status")));
     class_CoinsInfo = static_cast<jclass>(jenv->NewGlobalRef(
-            jenv->FindClass("net/mynero/wallet/model/CoinsInfo")));
+            jenv->FindClass("net/mynero/wallet/model/Enote")));
     return JNI_VERSION_1_6;
 }
 #ifdef __cplusplus
@@ -103,7 +103,7 @@ struct MyWalletListener : Monero::WalletListener {
     jobject jlistener;
 
     MyWalletListener(JNIEnv *env, jobject aListener) {
-        LOGD("Created MyListener");
+        LOGD("Created MyListener TEST");
         jlistener = env->NewGlobalRef(aListener);;
     }
 
@@ -643,7 +643,9 @@ Java_net_mynero_wallet_model_WalletManager_getDaemonVersion(JNIEnv *env,
 
 JNIEXPORT jlong JNICALL
 Java_net_mynero_wallet_model_WalletManager_getBlockchainHeight(JNIEnv *env, jobject instance) {
-    return Monero::WalletManagerFactory::getWalletManager()->blockchainHeight();
+    auto wm = Monero::WalletManagerFactory::getWalletManager();
+    auto result = wm->blockchainHeight();
+    return static_cast<jlong>(result);
 }
 
 JNIEXPORT jlong JNICALL
@@ -1270,30 +1272,27 @@ Java_net_mynero_wallet_model_Wallet_disposeTransaction(JNIEnv *env, jobject inst
 //virtual bool exportKeyImages(const std::string &filename) = 0;
 //virtual bool importKeyImages(const std::string &filename) = 0;
 
-JNIEXPORT jlong JNICALL
-Java_net_mynero_wallet_model_Wallet_getCoinsJ(JNIEnv *env, jobject instance) {
-    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
-    return reinterpret_cast<jlong>(wallet->coins());
-}
+jobject newCoinsInfo(JNIEnv *env, const Monero::Enote& info) {
 
-jobject newCoinsInfo(JNIEnv *env, Monero::CoinsInfo *info) {
     jmethodID c = env->GetMethodID(class_CoinsInfo, "<init>",
-                                   "(JZLjava/lang/String;JLjava/lang/String;Ljava/lang/String;ZJZLjava/lang/String;)V");
-    jstring _key_image = env->NewStringUTF(info->keyImage().c_str());
-    jstring _pub_key = env->NewStringUTF(info->pubKey().c_str());
-    jstring _hash = env->NewStringUTF(info->hash().c_str());
-    jstring _address = env->NewStringUTF(info->address().c_str());
+                                   "(JJZLjava/lang/String;JLjava/lang/String;Ljava/lang/String;ZJZLjava/lang/String;)V");
+    jstring _key_image = env->NewStringUTF(info.keyImage.c_str());
+    jstring _pub_key = env->NewStringUTF(info.pubKey.c_str());
+    jstring _hash = env->NewStringUTF(info.hash.c_str());
+    jstring _address = env->NewStringUTF(info.address.c_str());
     jobject result = env->NewObject(class_CoinsInfo, c,
-                                    static_cast<jlong> (info->globalOutputIndex()),
-                                    info->spent(),
+                                    static_cast<jlong> (info.idx),
+                                    static_cast<jlong> (info.globalOutputIndex),
+                                    info.spent,
                                     _key_image,
-                                    static_cast<jlong> (info->amount()),
+                                    static_cast<jlong> (info.amount),
                                     _hash,
                                     _pub_key,
-                                    info->unlocked(),
-                                    static_cast<jlong> (info->internalOutputIndex()),
-                                    info->frozen(),
+                                    info.unlocked,
+                                    static_cast<jlong> (info.internalOutputIndex),
+                                    info.frozen,
                                     _address);
+
     env->DeleteLocalRef(_key_image);
     env->DeleteLocalRef(_hash);
     env->DeleteLocalRef(_pub_key);
@@ -1301,7 +1300,7 @@ jobject newCoinsInfo(JNIEnv *env, Monero::CoinsInfo *info) {
     return result;
 }
 
-jobject coins_cpp2java(JNIEnv *env, const std::vector<Monero::CoinsInfo *> &vector) {
+jobject coins_cpp2java(JNIEnv *env, const std::vector<Monero::Enote>& vector) {
 
     jmethodID java_util_ArrayList_ = env->GetMethodID(class_ArrayList, "<init>", "(I)V");
     jmethodID java_util_ArrayList_add = env->GetMethodID(class_ArrayList, "add",
@@ -1309,38 +1308,32 @@ jobject coins_cpp2java(JNIEnv *env, const std::vector<Monero::CoinsInfo *> &vect
 
     jobject arrayList = env->NewObject(class_ArrayList, java_util_ArrayList_,
                                        static_cast<jint> (vector.size()));
-    for (Monero::CoinsInfo *s: vector) {
+    for (const Monero::Enote& s: vector) {
         jobject info = newCoinsInfo(env, s);
         env->CallBooleanMethod(arrayList, java_util_ArrayList_add, info);
         env->DeleteLocalRef(info);
     }
+
     return arrayList;
 }
 
-JNIEXPORT jint JNICALL
-Java_net_mynero_wallet_model_Coins_getCount(JNIEnv *env, jobject instance) {
-    Monero::Coins *coins = getHandle<Monero::Coins>(env, instance);
-    return coins->count();
-}
-
 JNIEXPORT jobject JNICALL
-Java_net_mynero_wallet_model_Coins_refreshJ(JNIEnv *env, jobject instance) {
-    Monero::Coins *coins = getHandle<Monero::Coins>(env, instance);
-    coins->refresh();
-    return coins_cpp2java(env, coins->getAll());
+Java_net_mynero_wallet_model_Wallet_getEnotesJ(JNIEnv *env, jobject instance) {
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+    std::vector<Monero::Enote> enotes = wallet->enotes();
+    return coins_cpp2java(env, enotes);
 }
 
 JNIEXPORT void JNICALL
-Java_net_mynero_wallet_model_Coins_setFrozen(JNIEnv *env, jobject instance, jstring publicKey,
-                                             jboolean frozen) {
-    Monero::Coins *coins = getHandle<Monero::Coins>(env, instance);
-    const char *_publicKey = env->GetStringUTFChars(publicKey, nullptr);
-    if (frozen) {
-        coins->setFrozen(_publicKey);
-    } else {
-        coins->thaw(_publicKey);
-    }
-    env->ReleaseStringUTFChars(publicKey, _publicKey);
+Java_net_mynero_wallet_model_Wallet_freeze(JNIEnv *env, jobject instance, jlong idx) {
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+    wallet->freeze(static_cast<ssize_t>(idx));
+}
+
+JNIEXPORT void JNICALL
+Java_net_mynero_wallet_model_Wallet_thaw(JNIEnv *env, jobject instance, jlong idx) {
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+    wallet->thaw(static_cast<ssize_t>(idx));
 }
 
 //virtual TransactionHistory * history() const = 0;

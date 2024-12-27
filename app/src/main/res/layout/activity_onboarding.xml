@@ -25,36 +25,31 @@
                 android:text="@string/create_wallet"
                 android:textSize="32sp"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@id/wallet_password_edittext"
-                app:layout_constraintEnd_toStartOf="@id/onboarding_tor_loading_progressindicator"
+                app:layout_constraintBottom_toTopOf="@id/wallet_name_edittext"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
-                android:id="@+id/onboarding_tor_icon"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/tor"
-                android:visibility="invisible"
-                app:layout_constraintBottom_toBottomOf="@id/onboarding_tor_loading_progressindicator"
-                app:layout_constraintEnd_toEndOf="@id/onboarding_tor_loading_progressindicator"
-                app:layout_constraintStart_toStartOf="@id/onboarding_tor_loading_progressindicator"
-                app:layout_constraintTop_toTopOf="@id/onboarding_tor_loading_progressindicator" />
-
-            <com.google.android.material.progressindicator.CircularProgressIndicator
-                android:id="@+id/onboarding_tor_loading_progressindicator"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:indeterminate="true"
-                android:visibility="invisible"
-                app:layout_constraintBottom_toBottomOf="@id/create_wallet_textview"
+            <EditText
+                android:id="@+id/wallet_name_edittext"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/edittext_bg"
+                android:hint="Wallet name"
+                android:inputType="text"
+                android:minHeight="48dp"
+                app:layout_constraintBottom_toTopOf="@id/wallet_password_edittext"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/create_wallet_textview" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/create_wallet_textview"
+                tools:visibility="visible" />
 
             <EditText
                 android:id="@+id/wallet_password_edittext"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:background="@drawable/edittext_bg"
                 android:hint="@string/password_non_optional"
                 android:inputType="textPassword"
@@ -62,23 +57,24 @@
                 app:layout_constraintBottom_toTopOf="@id/wallet_password_confirm_edittext"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/create_wallet_textview"
+                app:layout_constraintTop_toBottomOf="@id/wallet_name_edittext"
                 tools:visibility="visible" />
 
             <EditText
                 android:id="@+id/wallet_password_confirm_edittext"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:background="@drawable/edittext_bg"
                 android:hint="@string/password_confirm"
                 android:inputType="textPassword"
+                android:minHeight="48dp"
                 android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@id/advanced_settings_dropdown_textview"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/wallet_password_edittext"
-                tools:visibility="gone" />
+                tools:visibility="visible" />
 
             <TextView
                 android:id="@+id/advanced_settings_dropdown_textview"
@@ -117,26 +113,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/advanced_settings_dropdown_textview">
 
-                <TextView
-                    android:id="@+id/disable_xmrchan_textview"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/option_hide_xmrchan"
-                    android:textSize="16sp"
-                    app:layout_constraintBottom_toBottomOf="@id/show_xmrchan_switch"
-                    app:layout_constraintEnd_toStartOf="@id/show_xmrchan_switch"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/show_xmrchan_switch" />
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/show_xmrchan_switch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:minWidth="48dp"
-                    android:minHeight="48dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
                 <Button
                     android:id="@+id/select_node_button"
                     android:layout_width="match_parent"
@@ -149,9 +125,8 @@
                     android:singleLine="true"
                     app:layout_constraintBottom_toTopOf="@id/wallet_seed_layout"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/show_xmrchan_switch"
                     tools:ignore="SpeakableTextPresentCheck"
                     tools:text="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" />
 
@@ -222,7 +197,8 @@
                         app:layout_constraintBottom_toTopOf="@id/seed_offset_checkbox"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/wallet_seed_edittext" />
+                        app:layout_constraintTop_toBottomOf="@id/wallet_seed_edittext"
+                        tools:visibility="visible" />
 
                     <CheckBox
                         android:id="@+id/seed_offset_checkbox"
@@ -233,7 +209,8 @@
                         android:visibility="gone"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/wallet_restore_height_edittext" />
+                        app:layout_constraintTop_toBottomOf="@id/wallet_restore_height_edittext"
+                        tools:visibility="visible" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -264,17 +241,6 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <CheckBox
-                        android:id="@+id/bundled_tor_checkbox"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:text="@string/use_bundled_tor"
-                        app:layout_constraintBottom_toTopOf="@id/wallet_proxy_address_edittext"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tor_onboarding_switch" />
-
                     <EditText
                         android:id="@+id/wallet_proxy_address_edittext"
                         android:layout_width="0dp"
@@ -282,24 +248,11 @@
                         android:background="@drawable/edittext_bg"
                         android:hint="@string/wallet_proxy_address_hint"
                         android:minHeight="48dp"
-                        app:layout_constraintBottom_toTopOf="@id/wallet_proxy_port_edittext"
+                        app:layout_constraintBottom_toTopOf="@id/wallet_proxy_address_edittext"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/bundled_tor_checkbox" />
+                        app:layout_constraintTop_toBottomOf="@id/tor_onboarding_switch" />
 
-                    <EditText
-                        android:id="@+id/wallet_proxy_port_edittext"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:background="@drawable/edittext_bg"
-                        android:hint="@string/wallet_proxy_port_hint"
-                        android:inputType="number"
-                        android:minHeight="48dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/wallet_proxy_address_edittext" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
 

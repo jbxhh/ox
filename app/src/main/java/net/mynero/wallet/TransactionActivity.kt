@@ -1,35 +1,29 @@
 package net.mynero.wallet
 
-import android.content.ComponentName
-import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.IBinder
 import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import net.mynero.wallet.model.TransactionInfo
-import net.mynero.wallet.service.wallet.WalletServiceObserver
+import net.mynero.wallet.model.Wallet
 import net.mynero.wallet.service.wallet.WalletService
 import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.DateHelper
 import net.mynero.wallet.util.Helper
 import net.mynero.wallet.util.PreferenceUtils
+import net.mynero.wallet.util.acitivity.MoneroActivity
 import java.util.Calendar
 import java.util.Date
 import java.util.Objects
 
-class TransactionActivity : AppCompatActivity(), WalletServiceObserver {
+class TransactionActivity : MoneroActivity() {
 
     private val viewModel: TransactionActivityViewModel by viewModels()
-
-    private var walletService: WalletService? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,19 +43,6 @@ class TransactionActivity : AppCompatActivity(), WalletServiceObserver {
 
         bindObservers()
         bindListeners()
-
-        bindService(Intent(applicationContext, WalletService::class.java), connection, 0)
-    }
-
-    private val connection: ServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            val walletService = (service as WalletService.WalletServiceBinder).service
-            this@TransactionActivity.walletService = walletService
-            walletService.addObserver(this@TransactionActivity)
-            walletService.refreshTransactionsHistory()
-        }
-
-        override fun onServiceDisconnected(className: ComponentName) {}
     }
 
     private fun bindListeners() {
@@ -162,13 +143,24 @@ class TransactionActivity : AppCompatActivity(), WalletServiceObserver {
         }
     }
 
+    override fun onWalletServiceBound(walletService: WalletService) {
+        walletService.getWallet()?.let { wallet ->
+            updateState(wallet)
+        }
+    }
+
     private fun getDateTime(time: Long): String {
         return DateHelper.DATETIME_FORMATTER.format(Date(time * 1000))
     }
 
-    override fun onWalletHistoryRefreshed(transactions: List<TransactionInfo>) {
+    private fun updateState(wallet: Wallet) {
+        val transactions = wallet.getHistory()
         val newTransactionInfo = transactions.find { it.hash != null && it.hash == viewModel.txHash }
         viewModel.updateTransactionInfo(newTransactionInfo)
+    }
+
+    override fun onWalletUpdated(wallet: Wallet) {
+        updateState(wallet)
     }
 }
 

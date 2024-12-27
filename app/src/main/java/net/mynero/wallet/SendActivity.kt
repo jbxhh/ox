@@ -1,10 +1,6 @@
 package net.mynero.wallet
 
-import android.content.ComponentName
-import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.IBinder
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -18,7 +14,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.LiveData
@@ -32,21 +27,19 @@ import com.ncorti.slidetoact.SlideToActView
 import com.ncorti.slidetoact.SlideToActView.OnSlideCompleteListener
 import net.mynero.wallet.model.PendingTransaction
 import net.mynero.wallet.model.Wallet
-import net.mynero.wallet.service.wallet.WalletServiceObserver
 import net.mynero.wallet.service.wallet.WalletService
 import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.Helper
 import net.mynero.wallet.util.PreferenceUtils
 import net.mynero.wallet.util.TransactionDestination
 import net.mynero.wallet.util.UriData
+import net.mynero.wallet.util.acitivity.MoneroActivity
 
-class SendActivity : AppCompatActivity(), WalletServiceObserver {
+class SendActivity : MoneroActivity() {
 
     var priority: PendingTransaction.Priority = PendingTransaction.Priority.Priority_Default
 
     private val viewModel: SendViewModel by viewModels()
-
-    private var walletService: WalletService? = null
 
     private lateinit var sendMaxButton: Button
     private lateinit var addOutputImageView: ImageButton
@@ -101,8 +94,6 @@ class SendActivity : AppCompatActivity(), WalletServiceObserver {
         bindListeners()
         bindObservers()
         init()
-
-        connectWalletService()
     }
 
     private fun bindListeners() {
@@ -212,23 +203,8 @@ class SendActivity : AppCompatActivity(), WalletServiceObserver {
         viewModel.setEnotes(enotes)
     }
 
-    private fun connectWalletService() {
-        val intent = Intent(applicationContext, WalletService::class.java)
-        startService(intent)
-        bindService(intent, connection, BIND_AUTO_CREATE)
-    }
-
-    private val connection: ServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            val walletService = (service as WalletService.WalletServiceBinder).service
-            this@SendActivity.walletService = walletService
-            walletService.addObserver(this@SendActivity)
-            updateEnotesLabel()
-        }
-
-        override fun onServiceDisconnected(className: ComponentName) {
-            walletService = null
-        }
+    override fun onWalletServiceBound(walletService: WalletService) {
+        updateEnotesLabel()
     }
 
     private fun updateEnotesLabel() {
@@ -236,7 +212,7 @@ class SendActivity : AppCompatActivity(), WalletServiceObserver {
             val selectedUtxos = viewModel.enotes.value
             if (selectedUtxos?.isNotEmpty() == true) {
                 var selectedValue: Long = 0
-                val enotes = walletService.getWalletOrThrow().coins!!.all
+                val enotes = walletService.getWalletOrThrow().getEnotes()
                 for (coinsInfo in enotes) {
                     if (selectedUtxos.contains(coinsInfo.keyImage)) {
                         selectedValue += coinsInfo.amount
@@ -579,7 +555,6 @@ class SendActivity : AppCompatActivity(), WalletServiceObserver {
     }
 
     override fun onTransactionSent(pendingTransaction: PendingTransaction, success: Boolean) {
-        walletService?.refreshTransactionsHistory()
         runOnUiThread {
             if (success) {
                 Toast.makeText(this, getString(R.string.sent_tx), Toast.LENGTH_SHORT).show()

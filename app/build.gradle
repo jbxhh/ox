@@ -143,9 +143,4 @@ dependencies {
 
     // QR Code stuff
     implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
-
-    // Tor
-    def vTor = '4.8.6-0'
-    def vKmpTor = '1.4.4'
-    implementation "io.matthewnelson.kotlin-components:kmp-tor:$vTor-$vKmpTor"
 }

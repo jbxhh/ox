@@ -19,38 +19,16 @@
             android:text="@string/settings"
             android:textSize="32sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/settings_tor_loading_progressindicator"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/settings_tor_icon"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_marginEnd="24dp"
-            android:src="@drawable/tor"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@id/settings_textview"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/settings_textview" />
-
-        <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:id="@+id/settings_tor_loading_progressindicator"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:indeterminate="true"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@id/settings_tor_icon"
-            app:layout_constraintEnd_toEndOf="@id/settings_tor_icon"
-            app:layout_constraintStart_toStartOf="@id/settings_tor_icon"
-            app:layout_constraintTop_toTopOf="@id/settings_tor_icon" />
 
         <TextView
             android:id="@+id/wallet_settings_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="24dp"
             android:text="@string/wallet"
             android:textSize="24sp"
@@ -117,6 +95,51 @@
             app:layout_constraintTop_toBottomOf="@+id/display_utxos_button" />
 
         <TextView
+            android:id="@+id/enable_multiple_wallets_textview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:text="Enable multi-wallet mode"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@id/enable_multiple_wallets_switch"
+            app:layout_constraintEnd_toStartOf="@id/enable_multiple_wallets_switch"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/enable_multiple_wallets_switch" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/enable_multiple_wallets_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="24dp"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/appearance_settings_textview" />
+
+        <TextView
+            android:id="@+id/enable_multiple_accounts_textview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:text="Enable multi-account mode"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@id/enable_multiple_accounts_switch"
+            app:layout_constraintEnd_toStartOf="@id/enable_multiple_accounts_switch"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/enable_multiple_accounts_switch" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/enable_multiple_accounts_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/enable_multiple_wallets_switch" />
+
+        <TextView
             android:id="@+id/street_mode_label_textview"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -132,12 +155,11 @@
             android:id="@+id/street_mode_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:layout_marginEnd="24dp"
             android:minWidth="48dp"
             android:minHeight="48dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/appearance_settings_textview" />
+            app:layout_constraintTop_toBottomOf="@id/enable_multiple_accounts_switch" />
 
         <TextView
             android:id="@+id/allow_fee_override_label_textview"
@@ -162,6 +184,59 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/street_mode_switch" />
 
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/wallet_account_settings_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/allow_fee_override_switch">
+
+            <TextView
+                android:id="@+id/account_settings_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="24dp"
+                android:text="Accounts"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Button
+                android:id="@+id/add_account_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="24dp"
+                android:background="@drawable/button_bg"
+                android:text="@string/add_account"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/account_settings_textview" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/accounts_recycler_view"
+                android:layout_width="0dp"
+                android:layout_height="128dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="24dp"
+                android:background="@drawable/round_bg"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/add_account_button" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
         <TextView
             android:id="@+id/network_settings_textview"
             android:layout_width="match_parent"
@@ -174,7 +249,7 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/allow_fee_override_switch" />
+            app:layout_constraintTop_toBottomOf="@+id/wallet_account_settings_layout" />
 
         <Button
             android:id="@+id/select_node_button"
@@ -196,7 +271,7 @@
             tools:text="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" />
 
         <TextView
-            android:id="@+id/tor_textview"
+            android:id="@+id/proxy_textview"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
@@ -227,20 +302,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/proxy_switch">
 
-            <CheckBox
-                android:id="@+id/bundled_tor_checkbox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:minHeight="48dp"
-                android:text="@string/use_bundled_tor"
-                android:visibility="visible"
-                app:layout_constraintBottom_toTopOf="@id/wallet_proxy_address_edittext"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
             <EditText
                 android:id="@+id/wallet_proxy_address_edittext"
                 android:layout_width="0dp"
@@ -248,28 +309,12 @@
                 android:layout_marginStart="24dp"
                 android:layout_marginEnd="24dp"
                 android:background="@drawable/edittext_bg"
-                android:hint="@string/wallet_proxy_address_hint"
+                android:hint="@string/proxy_address_hint"
                 android:minHeight="48dp"
-                app:layout_constraintBottom_toTopOf="@id/wallet_proxy_port_edittext"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/bundled_tor_checkbox" />
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <EditText
-                android:id="@+id/wallet_proxy_port_edittext"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="24dp"
-                android:background="@drawable/edittext_bg"
-                android:hint="@string/wallet_proxy_port_hint"
-                android:inputType="number"
-                android:minHeight="48dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/wallet_proxy_address_edittext" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

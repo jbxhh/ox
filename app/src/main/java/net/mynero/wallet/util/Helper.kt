@@ -66,7 +66,7 @@ object Helper {
         return getStorage(context, WALLET_DIR)
     }
 
-    fun getStorage(context: Context, folderName: String?): File {
+    fun getStorage(context: Context, folderName: String): File {
         val dir = File(context.filesDir, folderName)
         if (!dir.exists()) {
             Log.i("Helper.kt", "Creating ${dir.absolutePath}")
@@ -114,13 +114,6 @@ object Helper {
         } else {
             true
         }
-    }
-
-    fun getWalletFile(context: Context, aWalletName: String?): File {
-        val walletDir = getWalletRoot(context)
-        val f = File(walletDir, aWalletName)
-        Log.d("Helper.kt", "wallet=${f.absolutePath} size= ${f.length()}")
-        return f
     }
 
     fun showKeyboard(act: Activity) {

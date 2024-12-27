@@ -26,6 +26,14 @@ object PreferenceUtils {
 
     fun setUseProxy(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_USE_PROXY, value)
 
+    fun isMultiWalletMode(context: Context): Boolean = getBoolean(context, Constants.PREF_ENABLE_MULTIPLE_WALLETS, false)
+
+    fun setMultiWalletMode(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_ENABLE_MULTIPLE_WALLETS, value)
+
+    fun isMultiAccountMode(context: Context): Boolean = getBoolean(context, Constants.PREF_ENABLE_MULTIPLE_ACCOUNTS, false)
+
+    fun setMultiAccountMode(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_ENABLE_MULTIPLE_ACCOUNTS, value)
+
     fun isStreetMode(context: Context): Boolean = getBoolean(context, Constants.PREF_STREET_MODE, false)
 
     fun setStreetMode(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_STREET_MODE, value)
@@ -104,11 +112,11 @@ object PreferenceUtils {
     }
 
     fun setNode(context: Context, node: Node): Result<Unit> = node.toJson().map { nodeJson ->
-        setString(context, Constants.PREF_NODE_3, nodeJson.toString())
+        setString(context, Constants.PREF_NODE, nodeJson.toString())
     }
 
     private fun getNode(context: Context): Result<Node?> {
-        val nodeJsonString = getString(context, Constants.PREF_NODE_3) ?: return Result.success(null)
+        val nodeJsonString = getString(context, Constants.PREF_NODE) ?: return Result.success(null)
         val nodeJson = kotlin.runCatching { JSONObject(nodeJsonString) }
         return nodeJson.fold(
             {
