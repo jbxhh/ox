@@ -25,12 +25,10 @@ import java.util.Locale
 
 class WalletManager {
     val networkType = NetworkType.NetworkType_Mainnet
-    var proxy = ""
-        private set
 
     fun createWallet(aFile: File, password: String, language: String, height: Long): Wallet {
         val walletHandle = createWalletJ(aFile.absolutePath, password, language, networkType.value)
-        val wallet = Wallet(walletHandle)
+        val wallet = Wallet(walletHandle, WalletInfo(aFile, password))
         if (wallet.status.isOk) {
             // (Re-)Estimate restore height based on what we know
             val oldHeight = wallet.getRestoreHeight()
@@ -48,7 +46,7 @@ class WalletManager {
         return wallet
     }
 
-    //public native List<String> findWallets(String path); // this does not work - some error in boost
+    external fun findWallets(path: String): List<String> // this does not work - some error in boost
     private external fun createWalletJ(
         path: String,
         password: String,
@@ -69,7 +67,7 @@ class WalletManager {
             language,
             networkType.value
         )
-        val wallet = Wallet(walletHandle)
+        val wallet = Wallet(walletHandle, WalletInfo(aFile, password))
         if (wallet.status.isOk) {
             wallet.setPassword(password) // this rewrites the keys file (which contains the restore height)
         } else Log.e("WalletManager.kt", wallet.status.toString())
@@ -87,7 +85,7 @@ class WalletManager {
     //TODO virtual bool checkPayment(const std::string &address, const std::string &txid, const std::string &txkey, const std::string &daemon_address, uint64_t &received, uint64_t &height, std::string &error) const = 0;
     fun openWallet(path: String, password: String): Wallet {
         val walletHandle = openWalletJ(path, password, networkType.value)
-        val wallet = Wallet(walletHandle)
+        val wallet = Wallet(walletHandle, WalletInfo(File(path), password))
         return wallet
     }
 
@@ -102,7 +100,7 @@ class WalletManager {
             mnemonic, offset,
             networkType.value, restoreHeight
         )
-        val wallet = Wallet(walletHandle)
+        val wallet = Wallet(walletHandle, WalletInfo(aFile, password))
         return wallet
     }
 
@@ -121,7 +119,7 @@ class WalletManager {
             mnemonic, offset,
             networkType.value
         )
-        val wallet = Wallet(walletHandle)
+        val wallet = Wallet(walletHandle, WalletInfo(aFile, password))
         return wallet
     }
 
@@ -140,7 +138,7 @@ class WalletManager {
             language, networkType.value, restoreHeight,
             addressString, viewKeyString, spendKeyString
         )
-        val wallet = Wallet(walletHandle)
+        val wallet = Wallet(walletHandle, WalletInfo(aFile, password))
         return wallet
     }
 
@@ -198,12 +196,8 @@ class WalletManager {
 
     external fun stopMining(): Boolean
     external fun resolveOpenAlias(address: String?, dnssec_valid: Boolean): String?
-    fun setProxy(address: String): Boolean {
-        proxy = address
-        return setProxyJ(address)
-    }
 
-    private external fun setProxyJ(address: String?): Boolean
+    external fun setProxyJ(address: String?): Boolean
     inner class WalletInfo(wallet: File) : Comparable<WalletInfo> {
         private val path: File
         private val name: String
@@ -228,7 +222,10 @@ class WalletManager {
         var LOGLEVEL_TRACE = 3
         var LOGLEVEL_MAX = 4
 
-        val instance: WalletManager = WalletManager()
+        val instance: WalletManager
+            get() = synchronized(WalletManager::class.java) {
+                return@synchronized WalletManager()
+            }
 
         fun addressPrefix(networkType: NetworkType): String {
             return when (networkType) {

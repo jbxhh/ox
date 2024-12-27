@@ -7,23 +7,20 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.Message
-import android.util.Log
 import androidx.lifecycle.AtomicReference
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import net.mynero.wallet.model.Balance
-import net.mynero.wallet.model.CoinsInfo
+import net.mynero.wallet.model.Enote
 import net.mynero.wallet.model.PendingTransaction
-import net.mynero.wallet.model.TransactionInfo
 import net.mynero.wallet.model.Wallet
+import net.mynero.wallet.model.Wallet.Companion.NEW_ACCOUNT_NAME
 import net.mynero.wallet.model.WalletListener
 import net.mynero.wallet.model.WalletManager
-import net.mynero.wallet.service.MoneroHandlerThread
 import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.TransactionDestination
 import timber.log.Timber
-import java.io.File
 import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 
 private const val EXTRA_WALLET_NAME = "wallet_name"
@@ -34,6 +31,8 @@ private const val EXTRA_DAEMON_PASSWORD = "daemon_password"
 private const val EXTRA_DAEMON_TRUSTED = "daemon_trusted"
 private const val EXTRA_SUBADDRESS_LABEL = "subaddress_label"
 private const val EXTRA_SUBADDRESS_INDEX = "subaddress_index"
+private const val EXTRA_ACCOUNT_LABEL = "account_label"
+private const val EXTRA_ACCOUNT_INDEX = "account_index"
 private const val EXTRA_TRANSACTION_DESTINATION = "transaction_destination"
 private const val EXTRA_TRANSACTION_DESTINATIONS = "transaction_destinations"
 private const val EXTRA_TRANSACTION_PRIORITY = "transaction_priority"
@@ -44,6 +43,10 @@ private const val EXTRA_ENOTE = "enote"
 private const val EXTRA_ENOTES = "enotes"
 
 class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
+
+    companion object {
+        val RUNNING: AtomicBoolean = AtomicBoolean(false)
+    }
 
     private var daemonHeight: AtomicLong = AtomicLong(0)
     // height of the wallet when it was opened
@@ -66,14 +69,16 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
                 }
                 WalletServiceCommand.OPEN_WALLET -> {
                     val walletName = data.getString(EXTRA_WALLET_NAME)!!
-                    val walletFile = File(applicationInfo.dataDir, walletName)
                     val walletPassword = data.getString(EXTRA_WALLET_PASSWORD)!!
                     val daemonAddress = data.getString(EXTRA_DAEMON_ADDRESS)!!
                     val daemonUsername = data.getString(EXTRA_DAEMON_USERNAME)!!
                     val daemonPassword = data.getString(EXTRA_DAEMON_PASSWORD)!!
                     val daemonTrusted = data.getBoolean(EXTRA_DAEMON_TRUSTED, false)
                     val proxy = data.getString(EXTRA_PROXY)!!
-                    handleOpenWallet(walletFile, walletPassword, daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
+                    handleOpenWallet(walletName, walletPassword, daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
+                }
+                WalletServiceCommand.CLOSE_WALLET -> {
+                    handleCloseWallet()
                 }
                 WalletServiceCommand.SET_DAEMON_ADDRESS -> {
                     val daemonAddress = data.getString(EXTRA_DAEMON_ADDRESS)!!
@@ -86,14 +91,11 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
                 WalletServiceCommand.FETCH_BLOCKCHAIN_HEIGHT -> {
                     handleFetchDaemonHeight()
                 }
-                WalletServiceCommand.REFRESH_WALLET_TRANSACTION_HISTORY -> {
-                    handleRefreshTransactionHistory()
-                }
-                WalletServiceCommand.GENERATE_NEW_SUBADDRESS -> {
+                WalletServiceCommand.GENERATE_NEW_ADDRESS -> {
                     val subaddressLabel = data.getString(EXTRA_SUBADDRESS_LABEL)!!
                     handleGenerateNewSubaddress(subaddressLabel)
                 }
-                WalletServiceCommand.SET_SUBADDRESS_LABEL -> {
+                WalletServiceCommand.SET_ADDRESS_LABEL -> {
                     val subaddressIndex = data.getInt(EXTRA_SUBADDRESS_INDEX)
                     val subaddressLabel = data.getString(EXTRA_SUBADDRESS_LABEL)!!
                     handleSetSubaddressLabel(subaddressIndex, subaddressLabel)
@@ -129,22 +131,32 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
                     val proxy = data.getString(EXTRA_PROXY)!!
                     handleSetProxy(proxy)
                 }
-                WalletServiceCommand.REFRESH_ENOTES -> {
-                    handleRefreshEnotes()
-                }
                 WalletServiceCommand.FREEZE_ENOTES -> {
-                    val enotes = data.getStringArrayList(EXTRA_ENOTES)!!
+                    val enotes = data.getLongArray(EXTRA_ENOTES)!!
                     handleFreezeEnotes(enotes)
                 }
                 WalletServiceCommand.THAW_ENOTES -> {
-                    val enotes = data.getStringArrayList(EXTRA_ENOTES)!!
+                    val enotes = data.getLongArray(EXTRA_ENOTES)!!
                     handleThawEnotes(enotes)
+                }
+                WalletServiceCommand.CREATE_ACCOUNT -> {
+                    val label = data.getString(EXTRA_ACCOUNT_LABEL)
+                    handleCreateAccount(label)
+                }
+                WalletServiceCommand.SET_ACCOUNT -> {
+                    val index = data.getInt(EXTRA_ACCOUNT_INDEX)
+                    handleSetAccount(index)
+                }
+                WalletServiceCommand.SET_ACCOUNT_LABEL -> {
+                    val index = data.getInt(EXTRA_ACCOUNT_INDEX)
+                    val label = data.getString(EXTRA_ACCOUNT_LABEL)!!
+                    handleSetAccountLabel(index, label)
                 }
             }
         }
 
         private fun handleOpenWallet(
-            walletFile: File,
+            walletName: String,
             walletPassword: String,
             daemonAddress: String,
             daemonUsername: String,
@@ -152,25 +164,27 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             daemonTrusted: Boolean,
             proxy: String
         ) {
-            WalletManager.instance.setProxy(proxy)
+            WalletManager.instance.setProxyJ(proxy)
             WalletManager.instance.setDaemonAddressJ(daemonAddress)
-            val wallet = WalletManager.instance.openWallet(walletFile.absolutePath, walletPassword)
+            val wallet = WalletManager.instance.openWallet(walletName, walletPassword)
             Timber.i("Initializing wallet with daemon address = $daemonAddress, daemon username = $daemonUsername, daemon password = ${"*".repeat(daemonPassword.length)}, proxy = $proxy")
             wallet.initJ(daemonAddress, 0, daemonUsername, daemonPassword, proxy)
             wallet.setTrustedDaemon(daemonTrusted)
 
             this@WalletService.walletBeginSyncHeight.set(wallet.getBlockChainHeightJ())
+            updateWallet(wallet)
             this@WalletService.walletRef.set(wallet)
 
-            forEachObserver {
-                it.onWalletOpened(wallet)
-            }
-
-            handleRefreshTransactionHistory()
-            handleRefreshEnotes()
+            handleFetchDaemonHeight() // TODO: investigate why there is a double free in Monero code when this is moved after startRefresh
             wallet.setListener(this@WalletService)
             wallet.startRefresh()
-            handleFetchDaemonHeight()
+        }
+
+        private fun handleCloseWallet() {
+            walletRef.getAndSet(null)?.let { wallet ->
+                wallet.setListener(null)
+                wallet.close()
+            }
         }
 
         private fun setDaemonAddress(
@@ -180,20 +194,14 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             daemonTrusted: Boolean,
             proxy: String
         ) {
-            WalletManager.instance.setProxy(proxy)
+            WalletManager.instance.setProxyJ(proxy)
             WalletManager.instance.setDaemonAddressJ(daemonAddress)
             walletRef.get()?.let { wallet ->
                 wallet.initJ(daemonAddress, 0, daemonUsername, daemonPassword, proxy)
                 wallet.setTrustedDaemon(daemonTrusted)
+                updateWallet(wallet)
                 wallet.setListener(this@WalletService)
                 wallet.startRefresh()
-
-                forEachObserver {
-                    it.onWalletOpened(wallet)
-                }
-
-                handleRefreshTransactionHistory()
-                handleRefreshEnotes()
             }
             handleFetchDaemonHeight()
         }
@@ -208,16 +216,11 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             }
         }
 
-        private fun handleRefreshTransactionHistory() {
-            val history = walletRef.get()!!.getTransactionHistory().refreshJ()
-            forEachObserver {
-                it.onWalletHistoryRefreshed(history)
-            }
-        }
-
         private fun handleGenerateNewSubaddress(label: String) {
-            walletRef.get()!!.addSubaddress(0, label)
-            walletRef.get()!!.store()
+            val wallet = getWalletOrThrow()
+            wallet.addSubaddress(wallet.getAccountIndex(), label)
+            wallet.store()
+            updateWallet(wallet)
             forEachObserver {
                 it.onSubaddressesUpdated()
             }
@@ -282,32 +285,28 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             val amountWithBasicFee = amount + basicFeeEstimate
             val selectedUtxos = ArrayList<String>()
             val seenTxs = ArrayList<String>()
-            val utxos: List<CoinsInfo> = ArrayList(walletRef.get()!!.coins?.all!!)
+            val enotes: List<Enote> = ArrayList(walletRef.get()!!.getEnotes())
             var amountSelected: Long = 0
-            val sortedUtxos = utxos.sorted()
             //loop through each utxo
-            Log.e("WS", "sortedUtxos sz = ${sortedUtxos.size}")
-            for (coinsInfo in sortedUtxos) {
-                Log.e("WS", "coinsInfo = $coinsInfo")
-                if (!coinsInfo.isSpent && coinsInfo.isUnlocked && !coinsInfo.isFrozen
-                ) { //filter out spent, locked, and frozen outputs
+            for (enote in enotes) {
+                // TODO: filter account
+                if (!enote.isSpent && enote.isUnlocked && !enote.isFrozen) { //filter out spent, locked, and frozen outputs
                     if (sendAll) {
                         // if send all, add all utxos and set amount to send all
-                        coinsInfo.keyImage?.let { selectedUtxos.add(it) }
+                        enote.keyImage?.let { selectedUtxos.add(it) }
                         amountSelected = Wallet.SWEEP_ALL
                     } else {
                         //if amount selected is still less than amount needed, and the utxos tx hash hasn't already been seen, add utxo
-                        if (amountSelected <= amountWithBasicFee && !seenTxs.contains(coinsInfo.hash)) {
-                            coinsInfo.keyImage?.let { selectedUtxos.add(it) }
+                        if (amountSelected <= amountWithBasicFee && !seenTxs.contains(enote.hash)) {
+                            enote.keyImage?.let { selectedUtxos.add(it) }
                             // we don't want to spend multiple utxos from the same transaction, so we prevent that from happening here.
-                            coinsInfo.hash?.let { seenTxs.add(it) }
-                            amountSelected += coinsInfo.amount
+                            enote.hash?.let { seenTxs.add(it) }
+                            amountSelected += enote.amount
                         }
                     }
                 }
             }
             if (amountSelected < amountWithBasicFee && !sendAll) {
-                Log.e("WS", "amountSelected = $amountSelected, amountWithBasicFee = $amountWithBasicFee")
                 throw Exception("insufficient wallet balance")
             }
             return selectedUtxos
@@ -326,7 +325,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         }
 
         private fun handleSetProxy(value: String) {
-            val success = WalletManager.instance.setProxy(value)
+            val success = WalletManager.instance.setProxyJ(value)
             // we assume that if setting proxy for daemon was successful,
             // then setting proxy for wallet must have been successful as well
             walletRef.get()?.setProxy(value)
@@ -338,47 +337,60 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             }
         }
 
-        private fun calculateBalanceAndNotifyAboutRefreshedEnotes(enotes: List<CoinsInfo>) {
-            var total = 0L
-            var unlocked = 0L
-            var frozen = 0L
-            var pending = 0L
+        private fun handleFreezeEnotes(enotes: LongArray) {
+            val wallet = walletRef.get()!!
+            enotes.forEach {
+                wallet.freeze(it)
+            }
+            wallet.store("")
+            updateWallet(wallet)
+        }
 
-            enotes.filter { !it.isSpent }.forEach { enote ->
-                total += enote.amount
-                if (enote.isFrozen) {
-                    frozen += enote.amount
-                } else if (enote.isUnlocked) {
-                    unlocked += enote.amount
-                } else {
-                    pending += enote.amount
+        private fun handleThawEnotes(enotes: LongArray) {
+            val wallet = walletRef.get()!!
+            enotes.forEach {
+                wallet.thaw(it)
+            }
+            wallet.store("")
+            updateWallet(wallet)
+        }
+
+        private fun handleCreateAccount(
+            label: String?
+        ) {
+            getWallet()?.let { wallet ->
+                wallet.addAccount(label ?: NEW_ACCOUNT_NAME)
+                wallet.store("")
+                forEachObserver {
+                    it.onAccountCreated()
                 }
             }
+        }
 
-            forEachObserver {
-                it.onEnotesRefreshed(enotes, Balance(total, unlocked, frozen, pending))
+        private fun handleSetAccount(
+            index: Int
+        ) {
+            getWallet()?.let { wallet ->
+                wallet.setAccountIndex(index)
+                updateWallet(wallet)
+                forEachObserver {
+                    it.onAccountSet(index)
+                }
             }
         }
 
-        private fun handleRefreshEnotes() {
-            val refreshedEnotes = walletRef.get()!!.coins!!.refreshJ()
-            calculateBalanceAndNotifyAboutRefreshedEnotes(refreshedEnotes)
-        }
-
-        private fun handleFreezeEnotes(enotes: List<String>) {
-            enotes.forEach {
-                walletRef.get()!!.coins!!.setFrozen(it, true)
+        private fun handleSetAccountLabel(
+            index: Int,
+            label: String
+        ) {
+            getWallet()?.let { wallet ->
+                wallet.setAccountLabel(index, label)
+                wallet.store("")
+                updateWallet(wallet)
+                forEachObserver {
+                    it.onAccountLabelChanged(index, label)
+                }
             }
-            val refreshedEnotes = walletRef.get()!!.coins!!.refreshJ()
-            calculateBalanceAndNotifyAboutRefreshedEnotes(refreshedEnotes)
-        }
-
-        private fun handleThawEnotes(enotes: List<String>) {
-            enotes.forEach {
-                walletRef.get()!!.coins!!.setFrozen(it, false)
-            }
-            val refreshedEnotes = walletRef.get()!!.coins!!.refreshJ()
-            calculateBalanceAndNotifyAboutRefreshedEnotes(refreshedEnotes)
         }
     }
 
@@ -387,10 +399,12 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
     private lateinit var handler: WalletHandler
 
     override fun onBind(intent: Intent?): IBinder {
+        Timber.d("A component is binding")
         return mBinder
     }
 
     override fun onCreate() {
+        Timber.d("Wallet Service is being created")
         // ArrayBlockingQueue is used as a oneshot channel to receive a Looper from MoneroHandlerThread
         val oneShotQueue = ArrayBlockingQueue<Looper>(1)
         val thread = MoneroHandlerThread { looper ->
@@ -400,9 +414,11 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
 
         val looper = oneShotQueue.take()
         handler = WalletHandler(looper)
+        RUNNING.set(true)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Timber.d("Wallet Service is being started")
         if (intent != null) {
             return START_STICKY
         } else {
@@ -411,7 +427,14 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         }
     }
 
+    override fun onDestroy() {
+        Timber.d("Wallet Service is being destroyed")
+        closeWallet()
+        RUNNING.set(false)
+    }
+
     override fun onDestroy(owner: LifecycleOwner) {
+        Timber.d("An observer ${owner.javaClass.simpleName} is being destroyed")
         synchronized(observers) {
             observers.remove(owner)
         }
@@ -425,47 +448,44 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         }
     }
 
+    private fun updateWallet(wallet: Wallet) {
+        wallet.update()
+        forEachObserver {
+            it.onWalletUpdated(wallet)
+        }
+    }
+
     override fun moneySpent(txId: String?, amount: Long) {
         Timber.d("Money spent callback")
-        refreshTransactionsHistory()
     }
 
     override fun moneyReceived(txId: String?, amount: Long) {
         Timber.d("Money received callback")
-        refreshTransactionsHistory()
     }
 
     override fun unconfirmedMoneyReceived(txId: String?, amount: Long) {
         Timber.d("Unconfirmed money received callback")
-        refreshTransactionsHistory()
     }
 
     override fun newBlock(height: Long) {
         Timber.d("New block callback at height $height")
-        daemonHeight.updateAndGet { if (it > 0 && it < height) height else it }
-        forEachObserver {
-            it.onNewBlock(height)
-        }
+        // Monero heights are fucked up. Wallet and blockchain heights are always +1 to real height, but this callback receives real height
+        daemonHeight.updateAndGet { if (it > 0 && it < (height + 1)) (height + 1) else it }
         val wallet = getWalletOrThrow()
-        refreshTransactionsHistory()
-        wallet.coins!!.refresh()
         if (wallet.isSynchronized) {
             wallet.store()
         }
+        // TODO: optimize to call this only on the last block of the batch
+        updateWallet(wallet)
     }
 
     override fun updated() {
         Timber.d("Updated callback")
-        forEachObserver {
-            it.onUpdated()
-        }
+        updateWallet(getWalletOrThrow())
     }
 
     override fun refreshed() {
         Timber.d("Refreshed callback")
-        forEachObserver {
-            it.onRefreshed()
-        }
         if (daemonHeight.get() <= 1) {
             Timber.d("Fetching blockchain height")
             fetchBlockchainHeight()
@@ -477,9 +497,11 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             wallet.isSynchronized = true
             wallet.store()
         }
+        updateWallet(wallet)
     }
 
     fun addObserver(observer: WalletServiceObserver) {
+        Timber.d("An observer ${observer.javaClass.simpleName} is being added")
         observer.lifecycle.addObserver(this)
         synchronized(observers) {
             observers.add(observer)
@@ -520,6 +542,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         daemonTrusted: Boolean,
         proxy: String
     ) {
+        closeWallet()
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.OPEN_WALLET.value()
         message.data.putString(EXTRA_WALLET_NAME, walletName)
@@ -529,6 +552,12 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         message.data.putString(EXTRA_DAEMON_PASSWORD, daemonPassword)
         message.data.putBoolean(EXTRA_DAEMON_TRUSTED, daemonTrusted)
         message.data.putString(EXTRA_PROXY, proxy)
+        handler.sendMessage(message)
+    }
+
+    fun closeWallet() {
+        val message = handler.obtainMessage()
+        message.arg1 = WalletServiceCommand.CLOSE_WALLET.value()
         handler.sendMessage(message)
     }
 
@@ -555,22 +584,16 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         handler.sendMessage(message)
     }
 
-    fun refreshTransactionsHistory() {
-        val message = handler.obtainMessage()
-        message.arg1 = WalletServiceCommand.REFRESH_WALLET_TRANSACTION_HISTORY.value()
-        handler.sendMessage(message)
-    }
-
     fun generateNewSubaddress(label: String) {
         val message = handler.obtainMessage()
-        message.arg1 = WalletServiceCommand.GENERATE_NEW_SUBADDRESS.value()
+        message.arg1 = WalletServiceCommand.GENERATE_NEW_ADDRESS.value()
         message.data.putString(EXTRA_SUBADDRESS_LABEL, label)
         handler.sendMessage(message)
     }
 
     fun setSubaddressLabel(index: Int, label: String) {
         val message = handler.obtainMessage()
-        message.arg1 = WalletServiceCommand.SET_SUBADDRESS_LABEL.value()
+        message.arg1 = WalletServiceCommand.SET_ADDRESS_LABEL.value()
         message.data.putInt(EXTRA_SUBADDRESS_INDEX, index)
         message.data.putString(EXTRA_SUBADDRESS_LABEL, label)
         handler.sendMessage(message)
@@ -608,56 +631,72 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         handler.sendMessage(message)
     }
 
-    fun refreshEnotes() {
-        val message = handler.obtainMessage()
-        message.arg1 = WalletServiceCommand.REFRESH_ENOTES.value()
-        handler.sendMessage(message)
-    }
-
-    fun freezeEnote(enotes: List<String>) {
+    fun freezeEnote(enotes: List<Long>) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.FREEZE_ENOTES.value()
-        message.data.putStringArrayList(EXTRA_ENOTES, ArrayList(enotes))
+        message.data.putLongArray(EXTRA_ENOTES, enotes.toLongArray())
         handler.sendMessage(message)
     }
 
-    fun thawEnote(enotes: List<String>) {
+    fun thawEnote(enotes: List<Long>) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.THAW_ENOTES.value()
-        message.data.putStringArrayList(EXTRA_ENOTES, ArrayList(enotes))
+        message.data.putLongArray(EXTRA_ENOTES, enotes.toLongArray())
+        handler.sendMessage(message)
+    }
+
+    fun createAccount(label: String? = null) {
+        val message = handler.obtainMessage()
+        message.arg1 = WalletServiceCommand.CREATE_ACCOUNT.value()
+        message.data.putString(EXTRA_ACCOUNT_LABEL, label)
+        handler.sendMessage(message)
+    }
+
+    fun setAccount(index: Int) {
+        val message = handler.obtainMessage()
+        message.arg1 = WalletServiceCommand.SET_ACCOUNT.value()
+        message.data.putInt(EXTRA_ACCOUNT_INDEX, index)
+        handler.sendMessage(message)
+    }
+
+    fun setAccountLabel(index: Int, label: String) {
+        val message = handler.obtainMessage()
+        message.arg1 = WalletServiceCommand.SET_ACCOUNT_LABEL.value()
+        message.data.putInt(EXTRA_ACCOUNT_INDEX, index)
+        message.data.putString(EXTRA_ACCOUNT_LABEL, label)
         handler.sendMessage(message)
     }
 }
 
 interface WalletServiceObserver : LifecycleOwner {
-    fun onWalletOpened(wallet: Wallet) {}
-    fun onWalletHistoryRefreshed(transactions: List<TransactionInfo>) {}
+    fun onWalletUpdated(wallet: Wallet) {}
     fun onBlockchainHeightFetched(height: Long) {}
-    fun onEnotesRefreshed(enotes: List<CoinsInfo>, balance: Balance) {}
     fun onSubaddressesUpdated() {}
     fun onTransactionCreated(pendingTransaction: PendingTransaction) {}
     fun onTransactionSent(pendingTransaction: PendingTransaction, success: Boolean) {}
     fun onProxyUpdated(proxy: String, success: Boolean) {}
-    fun onUpdated() {}
-    fun onRefreshed() {}
-    fun onNewBlock(height: Long) {}
+    fun onAccountCreated() {}
+    fun onAccountSet(index: Int) {}
+    fun onAccountLabelChanged(index: Int, label: String) {}
 }
 
 enum class WalletServiceCommand {
-    UNKNOWN,
+    UNKNOWN, // to catch bugs when command is set to 0 by accident
     OPEN_WALLET,
+    CLOSE_WALLET,
     SET_DAEMON_ADDRESS,
     FETCH_BLOCKCHAIN_HEIGHT,
-    REFRESH_WALLET_TRANSACTION_HISTORY,
-    GENERATE_NEW_SUBADDRESS,
-    SET_SUBADDRESS_LABEL,
+    GENERATE_NEW_ADDRESS,
+    SET_ADDRESS_LABEL,
     CREATE_SWEEP_TX,
     CREATE_TX,
     SEND_TX,
     SET_PROXY,
-    REFRESH_ENOTES,
     FREEZE_ENOTES,
-    THAW_ENOTES;
+    THAW_ENOTES,
+    CREATE_ACCOUNT,
+    SET_ACCOUNT,
+    SET_ACCOUNT_LABEL;
 
     fun value() = ordinal
 

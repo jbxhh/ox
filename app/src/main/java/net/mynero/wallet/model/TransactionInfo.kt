@@ -15,30 +15,25 @@
  */
 package net.mynero.wallet.model
 
-import android.os.Build
-import android.os.Parcel
-import android.os.Parcelable
-import android.os.Parcelable.Creator
-import net.mynero.wallet.data.Subaddress
-
-class TransactionInfo : Parcelable, Comparable<TransactionInfo> {
-    var direction: Direction
-    var isPending: Boolean
-    var isFailed: Boolean
-    var amount: Long
-    var fee: Long
-    var blockheight: Long
-    var hash: String?
-    var timestamp: Long
-    var paymentId: String?
-    var accountIndex: Int
-    var addressIndex: Int
-    var confirmations: Long
-    var subaddressLabel: String?
-    var transfers: List<Transfer>? = listOf()
-    var txKey: String? = null
-    var notes: String? = null
+data class TransactionInfo(
+    var direction: Direction,
+    var isPending: Boolean,
+    var isFailed: Boolean,
+    var amount: Long,
+    var fee: Long,
+    var blockheight: Long,
+    var hash: String?,
+    var timestamp: Long,
+    var paymentId: String?,
+    var accountIndex: Int,
+    var addressIndex: Int,
+    var confirmations: Long,
+    var subaddressLabel: String?,
+    var transfers: List<Transfer>? = listOf(),
+    var txKey: String? = null,
+    var notes: String? = null,
     var address: String? = null
+) {
 
     constructor(
         direction: Int,
@@ -55,93 +50,28 @@ class TransactionInfo : Parcelable, Comparable<TransactionInfo> {
         confirmations: Long,
         subaddressLabel: String?,
         transfers: List<Transfer>?
-    ) {
-        this.direction = Direction.values()[direction]
-        this.isPending = isPending
-        this.isFailed = isFailed
-        this.amount = amount
-        this.fee = fee
-        this.blockheight = blockheight
-        this.hash = hash
-        this.timestamp = timestamp
-        this.paymentId = paymentId
-        this.accountIndex = accountIndex
-        this.addressIndex = addressIndex
-        this.confirmations = confirmations
-        this.subaddressLabel = subaddressLabel
-        this.transfers = transfers
-    }
-
-    private constructor(`in`: Parcel) {
-        direction = Direction.fromInteger(`in`.readInt())
-        isPending = `in`.readByte().toInt() != 0
-        isFailed = `in`.readByte().toInt() != 0
-        amount = `in`.readLong()
-        fee = `in`.readLong()
-        blockheight = `in`.readLong()
-        hash = `in`.readString()
-        timestamp = `in`.readLong()
-        paymentId = `in`.readString()
-        accountIndex = `in`.readInt()
-        addressIndex = `in`.readInt()
-        confirmations = `in`.readLong()
-        subaddressLabel = `in`.readString()
-        transfers?.toMutableList()?.let { transfers ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                `in`.readList(transfers, Transfer::class.java.classLoader, Transfer::class.java)
-            } else {
-                `in`.readList(transfers, Transfer::class.java.classLoader)
-            }
-        }
-
-        txKey = `in`.readString()
-        notes = `in`.readString()
-        address = `in`.readString()
-    }
+    ) : this(
+        Direction.values()[direction],
+        isPending,
+        isFailed,
+        amount,
+        fee,
+        blockheight,
+        hash,
+        timestamp,
+        paymentId,
+        accountIndex,
+        addressIndex,
+        confirmations,
+        subaddressLabel,
+        transfers
+    )
 
     val isConfirmed: Boolean
         get() = confirmations >= CONFIRMATION
 
     override fun toString(): String {
         return "$direction@$blockheight $amount"
-    }
-
-    override fun writeToParcel(out: Parcel, flags: Int) {
-        out.writeInt(direction.value)
-        out.writeByte((if (isPending) 1 else 0).toByte())
-        out.writeByte((if (isFailed) 1 else 0).toByte())
-        out.writeLong(amount)
-        out.writeLong(fee)
-        out.writeLong(blockheight)
-        out.writeString(hash)
-        out.writeLong(timestamp)
-        out.writeString(paymentId)
-        out.writeInt(accountIndex)
-        out.writeInt(addressIndex)
-        out.writeLong(confirmations)
-        out.writeString(subaddressLabel)
-        transfers?.let {
-            out.writeList(transfers)
-        }
-        out.writeString(txKey)
-        out.writeString(notes)
-        out.writeString(address)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    override fun compareTo(other: TransactionInfo): Int {
-        val b1 = timestamp
-        val b2 = other.timestamp
-        return if (b1 > b2) {
-            -1
-        } else if (b1 < b2) {
-            1
-        } else {
-            hash?.let { other.hash?.compareTo(it) } ?: 0
-        }
     }
 
     enum class Direction(val value: Int) {
@@ -159,16 +89,5 @@ class TransactionInfo : Parcelable, Comparable<TransactionInfo> {
 
     companion object {
         const val CONFIRMATION = 10 // blocks
-
-        @JvmField
-        val CREATOR: Creator<TransactionInfo> = object : Creator<TransactionInfo> {
-            override fun createFromParcel(`in`: Parcel): TransactionInfo {
-                return TransactionInfo(`in`)
-            }
-
-            override fun newArray(size: Int): Array<TransactionInfo?> {
-                return arrayOfNulls(size)
-            }
-        }
     }
 }

@@ -15,18 +15,9 @@
  */
 package net.mynero.wallet.model
 
-import android.util.Log
-
-class TransactionHistory(private val handle: Long, var accountIndex: Int) {
+class TransactionHistory(private val handle: Long) {
     var all: List<TransactionInfo> = ArrayList()
         private set
-
-    fun setAccountFor(wallet: Wallet) {
-        if (accountIndex != wallet.getAccountIndex()) {
-            accountIndex = wallet.getAccountIndex()
-            refreshWithNotes(wallet)
-        }
-    }
 
     private fun loadNotes(wallet: Wallet) {
         for (info in all) {
@@ -43,14 +34,6 @@ class TransactionHistory(private val handle: Long, var accountIndex: Int) {
 
     private fun refresh() {
         val transactionInfos = refreshJ()
-        Log.d("TransactionHistory.kt", "refresh size=${transactionInfos.size}")
-        val iterator = transactionInfos.iterator()
-        while (iterator.hasNext()) {
-            val info = iterator.next()
-            if (info.accountIndex != accountIndex) {
-                iterator.remove()
-            }
-        }
         all = transactionInfos
     }
 

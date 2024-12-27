@@ -11,7 +11,6 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AtomicReference
 import androidx.lifecycle.LiveData
@@ -29,20 +28,18 @@ import net.mynero.wallet.adapter.SubaddressAdapter
 import net.mynero.wallet.adapter.SubaddressAdapter.SubaddressAdapterListener
 import net.mynero.wallet.data.Subaddress
 import net.mynero.wallet.fragment.dialog.EditAddressLabelBottomSheetDialog
-import net.mynero.wallet.service.wallet.WalletServiceObserver
 import net.mynero.wallet.service.wallet.WalletService
 import net.mynero.wallet.util.Helper.clipBoardCopy
 import net.mynero.wallet.util.PreferenceUtils
 import net.mynero.wallet.util.QrCodeHelper
+import net.mynero.wallet.util.acitivity.MoneroActivity
 import timber.log.Timber
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
-class ReceiveActivity : AppCompatActivity(), WalletServiceObserver {
+class ReceiveActivity : MoneroActivity() {
 
     private val viewModel: ReceiveViewModel by viewModels()
-
-    private var walletService: WalletService? = null
 
     private lateinit var addressTextView: TextView
     private lateinit var addressLabelTextView: TextView
@@ -64,21 +61,6 @@ class ReceiveActivity : AppCompatActivity(), WalletServiceObserver {
 
         bindListeners()
         bindObservers()
-
-        bindService(Intent(applicationContext, WalletService::class.java), connection, 0)
-    }
-
-    private val connection: ServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            val walletService = (service as WalletService.WalletServiceBinder).service
-            this@ReceiveActivity.walletService = walletService
-            walletService.addObserver(this@ReceiveActivity)
-            viewModel.refreshSubaddresses(walletService, qrCodeBackgroundColor())
-        }
-
-        override fun onServiceDisconnected(className: ComponentName) {
-            walletService = null
-        }
     }
 
     private fun bindListeners() {
@@ -119,6 +101,10 @@ class ReceiveActivity : AppCompatActivity(), WalletServiceObserver {
             // We want newer addresses addresses to be shown first
             adapter.submitAddresses(addresses.reversed())
         }
+    }
+
+    override fun onWalletServiceBound(walletService: WalletService) {
+        viewModel.refreshSubaddresses(walletService, qrCodeBackgroundColor())
     }
 
     override fun onSubaddressesUpdated() {

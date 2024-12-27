@@ -1,15 +1,11 @@
 package net.mynero.wallet
 
-import android.content.ComponentName
 import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.IBinder
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,17 +13,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import net.mynero.wallet.adapter.EnotesAdapter
 import net.mynero.wallet.model.Balance
-import net.mynero.wallet.model.CoinsInfo
+import net.mynero.wallet.model.Enote
+import net.mynero.wallet.model.Wallet
 import net.mynero.wallet.service.wallet.WalletService
-import net.mynero.wallet.service.wallet.WalletServiceObserver
 import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.PreferenceUtils
+import net.mynero.wallet.util.acitivity.MoneroActivity
 
-class EnotesActivity : AppCompatActivity(), WalletServiceObserver {
+class EnotesActivity : MoneroActivity() {
 
     private val viewModel: EnotesViewModel by viewModels()
-
-    private var walletService: WalletService? = null
 
     private lateinit var freezeUtxosButton: Button
     private lateinit var sendUtxosButton: Button
@@ -46,12 +41,12 @@ class EnotesActivity : AppCompatActivity(), WalletServiceObserver {
 
         val streetMode = PreferenceUtils.isStreetMode(this)
         adapter = EnotesAdapter(listOf(), streetMode, object : EnotesAdapter.EnotesAdapterListener {
-            override fun onEnoteSelected(coinsInfo: CoinsInfo) {
-                val selected = adapter.contains(coinsInfo)
+            override fun onEnoteSelected(enote: Enote) {
+                val selected = adapter.contains(enote)
                 if (selected) {
-                    adapter.deselectEnote(coinsInfo)
+                    adapter.deselectEnote(enote)
                 } else {
-                    adapter.selectEnote(coinsInfo)
+                    adapter.selectEnote(enote)
                 }
                 var frozenExists = false
                 var unfrozenExists = false
@@ -76,21 +71,6 @@ class EnotesActivity : AppCompatActivity(), WalletServiceObserver {
 
         bindListeners()
         bindObservers()
-
-        bindService(Intent(applicationContext, WalletService::class.java), connection, 0)
-    }
-
-    private val connection: ServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            val walletService = (service as WalletService.WalletServiceBinder).service
-            this@EnotesActivity.walletService = walletService
-            walletService.addObserver(this@EnotesActivity)
-            walletService.refreshEnotes()
-        }
-
-        override fun onServiceDisconnected(className: ComponentName) {
-            walletService = null
-        }
     }
 
     private fun bindListeners() {
@@ -120,28 +100,44 @@ class EnotesActivity : AppCompatActivity(), WalletServiceObserver {
     private fun bindObservers() {
         enotesRecyclerView.layoutManager = LinearLayoutManager(this)
         enotesRecyclerView.adapter = adapter
-        viewModel.enotes.observe(this) { enotes: List<CoinsInfo> ->
+        viewModel.enotes.observe(this) { enotes: List<Enote> ->
             val filteredEnotes = enotes.filter { !it.isSpent }
             if (filteredEnotes.isEmpty()) {
                 enotesRecyclerView.visibility = View.GONE
             } else {
                 adapter.submitList(filteredEnotes)
-                adapter.clear()
                 enotesRecyclerView.visibility = View.VISIBLE
             }
         }
     }
 
-    override fun onEnotesRefreshed(enotes: List<CoinsInfo>, balance: Balance) {
-        viewModel.updateEnotes(enotes)
+    override fun onWalletServiceBound(walletService: WalletService) {
+        walletService.getWallet()?.let { wallet ->
+            updateState(wallet)
+        }
+    }
+
+    override fun onWalletUpdated(wallet: Wallet) {
+        updateState(wallet)
+    }
+
+    private fun updateState(wallet: Wallet) {
+        val enotes = wallet.getEnotes()
+        val addresses = (0 until wallet.numSubaddresses).map {
+            wallet.getSubaddress(wallet.getAccountIndex(), it)
+        }.toSet()
+        val filteredEnotes = enotes.filter {
+            it.address != null && addresses.contains(it.address)
+        }
+        viewModel.updateEnotes(filteredEnotes)
     }
 }
 
 internal class EnotesViewModel : ViewModel() {
-    private val _enotes: MutableLiveData<List<CoinsInfo>> = MutableLiveData()
-    val enotes: LiveData<List<CoinsInfo>> = _enotes
+    private val _enotes: MutableLiveData<List<Enote>> = MutableLiveData()
+    val enotes: LiveData<List<Enote>> = _enotes
 
-    fun updateEnotes(enotes: List<CoinsInfo>) {
+    fun updateEnotes(enotes: List<Enote>) {
         _enotes.postValue(enotes)
     }
 }

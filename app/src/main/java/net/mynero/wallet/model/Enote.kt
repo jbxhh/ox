@@ -15,19 +15,16 @@
  */
 package net.mynero.wallet.model
 
-import android.util.Log
-
-class Coins(private val handle: Long) {
-    var all: List<CoinsInfo> = ArrayList()
-        private set
-
-    fun refresh() {
-        val transactionInfos = refreshJ()
-        Log.d("Coins.kt", "refresh size=${transactionInfos.size}")
-        all = transactionInfos
-    }
-
-    external fun setFrozen(publicKey: String?, frozen: Boolean)
-    external fun refreshJ(): List<CoinsInfo>
-    external fun getCount(): Int
-}
+data class Enote(
+    val idx: Long,
+    val globalOutputIndex: Long,
+    val isSpent: Boolean,
+    val keyImage: String?,
+    val amount: Long,
+    val hash: String?,
+    val pubKey: String?,
+    val isUnlocked: Boolean,
+    val localOutputIndex: Long,
+    val isFrozen: Boolean,
+    val address: String?
+)

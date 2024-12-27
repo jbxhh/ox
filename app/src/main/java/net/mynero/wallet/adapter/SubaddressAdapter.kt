@@ -25,7 +25,6 @@ import net.mynero.wallet.R
 import net.mynero.wallet.data.Subaddress
 import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.Helper
-import timber.log.Timber
 
 class SubaddressAdapter(
     private var addresses: List<Subaddress>,
@@ -44,21 +43,17 @@ class SubaddressAdapter(
         notifyDataSetChanged()
     }
 
-    // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        // Create a new view, which defines the UI of the list item
         val view = LayoutInflater.from(viewGroup.context)
             .inflate(R.layout.address_item, viewGroup, false)
         return ViewHolder(view, listener)
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val address = addresses[position]
         viewHolder.bind(address, selectedAddress != null && address == selectedAddress, streetMode)
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount(): Int {
         return addresses.size
     }
@@ -68,19 +63,17 @@ class SubaddressAdapter(
         fun onSubaddressEditLabel(subaddress: Subaddress)
     }
 
-    /**
-     * Provide a reference to the type of views that you are using
-     * (custom ViewHolder).
-     */
-    class ViewHolder(view: View, val listener: SubaddressAdapterListener) :
-        RecyclerView.ViewHolder(view) {
+    class ViewHolder(view: View, val listener: SubaddressAdapterListener) : RecyclerView.ViewHolder(view) {
+
+        private lateinit var addressTextView: TextView
+        private lateinit var addressLabelTextView: TextView
+        private lateinit var addressAmountTextView: TextView
 
         fun bind(subaddress: Subaddress, isSelected: Boolean, streetMode: Boolean) {
-            val addressTextView =
-                itemView.findViewById<TextView>(R.id.address_item_address_textview)
-            val addressLabelTextView = itemView.findViewById<TextView>(R.id.address_label_textview)
-            val addressAmountTextView =
-                itemView.findViewById<TextView>(R.id.address_amount_textview)
+            addressTextView = itemView.findViewById(R.id.address_item_address_textview)
+            addressLabelTextView = itemView.findViewById(R.id.address_label_textview)
+            addressAmountTextView = itemView.findViewById(R.id.address_amount_textview)
+
             addressTextView.text = subaddress.address
             if (isSelected) {
                 addressTextView.setTypeface(null, Typeface.BOLD)
@@ -94,7 +87,6 @@ class SubaddressAdapter(
             )
             addressLabelTextView.text = label.ifEmpty { address }
             val amount = subaddress.amount
-            Timber.e("amount = $amount")
             if (amount > 0) {
                 if (streetMode) {
                     addressAmountTextView.text = itemView.context.getString(

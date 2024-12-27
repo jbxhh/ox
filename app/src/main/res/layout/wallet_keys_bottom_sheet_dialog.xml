@@ -40,6 +40,26 @@
             app:layout_constraintTop_toBottomOf="@id/recv_monero_textview" />
 
         <TextView
+            android:id="@+id/encrypt_seed_textview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Use wallet password as seed offset"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@id/encrypt_seed_switch"
+            app:layout_constraintEnd_toStartOf="@id/encrypt_seed_switch"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/encrypt_seed_switch" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/encrypt_seed_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/wallet_seed_label_textview" />
+
+        <TextView
             android:id="@+id/wallet_seed_desc_textview"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -47,10 +67,10 @@
             android:text="@string/wallet_seed_desc"
             android:textColor="#f00"
             android:textSize="12sp"
-            app:layout_constraintBottom_toTopOf="@id/information_textview"
+            app:layout_constraintBottom_toTopOf="@id/seed_textview"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/wallet_seed_label_textview"
+            app:layout_constraintTop_toBottomOf="@id/encrypt_seed_switch"
             app:layout_constraintVertical_bias="0.0" />
 
         <TextView
@@ -64,10 +84,11 @@
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/information_textview" />
+            app:layout_constraintTop_toBottomOf="@id/seed_textview"
+            tools:visibility="visible" />
 
         <TextView
-            android:id="@+id/information_textview"
+            android:id="@+id/seed_textview"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"

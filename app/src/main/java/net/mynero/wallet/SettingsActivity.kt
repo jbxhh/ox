@@ -1,123 +1,128 @@
 package net.mynero.wallet
 
-import android.content.ComponentName
 import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.IBinder
 import android.view.View
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.CompoundButton
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import com.google.android.material.progressindicator.CircularProgressIndicator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import net.mynero.wallet.adapter.AccountAdapter
 import net.mynero.wallet.data.DefaultNode
 import net.mynero.wallet.data.Node
+import net.mynero.wallet.fragment.dialog.EditAccountLabelBottomSheetDialog
 import net.mynero.wallet.fragment.dialog.NodeSelectionBottomSheetDialog
+import net.mynero.wallet.fragment.dialog.PasswordBottomSheetDialog
 import net.mynero.wallet.fragment.dialog.WalletKeysBottomSheetDialog
 import net.mynero.wallet.listener.NodeSelectionDialogListenerAdapter
-import net.mynero.wallet.model.EnumTorState
-import net.mynero.wallet.service.PrefService
-import net.mynero.wallet.service.ProxyService
-import net.mynero.wallet.service.wallet.WalletServiceObserver
+import net.mynero.wallet.model.Account
+import net.mynero.wallet.model.Balance
 import net.mynero.wallet.service.wallet.WalletService
-import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.PreferenceUtils
+import net.mynero.wallet.util.acitivity.MoneroActivity
 import timber.log.Timber
 
-class SettingsActivity : AppCompatActivity(), WalletServiceObserver {
-
-    private val viewModel: SettingsViewModel by viewModels()
-
-    private var walletService: WalletService? = null
+class SettingsActivity : MoneroActivity() {
 
     private lateinit var walletProxyAddressEditText: EditText
-    private lateinit var walletProxyPortEditText: EditText
     private lateinit var selectNodeButton: Button
+    private lateinit var multiWalletModeSwitch: SwitchCompat
+    private lateinit var multiAccountModeSwitch: SwitchCompat
     private lateinit var streetModeSwitch: SwitchCompat
     private lateinit var allowFeeOverrideSwitch: SwitchCompat
-    private lateinit var useBundledTor: CheckBox
     private lateinit var displaySeedButton: Button
-    private lateinit var displayUtxosButton: Button
+    private lateinit var displayEnotesButton: Button
     private lateinit var proxySwitch: SwitchCompat
+    private lateinit var proxySettingsLayout: ConstraintLayout
     private lateinit var saveProxyButton: Button
+    private lateinit var accountSettingsConstraintLayout: ConstraintLayout
+    private lateinit var addAccountButton: Button
+    private lateinit var accountsRecyclerView: RecyclerView
 
-    private val askForWalletPasswordAndDisplayWalletKeys = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
-            val password = result.data?.extras?.getString(Constants.EXTRA_WALLET_PASSWORD)
-            password?.let { displaySeedDialog(it) }
-        }
-    }
+    private lateinit var accountAdapter: AccountAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
         displaySeedButton = findViewById(R.id.display_seed_button)
-        displayUtxosButton = findViewById(R.id.display_utxos_button)
+        displayEnotesButton = findViewById(R.id.display_utxos_button)
         selectNodeButton = findViewById(R.id.select_node_button)
+        multiWalletModeSwitch = findViewById(R.id.enable_multiple_wallets_switch)
+        multiAccountModeSwitch = findViewById(R.id.enable_multiple_accounts_switch)
         streetModeSwitch = findViewById(R.id.street_mode_switch)
         allowFeeOverrideSwitch = findViewById(R.id.allow_fee_override_switch)
         proxySwitch = findViewById(R.id.proxy_switch)
-        val proxySettingsLayout = findViewById<ConstraintLayout>(R.id.wallet_proxy_settings_layout)
+        proxySettingsLayout = findViewById(R.id.wallet_proxy_settings_layout)
         walletProxyAddressEditText = findViewById(R.id.wallet_proxy_address_edittext)
-        walletProxyPortEditText = findViewById(R.id.wallet_proxy_port_edittext)
-        useBundledTor = findViewById(R.id.bundled_tor_checkbox)
         saveProxyButton = findViewById(R.id.save_proxy_button)
+        accountSettingsConstraintLayout = findViewById(R.id.wallet_account_settings_layout)
+        addAccountButton = findViewById(R.id.add_account_button)
+        accountsRecyclerView = findViewById(R.id.accounts_recycler_view)
 
-        val cachedProxyAddress = ProxyService.instance?.proxyAddress ?: return
-        val cachedProxyPort = ProxyService.instance?.proxyPort ?: return
-        val cachedUsingProxy = ProxyService.instance?.usingProxy == true
-        val cachedUsingBundledTor = ProxyService.instance?.useBundledTor == true
+        val isMultiWalletMode = PreferenceUtils.isMultiWalletMode(applicationContext)
+        val isMultiAccountMode = PreferenceUtils.isMultiAccountMode(applicationContext)
+        val isStreetMode = PreferenceUtils.isStreetMode(applicationContext)
+        val isAllowFeeOverride = PreferenceUtils.isAllowFeeOverride(applicationContext)
+        val isUseProxy = PreferenceUtils.isUseProxy(applicationContext)
 
-//        walletProxyPortEditText.isEnabled = !cachedUsingBundledTor
-//        walletProxyAddressEditText.isEnabled = !cachedUsingBundledTor
-        proxySettingsLayout.visibility = View.VISIBLE
+        accountAdapter = AccountAdapter(emptyList(), null, isStreetMode, object : AccountAdapter.AccountAdapterListener {
+            override fun onAccountSelected(account: Account) {
+                walletService?.setAccount(account.index)
+            }
 
-        streetModeSwitch.isChecked = PreferenceUtils.isStreetMode(applicationContext)
-        allowFeeOverrideSwitch.isChecked = PreferenceUtils.isAllowFeeOverride(applicationContext)
-        useBundledTor.isChecked = cachedUsingBundledTor
-        proxySwitch.isChecked = cachedUsingProxy
-        updateProxy(cachedProxyAddress, cachedProxyPort)
+            override fun onAccountEditLabel(account: Account) {
+                val dialog = EditAccountLabelBottomSheetDialog(account.label) {
+                    walletService?.setAccountLabel(account.index, it)
+                }
+                dialog.show(supportFragmentManager, "edit_account_dialog")
+            }
+        })
+        accountsRecyclerView.layoutManager = LinearLayoutManager(this)
+        accountsRecyclerView.adapter = accountAdapter
+
+        if (isMultiAccountMode) {
+            accountSettingsConstraintLayout.visibility = View.VISIBLE
+        }
+
+        multiWalletModeSwitch.isChecked = isMultiWalletMode
+        multiAccountModeSwitch.isChecked = isMultiAccountMode
+        streetModeSwitch.isChecked = isStreetMode
+        allowFeeOverrideSwitch.isChecked = isAllowFeeOverride
+        proxySwitch.isChecked = isUseProxy
+
+        walletProxyAddressEditText.setText(PreferenceUtils.getProxy(this) ?: "")
 
         val node = PreferenceUtils.getOrSetDefaultNode(this, DefaultNode.defaultNode())
         selectNodeButton.text = getString(R.string.node_button_text, node.name)
 
         bindListeners()
-        bindObservers()
-
-        bindService(Intent(applicationContext, WalletService::class.java), connection, 0)
-    }
-
-    private val connection: ServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            val walletService = (service as WalletService.WalletServiceBinder).service
-            this@SettingsActivity.walletService = walletService
-            walletService.addObserver(this@SettingsActivity)
-        }
-
-        override fun onServiceDisconnected(className: ComponentName) {
-            walletService = null
-        }
     }
 
     private fun bindListeners() {
+        multiWalletModeSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PreferenceUtils.setMultiWalletMode(applicationContext, b)
+        }
+        multiAccountModeSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PreferenceUtils.setMultiAccountMode(applicationContext, b)
+            if (b) {
+                accountSettingsConstraintLayout.visibility = View.VISIBLE
+            } else {
+                accountSettingsConstraintLayout.visibility = View.GONE
+            }
+        }
         streetModeSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
             PreferenceUtils.setStreetMode(applicationContext, b)
         }
-
         allowFeeOverrideSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
             PreferenceUtils.setAllowFeeOverride(applicationContext, b)
+        }
+        proxySwitch.setOnCheckedChangeListener { _, b: Boolean ->
+            PreferenceUtils.setUseProxy(applicationContext, b)
         }
 
         selectNodeButton.setOnClickListener {
@@ -153,33 +158,26 @@ class SettingsActivity : AppCompatActivity(), WalletServiceObserver {
             dialog.show(supportFragmentManager, "node_selection_dialog")
         }
 
-        useBundledTor.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.setUseBundledTor(isChecked)
-        }
-
         displaySeedButton.setOnClickListener {
-            val intent = Intent(this, PasswordActivity::class.java)
-            // TODO: use real wallet name here
-            intent.putExtra(Constants.EXTRA_WALLET_NAME, Constants.DEFAULT_WALLET_NAME)
-            askForWalletPasswordAndDisplayWalletKeys.launch(intent)
+            val passwordDialog = PasswordBottomSheetDialog(walletService!!.getWalletOrThrow().info.path, object : PasswordBottomSheetDialog.Listener {
+                override fun onCorrectPasswordSubmitted(self: PasswordBottomSheetDialog, password: String) {
+                    self.dismiss()
+                    displaySeedDialog()
+                }
+            })
+            passwordDialog.show(supportFragmentManager, "password_dialog")
         }
 
-        displayUtxosButton.setOnClickListener {
+        displayEnotesButton.setOnClickListener {
             startActivity(Intent(this, EnotesActivity::class.java))
-        }
-
-        proxySwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
-            viewModel.setUseProxy(b)
         }
 
         saveProxyButton.setOnClickListener {
             val proxyAddress = walletProxyAddressEditText.text.toString()
-            val proxyPort = walletProxyPortEditText.text.toString()
-            val proxy = if (proxyAddress.isNotBlank() && proxyPort.isNotBlank()) "$proxyAddress:$proxyPort" else ""
-            PreferenceUtils.setProxy(applicationContext, proxyPort)
+            PreferenceUtils.setProxy(applicationContext, proxyAddress)
             if (proxySwitch.isChecked) {
                 Toast.makeText(this, "Activating proxy", Toast.LENGTH_SHORT).show()
-                walletService?.setProxy(proxy)
+                walletService?.setProxy(proxyAddress)
             } else {
                 if (walletService?.getProxy() != "") {
                     Toast.makeText(this, "Deactivating proxy", Toast.LENGTH_SHORT).show()
@@ -187,70 +185,56 @@ class SettingsActivity : AppCompatActivity(), WalletServiceObserver {
                 }
             }
         }
+
+        addAccountButton.setOnClickListener {
+            Toast.makeText(this, "Creating new account, please wait..", Toast.LENGTH_SHORT).show()
+            walletService?.createAccount()
+        }
     }
 
-    private fun bindObservers() {
-        viewModel.useProxy.observe(this) { useProxy ->
-            useBundledTor.isEnabled = useProxy
+    override fun onWalletServiceBound(walletService: WalletService) {
+        updateAccountAdapter()
+    }
 
-//            Utils.refreshProxy(walletProxyAddressEditText.text.toString(), walletProxyPortEditText.text.toString())
+    override fun onAccountCreated() {
+        runOnUiThread {
+            updateAccountAdapter()
+            Toast.makeText(this, "New account created", Toast.LENGTH_SHORT).show()
         }
+    }
 
-        viewModel.useBundledTor.observe(this) { isChecked ->
-            // TODO: bundled tor support
+    override fun onAccountSet(index: Int) {
+        runOnUiThread {
+            updateAccountAdapter()
+            Toast.makeText(this, "Account changed to #${index}", Toast.LENGTH_SHORT).show()
         }
+    }
 
-        val samouraiTorManager = ProxyService.instance?.samouraiTorManager
-        val indicatorCircle =
-            findViewById<CircularProgressIndicator>(R.id.settings_tor_loading_progressindicator)
-        val torIcon = findViewById<ImageView>(R.id.settings_tor_icon)
+    override fun onAccountLabelChanged(index: Int, label: String) {
+        runOnUiThread {
+            updateAccountAdapter()
+        }
+    }
 
-        samouraiTorManager?.getTorStateLiveData()?.observe(this) { state ->
-            samouraiTorManager.getProxy()?.address()?.let { socketAddress ->
-                if (socketAddress.toString().isEmpty()) return@let
-                if (viewModel.useProxy.value == true && viewModel.useBundledTor.value == true) {
-                    torIcon?.visibility = View.VISIBLE
-                    indicatorCircle?.visibility = View.INVISIBLE
-                    val proxyString = socketAddress.toString().substring(1)
-                    val address = proxyString.split(":")[0]
-                    val port = proxyString.split(":")[1]
-                    updateProxy(address, port)
-                }
+    private fun updateAccountAdapter() {
+        walletService?.getWallet()?.let { wallet ->
+            val accounts = (0 until wallet.getNumAccounts()).map {
+                val index = it
+                val label = wallet.getAccountLabel(index)
+                val balance = Balance(0, 0, 0, 0)
+                Account(index, label, balance)
             }
-
-            indicatorCircle?.isIndeterminate = state.progressIndicator == 0
-            indicatorCircle?.progress = state.progressIndicator
-
-            when (state.state) {
-                EnumTorState.OFF -> {
-                    torIcon?.visibility = View.INVISIBLE
-                    indicatorCircle?.visibility = View.INVISIBLE
-                }
-
-                EnumTorState.STARTING, EnumTorState.STOPPING -> {
-                    torIcon?.visibility = View.INVISIBLE
-                    indicatorCircle?.visibility = View.VISIBLE
-                }
-
-                else -> {}
-            }
+            accountAdapter.setAccounts(accounts)
+            accountAdapter.setSelectedAccount(accounts[wallet.getAccountIndex()])
         }
     }
 
-    private fun updateProxy(address: String, port: String) {
-        walletProxyPortEditText.setText(port)
-        walletProxyAddressEditText.setText(address)
-//        Utils.refreshProxy(address, port)
-    }
-
-    private fun displaySeedDialog(password: String) {
+    private fun displaySeedDialog() {
         val wallet = walletService!!.getWalletOrThrow()
-        val usesOffset = PrefService.instance.getBoolean(Constants.PREF_USES_OFFSET, false)
-        val seed = wallet.getSeed(if (usesOffset) password else "")
         val privateViewKey = wallet.getSecretViewKey()
         val restoreHeight = wallet.getRestoreHeight()
 
-        val informationDialog = WalletKeysBottomSheetDialog(usesOffset, seed, privateViewKey, restoreHeight)
+        val informationDialog = WalletKeysBottomSheetDialog(wallet, privateViewKey, restoreHeight)
         informationDialog.show(supportFragmentManager, "information_seed_dialog")
     }
 
@@ -269,42 +253,6 @@ class SettingsActivity : AppCompatActivity(), WalletServiceObserver {
                     Toast.makeText(this, "Failed to activate proxy", Toast.LENGTH_SHORT).show()
                 }
             }
-        }
-    }
-}
-
-class SettingsViewModel : ViewModel() {
-    private val _useProxy = MutableLiveData(false)
-    val useProxy: LiveData<Boolean> = _useProxy
-    private val _useBundledTor = MutableLiveData(false)
-    val useBundledTor: LiveData<Boolean> = _useBundledTor
-
-    init {
-        _useProxy.value = ProxyService.instance?.usingProxy
-        _useBundledTor.value = ProxyService.instance?.useBundledTor
-    }
-
-    fun setUseProxy(use: Boolean) {
-        _useProxy.value = use
-        ProxyService.instance?.usingProxy = use
-
-        val samouraiTorManager = ProxyService.instance?.samouraiTorManager
-        if (use && ProxyService.instance?.useBundledTor == true) {
-            samouraiTorManager?.start()
-        } else {
-            samouraiTorManager?.stop()
-        }
-    }
-
-    fun setUseBundledTor(use: Boolean) {
-        _useBundledTor.value = use
-        ProxyService.instance?.useBundledTor = use
-
-        val samouraiTorManager = ProxyService.instance?.samouraiTorManager
-        if (use && ProxyService.instance?.usingProxy == true) {
-            samouraiTorManager?.start()
-        } else {
-            samouraiTorManager?.stop()
         }
     }
 }

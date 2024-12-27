@@ -9,11 +9,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import net.mynero.wallet.R
-import net.mynero.wallet.model.WalletManager
 import net.mynero.wallet.util.Helper.getClipBoardText
-import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class EditAddressLabelBottomSheetDialog(
     private val currentLabel: String,

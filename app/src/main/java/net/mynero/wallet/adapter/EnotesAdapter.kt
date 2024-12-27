@@ -23,48 +23,44 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import net.mynero.wallet.R
-import net.mynero.wallet.model.CoinsInfo
+import net.mynero.wallet.model.Enote
 import net.mynero.wallet.model.Wallet
 import net.mynero.wallet.util.Constants
 
 class EnotesAdapter(
-    private var enotes: List<CoinsInfo>,
+    private var enotes: List<Enote>,
     private val streetMode: Boolean,
     private val listener: EnotesAdapterListener
 ) : RecyclerView.Adapter<EnotesAdapter.ViewHolder>() {
 
-    private val selectedEnotes: MutableMap<String, CoinsInfo> = HashMap()
+    private val selectedEnotes: MutableMap<Long, Enote> = HashMap()
     private var editing = false
 
-    fun submitList(enotes: List<CoinsInfo>) {
-        this.enotes = enotes
-        notifyDataSetChanged()
+    fun submitList(enotes: List<Enote>) {
+        if (this.enotes != enotes) {
+            this.enotes = enotes
+            notifyDataSetChanged()
+        }
     }
 
-    fun getSelectedEnotes(): Map<String, CoinsInfo> = selectedEnotes
+    fun getSelectedEnotes(): Map<Long, Enote> = selectedEnotes
 
-    fun deselectEnote(coinsInfo: CoinsInfo) {
-        selectedEnotes.remove(coinsInfo.pubKey)
-        if (selectedEnotes.size == 0) {
+    fun deselectEnote(enote: Enote) {
+        selectedEnotes.remove(enote.idx)
+        if (selectedEnotes.isEmpty()) {
             editing = false
         }
         notifyDataSetChanged()
     }
 
-    fun selectEnote(coinsInfo: CoinsInfo) {
+    fun selectEnote(enote: Enote) {
         editing = true
-        selectedEnotes[coinsInfo.pubKey!!] = coinsInfo
+        selectedEnotes[enote.idx] = enote
         notifyDataSetChanged()
     }
 
-    operator fun contains(coinsInfo: CoinsInfo): Boolean {
-        return selectedEnotes.containsKey(coinsInfo.pubKey)
-    }
-
-    fun clear() {
-        selectedEnotes.clear()
-        editing = false
-        notifyDataSetChanged()
+    operator fun contains(enote: Enote): Boolean {
+        return selectedEnotes.containsKey(enote.idx)
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
@@ -83,12 +79,12 @@ class EnotesAdapter(
     }
 
     interface EnotesAdapterListener {
-        fun onEnoteSelected(coinsInfo: CoinsInfo)
+        fun onEnoteSelected(enote: Enote)
     }
 
-    class ViewHolder(private val listener: EnotesAdapterListener?, view: View, private val streetMode: Boolean) :
+    class ViewHolder(private val listener: EnotesAdapterListener, view: View, private val streetMode: Boolean) :
         RecyclerView.ViewHolder(view), View.OnClickListener, OnLongClickListener {
-        private var coinsInfo: CoinsInfo? = null
+        private var enote: Enote? = null
         private var editing = false
 
         init {
@@ -98,12 +94,12 @@ class EnotesAdapter(
 
         fun bind(
             editing: Boolean,
-            coinsInfo: CoinsInfo,
-            selectedEnotes: Map<String, CoinsInfo>
+            enote: Enote,
+            selectedEnotes: Map<Long, Enote>
         ) {
             this.editing = editing
-            this.coinsInfo = coinsInfo
-            val selected = selectedEnotes.containsKey(coinsInfo.pubKey)
+            this.enote = enote
+            val selected = selectedEnotes.containsKey(enote.idx)
             val pubKeyTextView = itemView.findViewById<TextView>(R.id.utxo_pub_key_textview)
             val amountTextView = itemView.findViewById<TextView>(R.id.utxo_amount_textview)
             val addressTextView = itemView.findViewById<TextView>(R.id.utxo_address_textview)
@@ -111,28 +107,28 @@ class EnotesAdapter(
             val outpointTextView = itemView.findViewById<TextView>(R.id.utxo_outpoint_textview)
             val balanceString =
                 if (streetMode) Constants.STREET_MODE_BALANCE else Wallet.getDisplayAmount(
-                    coinsInfo.amount
+                    enote.amount
                 )
             amountTextView.text =
                 itemView.resources.getString(R.string.tx_amount_no_prefix, balanceString)
-            pubKeyTextView.text = coinsInfo.pubKey
-            addressTextView.text = coinsInfo.address
+            pubKeyTextView.text = enote.pubKey
+            addressTextView.text = enote.address
             globalIdxTextView.text =
                 itemView.resources.getString(
                     R.string.global_index_text,
-                    coinsInfo.globalOutputIndex
+                    enote.globalOutputIndex
                 )
             outpointTextView.text = itemView.resources.getString(
                 R.string.outpoint_text,
-                coinsInfo.hash + ":" + coinsInfo.localOutputIndex
+                enote.hash + ":" + enote.localOutputIndex
             )
             if (selected) {
                 itemView.backgroundTintList =
                     ContextCompat.getColorStateList(itemView.context, R.color.oled_colorSecondary)
-            } else if (coinsInfo.isFrozen) {
+            } else if (enote.isFrozen) {
                 itemView.backgroundTintList =
                     ContextCompat.getColorStateList(itemView.context, R.color.oled_frozen_utxo)
-            } else if (!coinsInfo.isUnlocked) {
+            } else if (!enote.isUnlocked) {
                 itemView.backgroundTintList =
                     ContextCompat.getColorStateList(itemView.context, R.color.oled_locked_utxo)
             } else {
@@ -146,17 +142,17 @@ class EnotesAdapter(
 
         override fun onClick(view: View) {
             if (!editing) return
-            val unlocked = coinsInfo?.isUnlocked == true
+            val unlocked = enote?.isUnlocked == true
             if (unlocked) {
-                coinsInfo?.let { listener?.onEnoteSelected(it) }
+                enote?.let { listener.onEnoteSelected(it) }
             }
         }
 
         override fun onLongClick(view: View): Boolean {
             if (editing) return false
-            val unlocked = coinsInfo?.isUnlocked == true
+            val unlocked = enote?.isUnlocked == true
             if (unlocked) {
-                coinsInfo?.let { listener?.onEnoteSelected(it) }
+                enote?.let { listener.onEnoteSelected(it) }
             }
             return unlocked
         }

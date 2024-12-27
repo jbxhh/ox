@@ -19,40 +19,21 @@ import android.util.Log
 import android.util.Pair
 import net.mynero.wallet.data.Subaddress
 import net.mynero.wallet.util.TransactionDestination
-import timber.log.Timber
 import java.io.File
 
-class Wallet {
+class Wallet(private val handle: Long, val info: WalletInfo, private var accountIndex: Int = 0) {
     var isSynchronized = false
-    private var accountIndex = 0
-    private var handle: Long = 0
     private var listenerHandle: Long = 0
     private var pendingTransaction: PendingTransaction? = null
-    var history: TransactionHistory? = null
-        get() {
-            if (field == null) {
-                field = TransactionHistory(getHistoryJ(), accountIndex)
-            }
-            return field
-        }
-        private set
-    var coins: Coins? = null
-        get() {
-            if (field == null) {
-                field = Coins(getCoinsJ())
-            }
-            return field
-        }
-        private set
+    private var enotes: List<Enote>? = null
+    private var balances: Map<Int, Balance>? = null
+    private var history: Map<Int, List<TransactionInfo>>? = null
 
-    internal constructor(handle: Long) {
-        this.handle = handle
+    fun update() {
+        refreshEnotes()
+        refreshTransactionHistory()
     }
 
-    internal constructor(handle: Long, accountIndex: Int) {
-        this.handle = handle
-        this.accountIndex = accountIndex
-    }
 
     fun getAccountIndex(): Int {
         return accountIndex
@@ -61,8 +42,84 @@ class Wallet {
     fun setAccountIndex(accountIndex: Int) {
         Log.d("Wallet.kt", "setAccountIndex($accountIndex)")
         this.accountIndex = accountIndex
-        history?.setAccountFor(this)
     }
+
+    private external fun getEnotesJ(): List<Enote>
+
+    fun refreshEnotes() {
+        val enotes = getEnotesJ()
+        this.enotes = enotes
+        this.balances = calculateBalances(enotes)
+    }
+
+    fun getEnotes(): List<Enote> {
+        var enotes = enotes
+        if (enotes == null) {
+            enotes = getEnotesJ()
+            this.enotes = enotes
+            return enotes
+        } else {
+            return enotes
+        }
+    }
+
+    fun getBalances(): Map<Int, Balance> {
+        if (balances == null) {
+            refreshEnotes()
+        }
+        return balances!!
+    }
+
+    fun getBalance(): Balance = getBalances()[accountIndex] ?: Balance(0, 0, 0, 0)
+
+    fun refreshTransactionHistory() {
+        val transactionInfos = mutableMapOf<Int, MutableList<TransactionInfo>>()
+        getTransactionHistory().refreshJ().forEach {
+            transactionInfos.getOrPut(it.accountIndex) { mutableListOf() }.add(it)
+        }
+        this.history = transactionInfos
+    }
+
+    fun getHistories(): Map<Int, List<TransactionInfo>> {
+        if (history == null) {
+            refreshTransactionHistory()
+        }
+        return history!!
+    }
+
+    fun getHistory(): List<TransactionInfo> = getHistories()[accountIndex] ?: listOf()
+
+    private fun calculateBalances(enotes: List<Enote>): Map<Int, Balance> {
+        val addressToAccount = mutableMapOf<String, Int>()
+        for (accountIndex in 0 until getNumAccounts()) {
+            for (addressIndex in 0 until getNumSubaddresses(accountIndex)) {
+                addressToAccount[getSubaddress(accountIndex, addressIndex)] = accountIndex
+            }
+        }
+
+        val accountToBalance = mutableMapOf<Int, Balance>()
+
+        enotes.filter { !it.isSpent }.forEach { enote ->
+            enote.address?.let { address -> addressToAccount[address] }?.let { account ->
+                val balance = accountToBalance.getOrDefault(account, Balance(0, 0, 0, 0))
+                balance.total += enote.amount
+                if (enote.isFrozen) {
+                    balance.frozen += enote.amount
+                } else if (enote.isUnlocked) {
+                    balance.unlocked += enote.amount
+                } else {
+                    balance.pending += enote.amount
+                }
+                accountToBalance[account] = balance
+            }
+        }
+
+        return accountToBalance
+    }
+
+
+    external fun freeze(idx: Long)
+    external fun thaw(idx: Long)
 
     val name: String
         get() = getPath()?.let { File(it).name }.toString()
@@ -84,7 +141,7 @@ class Wallet {
     private external fun statusWithErrorString(): Status
 
     fun getTransactionHistory(): TransactionHistory {
-        return TransactionHistory(getHistoryJ(), accountIndex)
+        return TransactionHistory(getHistoryJ())
     }
 
     @Synchronized
@@ -117,14 +174,14 @@ class Wallet {
     fun getSubaddressObject(subAddressIndex: Int): Subaddress {
         val subaddress = getSubaddressObject(accountIndex, subAddressIndex)
         var amount: Long = 0
-        history?.let { history ->
-            for (info in history.all) {
-                if (info.addressIndex == subAddressIndex && info.direction == TransactionInfo.Direction.Direction_In) {
-                    amount += info.amount
-                }
-            }
-        }
-
+//        history?.let { history ->
+//            for (info in history.all) {
+//                if (info.addressIndex == subAddressIndex && info.direction == TransactionInfo.Direction.Direction_In) {
+//                    amount += info.amount
+//                }
+//            }
+//        }
+//
         subaddress.amount = amount
         return subaddress
     }
@@ -308,23 +365,14 @@ class Wallet {
     private external fun createSweepUnmixableTransactionJ(): Long
     private external fun disposeTransaction(pendingTransaction: PendingTransaction?)
     private external fun getHistoryJ(): Long
-    private external fun getCoinsJ(): Long
 
     //virtual bool exportKeyImages(const std::string &filename) = 0;
     //virtual bool importKeyImages(const std::string &filename) = 0;
     //virtual TransactionHistory * history() const = 0;
-    fun refreshHistory() {
-        history?.refreshWithNotes(this)
-    }
 
-    fun refreshCoins() {
-        if (isSynchronized) {
-            coins?.refresh()
-        }
-    }
 
-    private external fun setListenerJ(listener: WalletListener): Long
-    fun setListener(listener: WalletListener) {
+    private external fun setListenerJ(listener: WalletListener?): Long
+    fun setListener(listener: WalletListener?) {
         listenerHandle = setListenerJ(listener)
     }
 
@@ -334,23 +382,16 @@ class Wallet {
     external fun getUserNote(txid: String?): String?
     external fun getTxKey(txid: String?): String?
 
-    @JvmOverloads
-    external fun addAccount(label: String? = NEW_ACCOUNT_NAME)
-    var accountLabel: String?
+    external fun addAccount(label: String)
+    var accountLabel: String
         get() = getAccountLabel(accountIndex)
         //virtual std::string signMessage(const std::string &message) = 0;
         set(label) {
             setAccountLabel(accountIndex, label)
         }
 
-    private fun getAccountLabel(accountIndex: Int): String {
-        var label = getSubaddressLabel(accountIndex, 0)
-        if (label == NEW_ACCOUNT_NAME) {
-            val address = getAddress(accountIndex)
-            val len = address.length
-            label = address.substring(0, 6) +
-                    "\u2026" + address.substring(len - 6, len)
-        }
+    fun getAccountLabel(accountIndex: Int): String {
+        val label = getSubaddressLabel(accountIndex, 0)
         return label
     }
 
@@ -359,13 +400,12 @@ class Wallet {
     }
 
     private external fun getSubaddressLabel(accountIndex: Int, addressIndex: Int): String
-    private fun setAccountLabel(accountIndex: Int, label: String?) {
+    fun setAccountLabel(accountIndex: Int, label: String?) {
         setSubaddressLabel(accountIndex, 0, label)
     }
 
     fun setSubaddressLabel(addressIndex: Int, label: String?) {
         setSubaddressLabel(accountIndex, addressIndex, label)
-        refreshHistory()
     }
 
     private external fun setSubaddressLabel(accountIndex: Int, addressIndex: Int, label: String?)
@@ -420,7 +460,7 @@ class Wallet {
 
     companion object {
         const val SWEEP_ALL = Long.MAX_VALUE
-        private const val NEW_ACCOUNT_NAME = "Untitled account" // src/wallet/wallet2.cpp:941
+        const val NEW_ACCOUNT_NAME = "Untitled account" // src/wallet/wallet2.cpp:941
 
         @JvmStatic
         external fun getDisplayAmount(amount: Long): String
@@ -438,12 +478,12 @@ class Wallet {
         external fun isPaymentIdValid(payment_id: String): Boolean
 
         fun isAddressValid(address: String): Boolean {
-            return WalletManager.instance?.networkType?.value?.let {
+            return WalletManager.instance.networkType.value.let {
                 isAddressValid(
                     address,
                     it
                 )
-            } == true
+            }
         }
 
         @JvmStatic
@@ -455,4 +495,8 @@ class Wallet {
         @JvmStatic
         external fun getMaximumAllowedAmount(): Long
     }
+}
+
+data class WalletInfo(val path: String, val name: String, val password: String) {
+    constructor(file: File, password: String) : this(file.absolutePath, file.name, password)
 }
