@@ -254,48 +254,32 @@ struct AddressBook
 };
 
 /**
- * @brief The CoinsInfo - interface for displaying coins information
+ * @brief Enote - enote (utxo) information
  */
-struct CoinsInfo
+struct Enote
 {
-    virtual ~CoinsInfo() = 0;
-
-    virtual uint64_t blockHeight() const = 0;
-    virtual std::string hash() const = 0;
-    virtual size_t internalOutputIndex() const = 0;
-    virtual uint64_t globalOutputIndex() const = 0;
-    virtual bool spent() const = 0;
-    virtual bool frozen() const = 0;
-    virtual uint64_t spentHeight() const = 0;
-    virtual uint64_t amount() const = 0;
-    virtual bool rct() const = 0;
-    virtual bool keyImageKnown() const = 0;
-    virtual size_t pkIndex() const = 0;
-    virtual uint32_t subaddrIndex() const = 0;
-    virtual uint32_t subaddrAccount() const = 0;
-    virtual std::string address() const = 0;
-    virtual std::string addressLabel() const = 0;
-    virtual std::string keyImage() const = 0;
-    virtual uint64_t unlockTime() const = 0;
-    virtual bool unlocked() const = 0;
-    virtual std::string pubKey() const = 0;
-    virtual bool coinbase() const = 0;
-    virtual std::string description() const = 0;
-};
-
-struct Coins
-{
-    virtual ~Coins() = 0;
-    virtual int count() const = 0;
-    virtual CoinsInfo * coin(int index)  const = 0;
-    virtual std::vector<CoinsInfo*> getAll() const = 0;
-    virtual void refresh() = 0;
-    virtual void setFrozen(std::string public_key) = 0;
-    virtual void setFrozen(int index) = 0;
-    virtual void thaw(std::string public_key) = 0;
-    virtual void thaw(int index) = 0;
-    virtual bool isTransferUnlocked(uint64_t unlockTime, uint64_t blockHeight) = 0;
-    virtual void setDescription(const std::string &public_key, const std::string &description) = 0;
+    size_t idx;
+    uint64_t blockHeight;
+    std::string hash;
+    size_t internalOutputIndex;
+    uint64_t globalOutputIndex;
+    bool spent;
+    bool frozen;
+    uint64_t spentHeight;
+    uint64_t amount;
+    bool rct;
+    bool keyImageKnown;
+    size_t pkIndex;
+    uint32_t subaddrIndex;
+    uint32_t subaddrAccount;
+    std::string address;
+    std::string addressLabel;
+    std::string keyImage;
+    uint64_t unlockTime;
+    bool unlocked;
+    std::string pubKey;
+    bool coinbase;
+    std::string description;
 };
 
 struct SubaddressRow {
@@ -1033,7 +1017,9 @@ struct Wallet
 
     virtual TransactionHistory * history() = 0;
     virtual AddressBook * addressBook() = 0;
-    virtual Coins * coins() = 0;
+    virtual std::vector<Enote> enotes() = 0;
+    virtual void freeze(size_t idx) = 0;
+    virtual void thaw(size_t idx) = 0;
     virtual Subaddress * subaddress() = 0;
     virtual SubaddressAccount * subaddressAccount() = 0;
     virtual void setListener(WalletListener *) = 0;
