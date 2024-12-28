@@ -64,6 +64,7 @@ abstract class NodeSelectionDialogListenerAdapter(
     }
 
     final override fun onAddNode(self: NodeSelectionBottomSheetDialog) {
+        val nodeSelectionBottomSheetDialog = self
         val addNodeDialog = AddNodeBottomSheetDialog(object : AddNodeBottomSheetDialog.AddNodeListener {
             override fun onAddNode(self: AddNodeBottomSheetDialog, node: Node) {
                 if (nodes.any { it.name == node.name }) {
@@ -74,6 +75,7 @@ abstract class NodeSelectionDialogListenerAdapter(
                     newNodes.add(node)
                     PreferenceUtils.setNodes(activity, newNodes).fold(
                         {
+                            nodeSelectionBottomSheetDialog.setNodes(newNodes)
                             Timber.i("New node ${node.name} added successfully")
                             Toast.makeText(activity, "Node added", Toast.LENGTH_SHORT).show()
                             self.dismiss()

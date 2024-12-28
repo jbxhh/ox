@@ -178,11 +178,11 @@ class SettingsActivity : MoneroActivity() {
             if (proxySwitch.isChecked) {
                 Toast.makeText(this, "Activating proxy", Toast.LENGTH_SHORT).show()
                 walletService?.setProxy(proxyAddress)
+            } else if (walletService?.getProxy() != "") {
+                Toast.makeText(this, "Deactivating proxy", Toast.LENGTH_SHORT).show()
+                walletService?.setProxy("")
             } else {
-                if (walletService?.getProxy() != "") {
-                    Toast.makeText(this, "Deactivating proxy", Toast.LENGTH_SHORT).show()
-                    walletService?.setProxy("")
-                }
+                Toast.makeText(this, "Proxy saved", Toast.LENGTH_SHORT).show()
             }
         }
 
