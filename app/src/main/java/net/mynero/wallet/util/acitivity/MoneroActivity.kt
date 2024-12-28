@@ -31,12 +31,16 @@ abstract class MoneroActivity : LoggingActivity(), WalletServiceObserver {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (!WalletService.RUNNING.get()) {
-            Timber.i("Finishing activity because wallet service is not running yet")
-            finish()
+            onWalletServiceNotFound()
         } else {
             bindService(Intent(applicationContext, WalletService::class.java), connection, 0)
         }
     }
 
     open fun onWalletServiceBound(walletService: WalletService) {}
+
+    open fun onWalletServiceNotFound() {
+        Timber.i("Finishing activity because wallet service is not running yet")
+        finish()
+    }
 }
