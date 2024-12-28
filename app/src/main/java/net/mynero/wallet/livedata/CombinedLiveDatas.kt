@@ -3,15 +3,14 @@ package net.mynero.wallet.livedata
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 
-fun <T1, T2, T3, T4, T5, T6, T7, S> combineLiveDatas(
+fun <T1, T2, T3, T4, T5, T6, S> combineLiveDatas(
     source1: LiveData<T1>,
     source2: LiveData<T2>,
     source3: LiveData<T3>,
     source4: LiveData<T4>,
     source5: LiveData<T5>,
     source6: LiveData<T6>,
-    source7: LiveData<T7>,
-    func: (T1?, T2?, T3?, T4?, T5?, T6?, T7?) -> S?
+    func: (T1?, T2?, T3?, T4?, T5?, T6?) -> S?
 ): LiveData<S> {
     val result = MediatorLiveData<S>()
     result.addSource(source1) {
@@ -22,7 +21,6 @@ fun <T1, T2, T3, T4, T5, T6, T7, S> combineLiveDatas(
             source4.value,
             source5.value,
             source6.value,
-            source7.value,
         )?.run { result.value = this }
     }
 
@@ -34,7 +32,6 @@ fun <T1, T2, T3, T4, T5, T6, T7, S> combineLiveDatas(
             source4.value,
             source5.value,
             source6.value,
-            source7.value,
         )?.run { result.value = this }
     }
 
@@ -46,7 +43,6 @@ fun <T1, T2, T3, T4, T5, T6, T7, S> combineLiveDatas(
             source4.value,
             source5.value,
             source6.value,
-            source7.value,
         )?.run { result.value = this }
     }
 
@@ -58,7 +54,6 @@ fun <T1, T2, T3, T4, T5, T6, T7, S> combineLiveDatas(
             source4.value,
             source5.value,
             source6.value,
-            source7.value,
         )?.run { result.value = this }
     }
 
@@ -70,7 +65,6 @@ fun <T1, T2, T3, T4, T5, T6, T7, S> combineLiveDatas(
             source4.value,
             source5.value,
             source6.value,
-            source7.value,
         )?.run { result.value = this }
     }
 
@@ -82,19 +76,6 @@ fun <T1, T2, T3, T4, T5, T6, T7, S> combineLiveDatas(
             source4.value,
             source5.value,
             source6.value,
-            source7.value,
-        )?.run { result.value = this }
-    }
-
-    result.addSource(source7) {
-        func(
-            source1.value,
-            source2.value,
-            source3.value,
-            source4.value,
-            source5.value,
-            source6.value,
-            source7.value,
         )?.run { result.value = this }
     }
 

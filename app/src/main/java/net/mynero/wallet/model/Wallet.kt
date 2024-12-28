@@ -22,7 +22,6 @@ import net.mynero.wallet.util.TransactionDestination
 import java.io.File
 
 class Wallet(private val handle: Long, val info: WalletInfo, private var accountIndex: Int = 0) {
-    var isSynchronized = false
     private var listenerHandle: Long = 0
     private var pendingTransaction: PendingTransaction? = null
     private var enotes: List<Enote>? = null
@@ -263,10 +262,6 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     external fun getDaemonBlockChainHeightJ(): Long
     external fun getDaemonBlockChainTargetHeight(): Long
 
-    fun setSynchronized() {
-        isSynchronized = true
-    }
-
     fun startRefresh() {
         startRefreshJ()
     }
@@ -276,10 +271,6 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     external fun refresh(): Boolean
     external fun refreshAsync()
     private external fun rescanBlockchainAsyncJ()
-    fun rescanBlockchainAsync() {
-        isSynchronized = false
-        rescanBlockchainAsyncJ()
-    }
 
     //TODO virtual void setAutoRefreshInterval(int millis) = 0;
     //TODO virtual int autoRefreshInterval() const = 0;

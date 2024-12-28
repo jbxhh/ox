@@ -14,7 +14,7 @@ import net.mynero.wallet.adapter.NodeSelectionAdapter.NodeSelectionAdapterListen
 import net.mynero.wallet.data.Node
 
 class NodeSelectionBottomSheetDialog(
-    private val nodes: List<Node>,
+    private var nodes: List<Node>,
     private var selectedNode: Node,
     private val listener: NodeSelectionDialogListener,
 ) : BottomSheetDialogFragment(), NodeSelectionAdapterListener {
@@ -50,6 +50,11 @@ class NodeSelectionBottomSheetDialog(
         addNodeButton.setOnClickListener {
             listener.onAddNode(this)
         }
+    }
+
+    fun setNodes(nodes: List<Node>) {
+        this.nodes = nodes
+        adapter.setNodes(nodes)
     }
 
     fun setSelectedNode(selectedNode: Node) {

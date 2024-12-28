@@ -14,6 +14,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
+import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -41,6 +42,7 @@ class OnboardingActivity : WalletOpeningActivity() {
 
     private val viewModel: OnboardingViewModel by viewModels()
 
+    private lateinit var useProxySwitch: SwitchCompat
     private lateinit var walletProxyAddressEditText: EditText
     private lateinit var walletNameEditText: EditText
     private lateinit var walletPasswordEditText: EditText
@@ -70,6 +72,7 @@ class OnboardingActivity : WalletOpeningActivity() {
         moreOptionsDropdownTextView = findViewById(R.id.advanced_settings_dropdown_textview)
         moreOptionsChevronImageView = findViewById(R.id.advanced_settings_chevron_imageview)
         seedOffsetCheckbox = findViewById(R.id.seed_offset_checkbox)
+        useProxySwitch = findViewById(R.id.use_proxy_switch)
         walletProxyAddressEditText = findViewById(R.id.wallet_proxy_address_edittext)
         advancedOptionsLayout = findViewById(R.id.more_options_layout)
         seedTypeButton = findViewById(R.id.seed_type_button)
@@ -77,7 +80,7 @@ class OnboardingActivity : WalletOpeningActivity() {
 
         val useProxy = PreferenceUtils.isUseProxy(this)
 
-        walletProxyAddressEditText.isEnabled = useProxy
+        useProxySwitch.isChecked = useProxy
 
         val node = PreferenceUtils.getOrSetDefaultNode(this, DefaultNode.defaultNode())
         selectNodeButton.text = getString(R.string.node_button_text, node.name)
@@ -146,8 +149,13 @@ class OnboardingActivity : WalletOpeningActivity() {
 
         moreOptionsChevronImageView.setOnClickListener { viewModel.onMoreOptionsClicked() }
 
+        useProxySwitch.setOnCheckedChangeListener { _, b ->
+            PreferenceUtils.setUseProxy(this, b)
+            viewModel.setUseProxy(b)
+        }
+
         seedOffsetCheckbox.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
-            viewModel.useOffset = b
+            viewModel.setUseOffset(b)
         }
 
         createWalletButton.setOnClickListener {
@@ -193,6 +201,7 @@ class OnboardingActivity : WalletOpeningActivity() {
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun afterTextChanged(editable: Editable) {
                 val text = editable.toString()
+                PreferenceUtils.setProxy(this@OnboardingActivity, text)
                 viewModel.setProxyAddress(text)
             }
         })
@@ -250,21 +259,21 @@ class OnboardingActivity : WalletOpeningActivity() {
                 walletNameEditText.text.toString(),
                 walletSeed,
                 restoreHeightText,
-                viewModel.useOffset,
+                viewModel.useOffset.value ?: false,
             )
         }
     }
 }
 
 internal class OnboardingViewModel : ViewModel() {
-    var useOffset = true
+    private val _useOffset = MutableLiveData(false)
+    val useOffset: LiveData<Boolean> = _useOffset
     private val _showMoreOptions = MutableLiveData(false)
     private val _creatingWallet = MutableLiveData(false)
     private val _seedType = MutableLiveData(SeedType.POLYSEED)
     private val _useProxy = MutableLiveData(false)
     val useProxy: LiveData<Boolean> = _useProxy
     private val _proxyAddress = MutableLiveData("")
-    private val _proxyPort = MutableLiveData("")
     private val _passphrase = MutableLiveData("")
     val passphrase: LiveData<String> = _passphrase
     private val _confirmedPassphrase = MutableLiveData("")
@@ -275,16 +284,15 @@ internal class OnboardingViewModel : ViewModel() {
         seedType,
         _useProxy,
         _proxyAddress,
-        _proxyPort,
         _passphrase,
         _confirmedPassphrase,
         _creatingWallet,
-    ) { seedType, useProxy, proxyAddress, proxyPort, passphrase, confirmedPassphrase, creatingWallet ->
-        if (seedType == null || useProxy == null || proxyAddress == null || proxyPort == null || passphrase == null || confirmedPassphrase == null || creatingWallet == null) return@combineLiveDatas false
+    ) { seedType, useProxy, proxyAddress, passphrase, confirmedPassphrase, creatingWallet ->
+        if (seedType == null || useProxy == null || proxyAddress == null || passphrase == null || confirmedPassphrase == null || creatingWallet == null) return@combineLiveDatas false
         if ((passphrase.isNotEmpty() || confirmedPassphrase.isNotEmpty()) && passphrase != confirmedPassphrase) return@combineLiveDatas false
         if (creatingWallet) return@combineLiveDatas false
         if (seedType == SeedType.POLYSEED && (passphrase.isEmpty() || confirmedPassphrase.isEmpty())) return@combineLiveDatas false
-        if (useProxy && (proxyAddress.isEmpty() || proxyPort.isEmpty())) return@combineLiveDatas false
+        if (useProxy && proxyAddress.isEmpty()) return@combineLiveDatas false
 
         return@combineLiveDatas true
     }
@@ -443,9 +451,12 @@ internal class OnboardingViewModel : ViewModel() {
         )
     }
 
+    fun setUseOffset(useOffset: Boolean) {
+        _useOffset.value = useOffset
+    }
+
     fun setProxyAddress(address: String) {
         _proxyAddress.value = address
-        val port = _proxyPort.value ?: return
     }
 
     fun setUseProxy(useProxy: Boolean) {

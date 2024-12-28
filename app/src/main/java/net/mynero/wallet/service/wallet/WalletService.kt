@@ -472,8 +472,8 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         // Monero heights are fucked up. Wallet and blockchain heights are always +1 to real height, but this callback receives real height
         daemonHeight.updateAndGet { if (it > 0 && it < (height + 1)) (height + 1) else it }
         val wallet = getWalletOrThrow()
-        if (last || wallet.isSynchronized) {
-            Timber.d("Storing and updating wallet because it is either synchronized or the block is the last one of the batch")
+        if (last) {
+            Timber.d("Storing and updating wallet because the block is the last one of the batch")
             wallet.store()
             updateWallet(wallet)
         }
@@ -490,14 +490,6 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             Timber.d("Fetching blockchain height")
             fetchBlockchainHeight()
         }
-        val wallet = getWalletOrThrow()
-        val wasSynchronized = wallet.isSynchronized
-        if (!wasSynchronized) {
-            Timber.d("Storing wallet after synchronization was completed")
-            wallet.isSynchronized = true
-            wallet.store()
-        }
-        updateWallet(wallet)
     }
 
     fun addObserver(observer: WalletServiceObserver) {
