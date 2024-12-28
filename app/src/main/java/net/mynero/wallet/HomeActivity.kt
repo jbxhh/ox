@@ -91,11 +91,7 @@ class HomeActivity : MoneroActivity() {
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                walletService?.closeWallet() // TODO: just stop the service instead?
-                finish()
-                if (PreferenceUtils.isMultiAccountMode(this@HomeActivity)) {
-                    startActivity(Intent(this@HomeActivity, WalletActivity::class.java))
-                }
+                stop()
             }
         })
     }
@@ -110,6 +106,20 @@ class HomeActivity : MoneroActivity() {
 
     override fun onWalletServiceBound(walletService: WalletService) {
         updateState(walletService, walletService.getWallet())
+    }
+
+    override fun onWalletServiceNotFound() {
+        stop()
+    }
+
+    private fun stop() {
+        walletService?.closeWallet() // TODO: just stop the service instead?
+        finish()
+        if (PreferenceUtils.isMultiAccountMode(this@HomeActivity)) {
+            startActivity(Intent(this@HomeActivity, WalletActivity::class.java))
+        } else {
+            startActivity(Intent(this@HomeActivity, StartActivity::class.java))
+        }
     }
 
     private fun displayEmptyHistory(
