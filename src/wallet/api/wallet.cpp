@@ -182,7 +182,7 @@ struct Wallet2CallbackImpl : public tools::i_wallet2_callback
         return m_listener;
     }
 
-    virtual void on_new_block(uint64_t height, const cryptonote::block& block)
+    virtual void on_new_block(uint64_t height, bool last, const cryptonote::block& block)
     {
         // Don't flood the GUI with signals. On fast refresh - send signal every 1000th block
         // get_refresh_from_block_height() returns the blockheight from when the wallet was 
@@ -190,7 +190,7 @@ struct Wallet2CallbackImpl : public tools::i_wallet2_callback
         if(height >= m_wallet->m_wallet->get_refresh_from_block_height() || height % 1000 == 0) {
             // LOG_PRINT_L3(__FUNCTION__ << ": new block. height: " << height);
             if (m_listener) {
-                m_listener->newBlock(height);
+                m_listener->newBlock(height, last);
             }
         }
     }

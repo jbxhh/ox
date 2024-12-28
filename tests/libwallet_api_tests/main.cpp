@@ -846,7 +846,7 @@ struct MyWalletListener : public Monero::WalletListener
         // cv_receive.notify_one();
     }
 
-    virtual void newBlock(uint64_t height)
+    virtual void newBlock(uint64_t height, bool last)
     {
 //        std::cout << "wallet: " << wallet->mainAddress()
 //                  <<", new block received, blockHeight: " << height << std::endl;

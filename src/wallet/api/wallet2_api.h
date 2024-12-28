@@ -393,8 +393,9 @@ struct WalletListener
     /**
      * @brief newBlock      - called when new block received
      * @param height        - block height
+     * @param last          - true if the block is the last block in the batch
      */
-    virtual void newBlock(uint64_t height) = 0;
+    virtual void newBlock(uint64_t height, bool last) = 0;
 
     /**
      * @brief updated  - generic callback, called when any event (sent/received/block reveived/etc) happened with the wallet;
