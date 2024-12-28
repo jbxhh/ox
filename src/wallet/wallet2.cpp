@@ -3088,7 +3088,7 @@ bool wallet2::should_skip_block(const cryptonote::block &b, uint64_t height) con
   return !(b.timestamp + 60*60*24 > m_account.get_createtime() && height >= m_refresh_from_block_height && height >= m_skip_to_height);
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::process_new_blockchain_entry(const cryptonote::block& b, const cryptonote::block_complete_entry& bche, const parsed_block &parsed_block, const crypto::hash& bl_id, uint64_t height, const std::vector<tx_cache_data> &tx_cache_data, size_t tx_cache_data_offset, std::map<std::pair<uint64_t, uint64_t>, size_t> *output_tracker_cache)
+void wallet2::process_new_blockchain_entry(const cryptonote::block& b, const cryptonote::block_complete_entry& bche, const parsed_block &parsed_block, const crypto::hash& bl_id, uint64_t height, bool last, const std::vector<tx_cache_data> &tx_cache_data, size_t tx_cache_data_offset, std::map<std::pair<uint64_t, uint64_t>, size_t> *output_tracker_cache)
 {
   THROW_WALLET_EXCEPTION_IF(bche.txs.size() + 1 != parsed_block.o_indices.indices.size(), error::wallet_internal_error,
       "block transactions=" + std::to_string(bche.txs.size()) +
@@ -3123,7 +3123,7 @@ void wallet2::process_new_blockchain_entry(const cryptonote::block& b, const cry
   m_blockchain.push_back(bl_id);
 
   if (0 != m_callback)
-    m_callback->on_new_block(height, b);
+    m_callback->on_new_block(height, last, b);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::get_short_chain_history(std::list<crypto::hash>& ids, uint64_t granularity) const
@@ -3488,9 +3488,11 @@ void wallet2::process_parsed_blocks(uint64_t start_height, const std::vector<cry
     const crypto::hash &bl_id = parsed_blocks[i].hash;
     const cryptonote::block &bl = parsed_blocks[i].block;
 
+    bool last = i == blocks.size() - 1;
+
     if(current_index >= m_blockchain.size())
     {
-      process_new_blockchain_entry(bl, blocks[i], parsed_blocks[i], bl_id, current_index, tx_cache_data, tx_cache_data_offset, output_tracker_cache);
+      process_new_blockchain_entry(bl, blocks[i], parsed_blocks[i], bl_id, current_index, last, tx_cache_data, tx_cache_data_offset, output_tracker_cache);
       ++blocks_added;
     }
     else if(bl_id != m_blockchain[current_index])
@@ -3507,7 +3509,7 @@ void wallet2::process_parsed_blocks(uint64_t start_height, const std::vector<cry
         std::to_string(reorg_depth));
 
       handle_reorg(current_index, output_tracker_cache);
-      process_new_blockchain_entry(bl, blocks[i], parsed_blocks[i], bl_id, current_index, tx_cache_data, tx_cache_data_offset, output_tracker_cache);
+      process_new_blockchain_entry(bl, blocks[i], parsed_blocks[i], bl_id, current_index, last, tx_cache_data, tx_cache_data_offset, output_tracker_cache);
     }
     else
     {
@@ -4055,7 +4057,7 @@ bool wallet2::fast_refresh(uint64_t stop_height, uint64_t &blocks_start_height, 
         if (0 != m_callback)
         { // FIXME: this isn't right, but simplewallet just logs that we got a block.
           cryptonote::block dummy;
-          m_callback->on_new_block(current_index, dummy);
+          m_callback->on_new_block(current_index, false, dummy);
         }
       }
       else if(bl_id != m_blockchain[current_index])
@@ -4151,7 +4153,8 @@ void wallet2::refresh(bool trusted_daemon, uint64_t start_height, uint64_t & blo
       if(m_light_wallet_blockchain_height != prev_height)
       {
         MDEBUG("new block since last time!");
-        m_callback->on_lw_new_block(m_light_wallet_blockchain_height - 1);
+        // this fork does not support light wallets, so `last` param is just set to false
+        m_callback->on_lw_new_block(m_light_wallet_blockchain_height - 1, false);
       }
       m_light_wallet_connected = true;
       MDEBUG("lw scanned block height: " <<  m_light_wallet_scanned_block_height);
