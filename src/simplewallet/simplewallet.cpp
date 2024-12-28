@@ -5837,7 +5837,7 @@ bool simple_wallet::save_bc(const std::vector<std::string>& args)
   return true;
 }
 //----------------------------------------------------------------------------------------------------
-void simple_wallet::on_new_block(uint64_t height, const cryptonote::block& block)
+void simple_wallet::on_new_block(uint64_t height, bool last, const cryptonote::block& block)
 {
   if (m_locked)
     return;
