@@ -467,16 +467,16 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         Timber.d("Unconfirmed money received callback")
     }
 
-    override fun newBlock(height: Long) {
-        Timber.d("New block callback at height $height")
+    override fun newBlock(height: Long, last: Boolean) {
+        Timber.d("New block callback at height $height, is last: $last")
         // Monero heights are fucked up. Wallet and blockchain heights are always +1 to real height, but this callback receives real height
         daemonHeight.updateAndGet { if (it > 0 && it < (height + 1)) (height + 1) else it }
         val wallet = getWalletOrThrow()
-        if (wallet.isSynchronized) {
+        if (last || wallet.isSynchronized) {
+            Timber.d("Storing and updating wallet because it is either synchronized or the block is the last one of the batch")
             wallet.store()
+            updateWallet(wallet)
         }
-        // TODO: optimize to call this only on the last block of the batch
-        updateWallet(wallet)
     }
 
     override fun updated() {

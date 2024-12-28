@@ -45,7 +45,7 @@ interface WalletListener {
      *
      * @param height - block height
      */
-    fun newBlock(height: Long)
+    fun newBlock(height: Long, last: Boolean)
 
     /**
      * updated  - generic callback, called when any event (sent/received/block reveived/etc) happened with the wallet;
