@@ -214,8 +214,9 @@ struct MyWalletListener : Monero::WalletListener {
     /**
      * @brief newBlock      - called when new block received
      * @param height        - block height
+     * @param last          - true if the block is the last block in the batch
      */
-    void newBlock(uint64_t height) {
+    void newBlock(uint64_t height, bool last) {
         std::lock_guard<std::mutex> lock(_listenerMutex);
         if (jlistener == nullptr) return;
         //LOGD("newBlock");
@@ -224,9 +225,10 @@ struct MyWalletListener : Monero::WalletListener {
         if (envStat == JNI_ERR) return;
 
         jlong h = static_cast<jlong>(height);
+        jboolean l = static_cast<jboolean>(last);
         jmethodID listenerClass_newBlock = jenv->GetMethodID(class_WalletListener, "newBlock",
-                                                             "(J)V");
-        jenv->CallVoidMethod(jlistener, listenerClass_newBlock, h);
+                                                             "(JZ)V");
+        jenv->CallVoidMethod(jlistener, listenerClass_newBlock, h, l);
 
         detachJVM(jenv, envStat);
     }
