@@ -65,7 +65,7 @@ class EnotesAdapter(
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.enote_selection_item, viewGroup, false)
+            .inflate(R.layout.recycler_view_item_enote, viewGroup, false)
         return ViewHolder(listener, view, streetMode)
     }
 

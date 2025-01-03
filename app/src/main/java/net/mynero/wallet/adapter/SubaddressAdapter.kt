@@ -45,7 +45,7 @@ class SubaddressAdapter(
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.address_item, viewGroup, false)
+            .inflate(R.layout.recycler_view_item_address, viewGroup, false)
         return ViewHolder(view, listener)
     }
 

@@ -227,8 +227,9 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         }
 
         private fun handleSetSubaddressLabel(index: Int, label: String) {
-            walletRef.get()!!.setSubaddressLabel(index, label)
-            walletRef.get()!!.store()
+            val wallet = getWalletOrThrow()
+            wallet.setSubaddressLabel(index, label)
+            wallet.store()
             forEachObserver {
                 it.onSubaddressesUpdated()
             }
