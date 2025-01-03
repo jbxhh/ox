@@ -24,6 +24,7 @@ import net.mynero.wallet.adapter.SubaddressAdapter
 import net.mynero.wallet.adapter.SubaddressAdapter.SubaddressAdapterListener
 import net.mynero.wallet.data.Subaddress
 import net.mynero.wallet.fragment.dialog.EditAddressLabelBottomSheetDialog
+import net.mynero.wallet.model.Wallet
 import net.mynero.wallet.service.wallet.WalletService
 import net.mynero.wallet.util.Helper.clipBoardCopy
 import net.mynero.wallet.util.PreferenceUtils
@@ -99,14 +100,14 @@ class ReceiveActivity : MoneroActivity() {
         }
     }
 
-    override fun onWalletServiceBound(walletService: WalletService) {
-        viewModel.refreshSubaddresses(walletService, qrCodeBackgroundColor())
+    override fun onWalletServiceConnected(walletService: WalletService) {
+        walletService.getWallet()?.let { wallet ->
+            viewModel.refreshSubaddresses(wallet, qrCodeBackgroundColor())
+        }
     }
 
-    override fun onSubaddressesUpdated() {
-        walletService?.let { walletService ->
-            viewModel.refreshSubaddresses(walletService, qrCodeBackgroundColor())
-        }
+    override fun onWalletUpdated(wallet: Wallet) {
+        viewModel.refreshSubaddresses(wallet, qrCodeBackgroundColor())
     }
 
     private fun qrCodeBackgroundColor(): Int = ContextCompat.getColor(this, R.color.oled_colorBackground)
@@ -156,9 +157,7 @@ class ReceiveViewModel : ViewModel() {
     private val _qrCode = MutableLiveData<Bitmap?>()
     val qrCode: LiveData<Bitmap?> = _qrCode
 
-    fun refreshSubaddresses(walletService: WalletService, backgroundColor: Int) {
-        val wallet = walletService.getWalletOrThrow()
-
+    fun refreshSubaddresses(wallet: Wallet, backgroundColor: Int) {
         val newSubaddresses = (0 until wallet.numSubaddresses).map { wallet.getSubaddressObject(it) }
         _subaddresses.postValue(newSubaddresses)
 

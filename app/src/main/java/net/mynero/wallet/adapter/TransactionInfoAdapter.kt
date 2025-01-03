@@ -32,7 +32,7 @@ import java.util.Date
 
 class TransactionInfoAdapter(
     private var streetMode: Boolean,
-    private val listener: TxInfoAdapterListener,
+    private val listener: Listener,
 ) : RecyclerView.Adapter<TransactionInfoAdapter.ViewHolder>() {
 
     private var localDataSet: List<TransactionInfo> = emptyList()
@@ -66,11 +66,11 @@ class TransactionInfoAdapter(
         return localDataSet.size
     }
 
-    interface TxInfoAdapterListener {
+    interface Listener {
         fun onClickTransaction(txInfo: TransactionInfo)
     }
 
-    class ViewHolder(val listener: TxInfoAdapterListener?, view: View) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(val listener: Listener?, view: View) : RecyclerView.ViewHolder(view) {
 
         private val outboundColour: Int = ThemeHelper.getThemedColor(view.context, R.attr.negativeColor)
         private val inboundColour: Int = ThemeHelper.getThemedColor(view.context, R.attr.positiveColor)

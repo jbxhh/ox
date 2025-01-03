@@ -203,7 +203,7 @@ class SendActivity : MoneroActivity() {
         viewModel.setEnotes(enotes)
     }
 
-    override fun onWalletServiceBound(walletService: WalletService) {
+    override fun onWalletServiceConnected(walletService: WalletService) {
         updateEnotesLabel()
     }
 

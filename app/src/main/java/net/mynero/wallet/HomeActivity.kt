@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import net.mynero.wallet.adapter.TransactionInfoAdapter
+import net.mynero.wallet.livedata.combineLiveDatas
 import net.mynero.wallet.model.Balance
 import net.mynero.wallet.model.TransactionInfo
 import net.mynero.wallet.model.Wallet
@@ -22,6 +23,7 @@ import net.mynero.wallet.service.wallet.WalletService
 import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.PreferenceUtils
 import net.mynero.wallet.util.acitivity.MoneroActivity
+import timber.log.Timber
 
 class HomeActivity : MoneroActivity() {
 
@@ -40,7 +42,13 @@ class HomeActivity : MoneroActivity() {
     private lateinit var frozenBalanceTextView: TextView
     private lateinit var lockedBalanceTextView: TextView
 
-    private lateinit var transactionInfoAdapter: TransactionInfoAdapter
+    private val transactionInfoAdapter: TransactionInfoAdapter = TransactionInfoAdapter(false, object : TransactionInfoAdapter.Listener {
+        override fun onClickTransaction(txInfo: TransactionInfo) {
+            val intent = Intent(this@HomeActivity, TransactionActivity::class.java)
+            intent.putExtra(Constants.NAV_ARG_TXINFO, txInfo.hash)
+            startActivity(intent)
+        }
+    })
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,18 +67,22 @@ class HomeActivity : MoneroActivity() {
         progressBar = findViewById(R.id.sync_progress_bar)
         progressBarText = findViewById(R.id.sync_progress_text)
 
-        val streetMode = PreferenceUtils.isStreetMode(this)
-        transactionInfoAdapter = TransactionInfoAdapter(streetMode, object : TransactionInfoAdapter.TxInfoAdapterListener {
-            override fun onClickTransaction(txInfo: TransactionInfo) {
-                val intent = Intent(this@HomeActivity, TransactionActivity::class.java)
-                intent.putExtra(Constants.NAV_ARG_TXINFO, txInfo.hash)
-                startActivity(intent)
-            }
-        })
-
         txHistoryRecyclerView.layoutManager = LinearLayoutManager(this)
         txHistoryRecyclerView.adapter = transactionInfoAdapter
 
+        bindListeners()
+        bindObservers()
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                Timber.d("Back pressed")
+                stopService(Intent(this@HomeActivity, WalletService::class.java))
+                stop()
+            }
+        })
+    }
+
+    private fun bindListeners() {
         settingsImageView.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
@@ -80,32 +92,120 @@ class HomeActivity : MoneroActivity() {
         receiveButton.setOnClickListener {
             startActivity(Intent(this, ReceiveActivity::class.java))
         }
+    }
 
-        viewModel.balance.observe(this) { balance ->
-            updateBalances(balance)
-        }
-
-        viewModel.transactions.observe(this) { history ->
-            updateTransactionHistory(history)
-        }
-
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                stop()
+    private fun bindObservers() {
+        viewModel.showWalletLabel.observe(this) { isShowWalletLabel ->
+            if (isShowWalletLabel) {
+                val wallet = walletService!!.getWalletOrThrow()
+                walletAndAccountTextView.visibility = View.VISIBLE
+                walletAndAccountTextView.text = "${wallet.name} / ${wallet.getAccountIndex()}"
+            } else {
+                walletAndAccountTextView.visibility = View.GONE
             }
-        })
+        }
+
+        viewModel.syncProgress.observe(this) { (walletConnected, heights) ->
+            if (walletConnected) {
+                val (walletBeginSyncHeight, walletHeight, daemonHeight) = heights
+                val diff = daemonHeight - walletHeight
+                val synchronized = daemonHeight > 0 && diff == 0L
+                val walletDisplayHeight = (walletHeight - 1).toString()
+                val daemonDisplayHeight = if (daemonHeight > 0) (daemonHeight - 1).toString() else "???"
+                progressBarText.visibility = View.VISIBLE
+                if (synchronized) {
+                    progressBar.visibility = View.INVISIBLE
+                    progressBarText.text = "Synchronized at $walletDisplayHeight"
+                } else {
+                    progressBar.isIndeterminate = false
+                    // Google employs the very rare kind of engineers to work on Android - engineers with negative fucking IQ
+                    // try switching the order of setting max and min here to see their brilliance and true ingenuity
+                    // and after you do that, try to find an explanation (or even a mention) of this behaviour in the docs:
+                    // https://developer.android.com/reference/android/widget/ProgressBar.html
+                    progressBar.max = daemonHeight.toInt()
+                    progressBar.min = walletBeginSyncHeight.toInt()
+                    progressBar.setProgress(walletHeight.toInt(), true)
+                    progressBar.visibility = View.VISIBLE
+                    if (walletHeight > walletBeginSyncHeight) {
+                        progressBarText.text = "Synchronizing: $walletDisplayHeight / $daemonDisplayHeight ($diff blocks remaining)"
+                    } else {
+                        progressBarText.text = "Starting wallet synchronization..."
+                    }
+                }
+            }
+        }
+
+        viewModel.balance.observe(this) { (balance, streetMode) ->
+            if (balance != null) {
+                unlockedBalanceTextView.text = if (!streetMode) Wallet.getDisplayAmount(balance.unlocked) else Constants.STREET_MODE_BALANCE
+                if (balance.frozen != 0L) {
+                    val textFrozenBalance = if (!streetMode) Wallet.getDisplayAmount(balance.frozen) else Constants.STREET_MODE_BALANCE
+                    val formattedFrozenBalance = if (balance.frozen < 0) "- $textFrozenBalance" else "+ $textFrozenBalance"
+                    frozenBalanceTextView.text = "$formattedFrozenBalance frozen"
+                    frozenBalanceTextView.visibility = View.VISIBLE
+                } else {
+                    frozenBalanceTextView.visibility = View.GONE
+                }
+                if (balance.pending != 0L) {
+                    val textUnconfirmedBalance = if (!streetMode) Wallet.getDisplayAmount(balance.pending) else Constants.STREET_MODE_BALANCE
+                    val formattedUnconfirmedBalance = if (balance.pending < 0) "- $textUnconfirmedBalance" else "+ $textUnconfirmedBalance"
+                    lockedBalanceTextView.text = "$formattedUnconfirmedBalance unconfirmed"
+                    lockedBalanceTextView.visibility = View.VISIBLE
+                } else {
+                    lockedBalanceTextView.visibility = View.GONE
+                }
+            }
+        }
+
+        viewModel.transactions.observe(this) { transactions ->
+            if (transactions.isNullOrEmpty()) {
+                val wallet = walletService?.getWallet()
+                val textResId: Int = if (wallet != null) {
+                    R.string.no_history_nget_some_monero_in_here
+                } else {
+                    R.string.no_history_loading
+                }
+                txHistoryRecyclerView.visibility = View.GONE
+                displayEmptyHistory(true, this, textResId)
+            } else {
+                // POPULATED WALLET HISTORY
+                val sortedHistory = transactions.sortedByDescending { it.timestamp }
+                if (sortedHistory.size > 100) {
+                    transactionInfoAdapter.submitList(sortedHistory.subList(0, 99))
+                } else {
+                    transactionInfoAdapter.submitList(sortedHistory)
+                }
+                txHistoryRecyclerView.visibility = View.VISIBLE
+                displayEmptyHistory(
+                    false,
+                    this,
+                    R.string.no_history_nget_some_monero_in_here,
+                )
+            }
+        }
+        viewModel.streetMode.observe(this) { streetMode ->
+            transactionInfoAdapter.submitStreetMode(streetMode)
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        // label, balances and transaction history must be updated here because street mode may have been changed by another activity
-        updateWalletAndAccountLabel(walletService?.getWallet())
-        updateBalances(viewModel.balance.value)
-        updateTransactionHistory(viewModel.transactions.value)
+
+        val isMultiWalletMode = PreferenceUtils.isMultiWalletMode(this)
+        val isMultiAccountMode = PreferenceUtils.isMultiAccountMode(this)
+        val isStreetModeMode = PreferenceUtils.isStreetMode(this)
+
+        viewModel.setMultiWalletMode(isMultiWalletMode)
+        viewModel.setMultiAccountMode(isMultiAccountMode)
+        viewModel.setStreetMode(isStreetModeMode)
     }
 
-    override fun onWalletServiceBound(walletService: WalletService) {
+    override fun onWalletServiceConnected(walletService: WalletService) {
         updateState(walletService, walletService.getWallet())
+    }
+
+    override fun onWalletServiceDisconnected() {
+        stop()
     }
 
     override fun onWalletServiceNotFound() {
@@ -113,7 +213,8 @@ class HomeActivity : MoneroActivity() {
     }
 
     private fun stop() {
-        walletService?.closeWallet() // TODO: just stop the service instead?
+        Timber.d("Stopping")
+        walletService?.closeWallet()
         finish()
         if (PreferenceUtils.isMultiAccountMode(this@HomeActivity)) {
             startActivity(Intent(this@HomeActivity, WalletActivity::class.java))
@@ -134,15 +235,6 @@ class HomeActivity : MoneroActivity() {
         textView.setText(textResId)
     }
 
-    private fun updateState(walletService: WalletService, wallet: Wallet?) {
-        wallet?.let {
-            updateWalletAndAccountLabel(wallet)
-        }
-        updateSynchronizationProgress(walletService, wallet)
-        updateBalances(wallet?.getBalance())
-        updateTransactionHistory(wallet?.getHistory())
-    }
-
     override fun onWalletUpdated(wallet: Wallet) {
         runOnUiThread {
             updateState(walletService!!, wallet)
@@ -151,118 +243,87 @@ class HomeActivity : MoneroActivity() {
 
     override fun onBlockchainHeightFetched(height: Long) {
         val walletService = walletService!!
-        runOnUiThread {
-            updateSynchronizationProgress(walletService, walletService.getWallet())
-        }
+        updateHeights(walletService, walletService.getWallet())
     }
 
-    private fun updateWalletAndAccountLabel(wallet: Wallet?) {
-        val isMultiWalletMode = PreferenceUtils.isMultiWalletMode(this)
-        val isMultiAccountMode = PreferenceUtils.isMultiAccountMode(this)
-        if (wallet != null && (isMultiWalletMode || isMultiAccountMode)) {
-            walletAndAccountTextView.visibility = View.VISIBLE
-            walletAndAccountTextView.text = "${wallet.name} / ${wallet.getAccountIndex()}"
-        } else {
-            walletAndAccountTextView.visibility = View.GONE
-        }
+    private fun updateState(walletService: WalletService, wallet: Wallet?) {
+        viewModel.setWalletConnected(wallet != null)
+        updateHeights(walletService, wallet)
+        viewModel.setBalance(wallet?.getBalance())
+        viewModel.setTransactions(wallet?.getHistory())
     }
 
-    private fun updateBalances(balance: Balance?) {
-        if (balance != null) {
-            val streetMode = PreferenceUtils.isStreetMode(applicationContext)
-            unlockedBalanceTextView.text = if (!streetMode) Wallet.getDisplayAmount(balance.unlocked) else Constants.STREET_MODE_BALANCE
-            if (balance.frozen != 0L) {
-                val textFrozenBalance = if (!streetMode) Wallet.getDisplayAmount(balance.frozen) else Constants.STREET_MODE_BALANCE
-                val formattedFrozenBalance = if (balance.frozen < 0) "- $textFrozenBalance" else "+ $textFrozenBalance"
-                frozenBalanceTextView.text = "$formattedFrozenBalance frozen"
-                frozenBalanceTextView.visibility = View.VISIBLE
-            } else {
-                frozenBalanceTextView.visibility = View.GONE
-            }
-            if (balance.pending != 0L) {
-                val textUnconfirmedBalance = if (!streetMode) Wallet.getDisplayAmount(balance.pending) else Constants.STREET_MODE_BALANCE
-                val formattedUnconfirmedBalance = if (balance.pending < 0) "- $textUnconfirmedBalance" else "+ $textUnconfirmedBalance"
-                lockedBalanceTextView.text = "$formattedUnconfirmedBalance unconfirmed"
-                lockedBalanceTextView.visibility = View.VISIBLE
-            } else {
-                lockedBalanceTextView.visibility = View.GONE
-            }
-        }
-    }
-
-    private fun updateTransactionHistory(history: List<TransactionInfo>?) {
-        if (history.isNullOrEmpty()) {
-            val wallet = walletService?.getWallet()
-            val textResId: Int = if (wallet != null) {
-                R.string.no_history_nget_some_monero_in_here
-            } else {
-                R.string.no_history_loading
-            }
-            txHistoryRecyclerView.visibility = View.GONE
-            displayEmptyHistory(true, this, textResId)
-        } else {
-            // POPULATED WALLET HISTORY
-            val sortedHistory = history.sortedByDescending { it.timestamp }
-            if (sortedHistory.size > 100) {
-                transactionInfoAdapter.submitList(sortedHistory.subList(0, 99))
-            } else {
-                transactionInfoAdapter.submitList(sortedHistory)
-            }
-            transactionInfoAdapter.submitStreetMode(PreferenceUtils.isStreetMode(applicationContext))
-            txHistoryRecyclerView.visibility = View.VISIBLE
-            displayEmptyHistory(
-                false,
-                this,
-                R.string.no_history_nget_some_monero_in_here,
-            )
-        }
-    }
-
-    private fun updateSynchronizationProgress(walletService: WalletService, wallet: Wallet?) {
-        wallet?.let {
-            val walletBeginSyncHeight = walletService.getWalletBeginSyncHeight()
-            val walletHeight = wallet.getBlockChainHeightJ()
-            val daemonHeight = walletService.getDaemonHeight()
-            val diff = daemonHeight - walletHeight
-            val synchronized = daemonHeight > 0 && diff == 0L
-            val walletDisplayHeight = (walletHeight - 1).toString()
-            val daemonDisplayHeight = if (daemonHeight > 0) (daemonHeight - 1).toString() else "???"
-            progressBarText.visibility = View.VISIBLE
-            if (synchronized) {
-                progressBar.visibility = View.INVISIBLE
-                progressBarText.text = "Synchronized at $walletDisplayHeight"
-            } else {
-                progressBar.isIndeterminate = false
-                // Google employs the very rare kind of engineers to work on Android - engineers with negative fucking IQ
-                // try switching the order of setting max and min here to see their brilliance and true ingenuity
-                // and after you do that, try to find an explanation (or even a mention) of this behaviour in the docs:
-                // https://developer.android.com/reference/android/widget/ProgressBar.html
-                progressBar.max = daemonHeight.toInt()
-                progressBar.min = walletBeginSyncHeight.toInt()
-                progressBar.setProgress(walletHeight.toInt(), true)
-                progressBar.visibility = View.VISIBLE
-                if (walletHeight > walletBeginSyncHeight) {
-                    progressBarText.text = "Synchronizing: $walletDisplayHeight / $daemonDisplayHeight ($diff blocks remaining)"
-                } else {
-                    progressBarText.text = "Starting wallet synchronization..."
-                }
-            }
-        }
+    private fun updateHeights(walletService: WalletService, wallet: Wallet?) {
+        viewModel.setHeights(Heights(walletService.getWalletBeginSyncHeight(), wallet?.getBlockChainHeightJ() ?: 0, walletService.getDaemonHeight()))
     }
 }
 
 internal class HomeActivityViewModel : ViewModel() {
-    private val _transactions = MutableLiveData<List<TransactionInfo>>()
-    val transactions: LiveData<List<TransactionInfo>> = _transactions
+    private val _walletConnected = MutableLiveData(false)
 
-    private val _balance: MutableLiveData<Balance> = MutableLiveData()
-    val balance: LiveData<Balance> = _balance
+    private val _multiWalletMode = MutableLiveData(false)
 
-    fun updateTransactions(newTransactions: List<TransactionInfo>) {
-        _transactions.postValue(newTransactions)
+    private val _multiAccountMode = MutableLiveData(false)
+
+    private val _streetMode = MutableLiveData(false)
+    val streetMode: LiveData<Boolean> = _streetMode
+
+    private val _heights = MutableLiveData(Heights(0L, 0L, 0L))
+
+    private val _balance: MutableLiveData<Balance?> = MutableLiveData(null)
+
+    private val _transactions = MutableLiveData<List<TransactionInfo>?>(null)
+    val transactions: LiveData<List<TransactionInfo>?> = _transactions
+
+    val showWalletLabel = combineLiveDatas(
+        _walletConnected,
+        _multiWalletMode,
+        _multiAccountMode,
+    ) { walletConnected, multiWalletMode, multiAccountMode ->
+        return@combineLiveDatas walletConnected!! && (multiWalletMode!! || multiAccountMode!!)
     }
 
-    fun updateBalance(newBalance: Balance) {
+    val syncProgress = combineLiveDatas(
+        _walletConnected,
+        _heights,
+    ) { walletConnected, heights ->
+        Pair(walletConnected!!, heights!!)
+    }
+
+    val balance = combineLiveDatas(
+        _balance,
+        _streetMode,
+    ) { balance, streetMode ->
+        Pair(balance, streetMode!!)
+    }
+
+    fun setWalletConnected(walletConnected: Boolean) {
+        _walletConnected.postValue(walletConnected)
+    }
+
+    fun setMultiWalletMode(multiWalletMode: Boolean) {
+        _multiWalletMode.postValue(multiWalletMode)
+    }
+
+    fun setMultiAccountMode(multiAccountMode: Boolean) {
+        _multiAccountMode.postValue(multiAccountMode)
+    }
+
+    fun setStreetMode(streetMode: Boolean) {
+        _streetMode.postValue(streetMode)
+    }
+
+    fun setHeights(heights: Heights) {
+        _heights.postValue(heights)
+    }
+
+    fun setBalance(newBalance: Balance?) {
         _balance.postValue(newBalance)
     }
+
+    fun setTransactions(newTransactions: List<TransactionInfo>?) {
+        _transactions.postValue(newTransactions)
+    }
 }
+
+internal data class Heights(val walletBeginSyncHeight: Long, val walletHeight: Long, val daemonHeight: Long)
