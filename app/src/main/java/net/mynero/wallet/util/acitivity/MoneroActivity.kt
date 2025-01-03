@@ -19,11 +19,12 @@ abstract class MoneroActivity : LoggingActivity(), WalletServiceObserver {
             val walletService = (service as WalletService.WalletServiceBinder).service
             this@MoneroActivity.walletService = walletService
             walletService.addObserver(this@MoneroActivity)
-            onWalletServiceBound(walletService)
+            onWalletServiceConnected(walletService)
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
-            Timber.i("Wallet Service disconnected for activity ${this@MoneroActivity.javaClass.simpleName}")
+            Timber.d("Wallet Service disconnected for activity ${this@MoneroActivity.javaClass.simpleName}")
+            onWalletServiceDisconnected()
             walletService = null
         }
     }
@@ -31,16 +32,22 @@ abstract class MoneroActivity : LoggingActivity(), WalletServiceObserver {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (!WalletService.RUNNING.get()) {
+            Timber.d("Wallet Service not found for activity ${this@MoneroActivity.javaClass.simpleName}")
             onWalletServiceNotFound()
         } else {
             bindService(Intent(applicationContext, WalletService::class.java), connection, 0)
         }
     }
 
-    open fun onWalletServiceBound(walletService: WalletService) {}
+    open fun onWalletServiceConnected(walletService: WalletService) {}
 
     open fun onWalletServiceNotFound() {
-        Timber.i("Finishing activity because wallet service is not running yet")
+        Timber.d("Finishing activity ${this@MoneroActivity.javaClass.simpleName} because wallet service is not found")
+        finish()
+    }
+
+    open fun onWalletServiceDisconnected() {
+        Timber.d("Finishing activity ${this@MoneroActivity.javaClass.simpleName} because wallet service disconnected")
         finish()
     }
 }

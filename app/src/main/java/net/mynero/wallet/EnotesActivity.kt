@@ -111,7 +111,7 @@ class EnotesActivity : MoneroActivity() {
         }
     }
 
-    override fun onWalletServiceBound(walletService: WalletService) {
+    override fun onWalletServiceConnected(walletService: WalletService) {
         walletService.getWallet()?.let { wallet ->
             updateState(wallet)
         }
