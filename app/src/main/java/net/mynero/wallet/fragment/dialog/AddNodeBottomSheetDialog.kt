@@ -32,7 +32,7 @@ class AddNodeBottomSheetDialog(val listener: AddNodeListener) : BottomSheetDialo
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.add_node_bottom_sheet_dialog, null)
+        return inflater.inflate(R.layout.bottom_sheet_dialog_add_node, null)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

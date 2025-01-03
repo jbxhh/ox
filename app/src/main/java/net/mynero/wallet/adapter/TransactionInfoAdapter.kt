@@ -27,7 +27,6 @@ import net.mynero.wallet.util.Constants
 import net.mynero.wallet.util.DateHelper
 import net.mynero.wallet.util.Helper
 import net.mynero.wallet.util.ThemeHelper
-import timber.log.Timber
 import java.util.Calendar
 import java.util.Date
 
@@ -54,7 +53,7 @@ class TransactionInfoAdapter(
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.transaction_history_item, viewGroup, false)
+            .inflate(R.layout.recycler_view_item_transaction, viewGroup, false)
         return ViewHolder(listener, view)
     }
 

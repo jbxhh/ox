@@ -51,7 +51,7 @@ class NodeSelectionAdapter(
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(viewGroup.context).inflate(R.layout.node_selection_item, viewGroup, false)
+        val view = LayoutInflater.from(viewGroup.context).inflate(R.layout.recycler_view_item_node, viewGroup, false)
         return ViewHolder(listener, view)
     }
 

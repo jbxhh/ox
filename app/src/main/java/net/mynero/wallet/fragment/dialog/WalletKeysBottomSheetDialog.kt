@@ -36,7 +36,7 @@ class WalletKeysBottomSheetDialog(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.wallet_keys_bottom_sheet_dialog, container)
+        return inflater.inflate(R.layout.bottom_sheet_dialog_wallet_secrets, container)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

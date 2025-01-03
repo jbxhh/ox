@@ -9,7 +9,6 @@ object Constants {
     const val MNEMONIC_LANGUAGE = "English"
     const val STREET_MODE_BALANCE = "#.############"
 
-    const val PREF_USES_PROXY = "pref_uses_tor"
     const val PREF_USE_PROXY = "pref_use_proxy"
     const val PREF_PROXY = "pref_proxy"
     const val PREF_NODE = "pref_node"
@@ -25,8 +24,6 @@ object Constants {
     const val NAV_ARG_TXINFO = "nav_arg_txinfo"
 
     const val EXTRA_PREVENT_GOING_BACK = "prevent_going_back"
-    const val EXTRA_WALLET_PATH = "wallet_name"
-    const val EXTRA_WALLET_PASSWORD = "wallet_password"
     const val EXTRA_SEND_ADDRESS = "send_address"
     const val EXTRA_SEND_AMOUNT = "send_amount"
     const val EXTRA_SEND_MAX = "send_max"

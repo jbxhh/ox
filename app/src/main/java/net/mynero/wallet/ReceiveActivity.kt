@@ -1,11 +1,7 @@
 package net.mynero.wallet
 
-import android.content.ComponentName
-import android.content.Intent
-import android.content.ServiceConnection
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.os.IBinder
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView

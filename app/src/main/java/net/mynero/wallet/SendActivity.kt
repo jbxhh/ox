@@ -304,7 +304,7 @@ class SendActivity : MoneroActivity() {
     private fun addOutput(initial: Boolean, address: String? = null, amount: String? = null) {
         val index = destCount
         val entryView =
-            layoutInflater.inflate(R.layout.transaction_output_item, null) as ConstraintLayout
+            layoutInflater.inflate(R.layout.recycler_view_item_destination, null) as ConstraintLayout
         val removeOutputImageButton =
             entryView.findViewById<ImageButton>(R.id.remove_output_imagebutton)
         val addressField = entryView.findViewById<EditText>(R.id.address_edittext)
