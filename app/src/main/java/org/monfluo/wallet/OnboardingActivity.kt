@@ -257,7 +257,7 @@ class OnboardingActivity : WalletOpeningActivity() {
                 walletNameEditText.text.toString(),
                 walletSeed,
                 restoreHeightText,
-                viewModel.useOffset.value ?: false,
+                viewModel.useOffset.value!! || viewModel.seedType.value == OnboardingViewModel.SeedType.POLYSEED,
             )
         }
     }
