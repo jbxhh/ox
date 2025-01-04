@@ -40,6 +40,10 @@ Maintaining Monfluo incurs some costs, so please consider donating.
 
 XMR address: `48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ`
 
+[Click to paste the address in your wallet](monero:48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ), or manually scan the QR code below:
+
+![](doc/donate_qr_code.png)
+
 #### Expenses (excluding developer time)
 
 - Build server for CI/CD: 10 EUR / month
