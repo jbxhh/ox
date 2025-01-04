@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="24dp"
-    tools:context="net.mynero.wallet.ReceiveActivity">
+    tools:context="org.monfluo.wallet.ReceiveActivity">
 
     <TextView
         android:id="@+id/recv_monero_textview"

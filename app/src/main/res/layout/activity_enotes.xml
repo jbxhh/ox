@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="net.mynero.wallet.EnotesActivity">
+    tools:context="org.monfluo.wallet.EnotesActivity">
 
     <TextView
         android:id="@+id/view_utxos_textview"

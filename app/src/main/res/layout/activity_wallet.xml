@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="24dp"
-    tools:context="net.mynero.wallet.ReceiveActivity">
+    tools:context="org.monfluo.wallet.ReceiveActivity">
 
 
     <Button
@@ -27,7 +27,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
-        android:text="Mysu"
+        android:text="@string/app_name"
         android:textAlignment="center"
         android:textSize="32sp"
         android:textStyle="bold"
