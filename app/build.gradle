@@ -40,13 +40,9 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
             applicationIdSuffix ".debug"
-        }
-        applicationVariants.all { variant ->
-            variant.buildConfigField "String", "ID_A", "\"" + getId("ID_A") + "\""
         }
     }
 
@@ -113,12 +109,6 @@ android {
     buildFeatures {
         viewBinding true
     }
-}
-
-static def getId(name) {
-    Properties props = new Properties()
-    props.load(new FileInputStream(new File('mynero.id')))
-    return props[name]
 }
 
 dependencies {
