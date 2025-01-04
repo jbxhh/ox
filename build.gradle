@@ -25,5 +25,5 @@ tasks.register('clean', Delete) {
 }
 
 ext {
-    apkName = 'mynero'
+    apkName = 'monfluo'
 }

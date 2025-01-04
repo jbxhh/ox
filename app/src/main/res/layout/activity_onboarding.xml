@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="net.mynero.wallet.OnboardingActivity">
+    tools:context="org.monfluo.wallet.OnboardingActivity">
 
     <ScrollView
         android:layout_width="match_parent"
