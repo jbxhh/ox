@@ -197,13 +197,14 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             WalletManager.instance.setProxyJ(proxy)
             WalletManager.instance.setDaemonAddressJ(daemonAddress)
             walletRef.get()?.let { wallet ->
+                Timber.i("Re-initializing wallet with daemon address = $daemonAddress, daemon username = $daemonUsername, daemon password = ${"*".repeat(daemonPassword.length)}, proxy = $proxy")
                 wallet.initJ(daemonAddress, 0, daemonUsername, daemonPassword, proxy)
                 wallet.setTrustedDaemon(daemonTrusted)
                 updateWallet(wallet)
+                handleFetchDaemonHeight()
                 wallet.setListener(this@WalletService)
                 wallet.startRefresh()
             }
-            handleFetchDaemonHeight()
         }
 
         private fun handleFetchDaemonHeight() {
@@ -240,12 +241,8 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             feePriority: PendingTransaction.Priority,
             selectedUtxos: ArrayList<String>
         ) {
-            val preferredInputs = if (selectedUtxos.isEmpty()) {
-                selectUtxos(Long.MAX_VALUE, true, feePriority)
-            } else {
-                selectedUtxos
-            }
-            val pendingTransaction = walletRef.get()!!.createSweepTransaction(destination, feePriority, preferredInputs)
+            val wallet = getWalletOrThrow()
+            val pendingTransaction = wallet.createSweepTransaction(destination, feePriority, selectedUtxos)
             forEachObserver {
                 it.onTransactionCreated(pendingTransaction)
             }
@@ -256,13 +253,8 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             feePriority: PendingTransaction.Priority,
             selectedUtxos: ArrayList<String>
         ) {
-            val totalAmount = destinations.sumOf { it.amount }
-            val preferredInputs = if (selectedUtxos.isEmpty()) {
-                selectUtxos(totalAmount, false, feePriority)
-            } else {
-                selectedUtxos
-            }
-            val pendingTransaction = walletRef.get()!!.createTransactionMultDest(destinations, feePriority, preferredInputs)
+            val wallet = getWalletOrThrow()
+            val pendingTransaction = wallet.createTransactionMultDest(destinations, feePriority, selectedUtxos)
             forEachObserver {
                 it.onTransactionCreated(pendingTransaction)
             }
@@ -273,56 +265,6 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             forEachObserver {
                 it.onTransactionSent(pendingTransaction, success)
             }
-        }
-
-        @Throws(Exception::class)
-        fun selectUtxos(
-            amount: Long,
-            sendAll: Boolean,
-            feePriority: PendingTransaction.Priority
-        ): ArrayList<String> {
-            // this is bugged, throws insufficient balance even when there is enough money (prob coins is not updated?)
-            val basicFeeEstimate = calculateBasicFee(amount, feePriority) ?: return arrayListOf()
-            val amountWithBasicFee = amount + basicFeeEstimate
-            val selectedUtxos = ArrayList<String>()
-            val seenTxs = ArrayList<String>()
-            val enotes: List<Enote> = ArrayList(walletRef.get()!!.getEnotes())
-            var amountSelected: Long = 0
-            //loop through each utxo
-            for (enote in enotes) {
-                // TODO: filter account
-                if (!enote.isSpent && enote.isUnlocked && !enote.isFrozen) { //filter out spent, locked, and frozen outputs
-                    if (sendAll) {
-                        // if send all, add all utxos and set amount to send all
-                        enote.keyImage?.let { selectedUtxos.add(it) }
-                        amountSelected = Wallet.SWEEP_ALL
-                    } else {
-                        //if amount selected is still less than amount needed, and the utxos tx hash hasn't already been seen, add utxo
-                        if (amountSelected <= amountWithBasicFee && !seenTxs.contains(enote.hash)) {
-                            enote.keyImage?.let { selectedUtxos.add(it) }
-                            // we don't want to spend multiple utxos from the same transaction, so we prevent that from happening here.
-                            enote.hash?.let { seenTxs.add(it) }
-                            amountSelected += enote.amount
-                        }
-                    }
-                }
-            }
-            if (amountSelected < amountWithBasicFee && !sendAll) {
-                throw Exception("insufficient wallet balance")
-            }
-            return selectedUtxos
-        }
-
-        private fun calculateBasicFee(amount: Long, feePriority: PendingTransaction.Priority): Long? {
-            val destinations = ArrayList<android.util.Pair<String, Long>>()
-            destinations.add(
-                android.util.Pair(
-                    Constants.DONATE_ADDRESS,
-                    amount
-                )
-            )
-            // destination string doesn't actually matter here, so i'm using the donation address. amount also technically doesn't matter
-            return walletRef.get()?.estimateTransactionFee(destinations, feePriority)
         }
 
         private fun handleSetProxy(value: String) {
