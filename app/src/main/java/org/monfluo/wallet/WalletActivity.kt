@@ -26,7 +26,7 @@ class WalletActivity : WalletOpeningActivity() {
         val walletPaths = org.monfluo.wallet.model.WalletManager.instance.findWallets(Helper.getWalletRoot(this).absolutePath)
         adapter = WalletAdapter(walletPaths, object : WalletAdapter.AccountAdapterListener {
             override fun onWalletSelected(walletPath: String) {
-                val passwordDialog = PasswordBottomSheetDialog(walletPath, object : PasswordBottomSheetDialog.Listener {
+                val passwordDialog = PasswordBottomSheetDialog(walletPath, false, object : PasswordBottomSheetDialog.Listener {
                     override fun onCorrectPasswordSubmitted(self: PasswordBottomSheetDialog, password: String) {
                         self.dismiss()
                         openWallet(walletPath, password)

@@ -2,6 +2,7 @@ package org.monfluo.wallet
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import org.monfluo.wallet.fragment.dialog.PasswordBottomSheetDialog
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
@@ -33,7 +34,7 @@ class StartActivity : WalletOpeningActivity() {
         } else {
             Timber.d("${walletPaths.size} wallets found but multi-wallet mode is not enabled, asking for password to open a wallet")
             val walletPath = walletPaths.find { it.endsWith(Constants.DEFAULT_WALLET_NAME) } ?: walletPaths.first()
-            val passwordDialog = PasswordBottomSheetDialog(walletPath, object : PasswordBottomSheetDialog.Listener {
+            val passwordDialog = PasswordBottomSheetDialog(walletPath, true, object : PasswordBottomSheetDialog.Listener {
                 override fun onCorrectPasswordSubmitted(self: PasswordBottomSheetDialog, password: String) {
                     self.dismiss()
                     openWallet(walletPath, password)
