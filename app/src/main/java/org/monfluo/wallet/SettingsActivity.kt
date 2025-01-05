@@ -159,7 +159,7 @@ class SettingsActivity : MoneroActivity() {
         }
 
         displaySeedButton.setOnClickListener {
-            val passwordDialog = PasswordBottomSheetDialog(walletService!!.getWalletOrThrow().info.path, object : PasswordBottomSheetDialog.Listener {
+            val passwordDialog = PasswordBottomSheetDialog(walletService!!.getWalletOrThrow().info.path, false, object : PasswordBottomSheetDialog.Listener {
                 override fun onCorrectPasswordSubmitted(self: PasswordBottomSheetDialog, password: String) {
                     self.dismiss()
                     displaySeedDialog()
