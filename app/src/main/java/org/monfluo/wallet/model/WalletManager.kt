@@ -22,13 +22,13 @@ import java.util.Calendar
 import java.util.Locale
 
 class WalletManager {
-    val networkType = org.monfluo.wallet.model.NetworkType.NetworkType_Mainnet
+    val networkType = NetworkType.NetworkType_Mainnet
 
-    fun createWallet(aFile: File, password: String, language: String, height: Long): org.monfluo.wallet.model.Wallet {
+    fun createWallet(aFile: File, password: String, language: String, height: Long): Wallet {
         val walletHandle = createWalletJ(aFile.absolutePath, password, language, networkType.value)
-        val wallet = org.monfluo.wallet.model.Wallet(
+        val wallet = Wallet(
             walletHandle,
-            org.monfluo.wallet.model.WalletInfo(aFile, password)
+            WalletInfo(aFile, password)
         )
         if (wallet.status.isOk) {
             // (Re-)Estimate restore height based on what we know
@@ -47,7 +47,7 @@ class WalletManager {
         return wallet
     }
 
-    external fun findWallets(path: String): List<String> // this does not work - some error in boost
+    external fun findWallets(path: String): List<String>
     private external fun createWalletJ(
         path: String,
         password: String,
@@ -60,7 +60,7 @@ class WalletManager {
         password: String,
         passphrase: String,
         language: String
-    ): org.monfluo.wallet.model.Wallet {
+    ): Wallet {
         val walletHandle = createWalletPolyseedJ(
             aFile.absolutePath,
             password,
@@ -68,9 +68,9 @@ class WalletManager {
             language,
             networkType.value
         )
-        val wallet = org.monfluo.wallet.model.Wallet(
+        val wallet = Wallet(
             walletHandle,
-            org.monfluo.wallet.model.WalletInfo(aFile, password)
+            WalletInfo(aFile, password)
         )
         if (wallet.status.isOk) {
             wallet.setPassword(password) // this rewrites the keys file (which contains the restore height)
@@ -87,11 +87,11 @@ class WalletManager {
     ): Long
 
     //TODO virtual bool checkPayment(const std::string &address, const std::string &txid, const std::string &txkey, const std::string &daemon_address, uint64_t &received, uint64_t &height, std::string &error) const = 0;
-    fun openWallet(path: String, password: String): org.monfluo.wallet.model.Wallet {
+    fun openWallet(path: String, password: String): Wallet {
         val walletHandle = openWalletJ(path, password, networkType.value)
-        val wallet = org.monfluo.wallet.model.Wallet(
+        val wallet = Wallet(
             walletHandle,
-            org.monfluo.wallet.model.WalletInfo(File(path), password)
+            WalletInfo(File(path), password)
         )
         return wallet
     }
@@ -101,15 +101,15 @@ class WalletManager {
         aFile: File, password: String,
         mnemonic: String, offset: String,
         restoreHeight: Long
-    ): org.monfluo.wallet.model.Wallet {
+    ): Wallet {
         val walletHandle = recoveryWalletJ(
             aFile.absolutePath, password,
             mnemonic, offset,
             networkType.value, restoreHeight
         )
-        val wallet = org.monfluo.wallet.model.Wallet(
+        val wallet = Wallet(
             walletHandle,
-            org.monfluo.wallet.model.WalletInfo(aFile, password)
+            WalletInfo(aFile, password)
         )
         return wallet
     }
@@ -123,15 +123,15 @@ class WalletManager {
     fun recoveryWalletPolyseed(
         aFile: File, password: String,
         mnemonic: String, offset: String
-    ): org.monfluo.wallet.model.Wallet {
+    ): Wallet {
         val walletHandle = recoveryWalletPolyseedJ(
             aFile.absolutePath, password,
             mnemonic, offset,
             networkType.value
         )
-        val wallet = org.monfluo.wallet.model.Wallet(
+        val wallet = Wallet(
             walletHandle,
-            org.monfluo.wallet.model.WalletInfo(aFile, password)
+            WalletInfo(aFile, password)
         )
         return wallet
     }
@@ -145,15 +145,15 @@ class WalletManager {
     fun createWalletWithKeys(
         aFile: File, password: String, language: String, restoreHeight: Long,
         addressString: String, viewKeyString: String, spendKeyString: String
-    ): org.monfluo.wallet.model.Wallet {
+    ): Wallet {
         val walletHandle = createWalletFromKeysJ(
             aFile.absolutePath, password,
             language, networkType.value, restoreHeight,
             addressString, viewKeyString, spendKeyString
         )
-        val wallet = org.monfluo.wallet.model.Wallet(
+        val wallet = Wallet(
             walletHandle,
-            org.monfluo.wallet.model.WalletInfo(aFile, password)
+            WalletInfo(aFile, password)
         )
         return wallet
     }
@@ -176,7 +176,7 @@ class WalletManager {
         subaddressLookahead: String
     ): Long
 
-    external fun closeJ(wallet: org.monfluo.wallet.model.Wallet?): Boolean
+    external fun closeJ(wallet: Wallet?): Boolean
 
     fun walletExists(aFile: File): Boolean {
         return walletExists(aFile.absolutePath)
@@ -214,7 +214,7 @@ class WalletManager {
     external fun resolveOpenAlias(address: String?, dnssec_valid: Boolean): String?
 
     external fun setProxyJ(address: String?): Boolean
-    inner class WalletInfo(wallet: File) : Comparable<org.monfluo.wallet.model.WalletManager.WalletInfo> {
+    inner class WalletInfo(wallet: File) : Comparable<WalletManager.WalletInfo> {
         private val path: File
         private val name: String
 
@@ -223,7 +223,7 @@ class WalletManager {
             name = wallet.name
         }
 
-        override fun compareTo(other: org.monfluo.wallet.model.WalletManager.WalletInfo): Int {
+        override fun compareTo(other: WalletManager.WalletInfo): Int {
             return name.lowercase(Locale.getDefault())
                 .compareTo(other.name.lowercase(Locale.getDefault()))
         }
@@ -238,16 +238,16 @@ class WalletManager {
         var LOGLEVEL_TRACE = 3
         var LOGLEVEL_MAX = 4
 
-        val instance: org.monfluo.wallet.model.WalletManager
-            get() = synchronized(org.monfluo.wallet.model.WalletManager::class.java) {
-                return@synchronized org.monfluo.wallet.model.WalletManager()
+        val instance: WalletManager
+            get() = synchronized(WalletManager::class.java) {
+                return@synchronized WalletManager()
             }
 
-        fun addressPrefix(networkType: org.monfluo.wallet.model.NetworkType): String {
+        fun addressPrefix(networkType: NetworkType): String {
             return when (networkType) {
-                org.monfluo.wallet.model.NetworkType.NetworkType_Testnet -> "9A-"
-                org.monfluo.wallet.model.NetworkType.NetworkType_Mainnet -> "4-"
-                org.monfluo.wallet.model.NetworkType.NetworkType_Stagenet -> "5-"
+                NetworkType.NetworkType_Testnet -> "9A-"
+                NetworkType.NetworkType_Mainnet -> "4-"
+                NetworkType.NetworkType_Stagenet -> "5-"
             }
         }
 

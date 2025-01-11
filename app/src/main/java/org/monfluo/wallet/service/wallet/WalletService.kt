@@ -14,6 +14,7 @@ import org.monfluo.wallet.model.PendingTransaction
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.model.Wallet.Companion.NEW_ACCOUNT_NAME
 import org.monfluo.wallet.model.WalletListener
+import org.monfluo.wallet.model.WalletManager
 import org.monfluo.wallet.util.TransactionDestination
 import timber.log.Timber
 import java.util.concurrent.ArrayBlockingQueue
@@ -161,9 +162,9 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             daemonTrusted: Boolean,
             proxy: String
         ) {
-            org.monfluo.wallet.model.WalletManager.instance.setProxyJ(proxy)
-            org.monfluo.wallet.model.WalletManager.instance.setDaemonAddressJ(daemonAddress)
-            val wallet = org.monfluo.wallet.model.WalletManager.instance.openWallet(walletName, walletPassword)
+            WalletManager.instance.setProxyJ(proxy)
+            WalletManager.instance.setDaemonAddressJ(daemonAddress)
+            val wallet = WalletManager.instance.openWallet(walletName, walletPassword)
             Timber.i("Initializing wallet with daemon address = $daemonAddress, daemon username = $daemonUsername, daemon password = ${"*".repeat(daemonPassword.length)}, proxy = $proxy")
             wallet.initJ(daemonAddress, 0, daemonUsername, daemonPassword, proxy)
             wallet.setTrustedDaemon(daemonTrusted)
@@ -191,8 +192,8 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             daemonTrusted: Boolean,
             proxy: String
         ) {
-            org.monfluo.wallet.model.WalletManager.instance.setProxyJ(proxy)
-            org.monfluo.wallet.model.WalletManager.instance.setDaemonAddressJ(daemonAddress)
+            WalletManager.instance.setProxyJ(proxy)
+            WalletManager.instance.setDaemonAddressJ(daemonAddress)
             walletRef.get()?.let { wallet ->
                 Timber.i("Re-initializing wallet with daemon address = $daemonAddress, daemon username = $daemonUsername, daemon password = ${"*".repeat(daemonPassword.length)}, proxy = $proxy")
                 wallet.initJ(daemonAddress, 0, daemonUsername, daemonPassword, proxy)
@@ -205,7 +206,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         }
 
         private fun handleFetchDaemonHeight() {
-            val newHeight = org.monfluo.wallet.model.WalletManager.instance.getBlockchainHeight()
+            val newHeight = WalletManager.instance.getBlockchainHeight()
             if (newHeight > 0) {
                 daemonHeight.set(newHeight)
             } else {
@@ -267,7 +268,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         }
 
         private fun handleSetProxy(value: String) {
-            val success = org.monfluo.wallet.model.WalletManager.instance.setProxyJ(value)
+            val success = WalletManager.instance.setProxyJ(value)
             // we assume that if setting proxy for daemon was successful,
             // then setting proxy for wallet must have been successful as well
             walletRef.get()?.setProxy(value)
