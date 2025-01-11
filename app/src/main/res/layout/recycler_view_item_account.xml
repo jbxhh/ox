@@ -11,6 +11,7 @@
         android:id="@+id/account_item_account_textview"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:ellipsize="middle"
         android:paddingTop="4dp"
         android:paddingBottom="4dp"
@@ -19,10 +20,10 @@
         android:textColor="@color/oled_addressListColor"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/address_label_textview"
+        app:layout_constraintBottom_toBottomOf="@+id/address_label_textview"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/address_label_textview"
+        app:layout_constraintTop_toTopOf="@+id/address_label_textview" />
 
     <TextView
         android:id="@+id/address_label_textview"
@@ -37,7 +38,7 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/address_item_address_textview" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/address_amount_textview"
