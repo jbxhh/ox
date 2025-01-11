@@ -18,7 +18,7 @@ package org.monfluo.wallet.data
 enum class DefaultNode(val value: Node) {
 
     MONERUJO(Node("monerujo", "nodex.monerujo.io:18081", null, null)),
-    SETHFORPRIVACY(Node("sethforprivacy (https)", "https://node.sethforprivacy.com", null, null)),
+    SETHFORPRIVACY(Node("sethforprivacy (https)", "https://node.sethforprivacy.com:443", null, null)),
     RUCKNIUM(Node("Rucknium", "rucknium.me:18081", null, null)),
     STACKWALLET(Node("StackWallet (https)", "https://monero.stackwallet.com:18081", null, null)),
     CAKEWALLET(Node("CakeWallet", "xmr-node.cakewallet.com:18081", null, null)),
