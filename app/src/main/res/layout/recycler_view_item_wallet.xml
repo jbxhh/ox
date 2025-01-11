@@ -8,13 +8,10 @@
     android:paddingEnd="8dp">
 
     <ImageView
-        android:id="@+id/monero_qr_imageview2"
+        android:id="@+id/wallet_imageview"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"
-        android:src="@drawable/ic_monero"
+        android:src="@drawable/wallet"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -33,7 +30,7 @@
         android:text="Label"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/monero_qr_imageview2"
+        app:layout_constraintStart_toEndOf="@+id/wallet_imageview"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
