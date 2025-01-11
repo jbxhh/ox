@@ -18,9 +18,9 @@ package org.monfluo.wallet.data
 enum class DefaultNode(val value: Node) {
 
     MONERUJO(Node("monerujo", "nodex.monerujo.io:18081", null, null)),
-    SETHFORPRIVACY(Node("sethforprivacy", "node.sethforprivacy.com:18089", null, null)),
+    SETHFORPRIVACY(Node("sethforprivacy (https)", "https://node.sethforprivacy.com", null, null)),
     RUCKNIUM(Node("Rucknium", "rucknium.me:18081", null, null)),
-    STACKWALLET(Node("StackWallet", "monero.stackwallet.com:18081", null, null)),
+    STACKWALLET(Node("StackWallet (https)", "https://monero.stackwallet.com:18081", null, null)),
     CAKEWALLET(Node("CakeWallet", "xmr-node.cakewallet.com:18081", null, null)),
     HASHVAULT(Node("Hashvault", "nodes.hashvault.pro:18081", null, null)),
     MONERUJO_ONION(Node("monerujo.onion", "monerujods7mbghwe6cobdr6ujih6c22zu5rl7zshmizz2udf7v7fsad.onion:18081", null, null)),
