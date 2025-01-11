@@ -210,7 +210,6 @@ class OnboardingActivity : WalletOpeningActivity() {
 
             val listener = object : NodeSelectionDialogListenerAdapter(
                 activity = this,
-                nodes = nodes,
             ) {
                 override fun trySelectNode(
                     self: NodeSelectionBottomSheetDialog,

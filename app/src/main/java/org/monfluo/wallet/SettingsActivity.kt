@@ -131,7 +131,6 @@ class SettingsActivity : MoneroActivity() {
 
             val listener = object : NodeSelectionDialogListenerAdapter(
                 activity = this,
-                nodes = nodes,
             ) {
                 override fun trySelectNode(
                     self: NodeSelectionBottomSheetDialog,
