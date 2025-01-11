@@ -42,6 +42,8 @@ class HomeActivity : MoneroActivity() {
     private lateinit var frozenBalanceTextView: TextView
     private lateinit var lockedBalanceTextView: TextView
 
+    private var isFinishing: Boolean = false
+
     private val transactionInfoAdapter: TransactionInfoAdapter = TransactionInfoAdapter(false, object : TransactionInfoAdapter.Listener {
         override fun onClickTransaction(txInfo: TransactionInfo) {
             val intent = Intent(this@HomeActivity, TransactionActivity::class.java)
@@ -212,15 +214,23 @@ class HomeActivity : MoneroActivity() {
         stop()
     }
 
+    override fun finish() {
+        // When HomeActivity is finishing, we should (once!) start either WalletActivity or StartActivity
+        if (!isFinishing) {
+            isFinishing = true
+            if (PreferenceUtils.isMultiAccountMode(this@HomeActivity)) {
+                startActivity(Intent(this@HomeActivity, WalletActivity::class.java))
+            } else {
+                startActivity(Intent(this@HomeActivity, StartActivity::class.java))
+            }
+        }
+        super.finish()
+    }
+
     private fun stop() {
         Timber.d("Stopping")
         walletService?.closeWallet()
         finish()
-        if (PreferenceUtils.isMultiAccountMode(this@HomeActivity)) {
-            startActivity(Intent(this@HomeActivity, WalletActivity::class.java))
-        } else {
-            startActivity(Intent(this@HomeActivity, StartActivity::class.java))
-        }
     }
 
     private fun displayEmptyHistory(
