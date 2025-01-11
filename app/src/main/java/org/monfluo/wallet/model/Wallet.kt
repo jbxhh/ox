@@ -206,7 +206,7 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     external fun store(path: String?): Boolean
     fun close(): Boolean {
         disposePendingTransaction()
-        return org.monfluo.wallet.model.WalletManager.instance.closeJ(this)
+        return WalletManager.instance.closeJ(this)
     }
 
     external fun getFilename(): String
@@ -469,7 +469,7 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
         external fun isPaymentIdValid(payment_id: String): Boolean
 
         fun isAddressValid(address: String): Boolean {
-            return org.monfluo.wallet.model.WalletManager.instance.networkType.value.let {
+            return WalletManager.instance.networkType.value.let {
                 isAddressValid(
                     address,
                     it

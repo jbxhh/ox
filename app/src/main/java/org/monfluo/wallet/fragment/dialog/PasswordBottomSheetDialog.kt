@@ -10,6 +10,7 @@ import android.widget.ImageButton
 import android.widget.Toast
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.monfluo.wallet.R
+import org.monfluo.wallet.model.WalletManager
 import org.monfluo.wallet.util.Helper.getClipBoardText
 
 class PasswordBottomSheetDialog(
@@ -62,7 +63,7 @@ class PasswordBottomSheetDialog(
     }
 
     private fun checkPassword(walletPassword: String): Boolean {
-        return org.monfluo.wallet.model.WalletManager.instance.verifyWalletPasswordOnly(
+        return WalletManager.instance.verifyWalletPasswordOnly(
             "$walletPath.keys",
             walletPassword
         )

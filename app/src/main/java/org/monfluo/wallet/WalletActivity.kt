@@ -7,6 +7,7 @@ import android.widget.Button
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.fragment.dialog.PasswordBottomSheetDialog
+import org.monfluo.wallet.model.WalletManager
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.acitivity.WalletOpeningActivity
 
@@ -23,7 +24,7 @@ class WalletActivity : WalletOpeningActivity() {
         createWalletButton = findViewById(R.id.create_or_import_wallet)
         walletRecyclerView = findViewById(R.id.wallet_list_recyclerview)
 
-        val walletPaths = org.monfluo.wallet.model.WalletManager.instance.findWallets(Helper.getWalletRoot(this).absolutePath)
+        val walletPaths = WalletManager.instance.findWallets(Helper.getWalletRoot(this).absolutePath)
         adapter = WalletAdapter(walletPaths, object : WalletAdapter.AccountAdapterListener {
             override fun onWalletSelected(walletPath: String) {
                 val passwordDialog = PasswordBottomSheetDialog(walletPath, false, object : PasswordBottomSheetDialog.Listener {

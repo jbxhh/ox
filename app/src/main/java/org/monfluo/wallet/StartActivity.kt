@@ -2,8 +2,8 @@ package org.monfluo.wallet
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.OnBackPressedCallback
 import org.monfluo.wallet.fragment.dialog.PasswordBottomSheetDialog
+import org.monfluo.wallet.model.WalletManager
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
@@ -17,7 +17,7 @@ class StartActivity : WalletOpeningActivity() {
         setVisible(false)
 
         val isMultiWalletMode = PreferenceUtils.isMultiWalletMode(this)
-        val walletPaths = org.monfluo.wallet.model.WalletManager.instance.findWallets(Helper.getWalletRoot(this).absolutePath)
+        val walletPaths = WalletManager.instance.findWallets(Helper.getWalletRoot(this).absolutePath)
         if (walletPaths.isEmpty()) {
             Timber.d("No wallets found, launching onboarding activity")
             val onboardingActivityIntent = Intent(this, OnboardingActivity::class.java)

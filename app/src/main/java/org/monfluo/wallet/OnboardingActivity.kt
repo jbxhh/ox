@@ -27,6 +27,7 @@ import org.monfluo.wallet.fragment.dialog.NodeSelectionBottomSheetDialog
 import org.monfluo.wallet.listener.NodeSelectionDialogListenerAdapter
 import org.monfluo.wallet.livedata.combineLiveDatas
 import org.monfluo.wallet.model.Wallet
+import org.monfluo.wallet.model.WalletManager
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
@@ -83,7 +84,7 @@ class OnboardingActivity : WalletOpeningActivity() {
         val node = PreferenceUtils.getOrSetDefaultNode(this, DefaultNode.defaultNode())
         selectNodeButton.text = getString(R.string.node_button_text, node.name)
 
-        walletNameEditText.setText(Constants.DEFAULT_WALLET_NAME)
+        walletNameEditText.setText(getWalletNameSuggestion())
 
         bindListeners()
         bindObservers()
@@ -260,6 +261,21 @@ class OnboardingActivity : WalletOpeningActivity() {
             )
         }
     }
+
+    private fun getWalletNameSuggestion(): String {
+        val walletRoot = Helper.getWalletRoot(this)
+        if (!WalletManager.instance.walletExists(walletRoot.resolve(Constants.DEFAULT_WALLET_NAME))) {
+            return Constants.DEFAULT_WALLET_NAME
+        }
+        for (i in 2 until Int.MAX_VALUE) {
+            val name = Constants.DEFAULT_WALLET_NAME + i
+            if (!WalletManager.instance.walletExists(walletRoot.resolve(name))) {
+                return name
+            }
+        }
+        Timber.e("User managed to create 2^31-3 wallets, giving up on finding a good wallet name")
+        return Constants.DEFAULT_WALLET_NAME
+    }
 }
 
 internal class OnboardingViewModel : ViewModel() {
@@ -347,7 +363,7 @@ internal class OnboardingViewModel : ViewModel() {
                     }
                     return
                 } else {
-                    org.monfluo.wallet.model.WalletManager.instance.createWalletPolyseed(
+                    WalletManager.instance.createWalletPolyseed(
                         walletFile,
                         passphrase,
                         offset,
@@ -358,7 +374,7 @@ internal class OnboardingViewModel : ViewModel() {
                 val tmpWalletFile =
                     File(activity.applicationInfo.dataDir, walletName + "_tmp")
                 val tmpWallet = createTempWallet(tmpWalletFile) //we do this to get seed, then recover wallet so we can use seed offset
-                wallet = org.monfluo.wallet.model.WalletManager.instance.recoveryWallet(
+                wallet = WalletManager.instance.recoveryWallet(
                     walletFile,
                     passphrase,
                     tmpWallet.getSeed(""),
@@ -383,14 +399,14 @@ internal class OnboardingViewModel : ViewModel() {
                 restoreHeight = restoreHeightText.toLong()
             }
             if (seedTypeValue == SeedType.POLYSEED) {
-                wallet = org.monfluo.wallet.model.WalletManager.instance.recoveryWalletPolyseed(
+                wallet = WalletManager.instance.recoveryWalletPolyseed(
                     walletFile,
                     passphrase,
                     walletSeed,
                     offset
                 )
             } else if (seedTypeValue == SeedType.LEGACY) {
-                wallet = org.monfluo.wallet.model.WalletManager.instance.recoveryWallet(
+                wallet = WalletManager.instance.recoveryWallet(
                     walletFile,
                     passphrase,
                     walletSeed,
@@ -440,7 +456,7 @@ internal class OnboardingViewModel : ViewModel() {
     }
 
     private fun createTempWallet(tmpWalletFile: File): Wallet {
-        return org.monfluo.wallet.model.WalletManager.instance.createWallet(
+        return WalletManager.instance.createWallet(
             tmpWalletFile,
             "",
             Constants.MNEMONIC_LANGUAGE,
