@@ -8,25 +8,19 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.monfluo.wallet.R
 import org.monfluo.wallet.util.Helper.getClipBoardText
-import timber.log.Timber
 
 class PasswordBottomSheetDialog(
     private val walletPath: String,
-    preventGoingBack: Boolean,
+    private val preventGoingBack: Boolean,
     private val listener: Listener,
 ) : BottomSheetDialogFragment() {
 
     private lateinit var passwordEditText: EditText
     private lateinit var unlockButton: Button
     private lateinit var pastePasswordImageButton: ImageButton
-
-    init {
-        isCancelable = !preventGoingBack
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,6 +36,12 @@ class PasswordBottomSheetDialog(
         pastePasswordImageButton = view.findViewById(R.id.paste_password_imagebutton)
 
         bindListeners()
+
+        if (preventGoingBack) {
+            dialog?.setOnDismissListener {
+                requireActivity().finish()
+            }
+        }
     }
 
     private fun bindListeners() {
