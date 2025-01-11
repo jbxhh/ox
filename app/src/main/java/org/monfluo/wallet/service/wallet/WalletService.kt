@@ -208,6 +208,8 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             val newHeight = org.monfluo.wallet.model.WalletManager.instance.getBlockchainHeight()
             if (newHeight > 0) {
                 daemonHeight.set(newHeight)
+            } else {
+                Timber.w("Fetched blockchain height is 0")
             }
             forEachObserver {
                 it.onBlockchainHeightFetched(newHeight)

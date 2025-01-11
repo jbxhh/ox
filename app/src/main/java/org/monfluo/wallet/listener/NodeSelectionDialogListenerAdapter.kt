@@ -11,7 +11,6 @@ import timber.log.Timber
 
 abstract class NodeSelectionDialogListenerAdapter(
     private val activity: FragmentActivity,
-    private var nodes: List<Node>,
 ) : NodeSelectionBottomSheetDialog.NodeSelectionDialogListener {
 
     abstract fun trySelectNode(self: NodeSelectionBottomSheetDialog, node: Node): Boolean
@@ -23,13 +22,15 @@ abstract class NodeSelectionDialogListenerAdapter(
     }
 
     final override fun onEditNode(self: NodeSelectionBottomSheetDialog, node: Node) {
+        val nodeSelectionBottomSheetDialog = self
         val listener = object : EditNodeBottomSheetDialog.EditNodeListener {
             override fun onDeleteNode(self: EditNodeBottomSheetDialog, node: Node) {
-                val newNodes = nodes.toMutableList()
+                val newNodes = nodeSelectionBottomSheetDialog.getNodes().toMutableList()
                 newNodes.remove(node)
                 PreferenceUtils.setNodes(activity, newNodes).fold(
                     {
                         Toast.makeText(activity, "Node delete", Toast.LENGTH_SHORT).show()
+                        nodeSelectionBottomSheetDialog.setNodes(newNodes)
                         self.dismiss()
                     },
                     {
@@ -44,10 +45,11 @@ abstract class NodeSelectionDialogListenerAdapter(
                 oldNode: Node,
                 newNode: Node,
             ) {
-                val newNodes = nodes.map { node -> if (node != oldNode) node else newNode }
+                val newNodes = nodeSelectionBottomSheetDialog.getNodes().map { node -> if (node != oldNode) node else newNode }
                 PreferenceUtils.setNodes(activity, newNodes).fold(
                     {
                         Toast.makeText(activity, "Node saved", Toast.LENGTH_SHORT).show()
+                        nodeSelectionBottomSheetDialog.setNodes(newNodes)
                         self.dismiss()
                     },
                     {
@@ -67,6 +69,7 @@ abstract class NodeSelectionDialogListenerAdapter(
         val nodeSelectionBottomSheetDialog = self
         val addNodeDialog = AddNodeBottomSheetDialog(object : AddNodeBottomSheetDialog.AddNodeListener {
             override fun onAddNode(self: AddNodeBottomSheetDialog, node: Node) {
+                val nodes = nodeSelectionBottomSheetDialog.getNodes()
                 if (nodes.any { it.name == node.name }) {
                     Timber.i("Failed to add nodes due to node with the same name already existing")
                     Toast.makeText(activity, "Node with this name already exists", Toast.LENGTH_SHORT).show()
@@ -75,8 +78,8 @@ abstract class NodeSelectionDialogListenerAdapter(
                     newNodes.add(node)
                     PreferenceUtils.setNodes(activity, newNodes).fold(
                         {
-                            nodeSelectionBottomSheetDialog.setNodes(newNodes)
                             Timber.i("New node ${node.name} added successfully")
+                            nodeSelectionBottomSheetDialog.setNodes(newNodes)
                             Toast.makeText(activity, "Node added", Toast.LENGTH_SHORT).show()
                             self.dismiss()
                         },

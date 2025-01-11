@@ -33,7 +33,7 @@ class EditNodeBottomSheetDialog(val listener: EditNodeListener, val node: Node) 
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.bottom_sheet_dialog_edit_node, null)
+        return inflater.inflate(R.layout.bottom_sheet_dialog_edit_node, container)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -84,7 +84,7 @@ class EditNodeBottomSheetDialog(val listener: EditNodeListener, val node: Node) 
 
         doneEditingButton.setOnClickListener {
             val name = nodeNameEditText.text.toString()
-            var address = addressEditText.text.toString()
+            val address = addressEditText.text.toString()
             val username = usernameEditText.text.toString().ifBlank { null }
             val password = passwordEditText.text.toString().ifBlank { null }
             val trusted = trustedDaemonCheckbox.isChecked

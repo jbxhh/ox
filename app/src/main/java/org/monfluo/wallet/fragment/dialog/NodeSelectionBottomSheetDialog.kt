@@ -28,7 +28,7 @@ class NodeSelectionBottomSheetDialog(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.bottom_sheet_dialog_node_selection, null)
+        return inflater.inflate(R.layout.bottom_sheet_dialog_node_selection, container)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -51,6 +51,8 @@ class NodeSelectionBottomSheetDialog(
             listener.onAddNode(this)
         }
     }
+
+    fun getNodes(): List<Node> = nodes
 
     fun setNodes(nodes: List<Node>) {
         this.nodes = nodes
