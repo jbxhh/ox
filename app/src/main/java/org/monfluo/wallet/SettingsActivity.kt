@@ -158,13 +158,15 @@ class SettingsActivity : MoneroActivity() {
         }
 
         displaySeedButton.setOnClickListener {
-            val passwordDialog = PasswordBottomSheetDialog(walletService!!.getWalletOrThrow().info.path, false, object : PasswordBottomSheetDialog.Listener {
-                override fun onCorrectPasswordSubmitted(self: PasswordBottomSheetDialog, password: String) {
-                    self.dismiss()
-                    displaySeedDialog()
-                }
-            })
-            passwordDialog.show(supportFragmentManager, "password_dialog")
+            walletService?.getWallet()?.let { wallet ->
+                val passwordDialog = PasswordBottomSheetDialog(wallet.info.path, false, object : PasswordBottomSheetDialog.Listener {
+                    override fun onCorrectPasswordSubmitted(self: PasswordBottomSheetDialog, password: String) {
+                        self.dismiss()
+                        displaySeedDialog()
+                    }
+                })
+                passwordDialog.show(supportFragmentManager, "password_dialog")
+            }
         }
 
         displayEnotesButton.setOnClickListener {
@@ -229,12 +231,16 @@ class SettingsActivity : MoneroActivity() {
     }
 
     private fun displaySeedDialog() {
-        val wallet = walletService!!.getWalletOrThrow()
-        val privateViewKey = wallet.getSecretViewKey()
-        val restoreHeight = wallet.getRestoreHeight()
+        val wallet = walletService!!.getWallet()
+        if (wallet != null) {
+            val privateViewKey = wallet.getSecretViewKey()
+            val restoreHeight = wallet.getRestoreHeight()
 
-        val informationDialog = WalletKeysBottomSheetDialog(wallet, privateViewKey, restoreHeight)
-        informationDialog.show(supportFragmentManager, "information_seed_dialog")
+            val informationDialog = WalletKeysBottomSheetDialog(wallet, privateViewKey, restoreHeight)
+            informationDialog.show(supportFragmentManager, "information_seed_dialog")
+        } else {
+            Toast.makeText(this, "Wallet is not opened yet", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onProxyUpdated(proxy: String, success: Boolean) {
