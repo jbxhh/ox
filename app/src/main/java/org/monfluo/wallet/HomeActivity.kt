@@ -203,7 +203,9 @@ class HomeActivity : MoneroActivity() {
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
-        updateState(walletService, walletService.getWallet())
+        val wallet = walletService.getWallet()
+        updateHeights(walletService, wallet)
+        updateState(wallet)
     }
 
     override fun onWalletServiceDisconnected() {
@@ -246,9 +248,11 @@ class HomeActivity : MoneroActivity() {
     }
 
     override fun onWalletUpdated(wallet: Wallet) {
-        runOnUiThread {
-            updateState(walletService!!, wallet)
-        }
+        updateState(wallet)
+    }
+
+    override fun onNewBlock(wallet: Wallet) {
+        updateHeights(walletService!!, wallet)
     }
 
     override fun onBlockchainHeightFetched(height: Long) {
@@ -256,15 +260,14 @@ class HomeActivity : MoneroActivity() {
         updateHeights(walletService, walletService.getWallet())
     }
 
-    private fun updateState(walletService: WalletService, wallet: Wallet?) {
-        viewModel.setWalletConnected(wallet != null)
-        updateHeights(walletService, wallet)
-        viewModel.setBalance(wallet?.getBalance())
-        viewModel.setTransactions(wallet?.getHistory())
-    }
-
     private fun updateHeights(walletService: WalletService, wallet: Wallet?) {
         viewModel.setHeights(Heights(walletService.getWalletBeginSyncHeight(), wallet?.getBlockChainHeightJ() ?: 0, walletService.getDaemonHeight()))
+    }
+
+    private fun updateState(wallet: Wallet?) {
+        viewModel.setWalletConnected(wallet != null)
+        viewModel.setBalance(wallet?.getBalance())
+        viewModel.setTransactions(wallet?.getHistory())
     }
 }
 
