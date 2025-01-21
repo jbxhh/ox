@@ -399,15 +399,19 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
     }
 
     override fun moneySpent(txId: String?, amount: Long) {
-        Timber.d("Money spent callback")
+        Timber.d("Money spent callback with txId $txId and amount $amount")
     }
 
     override fun moneyReceived(txId: String?, amount: Long) {
-        Timber.d("Money received callback")
+        Timber.d("Money received callback txId $txId and amount $amount")
     }
 
     override fun unconfirmedMoneyReceived(txId: String?, amount: Long) {
-        Timber.d("Unconfirmed money received callback")
+        Timber.d("Unconfirmed money received callback txId $txId and amount $amount")
+    }
+
+    override fun updated() {
+        Timber.d("Updated callback")
     }
 
     override fun newBlock(height: Long, last: Boolean) {
@@ -422,17 +426,13 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         }
     }
 
-    override fun updated() {
-        Timber.d("Updated callback")
-        updateWallet(getWalletOrThrow())
-    }
-
     override fun refreshed() {
         Timber.d("Refreshed callback")
         if (daemonHeight.get() <= 1) {
             Timber.d("Fetching blockchain height")
             fetchBlockchainHeight()
         }
+        updateWallet(getWalletOrThrow())
     }
 
     fun addObserver(observer: WalletServiceObserver) {

@@ -89,31 +89,14 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     fun getHistory(): List<TransactionInfo> = getHistories()[accountIndex] ?: listOf()
 
     private fun calculateBalances(enotes: List<Enote>): Map<Int, Balance> {
-        val addressToAccount = mutableMapOf<String, Int>()
-        for (accountIndex in 0 until getNumAccounts()) {
-            for (addressIndex in 0 until getNumSubaddresses(accountIndex)) {
-                addressToAccount[getSubaddress(accountIndex, addressIndex)] = accountIndex
-            }
+        return (0 until getNumAccounts()).associateWith { account ->
+            val totalBalance = getBalance(account)
+            val unlockedBalance = getUnlockedBalance(account)
+            val pendingBalance = totalBalance - unlockedBalance
+            val addresses = (0 until getNumSubaddresses(account)).map { getSubaddress(it) }.toSet()
+            val frozenBalance = enotes.filter { it.isFrozen && it.address?.let { address -> addresses.contains(address) } ?: false }.sumOf { it.amount }
+            Balance(totalBalance, unlockedBalance, frozenBalance, pendingBalance)
         }
-
-        val accountToBalance = mutableMapOf<Int, Balance>()
-
-        enotes.filter { !it.isSpent }.forEach { enote ->
-            enote.address?.let { address -> addressToAccount[address] }?.let { account ->
-                val balance = accountToBalance.getOrDefault(account, Balance(0, 0, 0, 0))
-                balance.total += enote.amount
-                if (enote.isFrozen) {
-                    balance.frozen += enote.amount
-                } else if (enote.isUnlocked) {
-                    balance.unlocked += enote.amount
-                } else {
-                    balance.pending += enote.amount
-                }
-                accountToBalance[account] = balance
-            }
-        }
-
-        return accountToBalance
     }
 
 
