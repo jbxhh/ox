@@ -110,6 +110,12 @@ class ReceiveActivity : MoneroActivity() {
         viewModel.refreshSubaddresses(wallet, qrCodeBackgroundColor())
     }
 
+    override fun onSubaddressesUpdated() {
+        walletService?.getWallet()?.let { wallet ->
+            viewModel.refreshSubaddresses(wallet, qrCodeBackgroundColor())
+        }
+    }
+
     private fun qrCodeBackgroundColor(): Int = ContextCompat.getColor(this, R.color.oled_colorBackground)
 
     private fun editAddressLabel(subaddress: Subaddress) {
