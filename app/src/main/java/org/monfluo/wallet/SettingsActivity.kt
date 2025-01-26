@@ -17,7 +17,7 @@ import org.monfluo.wallet.data.Node
 import org.monfluo.wallet.fragment.dialog.EditAccountLabelBottomSheetDialog
 import org.monfluo.wallet.fragment.dialog.NodeSelectionBottomSheetDialog
 import org.monfluo.wallet.fragment.dialog.PasswordBottomSheetDialog
-import org.monfluo.wallet.fragment.dialog.WalletKeysBottomSheetDialog
+import org.monfluo.wallet.fragment.dialog.WalletSecretsBottomSheetDialog
 import org.monfluo.wallet.listener.NodeSelectionDialogListenerAdapter
 import org.monfluo.wallet.model.Account
 import org.monfluo.wallet.model.Balance
@@ -34,6 +34,7 @@ class SettingsActivity : MoneroActivity() {
     private lateinit var multiAccountModeSwitch: SwitchCompat
     private lateinit var streetModeSwitch: SwitchCompat
     private lateinit var allowFeeOverrideSwitch: SwitchCompat
+    private lateinit var allowCopyingSecretsToClipboardSwitch: SwitchCompat
     private lateinit var displaySeedButton: Button
     private lateinit var displayEnotesButton: Button
     private lateinit var proxySwitch: SwitchCompat
@@ -49,13 +50,14 @@ class SettingsActivity : MoneroActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        displaySeedButton = findViewById(R.id.display_seed_button)
+        displaySeedButton = findViewById(R.id.display_wallet_secrets_button)
         displayEnotesButton = findViewById(R.id.display_utxos_button)
         selectNodeButton = findViewById(R.id.select_node_button)
         multiWalletModeSwitch = findViewById(R.id.enable_multiple_wallets_switch)
         multiAccountModeSwitch = findViewById(R.id.enable_multiple_accounts_switch)
         streetModeSwitch = findViewById(R.id.street_mode_switch)
         allowFeeOverrideSwitch = findViewById(R.id.allow_fee_override_switch)
+        allowCopyingSecretsToClipboardSwitch = findViewById(R.id.allow_copying_secrets_to_clipboard_switch)
         proxySwitch = findViewById(R.id.proxy_switch)
         proxySettingsLayout = findViewById(R.id.wallet_proxy_settings_layout)
         walletProxyAddressEditText = findViewById(R.id.wallet_proxy_address_edittext)
@@ -68,6 +70,7 @@ class SettingsActivity : MoneroActivity() {
         val isMultiAccountMode = PreferenceUtils.isMultiAccountMode(applicationContext)
         val isStreetMode = PreferenceUtils.isStreetMode(applicationContext)
         val isAllowFeeOverride = PreferenceUtils.isAllowFeeOverride(applicationContext)
+        val isAllowCopyingSecrets = PreferenceUtils.isAllowCopyingSecrets(applicationContext)
         val isUseProxy = PreferenceUtils.isUseProxy(applicationContext)
 
         accountAdapter = AccountAdapter(emptyList(), null, isStreetMode, object : AccountAdapter.AccountAdapterListener {
@@ -93,6 +96,7 @@ class SettingsActivity : MoneroActivity() {
         multiAccountModeSwitch.isChecked = isMultiAccountMode
         streetModeSwitch.isChecked = isStreetMode
         allowFeeOverrideSwitch.isChecked = isAllowFeeOverride
+        allowCopyingSecretsToClipboardSwitch.isChecked = isAllowCopyingSecrets
         proxySwitch.isChecked = isUseProxy
 
         walletProxyAddressEditText.setText(PreferenceUtils.getProxy(this) ?: "")
@@ -120,6 +124,9 @@ class SettingsActivity : MoneroActivity() {
         }
         allowFeeOverrideSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
             PreferenceUtils.setAllowFeeOverride(applicationContext, b)
+        }
+        allowCopyingSecretsToClipboardSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PreferenceUtils.setAllowCopyingSecrets(applicationContext, b)
         }
         proxySwitch.setOnCheckedChangeListener { _, b: Boolean ->
             PreferenceUtils.setUseProxy(applicationContext, b)
@@ -233,10 +240,7 @@ class SettingsActivity : MoneroActivity() {
     private fun displaySeedDialog() {
         val wallet = walletService!!.getWallet()
         if (wallet != null) {
-            val privateViewKey = wallet.getSecretViewKey()
-            val restoreHeight = wallet.getRestoreHeight()
-
-            val informationDialog = WalletKeysBottomSheetDialog(wallet, privateViewKey, restoreHeight)
+            val informationDialog = WalletSecretsBottomSheetDialog(wallet)
             informationDialog.show(supportFragmentManager, "information_seed_dialog")
         } else {
             Toast.makeText(this, "Wallet is not opened yet", Toast.LENGTH_SHORT).show()

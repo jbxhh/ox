@@ -28,7 +28,7 @@ class PasswordBottomSheetDialog(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.activity_password, container)
+        return inflater.inflate(R.layout.bottom_sheet_dialog_password, container)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

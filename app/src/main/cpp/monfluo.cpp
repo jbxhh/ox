@@ -56,7 +56,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
     class_ArrayList = static_cast<jclass>(jenv->NewGlobalRef(
             jenv->FindClass("java/util/ArrayList")));
     class_Pair = static_cast<jclass>(jenv->NewGlobalRef(
-            jenv->FindClass("android/util/Pair")));
+            jenv->FindClass("kotlin/Pair")));
     class_TransactionInfo = static_cast<jclass>(jenv->NewGlobalRef(
             jenv->FindClass("org/monfluo/wallet/model/TransactionInfo")));
     class_Transfer = static_cast<jclass>(jenv->NewGlobalRef(
@@ -351,6 +351,14 @@ jobject cpp2java(JNIEnv *env, const std::vector<std::string> &vector) {
         env->CallBooleanMethod(result, java_util_ArrayList_add, element);
         env->DeleteLocalRef(element);
     }
+    return result;
+}
+
+jobject create_java_pair(JNIEnv *env, const jobject first, const jobject second) {
+    jmethodID java_pair_constructor = env->GetMethodID(class_Pair, "<init>", "(Ljava/lang/Object;Ljava/lang/Object;)V");
+
+    jobject result = env->NewObject(class_Pair, java_pair_constructor, first, second);
+
     return result;
 }
 
@@ -788,19 +796,32 @@ Java_org_monfluo_wallet_model_Wallet_getLegacySeed(JNIEnv *env, jobject instance
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_Wallet_isPolyseedSupported(JNIEnv *env, jobject instance,
-                                                        jstring seedOffset) {
-    const char *_seedOffset = env->GetStringUTFChars(seedOffset, nullptr);
+Java_org_monfluo_wallet_model_Wallet_isPolyseedSupported(JNIEnv *env, jobject instance) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
 
-    std::string _seed;
-    std::string seedOffsetStr(_seedOffset);
-    bool _getPolyseed = wallet->getPolyseed(_seed, seedOffsetStr);
+    std::string seed;
+    std::string passphrase;
+    bool isPolyseed = wallet->getPolyseed(seed, passphrase);
 
-    env->ReleaseStringUTFChars(seedOffset, _seedOffset);
-    return _getPolyseed;
+    return isPolyseed;
 }
 
+JNIEXPORT jobject JNICALL
+Java_org_monfluo_wallet_model_Wallet_getPolyseedSeedAndPassphrase(JNIEnv *env, jobject instance) {
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+
+    std::string seed;
+    std::string passphrase;
+    bool isPolyseed = wallet->getPolyseed(seed, passphrase);
+
+    if (isPolyseed) {
+        jstring java_seed = env->NewStringUTF(seed.c_str());
+        jstring java_passphrase = env->NewStringUTF(passphrase.c_str());
+        return create_java_pair(env, java_seed, java_passphrase);
+    } else {
+        return nullptr;
+    }
+}
 
 JNIEXPORT jstring JNICALL
 Java_org_monfluo_wallet_model_Wallet_getSeedLanguage(JNIEnv *env, jobject instance) {
@@ -895,9 +916,21 @@ Java_org_monfluo_wallet_model_Wallet_getSecretViewKey(JNIEnv *env, jobject insta
 }
 
 JNIEXPORT jstring JNICALL
+Java_org_monfluo_wallet_model_Wallet_getPublicViewKey(JNIEnv *env, jobject instance) {
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+    return env->NewStringUTF(wallet->publicViewKey().c_str());
+}
+
+JNIEXPORT jstring JNICALL
 Java_org_monfluo_wallet_model_Wallet_getSecretSpendKey(JNIEnv *env, jobject instance) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     return env->NewStringUTF(wallet->secretSpendKey().c_str());
+}
+
+JNIEXPORT jstring JNICALL
+Java_org_monfluo_wallet_model_Wallet_getPublicSpendKey(JNIEnv *env, jobject instance) {
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+    return env->NewStringUTF(wallet->publicSpendKey().c_str());
 }
 
 JNIEXPORT jboolean JNICALL

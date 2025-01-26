@@ -16,7 +16,6 @@
 package org.monfluo.wallet.model
 
 import android.util.Log
-import android.util.Pair
 import org.monfluo.wallet.data.Subaddress
 import org.monfluo.wallet.util.TransactionDestination
 import java.io.File
@@ -108,7 +107,8 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
 
     external fun getSeed(offset: String): String
     external fun getLegacySeed(offset: String?): String?
-    external fun isPolyseedSupported(offset: String?): Boolean
+    external fun isPolyseedSupported(): Boolean
+    external fun getPolyseedSeedAndPassphrase(): Pair<String, String>?
     external fun getSeedLanguage(): String?
 
     val status: Status
@@ -177,7 +177,9 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     //    virtual void setRefreshFromBlockHeight(uint64_t refresh_from_block_height) = 0;
     external fun getIntegratedAddress(paymentId: String?): String?
     external fun getSecretViewKey(): String
+    external fun getPublicViewKey(): String
     external fun getSecretSpendKey(): String
+    external fun getPublicSpendKey(): String
 
     fun store(): Boolean {
         return store("")

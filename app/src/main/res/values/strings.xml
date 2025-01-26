@@ -36,7 +36,7 @@
     <string name="street_mode">Street mode (hide balances)</string>
     <string name="option_hide_xmrchan">Show Monerochan</string>
     <string name="option_allow_fee_override">Manual fee selection</string>
-    <string name="display_recovery_phrase">Display wallet keys</string>
+    <string name="display_wallet_secrets">Display wallet secrets</string>
     <string name="add_account">Add account</string>
     <string name="tor_switch_label">SOCKS Proxy</string>
     <string name="connection_failed">Failed to connect. Retrying…</string>
@@ -113,7 +113,7 @@
     <string name="churn">Churn</string>
     <string name="freeze">Freeze</string>
     <string name="unfreeze">Unfreeze</string>
-    <string name="wallet_keys_label">Wallet Keys</string>
+    <string name="wallet_secrets_label">Wallet secrets</string>
     <string name="done">Done</string>
     <string name="delete">Delete</string>
     <string name="cant_edit_current_node">Cannot edit current node.</string>
@@ -121,10 +121,13 @@
     <string name="edit_node">Edit Node</string>
     <string name="wallet_seed_label">Recovery seed</string>
     <string name="wallet_seed_desc">Anyone with your recovery seed can spend ALL coins in this wallet!</string>
-    <string name="wallet_seed_offset_desc">Your wallet seed passphrase (sometimes called a seed offset) is the passphrase you use to unlock the wallet in this app. It will not be displayed here, but it is needed to FULLY restore the keys to this wallet.</string>
-    <string name="wallet_viewkey_label">Private view-key</string>
+    <string name="wallet_seed_offset_legacy_seed_desc">The seed offset passphrase will be required to correctly restore this wallet.</string>
+    <string name="wallet_seed_offset_polyseed_desc">Your seed offset passphrase is required to restore this wallet.</string>
+    <string name="copy_secrets_warning">Copying the secrets of your wallet to clipboard is dangerous because other apps on your device can view the clipboard and steal them</string>
+    <string name="wallet_keys_label">Keys</string>
     <string name="wallet_viewkey_desc">Anyone with your private view-key can see all incoming transactions!</string>
     <string name="wallet_restore_height_label">Restore height</string>
+    <string name="wallet_address">Wallet address</string>
     <string name="use_password_as_seed_offset">Use passphrase as seed offset</string>
     <string name="trusted_daemon">Trusted daemon</string>
     <string name="subbaddress_info_subtitle" translatable="false">#%1$d: %2$s</string>
@@ -141,8 +144,15 @@
     <string name="display_advanced_wallet_creation_options">Display advanced wallet creation options</string>
     <string name="generate_fresh_wallet_address">Generate fresh wallet address</string>
     <string name="copy_selected_wallet_address">Copy selected wallet address</string>
+    <string name="copy_seed">Copy wallet\'s seed</string>
+    <string name="copy_polyseed_offset_passphrase">Copy wallet\'s polyseed offset passphrase</string>
     <string name="add_recipient_to_transaction">Add recipient to transaction</string>
+    <string name="copy_restore_height">Copy wallet\'s restore height</string>
+    <string name="copy_wallet_s_address">Copy wallet\'s address</string>
     <string name="copy_wallet_s_private_view_key">Copy wallet\'s private view-key</string>
+    <string name="copy_wallet_s_public_view_key">Copy wallet\'s public view-key</string>
+    <string name="copy_wallet_s_private_spend_key">Copy wallet\'s private spend-key</string>
+    <string name="copy_wallet_s_public_spend_key">Copy wallet\'s public spend-key</string>
     <string name="paste_clipboard_into_amount_field">Paste clipboard into amount field</string>
     <string name="paste_clipboard_into_address_field">Paste clipboard into address field</string>
     <string name="remove_recipient_from_transaction">Remove recipient from transaction</string>
