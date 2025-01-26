@@ -38,14 +38,14 @@
             app:layout_constraintTop_toBottomOf="@id/settings_textview" />
 
         <Button
-            android:id="@+id/display_seed_button"
+            android:id="@+id/display_wallet_secrets_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="24dp"
             android:background="@drawable/button_bg"
-            android:text="@string/display_recovery_phrase"
+            android:text="@string/display_wallet_secrets"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
@@ -63,7 +63,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/display_seed_button" />
+            app:layout_constraintTop_toBottomOf="@id/display_wallet_secrets_button" />
 
         <Button
             android:id="@+id/save_proxy_button"
@@ -184,6 +184,29 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/street_mode_switch" />
 
+        <TextView
+            android:id="@+id/allow_copying_secrets_to_clipboard_textview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:text="Allow copying secrets to clipboard"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@id/allow_copying_secrets_to_clipboard_switch"
+            app:layout_constraintEnd_toStartOf="@id/allow_copying_secrets_to_clipboard_switch"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/allow_copying_secrets_to_clipboard_switch" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/allow_copying_secrets_to_clipboard_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/allow_fee_override_switch" />
+
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/wallet_account_settings_layout"
@@ -193,7 +216,7 @@
             tools:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/allow_fee_override_switch">
+            app:layout_constraintTop_toBottomOf="@+id/allow_copying_secrets_to_clipboard_switch">
 
             <TextView
                 android:id="@+id/account_settings_textview"

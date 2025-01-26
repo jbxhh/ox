@@ -42,6 +42,10 @@ object PreferenceUtils {
 
     fun setAllowFeeOverride(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_ALLOW_FEE_OVERRIDE, value)
 
+    fun isAllowCopyingSecrets(context: Context): Boolean = getBoolean(context, Constants.PREF_ALLOW_COPYING_SECRETS, false)
+
+    fun setAllowCopyingSecrets(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_ALLOW_COPYING_SECRETS, value)
+
     fun getProxy(context: Context): String? = getString(context, Constants.PREF_PROXY)
 
     fun setProxy(context: Context, value: String) = setString(context, Constants.PREF_PROXY, value)
