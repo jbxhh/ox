@@ -17,14 +17,14 @@ package org.monfluo.wallet.data
 
 import java.util.regex.Pattern
 
-class Subaddress(
-    private val accountIndex: Int,
+data class Subaddress(
+    val accountIndex: Int,
     val addressIndex: Int,
     val address: String,
-    val label: String
+    val label: String,
+    val used: Boolean = false,
+    val totalBalance: Long = 0L,
 ) : Comparable<Subaddress> {
-    var amount: Long = 0
-
     override fun compareTo(other: Subaddress): Int { // newer is <
         val compareAccountIndex = other.accountIndex - accountIndex
         return if (compareAccountIndex == 0) other.addressIndex - addressIndex else compareAccountIndex

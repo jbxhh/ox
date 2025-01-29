@@ -63,7 +63,7 @@ class SubaddressAdapter(
         fun onSubaddressEditLabel(subaddress: Subaddress)
     }
 
-    class ViewHolder(view: View, val listener: SubaddressAdapterListener) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(val view: View, val listener: SubaddressAdapterListener) : RecyclerView.ViewHolder(view) {
 
         private lateinit var addressTextView: TextView
         private lateinit var addressLabelTextView: TextView
@@ -86,7 +86,12 @@ class SubaddressAdapter(
                 subaddress.addressIndex, subaddress.squashedAddress
             )
             addressLabelTextView.text = label.ifEmpty { address }
-            val amount = subaddress.amount
+            val amount = subaddress.totalBalance
+            if (subaddress.used) {
+                addressTextView.setTextColor(view.resources.getColor(R.color.oled_addressListColor))
+            } else {
+                addressTextView.setTextColor(view.resources.getColor(R.color.oled_colorPrimaryVariant))
+            }
             if (amount > 0) {
                 if (streetMode) {
                     addressAmountTextView.text = itemView.context.getString(
