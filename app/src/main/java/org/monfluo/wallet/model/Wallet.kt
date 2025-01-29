@@ -155,17 +155,17 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
 
     fun getSubaddressObject(subAddressIndex: Int): Subaddress {
         val subaddress = getSubaddressObject(accountIndex, subAddressIndex)
-        var amount: Long = 0
-//        history?.let { history ->
-//            for (info in history.all) {
-//                if (info.addressIndex == subAddressIndex && info.direction == TransactionInfo.Direction.Direction_In) {
-//                    amount += info.amount
-//                }
-//            }
-//        }
-//
-        subaddress.amount = amount
-        return subaddress
+        var used = false
+        var totalBalance = 0L
+        for (enote in getEnotes()) {
+            if (enote.address == subaddress.address) {
+                used = true
+                if (!enote.isSpent) {
+                    totalBalance += enote.amount
+                }
+            }
+        }
+        return subaddress.copy(used = used, totalBalance = totalBalance)
     }
 
     external fun getPath(): String?
