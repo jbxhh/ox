@@ -16,7 +16,6 @@
         android:paddingBottom="4dp"
         android:singleLine="true"
         android:text="Address"
-        android:textColor="@color/oled_addressListColor"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/address_label_textview"
