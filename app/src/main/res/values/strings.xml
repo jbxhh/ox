@@ -29,6 +29,7 @@
     <string name="error_sending_tx">Error sending transaction</string>
     <string name="error_creating_tx">Error creating: %1$s</string>
     <string name="create_wallet">Create wallet</string>
+    <string name="restore_wallet">Restore wallet</string>
     <string name="invalid_mnemonic_code">Invalid mnemonic</string>
     <string name="invalid_empty_passphrase">Please enter a passphrase</string>
     <string name="invalid_confirmed_password">Passphrases do not match</string>
@@ -51,9 +52,9 @@
     <string name="recovery_phrase_optional_legacy">Recovery seed (legacy)</string>
     <string name="recovery_phrase_optional_polyseed">Recovery seed (polyseed)</string>
     <string name="restore_height_optional">Restore height (optional)</string>
-    <string name="password_optional">Passphrase (optional)</string>
-    <string name="password_non_optional">Passphrase (seed offset; required)</string>
-    <string name="password_confirm">Confirm passphrase</string>
+    <string name="wallet_password_hint">Wallet password (optional)</string>
+    <string name="wallet_password_confirm_hint">Confirm wallet password</string>
+    <string name="wallet_seed_offset_passphrase">Seed offset passphrase (optional)</string>
     <string name="password">Passphrase</string>
     <string name="label">Label</string>
     <string name="unlock">Unlock</string>

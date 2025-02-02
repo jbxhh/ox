@@ -49,7 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:background="@drawable/edittext_bg"
-            android:hint="@string/password_non_optional"
+            android:hint="@string/wallet_password_hint"
             android:inputType="textPassword"
             android:minHeight="48dp"
             app:layout_constraintBottom_toTopOf="@id/wallet_password_confirm_edittext"
@@ -64,7 +64,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:background="@drawable/edittext_bg"
-            android:hint="@string/password_confirm"
+            android:hint="@string/wallet_password_confirm_hint"
             android:inputType="textPassword"
             android:minHeight="48dp"
             android:visibility="gone"
@@ -111,38 +111,20 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/advanced_settings_dropdown_textview">
 
-            <Button
-                android:id="@+id/select_node_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/button_bg"
-                android:ellipsize="middle"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:singleLine="true"
-                app:layout_constraintBottom_toTopOf="@id/wallet_seed_layout"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                tools:ignore="SpeakableTextPresentCheck"
-                tools:text="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" />
-
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/wallet_seed_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/card"
-                app:layout_constraintBottom_toTopOf="@id/wallet_proxy_layout"
-                app:layout_constraintTop_toBottomOf="@id/select_node_button">
+                app:layout_constraintTop_toTopOf="parent">
 
                 <Button
                     android:id="@+id/seed_type_button"
                     android:layout_width="wrap_content"
                     android:layout_height="32dp"
                     android:background="@drawable/button_bg_small"
-                    android:text="POLYSEED"
+                    android:text="MONERO"
                     android:textSize="12sp"
                     app:layout_constraintBottom_toTopOf="@id/seed_type_desc_textview"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -152,7 +134,7 @@
                     android:id="@+id/seed_type_label_textview"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Seed version"
+                    android:text="Seed type"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="@id/seed_type_button"
                     app:layout_constraintEnd_toStartOf="@id/seed_type_button"
@@ -165,7 +147,7 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="8dp"
                     android:paddingBottom="16dp"
-                    android:text="16 words instead of 25; just as secure."
+                    android:text="SEED TYPE DESCRIPTION"
                     app:layout_constraintBottom_toTopOf="@id/wallet_seed_edittext"
                     app:layout_constraintTop_toBottomOf="@id/seed_type_button" />
 
@@ -191,24 +173,39 @@
                     android:inputType="number"
                     android:minHeight="48dp"
                     android:visibility="gone"
-                    app:layout_constraintBottom_toTopOf="@id/seed_offset_checkbox"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/wallet_seed_edittext"
                     tools:visibility="visible" />
 
-                <CheckBox
-                    android:id="@+id/seed_offset_checkbox"
-                    android:layout_width="match_parent"
+                <EditText
+                    android:id="@+id/wallet_seed_offset_passphrase_edittext"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/edittext_bg"
+                    android:hint="@string/wallet_seed_offset_passphrase"
                     android:minHeight="48dp"
-                    android:text="@string/use_password_as_seed_offset"
-                    android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/wallet_restore_height_edittext"
-                    tools:visibility="visible" />
+                    app:layout_constraintTop_toBottomOf="@id/wallet_restore_height_edittext" />
             </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <Button
+                android:id="@+id/select_node_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/button_bg"
+                android:ellipsize="middle"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:singleLine="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/wallet_seed_layout"
+                app:layout_constraintHorizontal_bias="0.0"
+                tools:ignore="SpeakableTextPresentCheck"
+                tools:text="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/wallet_proxy_layout"
@@ -216,7 +213,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/card_no_top"
-                app:layout_constraintTop_toBottomOf="@id/wallet_seed_layout">
+                app:layout_constraintTop_toBottomOf="@id/select_node_button">
 
                 <TextView
                     android:id="@+id/tor_onboarding_switch_label"

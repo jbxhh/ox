@@ -105,8 +105,8 @@ class WalletSecretsBottomSheetDialog(
     private fun bindListeners() {
         seedTypeButton.setOnClickListener {
             val newSeedType = when (viewModel.seedType.value!!) {
-                SeedType.LEGACY -> SeedType.POLYSEED
-                SeedType.POLYSEED -> SeedType.LEGACY
+                SeedType.MONERO -> SeedType.POLYSEED
+                SeedType.POLYSEED -> SeedType.MONERO
             }
             viewModel.setSeedType(newSeedType)
         }
@@ -165,7 +165,7 @@ class WalletSecretsBottomSheetDialog(
             seedTypeButton.isEnabled = isPolyseed
         }
         viewModel.seedTypeAndUseLegacySeedOffsetPassphrase.observe(this) { (seedType, useLegacySeedOffsetPassphrase) ->
-            if (seedType == SeedType.LEGACY && useLegacySeedOffsetPassphrase) {
+            if (seedType == SeedType.MONERO && useLegacySeedOffsetPassphrase) {
                 legacySeedOffsetPassphraseDescriptionLabelTextView.visibility = View.VISIBLE
                 legacySeedOffsetPassphraseEditText.visibility = View.VISIBLE
             } else {
@@ -173,10 +173,10 @@ class WalletSecretsBottomSheetDialog(
                 legacySeedOffsetPassphraseEditText.visibility = View.GONE
             }
         }
-        viewModel.seedType.observe(this) { seedType ->
+        viewModel.seedTypeAndPolyseedSeedOffsetPassphrase.observe(this) { (seedType, polyseedOffsetPassphrase) ->
             seedTypeButton.text = seedType.name
             when (seedType) {
-                SeedType.LEGACY -> {
+                SeedType.MONERO -> {
                     legacySeedApplySeedOffsetPassphraseTextView.visibility = View.VISIBLE
                     legacySeedApplySeedOffsetPassphraseSwitch.visibility = View.VISIBLE
 
@@ -187,8 +187,13 @@ class WalletSecretsBottomSheetDialog(
                     legacySeedApplySeedOffsetPassphraseTextView.visibility = View.GONE
                     legacySeedApplySeedOffsetPassphraseSwitch.visibility = View.GONE
 
-                    polyseedOffsetPassphraseDescriptionLabelTextView.visibility = View.VISIBLE
-                    polyseedOffsetPassphraseLayout.visibility = View.VISIBLE
+                    if (polyseedOffsetPassphrase.isNotEmpty()) {
+                        polyseedOffsetPassphraseDescriptionLabelTextView.visibility = View.VISIBLE
+                        polyseedOffsetPassphraseLayout.visibility = View.VISIBLE
+                    } else {
+                        polyseedOffsetPassphraseDescriptionLabelTextView.visibility = View.GONE
+                        polyseedOffsetPassphraseLayout.visibility = View.GONE
+                    }
                 }
             }
         }
@@ -232,7 +237,7 @@ class WalletSecretsBottomSheetDialogViewModel : ViewModel() {
             polyseedOffsetPassphrase.value = polyseedAndOffset.second
         } else {
             isWalletPolyseed.value = false
-            _seedType.value = SeedType.LEGACY
+            _seedType.value = SeedType.MONERO
         }
         restoreHeight.value = wallet.getRestoreHeight()
         walletAddress.value = wallet.getAddress(0)
@@ -245,7 +250,7 @@ class WalletSecretsBottomSheetDialogViewModel : ViewModel() {
 
     val isWalletPolyseed = MutableLiveData(false)
     val allowCopyingSecrets = MutableLiveData(false)
-    private val _seedType = MutableLiveData<SeedType>(null)
+    private val _seedType = MutableLiveData(SeedType.MONERO)
     val seedType: LiveData<SeedType> = _seedType
     private val _useLegacySeedOffsetPassphrase = MutableLiveData(false)
     private val _legacySeedOffsetPassphrase = MutableLiveData("")
@@ -258,11 +263,18 @@ class WalletSecretsBottomSheetDialogViewModel : ViewModel() {
     val secretSpendKey = MutableLiveData("")
     val publicSpendKey = MutableLiveData("")
 
-    val seedTypeAndUseLegacySeedOffsetPassphrase: LiveData<Pair<SeedType?, Boolean>> = combineLiveDatas(
+    val seedTypeAndUseLegacySeedOffsetPassphrase: LiveData<Pair<SeedType, Boolean>> = combineLiveDatas(
         _seedType,
         _useLegacySeedOffsetPassphrase,
     ) { seedType, useLegacySeedOffsetPassphrase ->
-        return@combineLiveDatas Pair(seedType, useLegacySeedOffsetPassphrase!!)
+        return@combineLiveDatas Pair(seedType!!, useLegacySeedOffsetPassphrase!!)
+    }
+
+    val seedTypeAndPolyseedSeedOffsetPassphrase: LiveData<Pair<SeedType, String>> = combineLiveDatas(
+        _seedType,
+        polyseedOffsetPassphrase,
+    ) { seedType, polyseedOffsetPassphrase ->
+        return@combineLiveDatas Pair(seedType!!, polyseedOffsetPassphrase!!)
     }
 
     fun setSeedType(seedType: SeedType) {
@@ -282,7 +294,7 @@ class WalletSecretsBottomSheetDialogViewModel : ViewModel() {
 
     private fun updateSeed() {
         when (_seedType.value!!) {
-            SeedType.LEGACY -> {
+            SeedType.MONERO -> {
                 if (_useLegacySeedOffsetPassphrase.value!!) {
                     seed.value = wallet.getLegacySeed(_legacySeedOffsetPassphrase.value!!)
                 } else {
