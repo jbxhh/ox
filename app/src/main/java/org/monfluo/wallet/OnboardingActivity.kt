@@ -5,8 +5,6 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.Button
-import android.widget.CheckBox
-import android.widget.CompoundButton
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
@@ -23,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.monfluo.wallet.data.DefaultNode
 import org.monfluo.wallet.data.Node
+import org.monfluo.wallet.data.SeedType
 import org.monfluo.wallet.fragment.dialog.NodeSelectionBottomSheetDialog
 import org.monfluo.wallet.listener.NodeSelectionDialogListenerAdapter
 import org.monfluo.wallet.livedata.combineLiveDatas
@@ -31,51 +30,49 @@ import org.monfluo.wallet.model.WalletManager
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
-import org.monfluo.wallet.util.RestoreHeight
 import org.monfluo.wallet.util.acitivity.WalletOpeningActivity
 import timber.log.Timber
 import java.io.File
-import java.util.Calendar
 
 class OnboardingActivity : WalletOpeningActivity() {
 
     private val viewModel: OnboardingViewModel by viewModels()
 
-    private lateinit var useProxySwitch: SwitchCompat
-    private lateinit var walletProxyAddressEditText: EditText
     private lateinit var walletNameEditText: EditText
     private lateinit var walletPasswordEditText: EditText
     private lateinit var walletPasswordConfirmEditText: EditText
+    private lateinit var seedTypeButton: Button
+    private lateinit var moreOptionsDropdownTextView: TextView
+    private lateinit var moreOptionsChevronImageView: ImageView
+    private lateinit var advancedOptionsLayout: ConstraintLayout
+    private lateinit var seedTypeDescTextView: TextView
     private lateinit var walletSeedEditText: EditText
     private lateinit var walletRestoreHeightEditText: EditText
-    private lateinit var createWalletButton: Button
-    private lateinit var moreOptionsDropdownTextView: TextView
-    private lateinit var advancedOptionsLayout: ConstraintLayout
-    private lateinit var moreOptionsChevronImageView: ImageView
-    private lateinit var seedOffsetCheckbox: CheckBox
+    private lateinit var walletSeedOffsetPassphraseEditText: EditText
     private lateinit var selectNodeButton: Button
-    private lateinit var seedTypeButton: Button
-    private lateinit var seedTypeDescTextView: TextView
+    private lateinit var useProxySwitch: SwitchCompat
+    private lateinit var walletProxyAddressEditText: EditText
+    private lateinit var createWalletButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
 
-        selectNodeButton = findViewById(R.id.select_node_button)
         walletNameEditText = findViewById(R.id.wallet_name_edittext)
         walletPasswordEditText = findViewById(R.id.wallet_password_edittext)
         walletPasswordConfirmEditText = findViewById(R.id.wallet_password_confirm_edittext)
-        walletSeedEditText = findViewById(R.id.wallet_seed_edittext)
-        walletRestoreHeightEditText = findViewById(R.id.wallet_restore_height_edittext)
-        createWalletButton = findViewById(R.id.create_wallet_button)
+        seedTypeButton = findViewById(R.id.seed_type_button)
         moreOptionsDropdownTextView = findViewById(R.id.advanced_settings_dropdown_textview)
         moreOptionsChevronImageView = findViewById(R.id.advanced_settings_chevron_imageview)
-        seedOffsetCheckbox = findViewById(R.id.seed_offset_checkbox)
+        advancedOptionsLayout = findViewById(R.id.more_options_layout)
+        seedTypeDescTextView = findViewById(R.id.seed_type_desc_textview)
+        walletSeedEditText = findViewById(R.id.wallet_seed_edittext)
+        walletRestoreHeightEditText = findViewById(R.id.wallet_restore_height_edittext)
+        walletSeedOffsetPassphraseEditText = findViewById(R.id.wallet_seed_offset_passphrase_edittext)
+        selectNodeButton = findViewById(R.id.select_node_button)
         useProxySwitch = findViewById(R.id.use_proxy_switch)
         walletProxyAddressEditText = findViewById(R.id.wallet_proxy_address_edittext)
-        advancedOptionsLayout = findViewById(R.id.more_options_layout)
-        seedTypeButton = findViewById(R.id.seed_type_button)
-        seedTypeDescTextView = findViewById(R.id.seed_type_desc_textview)
+        createWalletButton = findViewById(R.id.create_wallet_button)
 
         val useProxy = PreferenceUtils.isUseProxy(this)
 
@@ -99,7 +96,7 @@ class OnboardingActivity : WalletOpeningActivity() {
     }
 
     private fun bindObservers() {
-        viewModel.passphrase.observe(this) { text ->
+        viewModel.password.observe(this) { text ->
             if (text.isEmpty()) {
                 walletPasswordConfirmEditText.text = null
                 walletPasswordConfirmEditText.visibility = View.GONE
@@ -122,19 +119,23 @@ class OnboardingActivity : WalletOpeningActivity() {
             createWalletButton.isEnabled = enable
         }
 
-        viewModel.seedType.observe(this) { seedType: OnboardingViewModel.SeedType ->
+        viewModel.seedType.observe(this) { seedType ->
             seedTypeButton.text = seedType.toString()
-            seedTypeDescTextView.text = getText(seedType.descResId)
-            if (seedType == OnboardingViewModel.SeedType.LEGACY) {
-                seedOffsetCheckbox.visibility = View.VISIBLE
+            seedTypeDescTextView.text = getText(seedType.getDescriptionResourceId())
+            if (seedType == SeedType.MONERO) {
                 walletRestoreHeightEditText.visibility = View.VISIBLE
-                walletPasswordEditText.hint = getString(R.string.password_optional)
                 walletSeedEditText.hint = getString(R.string.recovery_phrase_optional_legacy)
             } else {
-                seedOffsetCheckbox.visibility = View.GONE
                 walletRestoreHeightEditText.visibility = View.GONE
-                walletPasswordEditText.hint = getString(R.string.password_non_optional)
                 walletSeedEditText.hint = getString(R.string.recovery_phrase_optional_polyseed)
+            }
+        }
+
+        viewModel.seedAndType.observe(this) { (seedType, seed) ->
+            if (seed.isNotBlank() || seedType == SeedType.POLYSEED) {
+                walletSeedOffsetPassphraseEditText.visibility = View.VISIBLE
+            } else {
+                walletSeedOffsetPassphraseEditText.visibility = View.GONE
             }
         }
 
@@ -144,17 +145,13 @@ class OnboardingActivity : WalletOpeningActivity() {
     }
 
     private fun bindListeners() {
-        moreOptionsDropdownTextView.setOnClickListener { viewModel.onMoreOptionsClicked() }
+        moreOptionsDropdownTextView.setOnClickListener { viewModel.showMoreOptions.value = !viewModel.showMoreOptions.value!! }
 
-        moreOptionsChevronImageView.setOnClickListener { viewModel.onMoreOptionsClicked() }
+        moreOptionsChevronImageView.setOnClickListener { viewModel.showMoreOptions.value = !viewModel.showMoreOptions.value!! }
 
         useProxySwitch.setOnCheckedChangeListener { _, b ->
             PreferenceUtils.setUseProxy(this, b)
             viewModel.setUseProxy(b)
-        }
-
-        seedOffsetCheckbox.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
-            viewModel.setUseOffset(b)
         }
 
         createWalletButton.setOnClickListener {
@@ -185,11 +182,20 @@ class OnboardingActivity : WalletOpeningActivity() {
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun afterTextChanged(editable: Editable) {
                 val text = editable.toString()
+                viewModel.seed.value = text
                 if (text.isEmpty()) {
                     createWalletButton.setText(R.string.create_wallet)
                 } else {
                     createWalletButton.setText(R.string.menu_restore)
                 }
+            }
+        })
+
+        walletSeedOffsetPassphraseEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+            override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+            override fun afterTextChanged(editable: Editable) {
+                viewModel.seedOffsetPassphrase.value = editable.toString()
             }
         })
 
@@ -238,13 +244,12 @@ class OnboardingActivity : WalletOpeningActivity() {
 
     private fun toggleSeedType() {
         val seedType = viewModel.seedType.value ?: return
-        var newSeedType = OnboardingViewModel.SeedType.UNKNOWN
-        if (seedType == OnboardingViewModel.SeedType.POLYSEED) {
-            newSeedType = OnboardingViewModel.SeedType.LEGACY
-        } else if (seedType == OnboardingViewModel.SeedType.LEGACY) {
-            newSeedType = OnboardingViewModel.SeedType.POLYSEED
+        val newSeedType = if (seedType == SeedType.POLYSEED) {
+            SeedType.MONERO
+        } else {
+            SeedType.POLYSEED
         }
-        viewModel.setSeedType(newSeedType)
+        viewModel.seedType.value = newSeedType
     }
 
     private fun createOrImportWallet(
@@ -257,7 +262,6 @@ class OnboardingActivity : WalletOpeningActivity() {
                 walletNameEditText.text.toString(),
                 walletSeed,
                 restoreHeightText,
-                viewModel.useOffset.value!! || viewModel.seedType.value == OnboardingViewModel.SeedType.POLYSEED,
             )
         }
     }
@@ -279,45 +283,40 @@ class OnboardingActivity : WalletOpeningActivity() {
 }
 
 internal class OnboardingViewModel : ViewModel() {
-    private val _useOffset = MutableLiveData(false)
-    val useOffset: LiveData<Boolean> = _useOffset
-    private val _showMoreOptions = MutableLiveData(false)
-    private val _creatingWallet = MutableLiveData(false)
-    private val _seedType = MutableLiveData(SeedType.POLYSEED)
+
+    val seedType = MutableLiveData(SeedType.MONERO)
+    val showMoreOptions = MutableLiveData(false)
     private val _useProxy = MutableLiveData(false)
     val useProxy: LiveData<Boolean> = _useProxy
     private val _proxyAddress = MutableLiveData("")
-    private val _passphrase = MutableLiveData("")
-    val passphrase: LiveData<String> = _passphrase
+    private val _password = MutableLiveData("")
+    val password: LiveData<String> = _password
     private val _confirmedPassphrase = MutableLiveData("")
-    var showMoreOptions: LiveData<Boolean> = _showMoreOptions
-    var seedType: LiveData<SeedType> = _seedType
+    val seed = MutableLiveData("")
+    val seedOffsetPassphrase = MutableLiveData("")
+    private val _creatingWallet = MutableLiveData(false)
 
     val enableButton = combineLiveDatas(
         seedType,
         _useProxy,
         _proxyAddress,
-        _passphrase,
+        _password,
         _confirmedPassphrase,
         _creatingWallet,
     ) { seedType, useProxy, proxyAddress, passphrase, confirmedPassphrase, creatingWallet ->
         if (seedType == null || useProxy == null || proxyAddress == null || passphrase == null || confirmedPassphrase == null || creatingWallet == null) return@combineLiveDatas false
         if ((passphrase.isNotEmpty() || confirmedPassphrase.isNotEmpty()) && passphrase != confirmedPassphrase) return@combineLiveDatas false
         if (creatingWallet) return@combineLiveDatas false
-        if (seedType == SeedType.POLYSEED && (passphrase.isEmpty() || confirmedPassphrase.isEmpty())) return@combineLiveDatas false
         if (useProxy && proxyAddress.isEmpty()) return@combineLiveDatas false
 
         return@combineLiveDatas true
     }
 
-    fun onMoreOptionsClicked() {
-        val currentValue = showMoreOptions.value ?: false
-        val newValue = !currentValue
-        _showMoreOptions.value = newValue
-    }
-
-    fun setSeedType(seedType: SeedType?) {
-        _seedType.value = seedType
+    val seedAndType = combineLiveDatas(
+        seedType,
+        seed
+    ) { seedType, seed ->
+        Pair(seedType!!, seed!!)
     }
 
     fun createOrImportWallet(
@@ -325,16 +324,16 @@ internal class OnboardingViewModel : ViewModel() {
         walletName: String,
         walletSeed: String,
         restoreHeightText: String,
-        useOffset: Boolean,
     ) {
-        val passphrase = _passphrase.value ?: return
-        val confirmedPassphrase = _confirmedPassphrase.value ?: return
+        val password = _password.value ?: return
+        val confirmedPassword = _confirmedPassphrase.value ?: return
 
         val application = activity.application as MoneroApplication
         _creatingWallet.postValue(true)
-        val offset = if (useOffset) confirmedPassphrase else ""
-        if (passphrase.isNotEmpty()) {
-            if (passphrase != confirmedPassphrase) {
+
+        val offset = seedOffsetPassphrase.value!!
+        if (password.isNotEmpty()) {
+            if (password != confirmedPassword) {
                 _creatingWallet.postValue(false)
                 activity.runOnUiThread {
                     Toast.makeText(
@@ -346,45 +345,29 @@ internal class OnboardingViewModel : ViewModel() {
                 return
             }
         }
-        var restoreHeight = newRestoreHeight
         val walletFile = File(Helper.getWalletRoot(activity), walletName)
-        var wallet: Wallet? = null
         val seedTypeValue = seedType.value ?: return
-        if (walletSeed.isEmpty()) {
-            if (seedTypeValue == SeedType.POLYSEED) {
-                wallet = if (offset.isEmpty()) {
-                    activity.runOnUiThread {
-                        _creatingWallet.postValue(false)
-                        Toast.makeText(
-                            activity,
-                            application.getString(R.string.invalid_empty_passphrase),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    return
-                } else {
+
+        val wallet: Wallet = if (walletSeed.isEmpty()) {
+            when (seedTypeValue) {
+                SeedType.MONERO -> {
+                    WalletManager.instance.createWallet(
+                        walletFile,
+                        password,
+                        "English"
+                    )
+                }
+                SeedType.POLYSEED -> {
                     WalletManager.instance.createWalletPolyseed(
                         walletFile,
-                        passphrase,
+                        password,
                         offset,
                         Constants.MNEMONIC_LANGUAGE
                     )
                 }
-            } else if (seedTypeValue == SeedType.LEGACY) {
-                val tmpWalletFile =
-                    File(activity.applicationInfo.dataDir, walletName + "_tmp")
-                val tmpWallet = createTempWallet(tmpWalletFile) //we do this to get seed, then recover wallet so we can use seed offset
-                wallet = WalletManager.instance.recoveryWallet(
-                    walletFile,
-                    passphrase,
-                    tmpWallet.getSeed(""),
-                    offset,
-                    restoreHeight
-                )
-                tmpWalletFile.delete()
             }
         } else {
-            if (getMnemonicType(walletSeed) == SeedType.UNKNOWN) {
+            if (getMnemonicType(walletSeed) == null) {
                 activity.runOnUiThread {
                     _creatingWallet.postValue(false)
                     Toast.makeText(
@@ -395,32 +378,42 @@ internal class OnboardingViewModel : ViewModel() {
                 }
                 return
             }
-            if (restoreHeightText.isNotEmpty()) {
-                restoreHeight = restoreHeightText.toLong()
-            }
-            if (seedTypeValue == SeedType.POLYSEED) {
-                wallet = WalletManager.instance.recoveryWalletPolyseed(
-                    walletFile,
-                    passphrase,
-                    walletSeed,
-                    offset
-                )
-            } else if (seedTypeValue == SeedType.LEGACY) {
-                wallet = WalletManager.instance.recoveryWallet(
-                    walletFile,
-                    passphrase,
-                    walletSeed,
-                    offset,
-                    restoreHeight
-                )
+            val restoreHeight = restoreHeightText.toLongOrNull() ?: 0
+
+            when (seedTypeValue) {
+                SeedType.MONERO -> {
+                    WalletManager.instance.recoveryWallet(
+                        walletFile,
+                        password,
+                        walletSeed,
+                        offset,
+                        restoreHeight
+                    )
+                }
+                SeedType.POLYSEED -> {
+                    WalletManager.instance.recoveryWalletPolyseed(
+                        walletFile,
+                        password,
+                        walletSeed,
+                        offset
+                    )
+                }
             }
         }
-        val walletStatus = wallet?.status
-        wallet?.close()
-        val ok = walletStatus?.isOk
-        walletFile.delete() // cache is broken for some reason when recovering wallets. delete the file here. this happens in monerujo too.
-        if (ok == true) {
-            activity.openWallet(walletFile.absolutePath, passphrase)
+        val walletStatus = wallet.status
+        wallet.close()
+        val ok = walletStatus.isOk
+        /*
+        * If wallet file is not deleted here, then `doInit` in `wallet.cpp` sets 'refresh from block height' to 'daemon blockchain height',
+        * which makes wallet use 'fast sync' thus missing all the transactions
+        * Deleting wallet file results in `m_rebuildWalletCache` being set to true, and doInit does not treat the wallet as a new one,
+        * and does not override 'refresh from block height'
+        *
+        * Seems like a bug in Monero software
+        * */
+        walletFile.delete()
+        if (ok) {
+            activity.openWallet(walletFile.absolutePath, password)
         } else {
             activity.runOnUiThread {
                 _creatingWallet.postValue(false)
@@ -428,7 +421,7 @@ internal class OnboardingViewModel : ViewModel() {
                     activity,
                     application.getString(
                         R.string.create_wallet_failed,
-                        walletStatus?.errorString
+                        walletStatus.errorString
                     ),
                     Toast.LENGTH_SHORT
                 ).show()
@@ -436,36 +429,16 @@ internal class OnboardingViewModel : ViewModel() {
         }
     }
 
-    private val newRestoreHeight: Long
-        get() {
-            val restoreDate = Calendar.getInstance()
-            restoreDate.add(Calendar.DAY_OF_MONTH, 0)
-            return RestoreHeight.instance?.getHeight(restoreDate.time) ?: 0
-        }
-
-    private fun getMnemonicType(seed: String): SeedType {
+    private fun getMnemonicType(seed: String): SeedType? {
         val words = seed.split("\\s".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        val seedTypeValue = seedType.value ?: return SeedType.LEGACY
+        val seedTypeValue = seedType.value ?: return SeedType.MONERO
         return if (words.size == 16 && seedTypeValue == SeedType.POLYSEED) {
             SeedType.POLYSEED
-        } else if (words.size == 25 && seedTypeValue == SeedType.LEGACY) {
-            SeedType.LEGACY
+        } else if (words.size == 25 && seedTypeValue == SeedType.MONERO) {
+            SeedType.MONERO
         } else {
-            SeedType.UNKNOWN
+            null
         }
-    }
-
-    private fun createTempWallet(tmpWalletFile: File): Wallet {
-        return WalletManager.instance.createWallet(
-            tmpWalletFile,
-            "",
-            Constants.MNEMONIC_LANGUAGE,
-            0
-        )
-    }
-
-    fun setUseOffset(useOffset: Boolean) {
-        _useOffset.value = useOffset
     }
 
     fun setProxyAddress(address: String) {
@@ -477,14 +450,10 @@ internal class OnboardingViewModel : ViewModel() {
     }
 
     fun setPassphrase(passphrase: String) {
-        _passphrase.value = passphrase
+        _password.value = passphrase
     }
 
     fun setConfirmedPassphrase(confirmedPassphrase: String) {
         _confirmedPassphrase.value = confirmedPassphrase
-    }
-
-    enum class SeedType(val descResId: Int) {
-        LEGACY(R.string.seed_desc_legacy), POLYSEED(R.string.seed_desc_polyseed), UNKNOWN(0)
     }
 }

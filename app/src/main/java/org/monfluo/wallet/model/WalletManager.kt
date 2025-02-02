@@ -16,7 +16,6 @@
 package org.monfluo.wallet.model
 
 import android.util.Log
-import org.monfluo.wallet.util.RestoreHeight
 import java.io.File
 import java.util.Calendar
 import java.util.Locale
@@ -24,26 +23,12 @@ import java.util.Locale
 class WalletManager {
     val networkType = NetworkType.NetworkType_Mainnet
 
-    fun createWallet(aFile: File, password: String, language: String, height: Long): Wallet {
+    fun createWallet(aFile: File, password: String, language: String): Wallet {
         val walletHandle = createWalletJ(aFile.absolutePath, password, language, networkType.value)
         val wallet = Wallet(
             walletHandle,
             WalletInfo(aFile, password)
         )
-        if (wallet.status.isOk) {
-            // (Re-)Estimate restore height based on what we know
-            val oldHeight = wallet.getRestoreHeight()
-            // Go back 4 days if we don't have a precise restore height
-            val restoreDate = Calendar.getInstance()
-            restoreDate.add(Calendar.DAY_OF_MONTH, 0)
-            val restoreHeight =
-                if (height > -1) height else RestoreHeight.instance?.getHeight(restoreDate.time)
-            if (restoreHeight != null) {
-                wallet.setRestoreHeight(restoreHeight)
-            }
-            Log.d("WalletManager.kt", "Changed Restore Height from $oldHeight to ${wallet.getRestoreHeight()}")
-            wallet.setPassword(password) // this rewrites the keys file (which contains the restore height)
-        } else Log.e("WalletManager.kt", wallet.status.toString())
         return wallet
     }
 
