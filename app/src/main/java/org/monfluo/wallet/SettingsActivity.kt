@@ -2,10 +2,12 @@ package org.monfluo.wallet
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
 import android.view.View
 import android.widget.Button
 import android.widget.CompoundButton
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -43,6 +45,7 @@ class SettingsActivity : MoneroActivity() {
     private lateinit var accountSettingsConstraintLayout: ConstraintLayout
     private lateinit var addAccountButton: Button
     private lateinit var accountsRecyclerView: RecyclerView
+    private lateinit var aboutMonfluoTextView: TextView
 
     private lateinit var accountAdapter: AccountAdapter
 
@@ -65,6 +68,7 @@ class SettingsActivity : MoneroActivity() {
         accountSettingsConstraintLayout = findViewById(R.id.wallet_account_settings_layout)
         addAccountButton = findViewById(R.id.add_account_button)
         accountsRecyclerView = findViewById(R.id.accounts_recycler_view)
+        aboutMonfluoTextView = findViewById(R.id.about_monfluo_textview)
 
         val isMultiWalletMode = PreferenceUtils.isMultiWalletMode(applicationContext)
         val isMultiAccountMode = PreferenceUtils.isMultiAccountMode(applicationContext)
@@ -103,6 +107,8 @@ class SettingsActivity : MoneroActivity() {
 
         val node = PreferenceUtils.getOrSetDefaultNode(this, DefaultNode.defaultNode())
         selectNodeButton.text = getString(R.string.node_button_text, node.name)
+
+        aboutMonfluoTextView.movementMethod = LinkMovementMethod.getInstance();
 
         bindListeners()
     }
