@@ -23,6 +23,7 @@ import org.monfluo.wallet.fragment.dialog.WalletSecretsBottomSheetDialog
 import org.monfluo.wallet.listener.NodeSelectionDialogListenerAdapter
 import org.monfluo.wallet.model.Account
 import org.monfluo.wallet.model.Balance
+import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.acitivity.MoneroActivity
@@ -208,6 +209,12 @@ class SettingsActivity : MoneroActivity() {
 
     override fun onWalletServiceConnected(walletService: WalletService) {
         updateAccountAdapter()
+    }
+
+    override fun onWalletUpdated(wallet: Wallet) {
+        runOnUiThread {
+            updateAccountAdapter()
+        }
     }
 
     override fun onAccountCreated() {
