@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE resources [<!ENTITY nbsp "&#160;">]>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
-    <string name="app_name" translatable="false">Mysu</string>
+    <string name="app_name" translatable="false">Monfluo</string>
 
     <string name="bad_password">Incorrect passphrase!</string>
 
@@ -29,6 +29,7 @@
     <string name="error_sending_tx">Error sending transaction</string>
     <string name="error_creating_tx">Error creating: %1$s</string>
     <string name="create_wallet">Create wallet</string>
+    <string name="restore_wallet">Restore wallet</string>
     <string name="invalid_mnemonic_code">Invalid mnemonic</string>
     <string name="invalid_empty_passphrase">Please enter a passphrase</string>
     <string name="invalid_confirmed_password">Passphrases do not match</string>
@@ -36,10 +37,11 @@
     <string name="street_mode">Street mode (hide balances)</string>
     <string name="option_hide_xmrchan">Show Monerochan</string>
     <string name="option_allow_fee_override">Manual fee selection</string>
-    <string name="display_recovery_phrase">Display wallet keys</string>
+    <string name="display_wallet_secrets">Display wallet secrets</string>
+    <string name="add_account">Add account</string>
     <string name="tor_switch_label">SOCKS Proxy</string>
     <string name="connection_failed">Failed to connect. Retrying…</string>
-    <string name="address">87BqQYkugEzh6Tuyotm2uc3DzJzKM6MuZaC161e6u1TsQxxPmXVPHpdNRyK47JY4d1hhbe25YVz4e9vTXCLDxvHkRXEAeBC</string>
+    <string name="address">48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ</string>
     <string name="amount">0.00</string>
     <string name="sending_all">SENDING ALL</string>
     <string name="send">Send</string>
@@ -50,9 +52,9 @@
     <string name="recovery_phrase_optional_legacy">Recovery seed (legacy)</string>
     <string name="recovery_phrase_optional_polyseed">Recovery seed (polyseed)</string>
     <string name="restore_height_optional">Restore height (optional)</string>
-    <string name="password_optional">Passphrase (optional)</string>
-    <string name="password_non_optional">Passphrase (seed offset; required)</string>
-    <string name="password_confirm">Confirm passphrase</string>
+    <string name="wallet_password_hint">Wallet password (optional)</string>
+    <string name="wallet_password_confirm_hint">Confirm wallet password</string>
+    <string name="wallet_seed_offset_passphrase">Seed offset passphrase (optional)</string>
     <string name="password">Passphrase</string>
     <string name="label">Label</string>
     <string name="unlock">Unlock</string>
@@ -72,11 +74,17 @@
     <string name="wallet">Wallet</string>
     <string name="appearance">Appearance</string>
     <string name="network">Network</string>
+    <string name="about_monfluo_header">About Monfluo</string>
+    <string name="about_monfluo">
+        Monfluo is a pure Monero wallet for Android developed by acx and community.\n
+        Join our <a href="https://matrix.to/#/%23monfluo%3Amonero.social?via=monero.social">Matrix room</a> or <a href="https://simplex.chat/contact#/?v=2-7&amp;smp=smp%3A%2F%2F1OwYGt-yqOfe2IyVHhxz3ohqo3aCCMjtB-8wn4X_aoY%3D%40smp11.simplex.im%2FA89PUHNXaCYLa48cSAWH5k8orgG1ebbt%23%2F%3Fv%3D1-3%26dh%3DMCowBQYDK2VuAyEAVG3M3jjFAELlA2zJtOMq--p1V0yfN252oglNp4ZR1wM%253D%26srv%3D6ioorbm6i3yxmuoezrhjk6f6qgkc4syabh7m3so74xunb5nzr4pwgfqd.onion&amp;data=%7B%22groupLinkId%22%3A%22aSaW9b7I_yHrzvsstF-hYA%3D%3D%22%7D">SimpleX group</a> to keep in touch.\n
+        Git repository is available on <a href="https://codeberg.org/anoncontributorxmr/monfluo">Codeberg</a>.\n
+        Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
+    </string>
     <string name="add_node">Add Node</string>
     <string name="nodes">Nodes</string>
     <string name="node_name_hint">My Monero Node</string>
-    <string name="node_address_hint">127.0.0.1</string>
-    <string name="node_port_hint">18081</string>
+    <string name="node_address_hint">127.0.0.1:18081</string>
     <string name="node_username_hint">Username (optional)</string>
     <string name="node_password_hint">Passphrase</string>
     <string name="transaction_action_sent">You sent</string>
@@ -85,6 +93,7 @@
     <string name="tx_amount_no_prefix2">999.99999999999</string>
     <string name="wallet_proxy_address_hint">127.0.0.1</string>
     <string name="wallet_proxy_port_hint">9050</string>
+    <string name="proxy_address_hint">127.0.0.1:9050</string>
     <string name="no_history_loading">Loading your wallet…</string>
     <string name="no_history_nget_some_monero_in_here">No transactions to display.\nAcquire coins by doing jobs, selling products, mining it, or buying some peer-to-peer.</string>
     <string name="node_button_text">Node: %1$s</string>
@@ -102,7 +111,8 @@
     <string name="default_fee">Default</string>
     <string name="medium_fee">Medium</string>
     <string name="high_fee">High</string>
-    <string name="view_utxos">View coins</string>
+    <string name="view_enotes">View enotes</string>
+    <string name="settings_save_proxy">Save &amp; update</string>
     <string name="selected_utxos_value">Selected value: %1$s XMR</string>
     <string name="selected_utxos_value_churning">Selected value: %1$s XMR\n\nThe anonymity benefits of churning are still being researched. Only proceed if you know what you are doing.</string>
     <string name="global_index_text">%1$d</string>
@@ -111,8 +121,7 @@
     <string name="churn">Churn</string>
     <string name="freeze">Freeze</string>
     <string name="unfreeze">Unfreeze</string>
-    <string name="toggle_freeze">(Un)freeze</string>
-    <string name="wallet_keys_label">Wallet Keys</string>
+    <string name="wallet_secrets_label">Wallet secrets</string>
     <string name="done">Done</string>
     <string name="delete">Delete</string>
     <string name="cant_edit_current_node">Cannot edit current node.</string>
@@ -120,17 +129,19 @@
     <string name="edit_node">Edit Node</string>
     <string name="wallet_seed_label">Recovery seed</string>
     <string name="wallet_seed_desc">Anyone with your recovery seed can spend ALL coins in this wallet!</string>
-    <string name="wallet_seed_offset_desc">Your wallet seed passphrase (sometimes called a seed offset) is the passphrase you use to unlock the wallet in this app. It will not be displayed here, but it is needed to FULLY restore the keys to this wallet.</string>
-    <string name="wallet_viewkey_label">Private view-key</string>
+    <string name="wallet_seed_offset_legacy_seed_desc">The seed offset passphrase will be required to correctly restore this wallet.</string>
+    <string name="wallet_seed_offset_polyseed_desc">Your seed offset passphrase is required to restore this wallet.</string>
+    <string name="copy_secrets_warning">Copying the secrets of your wallet to clipboard is dangerous because other apps on your device can view the clipboard and steal them</string>
+    <string name="wallet_keys_label">Keys</string>
     <string name="wallet_viewkey_desc">Anyone with your private view-key can see all incoming transactions!</string>
     <string name="wallet_restore_height_label">Restore height</string>
+    <string name="wallet_address">Wallet address</string>
     <string name="use_password_as_seed_offset">Use passphrase as seed offset</string>
     <string name="trusted_daemon">Trusted daemon</string>
-    <string name="use_bundled_tor">Let Mysu start and manage a Tor daemon</string>
     <string name="subbaddress_info_subtitle" translatable="false">#%1$d: %2$s</string>
     <string name="all_addresses">All addresses</string>
-    <string name="donate_label">Donate to Mysu</string>
-    <string name="donating_label">Donating to Mysu. Thank you!</string>
+    <string name="donate_label">Donate to Monfluo</string>
+    <string name="donating_label">Donating to Monfluo. Thank you!</string>
     <string name="transactions">Transactions</string>
     <string name="auth">[ auth ]</string>
     <string name="trusted">[ trusted ]</string>
@@ -141,18 +152,25 @@
     <string name="display_advanced_wallet_creation_options">Display advanced wallet creation options</string>
     <string name="generate_fresh_wallet_address">Generate fresh wallet address</string>
     <string name="copy_selected_wallet_address">Copy selected wallet address</string>
+    <string name="copy_seed">Copy wallet\'s seed</string>
+    <string name="copy_polyseed_offset_passphrase">Copy wallet\'s polyseed offset passphrase</string>
     <string name="add_recipient_to_transaction">Add recipient to transaction</string>
+    <string name="copy_restore_height">Copy wallet\'s restore height</string>
+    <string name="copy_wallet_s_address">Copy wallet\'s address</string>
     <string name="copy_wallet_s_private_view_key">Copy wallet\'s private view-key</string>
+    <string name="copy_wallet_s_public_view_key">Copy wallet\'s public view-key</string>
+    <string name="copy_wallet_s_private_spend_key">Copy wallet\'s private spend-key</string>
+    <string name="copy_wallet_s_public_spend_key">Copy wallet\'s public spend-key</string>
     <string name="paste_clipboard_into_amount_field">Paste clipboard into amount field</string>
     <string name="paste_clipboard_into_address_field">Paste clipboard into address field</string>
     <string name="remove_recipient_from_transaction">Remove recipient from transaction</string>
     <string name="scan_qr_code_for_address_field">Scan QR code for address field</string>
     <string name="copy_transaction_hash">Copy transaction hash</string>
     <string name="copy_transaction_addr">Copy transaction address</string>
-    <string name="seed_desc_polyseed">16 words instead of 25; just as secure, but not supported in as many wallets right now. In Mysu, seed passphrase is enforced for these wallets.</string>
-    <string name="seed_desc_legacy">Older, 25 word seed; supported in all Monero wallets. In Mysu, seed passphrase is not enforced for these wallets.</string>
+    <string name="seed_desc_polyseed">16 words instead of 25; just as secure, but not supported in as many wallets right now. In Monfluo, seed passphrase is enforced for these wallets.</string>
+    <string name="seed_desc_legacy">Older, 25 word seed; supported in all Monero wallets. In Monfluo, seed passphrase is not enforced for these wallets.</string>
     <string name="approve_the_transaction">Send transaction</string>
     <string name="paste_clipboard_into_passphrase_field">Paste clipboard into passphrase field</string>
     <string name="slide_to_send_transaction">Slide to send transaction</string>
-
+    <string name="service_description">Wallet is open</string>
 </resources>

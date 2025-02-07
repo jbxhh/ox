@@ -10,6 +10,6 @@
 
 ## Building:
 
-1. Clone mysu repo including submodules: `git clone --recurse-submodules https://codeberg.org/anoncontributorxmr/mysu.git`
+1. Clone Monfluo repo including submodules: `git clone --recurse-submodules https://codeberg.org/anoncontributorxmr/monfluo.git`
 
 2. Run `make` in `external-libs` directory

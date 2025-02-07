@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.4.1)
 message(STATUS ABI_INFO  = ${ANDROID_ABI})
 
-add_library( monerujo
+add_library( monfluo
              SHARED
-             src/main/cpp/monerujo.cpp )
+             src/main/cpp/monfluo.cpp )
 
 set(EXTERNAL_LIBS_DIR ${CMAKE_SOURCE_DIR}/../external-libs)
 
@@ -203,7 +203,7 @@ else()
     set(EXTRA_LIBS "")
 endif()
 
-target_link_libraries(  monerujo
+target_link_libraries(  monfluo
 
                         wallet_api
                         wallet
