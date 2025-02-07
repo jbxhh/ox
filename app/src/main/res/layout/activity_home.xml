@@ -4,7 +4,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="net.mynero.wallet.fragment.home.HomeFragment">
+    tools:context="org.monfluo.wallet.HomeActivity">
+
+    <TextView
+        android:id="@+id/wallet_and_account_textview"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="wallet / account" />
 
     <ProgressBar
         android:id="@+id/sync_progress_bar"
@@ -16,7 +31,7 @@
         android:progressDrawable="@drawable/sync_progress_bar_drawable"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/wallet_and_account_textview" />
 
     <TextView
         android:id="@+id/sync_progress_text"
@@ -32,20 +47,34 @@
         app:layout_constraintEnd_toEndOf="@id/sync_progress_bar"
         app:layout_constraintStart_toStartOf="@id/sync_progress_bar"
         app:layout_constraintTop_toTopOf="@id/sync_progress_bar"
-        tools:text="Syncing... 3102333/40010203" />
+        tools:text="Syncing... 3102333/40010203"
+        tools:visibility="visible" />
 
     <TextView
         android:id="@+id/balance_unlocked_textview"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="4dp"
         android:textSize="32sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@id/settings_imageview"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sync_progress_text"
         tools:text="100.000000000000" />
+
+    <TextView
+        android:id="@+id/balance_frozen_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/balance_unlocked_textview"
+        tools:text="+ 100.000000000000 frozen"
+        tools:visibility="visible" />
 
     <TextView
         android:id="@+id/balance_locked_textview"
@@ -53,10 +82,12 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/balance_unlocked_textview"
-        tools:text="+ 100.000000000000 confirming" />
+        app:layout_constraintTop_toBottomOf="@id/balance_frozen_textview"
+        tools:text="+ 100.000000000000 confirming"
+        tools:visibility="visible" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/transaction_history_recyclerview"
@@ -81,25 +112,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/balance_locked_textview"
         tools:visibility="visible">
-
-        <ImageView
-            android:id="@+id/monerochan_imageview"
-            android:layout_width="0dp"
-            android:layout_height="400dp"
-            android:src="@drawable/xmrchan_empty2"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/monerochan_empty_tx_textview"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
-            android:id="@+id/monerochan_empty_tx_textview"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/no_history_nget_some_monero_in_here"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/monerochan_imageview"
-            app:layout_constraintTop_toTopOf="@id/monerochan_imageview" />
 
         <TextView
             android:id="@+id/empty_tx_textview"
