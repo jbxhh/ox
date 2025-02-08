@@ -65,10 +65,12 @@ class WalletActivity : WalletOpeningActivity() {
                         self: EditWalletBottomSheetDialog,
                         newWalletName: String
                     ) {
-                        Path(walletPath).moveTo(Path(walletPath).resolveSibling(newWalletName))
-                        Path("$walletPath.keys").moveTo(Path(walletPath).resolveSibling("$newWalletName.keys"))
-                        walletAdapter.setWalletPaths(findWallets())
-                        Toast.makeText(this@WalletActivity, "Wallet renamed", Toast.LENGTH_SHORT).show()
+                        if (Path(walletPath).name != newWalletName) {
+                            Path(walletPath).moveTo(Path(walletPath).resolveSibling(newWalletName))
+                            Path("$walletPath.keys").moveTo(Path(walletPath).resolveSibling("$newWalletName.keys"))
+                            walletAdapter.setWalletPaths(findWallets())
+                            Toast.makeText(this@WalletActivity, "Wallet renamed", Toast.LENGTH_SHORT).show()
+                        }
                         self.dismiss()
                     }
                 })
