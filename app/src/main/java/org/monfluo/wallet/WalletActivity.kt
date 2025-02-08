@@ -1,15 +1,22 @@
 package org.monfluo.wallet
 
-import WalletAdapter
+import org.monfluo.wallet.adapter.WalletAdapter
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.monfluo.wallet.fragment.dialog.EditWalletBottomSheetDialog
 import org.monfluo.wallet.fragment.dialog.PasswordBottomSheetDialog
 import org.monfluo.wallet.model.WalletManager
+import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.acitivity.WalletOpeningActivity
+import kotlin.io.path.Path
+import kotlin.io.path.deleteExisting
+import kotlin.io.path.moveTo
+import kotlin.io.path.name
 
 class WalletActivity : WalletOpeningActivity() {
 
@@ -25,8 +32,8 @@ class WalletActivity : WalletOpeningActivity() {
         walletRecyclerView = findViewById(R.id.wallet_list_recyclerview)
 
         val walletPaths = WalletManager.instance.findWallets(Helper.getWalletRoot(this).absolutePath)
-        adapter = WalletAdapter(walletPaths, object : WalletAdapter.AccountAdapterListener {
-            override fun onWalletSelected(walletPath: String) {
+        adapter = WalletAdapter(walletPaths, object : WalletAdapter.WalletAdapterListener {
+            override fun onWalletSelected(self: WalletAdapter, walletPath: String) {
                 val passwordDialog = PasswordBottomSheetDialog(walletPath, false, object : PasswordBottomSheetDialog.Listener {
                     override fun onCorrectPasswordSubmitted(self: PasswordBottomSheetDialog, password: String) {
                         self.dismiss()
@@ -34,6 +41,37 @@ class WalletActivity : WalletOpeningActivity() {
                     }
                 })
                 passwordDialog.show(supportFragmentManager, "password_dialog")
+            }
+
+            override fun onWalletEdit(self: WalletAdapter, walletPath: String) {
+                if (WalletService.RUNNING.get()) {
+                    Toast.makeText(this@WalletActivity, "Please wait until wallet is closed", Toast.LENGTH_SHORT).show()
+                    return
+                }
+                val walletAdapter = self
+                val editWalletDialog = EditWalletBottomSheetDialog(Path(walletPath).name, object : EditWalletBottomSheetDialog.EditWalletListener {
+                    override fun onDeleteWallet(
+                        self: EditWalletBottomSheetDialog,
+                    ) {
+                        Path(walletPath).deleteExisting()
+                        Path("$walletPath.keys").deleteExisting()
+                        walletAdapter.setWalletPaths(WalletManager.instance.findWallets(Helper.getWalletRoot(this@WalletActivity).absolutePath))
+                        Toast.makeText(this@WalletActivity, "Wallet deleted", Toast.LENGTH_SHORT).show()
+                        self.dismiss()
+                    }
+
+                    override fun onDone(
+                        self: EditWalletBottomSheetDialog,
+                        newWalletName: String
+                    ) {
+                        Path(walletPath).moveTo(Path(walletPath).resolveSibling(newWalletName))
+                        Path("$walletPath.keys").moveTo(Path(walletPath).resolveSibling("$newWalletName.keys"))
+                        walletAdapter.setWalletPaths(WalletManager.instance.findWallets(Helper.getWalletRoot(this@WalletActivity).absolutePath))
+                        Toast.makeText(this@WalletActivity, "Wallet renamed", Toast.LENGTH_SHORT).show()
+                        self.dismiss()
+                    }
+                })
+                editWalletDialog.show(supportFragmentManager, "edit_wallet_dialog")
             }
         })
         walletRecyclerView.layoutManager = LinearLayoutManager(this)

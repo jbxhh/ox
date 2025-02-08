@@ -84,6 +84,7 @@
     <string name="add_node">Add Node</string>
     <string name="nodes">Nodes</string>
     <string name="node_name_hint">My Monero Node</string>
+    <string name="wallet_name_hint">My Monero Wallet</string>
     <string name="node_address_hint">127.0.0.1:18081</string>
     <string name="node_username_hint">Username (optional)</string>
     <string name="node_password_hint">Passphrase</string>
@@ -127,6 +128,7 @@
     <string name="cant_edit_current_node">Cannot edit current node.</string>
     <string name="cant_edit_default_nodes">Cannot edit default node.</string>
     <string name="edit_node">Edit Node</string>
+    <string name="edit_wallet">Edit Wallet</string>
     <string name="wallet_seed_label">Recovery seed</string>
     <string name="wallet_seed_desc">Anyone with your recovery seed can spend ALL coins in this wallet!</string>
     <string name="wallet_seed_offset_legacy_seed_desc">The seed offset passphrase will be required to correctly restore this wallet.</string>
