@@ -61,6 +61,7 @@
     <string name="save">Save</string>
     <string name="enter_password">Enter passphrase</string>
     <string name="edit_address_label">Set address label</string>
+    <string name="edit_account_label">Set account label</string>
     <string name="tx_address_text">Address: %1$s</string>
     <string name="tx_amount_text">Amount: %1$s XMR</string>
     <string name="tx_fee_text">Fee: %1$s XMR</string>
