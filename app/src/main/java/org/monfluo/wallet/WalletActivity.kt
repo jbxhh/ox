@@ -13,6 +13,7 @@ import org.monfluo.wallet.model.WalletManager
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.acitivity.WalletOpeningActivity
+import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.deleteExisting
 import kotlin.io.path.moveTo
@@ -31,7 +32,7 @@ class WalletActivity : WalletOpeningActivity() {
         createWalletButton = findViewById(R.id.create_or_import_wallet)
         walletRecyclerView = findViewById(R.id.wallet_list_recyclerview)
 
-        val walletPaths = WalletManager.instance.findWallets(Helper.getWalletRoot(this).absolutePath)
+        val walletPaths = findWallets()
         adapter = WalletAdapter(walletPaths, object : WalletAdapter.WalletAdapterListener {
             override fun onWalletSelected(self: WalletAdapter, walletPath: String) {
                 val passwordDialog = PasswordBottomSheetDialog(walletPath, false, object : PasswordBottomSheetDialog.Listener {
@@ -55,7 +56,7 @@ class WalletActivity : WalletOpeningActivity() {
                     ) {
                         Path(walletPath).deleteExisting()
                         Path("$walletPath.keys").deleteExisting()
-                        walletAdapter.setWalletPaths(WalletManager.instance.findWallets(Helper.getWalletRoot(this@WalletActivity).absolutePath))
+                        walletAdapter.setWalletPaths(findWallets())
                         Toast.makeText(this@WalletActivity, "Wallet deleted", Toast.LENGTH_SHORT).show()
                         self.dismiss()
                     }
@@ -66,7 +67,7 @@ class WalletActivity : WalletOpeningActivity() {
                     ) {
                         Path(walletPath).moveTo(Path(walletPath).resolveSibling(newWalletName))
                         Path("$walletPath.keys").moveTo(Path(walletPath).resolveSibling("$newWalletName.keys"))
-                        walletAdapter.setWalletPaths(WalletManager.instance.findWallets(Helper.getWalletRoot(this@WalletActivity).absolutePath))
+                        walletAdapter.setWalletPaths(findWallets())
                         Toast.makeText(this@WalletActivity, "Wallet renamed", Toast.LENGTH_SHORT).show()
                         self.dismiss()
                     }
@@ -82,5 +83,9 @@ class WalletActivity : WalletOpeningActivity() {
             onboardingActivityIntent.data = intent.data
             startActivity(onboardingActivityIntent)
         }
+    }
+
+    private fun findWallets(): List<String> {
+        return Helper.findWallets(Helper.getWalletRoot(this))
     }
 }
