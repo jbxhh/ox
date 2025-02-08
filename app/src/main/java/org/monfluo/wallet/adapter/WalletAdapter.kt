@@ -1,3 +1,5 @@
+package org.monfluo.wallet.adapter
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,8 +11,13 @@ import kotlin.io.path.name
 
 class WalletAdapter(
     private var walletPaths: List<String>,
-    private val listener: AccountAdapterListener
+    private val listener: WalletAdapterListener
 ) : RecyclerView.Adapter<WalletAdapter.ViewHolder>() {
+
+    fun setWalletPaths(walletPaths: List<String>) {
+        this.walletPaths = walletPaths
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.recycler_view_item_wallet, parent, false)
@@ -25,11 +32,12 @@ class WalletAdapter(
         holder.bind(walletPaths[position])
     }
 
-    interface AccountAdapterListener {
-        fun onWalletSelected(walletPath: String)
+    interface WalletAdapterListener {
+        fun onWalletSelected(self: WalletAdapter, walletPath: String)
+        fun onWalletEdit(self: WalletAdapter, walletPath: String)
     }
 
-    class ViewHolder(private val listener: AccountAdapterListener, view: View) : RecyclerView.ViewHolder(view) {
+    inner class ViewHolder(private val listener: WalletAdapterListener, view: View) : RecyclerView.ViewHolder(view) {
 
         private lateinit var walletNameTextView: TextView
 
@@ -45,7 +53,12 @@ class WalletAdapter(
             walletNameTextView.text = Path(walletPath).name
 
             itemView.setOnClickListener {
-                listener.onWalletSelected(walletPath)
+                listener.onWalletSelected(this@WalletAdapter, walletPath)
+            }
+
+            itemView.setOnLongClickListener { _ ->
+                listener.onWalletEdit(this@WalletAdapter, walletPath)
+                true
             }
         }
     }
