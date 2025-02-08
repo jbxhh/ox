@@ -26,6 +26,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Path
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.VectorDrawable
 import android.os.Build
@@ -60,8 +61,16 @@ object Helper {
     var ALLOW_SHIFT = false
     var DISPLAY_DIGITS_INFO = 5
     private var ShakeAnimation: Animation? = null
+
     fun getWalletRoot(context: Context): File {
         return getStorage(context, WALLET_DIR)
+    }
+
+    fun findWallets(file: File): List<String> {
+        return file.listFiles()
+            ?.filter { it.isFile && it.path.endsWith(".keys") }
+            ?.map { it.path.removeSuffix(".keys") }
+            ?: emptyList()
     }
 
     fun getStorage(context: Context, folderName: String): File {
