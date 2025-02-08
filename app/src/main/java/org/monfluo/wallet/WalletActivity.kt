@@ -16,6 +16,7 @@ import org.monfluo.wallet.util.acitivity.WalletOpeningActivity
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.deleteExisting
+import kotlin.io.path.deleteIfExists
 import kotlin.io.path.moveTo
 import kotlin.io.path.name
 
@@ -54,8 +55,8 @@ class WalletActivity : WalletOpeningActivity() {
                     override fun onDeleteWallet(
                         self: EditWalletBottomSheetDialog,
                     ) {
-                        Path(walletPath).deleteExisting()
-                        Path("$walletPath.keys").deleteExisting()
+                        Path(walletPath).deleteIfExists()
+                        Path("$walletPath.keys").deleteIfExists()
                         walletAdapter.setWalletPaths(findWallets())
                         Toast.makeText(this@WalletActivity, "Wallet deleted", Toast.LENGTH_SHORT).show()
                         self.dismiss()
