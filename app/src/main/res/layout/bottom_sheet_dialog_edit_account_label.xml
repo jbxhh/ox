@@ -18,7 +18,7 @@
             android:layout_marginTop="24dp"
             android:layout_marginEnd="24dp"
             android:layout_marginBottom="32dp"
-            android:text="@string/edit_address_label"
+            android:text="@string/edit_account_label"
             android:textSize="32sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@id/wallet_password_edittext"
