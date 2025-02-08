@@ -169,8 +169,8 @@
     <string name="scan_qr_code_for_address_field">Scan QR code for address field</string>
     <string name="copy_transaction_hash">Copy transaction hash</string>
     <string name="copy_transaction_addr">Copy transaction address</string>
-    <string name="seed_desc_polyseed">16 words instead of 25; just as secure, but not supported in as many wallets right now. In Monfluo, seed passphrase is enforced for these wallets.</string>
-    <string name="seed_desc_legacy">Older, 25 word seed; supported in all Monero wallets. In Monfluo, seed passphrase is not enforced for these wallets.</string>
+    <string name="seed_desc_polyseed">16 words instead of 25; just as secure, but not supported in as many wallets right now.</string>
+    <string name="seed_desc_legacy">Older, 25 word seed; supported in all Monero wallets.</string>
     <string name="approve_the_transaction">Send transaction</string>
     <string name="paste_clipboard_into_passphrase_field">Paste clipboard into passphrase field</string>
     <string name="slide_to_send_transaction">Slide to send transaction</string>
