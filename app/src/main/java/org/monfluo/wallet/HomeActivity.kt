@@ -99,9 +99,10 @@ class HomeActivity : MoneroActivity() {
     private fun bindObservers() {
         viewModel.showWalletLabel.observe(this) { isShowWalletLabel ->
             if (isShowWalletLabel) {
-                val wallet = walletService!!.getWalletOrThrow()
-                walletAndAccountTextView.visibility = View.VISIBLE
-                walletAndAccountTextView.text = "${wallet.name} / ${wallet.getAccountIndex()}"
+                walletService?.getWallet()?.let { wallet ->
+                    walletAndAccountTextView.visibility = View.VISIBLE
+                    walletAndAccountTextView.text = "${wallet.name} / ${wallet.getAccountIndex()}"
+                }
             } else {
                 walletAndAccountTextView.visibility = View.GONE
             }
