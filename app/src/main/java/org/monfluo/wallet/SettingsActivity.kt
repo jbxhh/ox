@@ -78,7 +78,7 @@ class SettingsActivity : MoneroActivity() {
         val isAllowCopyingSecrets = PreferenceUtils.isAllowCopyingSecrets(applicationContext)
         val isUseProxy = PreferenceUtils.isUseProxy(applicationContext)
 
-        accountAdapter = AccountAdapter(emptyList(), null, isStreetMode, object : AccountAdapter.AccountAdapterListener {
+        accountAdapter = AccountAdapter(emptyList(), null, object : AccountAdapter.AccountAdapterListener {
             override fun onAccountSelected(account: Account) {
                 walletService?.setAccount(account.index)
             }

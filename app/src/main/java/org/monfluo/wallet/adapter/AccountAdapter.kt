@@ -12,7 +12,6 @@ import org.monfluo.wallet.model.Account
 class AccountAdapter(
     private var accounts: List<Account>,
     private var selectedAccount: Account?,
-    private var streetMode: Boolean,
     private val listener: AccountAdapterListener
 ) : RecyclerView.Adapter<AccountAdapter.ViewHolder>() {
 
@@ -28,7 +27,7 @@ class AccountAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.recycler_view_item_account, parent, false)
-        return ViewHolder(listener, view, streetMode)
+        return ViewHolder(listener, view)
     }
 
     override fun getItemCount(): Int {
@@ -44,11 +43,10 @@ class AccountAdapter(
         fun onAccountEditLabel(account: Account)
     }
 
-    class ViewHolder(private val listener: AccountAdapterListener, view: View, private val streetMode: Boolean) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(private val listener: AccountAdapterListener, view: View) : RecyclerView.ViewHolder(view) {
 
-        private lateinit var addressTextView: TextView
-        private lateinit var addressLabelTextView: TextView
-        private lateinit var addressAmountTextView: TextView
+        private lateinit var accountIndexTextView: TextView
+        private lateinit var accountLabelTextView: TextView
 
         private lateinit var account: Account
 
@@ -58,18 +56,16 @@ class AccountAdapter(
         ) {
             this.account = account
 
-            addressTextView = itemView.findViewById(R.id.account_item_account_textview)
-            addressLabelTextView = itemView.findViewById(R.id.address_label_textview)
-            addressAmountTextView = itemView.findViewById(R.id.address_amount_textview)
+            accountIndexTextView = itemView.findViewById(R.id.account_index_textview)
+            accountLabelTextView = itemView.findViewById(R.id.account_label_textview)
 
-            addressTextView.text = account.label
-            addressLabelTextView.text = account.index.toString()
-            addressAmountTextView.text = account.balance.total.toString()
+            accountIndexTextView.text = account.index.toString()
+            accountLabelTextView.text = account.label
 
             if (isSelected) {
-                addressTextView.setTypeface(null, Typeface.BOLD)
+                accountLabelTextView.setTypeface(null, Typeface.BOLD)
             } else {
-                addressTextView.setTypeface(null, Typeface.NORMAL)
+                accountLabelTextView.setTypeface(null, Typeface.NORMAL)
             }
 
             itemView.setOnClickListener {
