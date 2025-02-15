@@ -7,20 +7,25 @@ Mysu was a fork of Monerujo developed by m2049r.
 
 ## QUICKSTART
 
-Note: there are no production releases of Monfluo available yet. Only proceed if you would like to use a beta/testing release.
+- Download and install the latest apk from the [releases tab](https://codeberg.org/acx/monfluo/releases) (there are several files for different architectures, you probably want the one with "arm64" in the name, but if you are not sure you can just grab the universal one).
+- Run the app and either create a new wallet or restore an existing one.
+- Start using Monero.
 
-- Download the latest release [here](https://codeberg.org/anoncontributorxmr/monfluo/actions)
-    - Click on the newest action that is successful (has a green tick to the left) and originates from the `master` branch (has a label with the same name to the right).
-        - If the action has a label different than `master` - this is a work in progress release not intended for general audience, proceed only if you know what you are doing.
+## Using experimental/nightly builds from CI
+
+The CI is configured to build the app for every new commit.
+You can use those builds if you want to help with testing.
+Be aware though, those builds have a higher chance of having bugs.
+Release builds and experimental builds can be installed on the same device without interfering with each other.
+
+- Download the latest CI build [here](https://codeberg.org/acx/monfluo/actions)
+    - Click on the newest action that is successful (has a green tick to the left).
     - Look for `apks` artifact and click on it (this will start the download of a zip file).
     - Unzip the archive, find the app (it has .apk extension) and install it on your device.
-- Run the app, enter a passphrase (optional, depending on seed type), recovery seed (optional), and restore height (optional) to create a wallet.
-- See the [FAQ](doc/FAQ.md)
 
 ## Disclaimer
 
-Be sure to back up your wallet recovery phrase (and seed offset/passphrase, if you set one).  
-Monfluo enforces seed offsets/passphrases for Polyseed wallets).  
+Be sure to back up your wallet recovery phrase (and seed offset passphrase, if you set one).  
 We are NOT responsible for lost or stolen funds.
 
 ## Notable Features
@@ -28,6 +33,19 @@ We are NOT responsible for lost or stolen funds.
 - Coin control (UTXO/enote management)
 - Seed passphrases/offsets
 - Polyseed
+- Multi wallet & multi account
+- Select your own node
+- NO support for other coins
+- NO integrations (exchange rates, swapping services, fiat on/off-ramps, etc.)
+
+## Screenshots
+
+![](doc/screenshots/Monfluo1.png)
+![](doc/screenshots/Monfluo2.png)
+![](doc/screenshots/Monfluo3.png)
+![](doc/screenshots/Monfluo4.png)
+![](doc/screenshots/Monfluo5.png)
+![](doc/screenshots/Monfluo6.png)
 
 ## HOW TO BUILD
 
