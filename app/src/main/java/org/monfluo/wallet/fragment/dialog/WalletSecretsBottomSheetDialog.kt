@@ -21,6 +21,7 @@ import org.monfluo.wallet.livedata.combineLiveDatas
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.util.Helper.clipBoardCopy
 import org.monfluo.wallet.util.PreferenceUtils
+import java.text.NumberFormat
 
 class WalletSecretsBottomSheetDialog(
     private val wallet: Wallet,
@@ -204,7 +205,7 @@ class WalletSecretsBottomSheetDialog(
             seedTextView.text = seed
         }
         viewModel.restoreHeight.observe(this) { restoreHeight ->
-            restoreHeightTextView.text = restoreHeight.toString()
+            restoreHeightTextView.text = NumberFormat.getInstance().format(restoreHeight)
         }
         viewModel.walletAddress.observe(this) { walletAddress ->
             walletAddressTextView.text = walletAddress

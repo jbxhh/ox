@@ -17,6 +17,7 @@ import org.monfluo.wallet.util.DateHelper
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.acitivity.MoneroActivity
+import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Objects
@@ -81,15 +82,15 @@ class TransactionActivity : MoneroActivity() {
                 return@observe
             }
             txHashTextView.text = transactionInfo.hash
-            txConfTextView.text = "${transactionInfo.confirmations}"
+            txConfTextView.text = NumberFormat.getInstance().format(transactionInfo.confirmations)
             txDateTextView.text = getDateTime(transactionInfo.timestamp)
             if (transactionInfo.confirmations > 1) {
                 confLabel2.text = getString(R.string.transaction_conf_desc2_confirmed)
-                blockHeightTextView.text = "${transactionInfo.blockheight}"
+                blockHeightTextView.text = NumberFormat.getInstance().format(transactionInfo.blockheight)
                 blockHeightTextView.visibility = View.VISIBLE
             } else if (transactionInfo.confirmations == 1L) {
                 confLabel2.text = getString(R.string.transaction_conf_1_desc2_confirmed)
-                blockHeightTextView.text = "${transactionInfo.blockheight}"
+                blockHeightTextView.text = NumberFormat.getInstance().format(transactionInfo.blockheight)
                 blockHeightTextView.visibility = View.VISIBLE
             } else {
                 blockHeightTextView.visibility = View.GONE
