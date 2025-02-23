@@ -28,11 +28,6 @@ class PendingTransaction internal constructor(var handle: Long) {
     external fun getAmount(): Long
     external fun getDust(): Long
     external fun getFee(): Long
-    val firstTxId: String
-        get() = getFirstTxIdJ() ?: throw IndexOutOfBoundsException()
-
-    external fun getFirstTxIdJ(): String?
-    external fun getTxCount(): Long
 
     enum class Status {
         Status_Ok, Status_Error, Status_Critical

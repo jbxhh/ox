@@ -15,10 +15,8 @@
  */
 package org.monfluo.wallet.model
 
-import android.util.Log
+import timber.log.Timber
 import java.io.File
-import java.util.Calendar
-import java.util.Locale
 
 class WalletManager {
     val networkType = NetworkType.NetworkType_Mainnet
@@ -32,7 +30,6 @@ class WalletManager {
         return wallet
     }
 
-    external fun findWallets(path: String): List<String>
     private external fun createWalletJ(
         path: String,
         password: String,
@@ -59,7 +56,7 @@ class WalletManager {
         )
         if (wallet.status.isOk) {
             wallet.setPassword(password) // this rewrites the keys file (which contains the restore height)
-        } else Log.e("WalletManager.kt", wallet.status.toString())
+        } else Timber.e("Failed to create polyseed wallet: ${wallet.status}")
         return wallet
     }
 
@@ -71,7 +68,6 @@ class WalletManager {
         networkType: Int
     ): Long
 
-    //TODO virtual bool checkPayment(const std::string &address, const std::string &txid, const std::string &txkey, const std::string &daemon_address, uint64_t &received, uint64_t &height, std::string &error) const = 0;
     fun openWallet(path: String, password: String): Wallet {
         val walletHandle = openWalletJ(path, password, networkType.value)
         val wallet = Wallet(
@@ -153,14 +149,6 @@ class WalletManager {
         spendKeyString: String
     ): Long
 
-    private external fun createWalletFromDeviceJ(
-        path: String, password: String,
-        networkType: Int,
-        deviceName: String,
-        restoreHeight: Long,
-        subaddressLookahead: String
-    ): Long
-
     external fun closeJ(wallet: Wallet?): Boolean
 
     fun walletExists(aFile: File): Boolean {
@@ -171,57 +159,21 @@ class WalletManager {
     external fun verifyWalletPassword(
         keysFileName: String?,
         password: String?,
-        watchOnly: Boolean
+        noSpendKey: Boolean
     ): Boolean
-
-    fun verifyWalletPasswordOnly(keysFileName: String, password: String): Boolean {
-        return queryWalletDeviceJ(keysFileName, password) >= 0
-    }
-
-    private external fun queryWalletDeviceJ(keysFileName: String, password: String): Int
 
     external fun setDaemonAddressJ(address: String)
     external fun getDaemonVersion(): Int
     external fun getBlockchainHeight(): Long
     external fun getBlockchainTargetHeight(): Long
     external fun getNetworkDifficulty(): Long
-    external fun getMiningHashRate(): Double
     external fun getBlockTarget(): Long
-    external fun isMining(): Boolean
 
-    external fun startMining(
-        address: String?,
-        backgroundMining: Boolean,
-        ignoreBattery: Boolean
-    ): Boolean
-
-    external fun stopMining(): Boolean
     external fun resolveOpenAlias(address: String?, dnssec_valid: Boolean): String?
 
     external fun setProxyJ(address: String?): Boolean
-    inner class WalletInfo(wallet: File) : Comparable<WalletManager.WalletInfo> {
-        private val path: File
-        private val name: String
-
-        init {
-            path = wallet.parentFile
-            name = wallet.name
-        }
-
-        override fun compareTo(other: WalletManager.WalletInfo): Int {
-            return name.lowercase(Locale.getDefault())
-                .compareTo(other.name.lowercase(Locale.getDefault()))
-        }
-    }
 
     companion object {
-        //TODO: maybe put these in an enum like in monero core - but why?
-        var LOGLEVEL_SILENT = -1
-        var LOGLEVEL_WARN = 0
-        var LOGLEVEL_INFO = 1
-        var LOGLEVEL_DEBUG = 2
-        var LOGLEVEL_TRACE = 3
-        var LOGLEVEL_MAX = 4
 
         val instance: WalletManager
             get() = synchronized(WalletManager::class.java) {
@@ -241,18 +193,6 @@ class WalletManager {
 
         @JvmStatic
         external fun setLogLevel(level: Int)
-
-        @JvmStatic
-        external fun logDebug(category: String?, message: String?)
-
-        @JvmStatic
-        external fun logInfo(category: String?, message: String?)
-
-        @JvmStatic
-        external fun logWarning(category: String?, message: String?)
-
-        @JvmStatic
-        external fun logError(category: String?, message: String?)
 
         @JvmStatic
         external fun moneroVersion(): String?

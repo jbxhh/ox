@@ -3,7 +3,6 @@ package org.monfluo.wallet
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -34,6 +33,7 @@ import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.TransactionDestination
 import org.monfluo.wallet.util.UriData
 import org.monfluo.wallet.util.acitivity.MoneroActivity
+import timber.log.Timber
 
 class SendActivity : MoneroActivity() {
 
@@ -562,7 +562,7 @@ class SendActivity : MoneroActivity() {
             } else {
                 sendTxSlider.resetSlider()
                 Toast.makeText(this, getString(R.string.error_sending_tx), Toast.LENGTH_SHORT).show()
-                Log.e("SA", "pts = ${pendingTransaction.status}")
+                Timber.e("Transaction creation failed with status ${pendingTransaction.status}")
             }
         }
     }
