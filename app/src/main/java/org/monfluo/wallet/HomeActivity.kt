@@ -24,6 +24,7 @@ import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.acitivity.MoneroActivity
 import timber.log.Timber
+import java.text.NumberFormat
 
 class HomeActivity : MoneroActivity() {
 
@@ -101,7 +102,7 @@ class HomeActivity : MoneroActivity() {
             if (isShowWalletLabel) {
                 walletService?.getWallet()?.let { wallet ->
                     walletAndAccountTextView.visibility = View.VISIBLE
-                    walletAndAccountTextView.text = "${wallet.name()} / ${wallet.getAccountIndex()}"
+                    walletAndAccountTextView.text = getString(R.string.wallet_name_and_account_label, wallet.name(), wallet.getAccountIndex())
                 }
             } else {
                 walletAndAccountTextView.visibility = View.GONE
@@ -113,12 +114,13 @@ class HomeActivity : MoneroActivity() {
                 val (walletBeginSyncHeight, walletHeight, daemonHeight) = heights
                 val diff = daemonHeight - walletHeight
                 val synchronized = daemonHeight > 0 && diff == 0L
-                val walletDisplayHeight = (walletHeight - 1).toString()
-                val daemonDisplayHeight = if (daemonHeight > 0) (daemonHeight - 1).toString() else "???"
+                val walletDisplayHeight = NumberFormat.getInstance().format(walletHeight - 1)
+                val daemonDisplayHeight = if (daemonHeight > 0) NumberFormat.getInstance().format(daemonHeight - 1) else "???"
+                val diffDisplay = NumberFormat.getInstance().format(diff)
                 progressBarText.visibility = View.VISIBLE
                 if (synchronized) {
                     progressBar.visibility = View.INVISIBLE
-                    progressBarText.text = "Synchronized at $walletDisplayHeight"
+                    progressBarText.text = getString(R.string.synchronized_at_label, walletDisplayHeight)
                 } else {
                     progressBar.isIndeterminate = false
                     // Google employs the very rare kind of engineers to work on Android - engineers with negative fucking IQ
@@ -130,9 +132,9 @@ class HomeActivity : MoneroActivity() {
                     progressBar.setProgress(walletHeight.toInt(), true)
                     progressBar.visibility = View.VISIBLE
                     if (walletHeight > walletBeginSyncHeight) {
-                        progressBarText.text = "Synchronizing: $walletDisplayHeight / $daemonDisplayHeight ($diff blocks remaining)"
+                        progressBarText.text = getString(R.string.synchronizing_blocks_remaining, walletDisplayHeight, daemonDisplayHeight, diffDisplay)
                     } else {
-                        progressBarText.text = "Starting wallet synchronization..."
+                        progressBarText.text = getString(R.string.starting_wallet_synchronization)
                     }
                 }
             }
@@ -144,7 +146,7 @@ class HomeActivity : MoneroActivity() {
                 if (balance.frozen != 0L) {
                     val textFrozenBalance = if (!streetMode) Wallet.getDisplayAmount(balance.frozen) else Constants.STREET_MODE_BALANCE
                     val formattedFrozenBalance = if (balance.frozen < 0) "- $textFrozenBalance" else "+ $textFrozenBalance"
-                    frozenBalanceTextView.text = "$formattedFrozenBalance frozen"
+                    frozenBalanceTextView.text = getString(R.string.frozen_amount, formattedFrozenBalance)
                     frozenBalanceTextView.visibility = View.VISIBLE
                 } else {
                     frozenBalanceTextView.visibility = View.GONE
@@ -152,7 +154,7 @@ class HomeActivity : MoneroActivity() {
                 if (balance.pending != 0L) {
                     val textUnconfirmedBalance = if (!streetMode) Wallet.getDisplayAmount(balance.pending) else Constants.STREET_MODE_BALANCE
                     val formattedUnconfirmedBalance = if (balance.pending < 0) "- $textUnconfirmedBalance" else "+ $textUnconfirmedBalance"
-                    lockedBalanceTextView.text = "$formattedUnconfirmedBalance unconfirmed"
+                    lockedBalanceTextView.text = getString(R.string.unconfirmed_amount, formattedUnconfirmedBalance)
                     lockedBalanceTextView.visibility = View.VISIBLE
                 } else {
                     lockedBalanceTextView.visibility = View.GONE
