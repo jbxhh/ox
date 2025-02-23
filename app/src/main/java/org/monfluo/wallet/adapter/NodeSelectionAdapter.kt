@@ -25,6 +25,8 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.R
 import org.monfluo.wallet.data.Node
+import timber.log.Timber
+import java.net.URL
 
 class NodeSelectionAdapter(
     private var nodes: List<Node>,
@@ -103,10 +105,10 @@ class NodeSelectionAdapter(
             }
             val nodeAnonymityNetworkImageView =
                 itemView.findViewById<ImageView>(R.id.anonymity_network_imageview)
-            if (node.isOnion) {
+            if (node.isOnion()) {
                 nodeAnonymityNetworkImageView.visibility = View.VISIBLE
                 nodeAnonymityNetworkImageView.setImageResource(R.drawable.tor)
-            } else if (node.isI2P) {
+            } else if (node.isI2P()) {
                 nodeAnonymityNetworkImageView.visibility = View.VISIBLE
                 nodeAnonymityNetworkImageView.setImageResource(R.drawable.i2p)
             } else {

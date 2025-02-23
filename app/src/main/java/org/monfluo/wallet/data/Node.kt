@@ -27,10 +27,8 @@ data class Node(
     val trusted: Boolean = false,
 ) {
 
-    val isOnion: Boolean = false
-//        get() = host.let { OnionHelper.isOnionHost(it) }
-    val isI2P: Boolean = false
-//        get() = host.let { OnionHelper.isI2PHost(it) }
+    fun isOnion(): Boolean = kotlin.runCatching { address.split(":").getOrNull(0)?.endsWith(".onion") }.getOrNull() ?: false
+    fun isI2P(): Boolean = kotlin.runCatching { address.split(":").getOrNull(0)?.endsWith(".i2p") }.getOrNull() ?: false
 
     fun toJson(): Result<JSONObject> = runCatching {
         val jsonObject = JSONObject()

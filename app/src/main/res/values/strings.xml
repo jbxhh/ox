@@ -12,15 +12,9 @@
     <string name="tx_list_amount_negative">- %1$s</string>
     <string name="tx_list_amount_positive">+ %1$s</string>
 
-    <!--note: as in "Test a network connection"-->
-
     <string name="menu_restore">Import wallet</string>
 
     <string name="preferred_theme" translatable="false">preferred_theme</string>
-
-    <!-- like: User Intreface -->
-
-    <!-- Strings used for fragments for navigation -->
 
     <string name="wallet_locked_balance_text">+ %1$s confirming</string>
     <string name="send_amount_empty">Please enter an amount</string>

@@ -101,7 +101,7 @@ class HomeActivity : MoneroActivity() {
             if (isShowWalletLabel) {
                 walletService?.getWallet()?.let { wallet ->
                     walletAndAccountTextView.visibility = View.VISIBLE
-                    walletAndAccountTextView.text = "${wallet.name} / ${wallet.getAccountIndex()}"
+                    walletAndAccountTextView.text = "${wallet.name()} / ${wallet.getAccountIndex()}"
                 }
             } else {
                 walletAndAccountTextView.visibility = View.GONE
@@ -253,12 +253,15 @@ class HomeActivity : MoneroActivity() {
     }
 
     override fun onNewBlock(wallet: Wallet) {
-        updateHeights(walletService!!, wallet)
+        walletService?.let { walletService ->
+            updateHeights(walletService, wallet)
+        }
     }
 
     override fun onBlockchainHeightFetched(height: Long) {
-        val walletService = walletService!!
-        updateHeights(walletService, walletService.getWallet())
+        walletService?.let { walletService ->
+            updateHeights(walletService, walletService.getWallet())
+        }
     }
 
     private fun updateHeights(walletService: WalletService, wallet: Wallet?) {

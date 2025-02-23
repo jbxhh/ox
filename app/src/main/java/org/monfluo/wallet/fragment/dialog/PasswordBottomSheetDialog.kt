@@ -62,10 +62,11 @@ class PasswordBottomSheetDialog(
         }
     }
 
-    private fun checkPassword(walletPassword: String): Boolean {
-        return WalletManager.instance.verifyWalletPasswordOnly(
+    private fun checkPassword(walletPassword: String, noSpendKey: Boolean = false): Boolean {
+        return WalletManager.instance.verifyWalletPassword(
             "$walletPath.keys",
-            walletPassword
+            walletPassword,
+            noSpendKey
         )
     }
 
