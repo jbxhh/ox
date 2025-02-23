@@ -26,6 +26,7 @@ import org.monfluo.wallet.R
 import org.monfluo.wallet.model.Enote
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.util.Constants
+import java.text.NumberFormat
 
 class EnotesAdapter(
     private var enotes: List<Enote>,
@@ -116,7 +117,7 @@ class EnotesAdapter(
             globalIdxTextView.text =
                 itemView.resources.getString(
                     R.string.global_index_text,
-                    enote.globalOutputIndex
+                    NumberFormat.getInstance().format(enote.globalOutputIndex)
                 )
             outpointTextView.text = itemView.resources.getString(
                 R.string.outpoint_text,
