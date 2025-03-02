@@ -1,6 +1,7 @@
 package org.monfluo.wallet
 
 import android.content.Intent
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -86,6 +87,12 @@ class HomeActivity : MoneroActivity() {
     }
 
     private fun bindListeners() {
+        unlockedBalanceTextView.setOnClickListener {
+            val streetMode = viewModel.streetMode.value!!
+            val newStreetMode = !streetMode
+            PreferenceUtils.setStreetMode(this, newStreetMode)
+            viewModel.setStreetMode(newStreetMode)
+        }
         settingsImageView.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
@@ -140,8 +147,13 @@ class HomeActivity : MoneroActivity() {
             }
         }
 
-        viewModel.balance.observe(this) { (balance, streetMode) ->
+        viewModel.balance.observe(this) { (isSynchronized, balance, streetMode) ->
             if (balance != null) {
+                val typeface = if (isSynchronized) Typeface.BOLD else Typeface.BOLD_ITALIC
+                unlockedBalanceTextView.setTypeface(null, typeface)
+                frozenBalanceTextView.setTypeface(null, typeface)
+                lockedBalanceTextView.setTypeface(null, typeface)
+
                 unlockedBalanceTextView.text = if (!streetMode) Wallet.getDisplayAmount(balance.unlocked) else Constants.STREET_MODE_BALANCE
                 if (balance.frozen != 0L) {
                     val textFrozenBalance = if (!streetMode) Wallet.getDisplayAmount(balance.frozen) else Constants.STREET_MODE_BALANCE
@@ -310,10 +322,19 @@ internal class HomeActivityViewModel : ViewModel() {
     }
 
     val balance = combineLiveDatas(
+        syncProgress,
         _balance,
         _streetMode,
-    ) { balance, streetMode ->
-        Pair(balance, streetMode!!)
+    ) { syncProgress, balance, streetMode ->
+        val (walletConnected, heights) = syncProgress!!
+        val isSynchronized = if (walletConnected) {
+            val (_, walletHeight, daemonHeight) = heights
+            val diff = daemonHeight - walletHeight
+            daemonHeight > 0 && diff == 0L
+        } else {
+            false
+        }
+        Triple(isSynchronized, balance, streetMode!!)
     }
 
     fun setWalletConnected(walletConnected: Boolean) {
