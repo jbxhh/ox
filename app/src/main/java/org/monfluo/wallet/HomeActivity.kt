@@ -210,11 +210,11 @@ class HomeActivity : MoneroActivity() {
 
         val isMultiWalletMode = PreferenceUtils.isMultiWalletMode(this)
         val isMultiAccountMode = PreferenceUtils.isMultiAccountMode(this)
-        val isStreetModeMode = PreferenceUtils.isStreetMode(this)
+        val isStreetMode = PreferenceUtils.isStreetMode(this)
 
         viewModel.setMultiWalletMode(isMultiWalletMode)
         viewModel.setMultiAccountMode(isMultiAccountMode)
-        viewModel.setStreetMode(isStreetModeMode)
+        viewModel.setStreetMode(isStreetMode)
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
