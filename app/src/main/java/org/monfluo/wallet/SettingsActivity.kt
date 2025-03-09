@@ -191,13 +191,17 @@ class SettingsActivity : MoneroActivity() {
             val proxyAddress = walletProxyAddressEditText.text.toString()
             PreferenceUtils.setProxy(applicationContext, proxyAddress)
             if (proxySwitch.isChecked) {
-                Toast.makeText(this, "Activating proxy", Toast.LENGTH_SHORT).show()
-                walletService?.setProxy(proxyAddress)
+                if (proxyAddress.isBlank()) {
+                    Toast.makeText(this, "Proxy address is not set", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Activating proxy", Toast.LENGTH_SHORT).show()
+                    walletService?.setProxy(proxyAddress)
+                }
             } else if (walletService?.getProxy() != "") {
                 Toast.makeText(this, "Deactivating proxy", Toast.LENGTH_SHORT).show()
                 walletService?.setProxy("")
             } else {
-                Toast.makeText(this, "Proxy saved", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Proxy settings saved", Toast.LENGTH_SHORT).show()
             }
         }
 
