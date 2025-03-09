@@ -419,14 +419,15 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         // Monero heights are fucked up. Wallet and blockchain heights are always +1 to real height, but this callback receives real height
         daemonHeight.updateAndGet { if (it > 0 && it < (height + 1)) (height + 1) else it }
         walletBeginSyncHeight.updateAndGet { if (it <= 1) (height + 1) else it }
-        val wallet = getWalletOrThrow()
-        forEachObserver {
-            it.onNewBlock(wallet)
-        }
-        if (last) {
-            Timber.d("Storing and updating wallet because the block is the last one of the batch")
-            updateWallet(wallet)
-            wallet.store()
+        getWalletOrLog()?.let { wallet ->
+            forEachObserver {
+                it.onNewBlock(wallet)
+            }
+            if (last) {
+                Timber.d("Storing and updating wallet because the block is the last one of the batch")
+                updateWallet(wallet)
+                wallet.store()
+            }
         }
     }
 
@@ -436,7 +437,9 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             Timber.d("Fetching blockchain height")
             fetchBlockchainHeight()
         }
-        updateWallet(getWalletOrThrow())
+        getWalletOrLog()?.let { wallet ->
+            updateWallet(wallet)
+        }
     }
 
     fun addObserver(observer: WalletServiceObserver) {
@@ -469,6 +472,17 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             return wallet
         } else {
             throw IllegalStateException("Get wallet called on null wallet")
+        }
+    }
+
+    fun getWalletOrLog(): Wallet? {
+        val wallet = this.walletRef.get()
+        if (wallet != null) {
+            return wallet
+        } else {
+            val e = IllegalStateException("Get wallet called on null wallet")
+            Timber.e(e, "Get wallet called on null wallet (log only)")
+            return null
         }
     }
 

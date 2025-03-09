@@ -96,6 +96,7 @@ class TransactionActivity : MoneroActivity() {
             if (transactionInfo == null) {
                 return@observe
             }
+            val wallet = walletService?.getWalletOrLog() ?: return@observe
             txHashTextView.text = transactionInfo.hash
             txConfTextView.text = NumberFormat.getInstance().format(transactionInfo.confirmations)
             txDateTextView.text = getDateTime(transactionInfo.timestamp)
@@ -135,7 +136,6 @@ class TransactionActivity : MoneroActivity() {
             }
             txAmountTextView.text = balanceString
             var destination: String? = "-"
-            val wallet = walletService!!.getWalletOrThrow()
             if (transactionInfo.txKey == null) {
                 transactionInfo.txKey = wallet.getTxKey(transactionInfo.hash)
             }

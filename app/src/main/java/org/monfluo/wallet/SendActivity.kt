@@ -208,13 +208,13 @@ class SendActivity : MoneroActivity() {
     }
 
     private fun updateEnotesLabel() {
-        walletService?.let { walletService ->
-            val selectedUtxos = viewModel.enotes.value
-            if (selectedUtxos?.isNotEmpty() == true) {
+        walletService?.getWalletOrLog()?.let { wallet ->
+            val selectedEnotes = viewModel.enotes.value
+            if (selectedEnotes?.isNotEmpty() == true) {
                 var selectedValue: Long = 0
-                val enotes = walletService.getWalletOrThrow().getEnotes()
+                val enotes = wallet.getEnotes()
                 for (coinsInfo in enotes) {
-                    if (selectedUtxos.contains(coinsInfo.keyImage)) {
+                    if (selectedEnotes.contains(coinsInfo.keyImage)) {
                         selectedValue += coinsInfo.amount
                     }
                 }
