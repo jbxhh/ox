@@ -2,7 +2,9 @@ package org.monfluo.wallet.listener
 
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
+import org.monfluo.wallet.data.DefaultNode
 import org.monfluo.wallet.data.Node
+import org.monfluo.wallet.data.SortOrder
 import org.monfluo.wallet.fragment.dialog.AddNodeBottomSheetDialog
 import org.monfluo.wallet.fragment.dialog.EditNodeBottomSheetDialog
 import org.monfluo.wallet.fragment.dialog.NodeSelectionBottomSheetDialog
@@ -25,7 +27,7 @@ abstract class NodeSelectionDialogListenerAdapter(
         val nodeSelectionBottomSheetDialog = self
         val listener = object : EditNodeBottomSheetDialog.EditNodeListener {
             override fun onDeleteNode(self: EditNodeBottomSheetDialog, node: Node) {
-                val newNodes = nodeSelectionBottomSheetDialog.getNodes().toMutableList()
+                val newNodes = PreferenceUtils.getOrSetDefaultNodes(activity, DefaultNode.defaultNodes()).toMutableList()
                 newNodes.remove(node)
                 PreferenceUtils.setNodes(activity, newNodes).fold(
                     {
@@ -45,7 +47,8 @@ abstract class NodeSelectionDialogListenerAdapter(
                 oldNode: Node,
                 newNode: Node,
             ) {
-                val newNodes = nodeSelectionBottomSheetDialog.getNodes().map { node -> if (node != oldNode) node else newNode }
+                val newNodes = PreferenceUtils.getOrSetDefaultNodes(activity, DefaultNode.defaultNodes())
+                    .map { node -> if (node != oldNode) node else newNode }
                 PreferenceUtils.setNodes(activity, newNodes).fold(
                     {
                         Toast.makeText(activity, "Node saved", Toast.LENGTH_SHORT).show()
@@ -69,7 +72,7 @@ abstract class NodeSelectionDialogListenerAdapter(
         val nodeSelectionBottomSheetDialog = self
         val addNodeDialog = AddNodeBottomSheetDialog(object : AddNodeBottomSheetDialog.AddNodeListener {
             override fun onAddNode(self: AddNodeBottomSheetDialog, node: Node) {
-                val nodes = nodeSelectionBottomSheetDialog.getNodes()
+                val nodes = PreferenceUtils.getOrSetDefaultNodes(activity, DefaultNode.defaultNodes())
                 if (nodes.any { it.name == node.name }) {
                     Timber.i("Failed to add nodes due to node with the same name already existing")
                     Toast.makeText(activity, "Node with this name already exists", Toast.LENGTH_SHORT).show()
@@ -92,5 +95,11 @@ abstract class NodeSelectionDialogListenerAdapter(
             }
         })
         addNodeDialog.show(activity.supportFragmentManager, "add_node_dialog")
+    }
+
+    override fun onSortClicked(self: NodeSelectionBottomSheetDialog, sortOrder: SortOrder) {
+        val newSortOrder = sortOrder.reverse()
+        PreferenceUtils.setSortNodesAscending(activity, newSortOrder.toBoolean())
+        self.setSortOrder(newSortOrder)
     }
 }

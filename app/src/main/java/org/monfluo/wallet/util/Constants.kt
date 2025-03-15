@@ -16,6 +16,7 @@ object Constants {
     const val PREF_ENABLE_MULTIPLE_WALLETS = "pref_enable_multiple_wallets"
     const val PREF_ENABLE_MULTIPLE_ACCOUNTS = "pref_enable_multiple_accounts"
     const val PREF_ALLOW_COPYING_SECRETS = "pref_allow_copying_secrets"
+    const val PREF_SORT_NODES_ASCENDING = "pref_sort_nodes_ascending"
 
     const val URI_PREFIX = "monero:"
     const val URI_ARG_AMOUNT = "tx_amount"

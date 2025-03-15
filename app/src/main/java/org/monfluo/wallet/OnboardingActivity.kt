@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 import org.monfluo.wallet.data.DefaultNode
 import org.monfluo.wallet.data.Node
 import org.monfluo.wallet.data.SeedType
+import org.monfluo.wallet.data.SortOrder
 import org.monfluo.wallet.fragment.dialog.NodeSelectionBottomSheetDialog
 import org.monfluo.wallet.listener.NodeSelectionDialogListenerAdapter
 import org.monfluo.wallet.livedata.combineLiveDatas
@@ -214,6 +215,7 @@ class OnboardingActivity : WalletOpeningActivity() {
         selectNodeButton.setOnClickListener {
             val nodes = PreferenceUtils.getOrSetDefaultNodes(this, DefaultNode.defaultNodes())
             val node = PreferenceUtils.getOrSetDefaultNode(this, DefaultNode.defaultNode())
+            val sortOrder = SortOrder.fromBoolean(PreferenceUtils.isSortNodesAscending(this))
 
             val listener = object : NodeSelectionDialogListenerAdapter(
                 activity = this,
@@ -237,7 +239,7 @@ class OnboardingActivity : WalletOpeningActivity() {
                 }
             }
 
-            val dialog = NodeSelectionBottomSheetDialog(nodes, node, listener)
+            val dialog = NodeSelectionBottomSheetDialog(sortOrder, nodes, node, listener)
             dialog.show(supportFragmentManager, "node_selection_dialog")
         }
     }

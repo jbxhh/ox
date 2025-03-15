@@ -25,8 +25,6 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.R
 import org.monfluo.wallet.data.Node
-import timber.log.Timber
-import java.net.URL
 
 class NodeSelectionAdapter(
     private var nodes: List<Node>,
@@ -71,30 +69,20 @@ class NodeSelectionAdapter(
         fun onEditNode(node: Node)
     }
 
-    class ViewHolder(private val listener: NodeSelectionAdapterListener, view: View) :
-        RecyclerView.ViewHolder(
-            view
-        ) {
+    class ViewHolder(private val listener: NodeSelectionAdapterListener, view: View) : RecyclerView.ViewHolder(view) {
+
+        private val nodeNameTextView: TextView = itemView.findViewById(R.id.node_name_textview)
+        private val nodeAddressTextView: TextView = itemView.findViewById(R.id.node_uri_textview)
+        private val authTextView: TextView = itemView.findViewById(R.id.authenticated_textview)
+        private val trustedTextView: TextView = itemView.findViewById(R.id.trusted_node_textview)
+        private val anonymityNetworkImageView: ImageView = itemView.findViewById(R.id.anonymity_network_imageview)
+
         fun bind(node: Node, isSelected: Boolean) {
             if (isSelected) {
-                itemView.setBackgroundColor(
-                    ContextCompat.getColor(
-                        itemView.context,
-                        R.color.oled_colorSecondary
-                    )
-                )
+                itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.oled_colorSecondary))
             } else {
-                itemView.setBackgroundColor(
-                    ContextCompat.getColor(
-                        itemView.context,
-                        android.R.color.transparent
-                    )
-                )
+                itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, android.R.color.transparent))
             }
-            val nodeNameTextView = itemView.findViewById<TextView>(R.id.node_name_textview)
-            val nodeAddressTextView = itemView.findViewById<TextView>(R.id.node_uri_textview)
-            val authTextView = itemView.findViewById<TextView>(R.id.authenticated_textview)
-            val trustedTextView = itemView.findViewById<TextView>(R.id.trusted_node_textview)
             nodeNameTextView.text = node.name
             nodeAddressTextView.text = node.address
             if (!node.password.isNullOrBlank()) {
@@ -103,16 +91,14 @@ class NodeSelectionAdapter(
             if (node.trusted) {
                 trustedTextView.visibility = View.VISIBLE
             }
-            val nodeAnonymityNetworkImageView =
-                itemView.findViewById<ImageView>(R.id.anonymity_network_imageview)
             if (node.isOnion()) {
-                nodeAnonymityNetworkImageView.visibility = View.VISIBLE
-                nodeAnonymityNetworkImageView.setImageResource(R.drawable.tor)
+                anonymityNetworkImageView.visibility = View.VISIBLE
+                anonymityNetworkImageView.setImageResource(R.drawable.tor)
             } else if (node.isI2P()) {
-                nodeAnonymityNetworkImageView.visibility = View.VISIBLE
-                nodeAnonymityNetworkImageView.setImageResource(R.drawable.i2p)
+                anonymityNetworkImageView.visibility = View.VISIBLE
+                anonymityNetworkImageView.setImageResource(R.drawable.i2p)
             } else {
-                nodeAnonymityNetworkImageView.visibility = View.GONE
+                anonymityNetworkImageView.visibility = View.GONE
             }
             itemView.setOnLongClickListener {
                 listener.onEditNode(node)
