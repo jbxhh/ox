@@ -46,6 +46,10 @@ object PreferenceUtils {
 
     fun setAllowCopyingSecrets(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_ALLOW_COPYING_SECRETS, value)
 
+    fun isSortNodesAscending(context: Context): Boolean = getBoolean(context, Constants.PREF_SORT_NODES_ASCENDING, true)
+
+    fun setSortNodesAscending(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_SORT_NODES_ASCENDING, value)
+
     fun getProxy(context: Context): String? = getString(context, Constants.PREF_PROXY)
 
     fun setProxy(context: Context, value: String) = setString(context, Constants.PREF_PROXY, value)
