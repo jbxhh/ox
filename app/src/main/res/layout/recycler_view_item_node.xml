@@ -12,7 +12,7 @@
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_marginEnd="8dp"
-        android:src="@drawable/ic_fingerprint"
+        android:src="@drawable/monfluo"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/node_uri_textview"
         app:layout_constraintEnd_toStartOf="@id/node_name_textview"

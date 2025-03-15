@@ -49,7 +49,7 @@ class ReceiveActivity : MoneroActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_receive)
 
-        addressImageView = findViewById(R.id.monero_qr_imageview)
+        addressImageView = findViewById(R.id.address_qrcode_imageview)
         addressTextView = findViewById(R.id.address_textview)
         addressLabelTextView = findViewById(R.id.address_label_textview)
         copyAddressImageButton = findViewById(R.id.copy_address_imagebutton)
