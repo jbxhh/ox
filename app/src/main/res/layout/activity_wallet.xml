@@ -30,18 +30,18 @@
         android:textAlignment="center"
         android:textSize="32sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/monero_qr_imageview"
+        app:layout_constraintBottom_toTopOf="@id/monfluo_imageview"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/monero_qr_imageview"
+        android:id="@+id/monfluo_imageview"
         android:layout_width="256dp"
         android:layout_height="256dp"
         android:layout_marginTop="16dp"
-        android:src="@drawable/ic_monero"
+        android:src="@drawable/monfluo"
         android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

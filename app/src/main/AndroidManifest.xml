@@ -13,7 +13,7 @@
 
     <application
         android:name=".MoneroApplication"
-        android:icon="@mipmap/ic_launcher_round"
+        android:icon="@drawable/monfluo"
         android:label="@string/app_name"
         android:preserveLegacyExternalStorage="true"
         android:supportsRtl="true"

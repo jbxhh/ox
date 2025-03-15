@@ -15,7 +15,7 @@
         android:text="@string/recv_monero"
         android:textSize="32sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/monero_qr_imageview"
+        app:layout_constraintBottom_toTopOf="@id/address_qrcode_imageview"
         app:layout_constraintEnd_toStartOf="@id/fresh_address_imageview"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -35,11 +35,11 @@
         app:tint="@color/oled_textColorPrimary" />
 
     <ImageView
-        android:id="@+id/monero_qr_imageview"
+        android:id="@+id/address_qrcode_imageview"
         android:layout_width="256dp"
         android:layout_height="256dp"
         android:layout_marginTop="16dp"
-        android:src="@drawable/ic_monero"
+        android:src="@drawable/monfluo"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -62,7 +62,7 @@
         app:layout_constraintBottom_toTopOf="@id/address_label_textview"
         app:layout_constraintEnd_toStartOf="@id/copy_address_imagebutton"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/monero_qr_imageview"
+        app:layout_constraintTop_toBottomOf="@id/address_qrcode_imageview"
         tools:text="ADDRESS"
         tools:visibility="visible" />
 
@@ -95,7 +95,7 @@
         app:layout_constraintBottom_toTopOf="@id/address_list_recyclerview"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/address_textview"
-        app:layout_constraintTop_toBottomOf="@id/monero_qr_imageview" />
+        app:layout_constraintTop_toBottomOf="@id/address_qrcode_imageview" />
 
     <TextView
         android:id="@+id/address_list_label_textview"
