@@ -12,6 +12,7 @@ import androidx.lifecycle.AtomicReference
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -160,8 +161,8 @@ class ReceiveViewModel : ViewModel() {
     private val _subaddresses = MutableLiveData<List<Subaddress>>()
     val subaddresses: LiveData<List<Subaddress>> = _subaddresses
 
-    private val _qrCode = MutableLiveData<Bitmap?>()
-    val qrCode: LiveData<Bitmap?> = _qrCode
+    private val _addressAndQrCode = MutableLiveData<Pair<String, Bitmap?>?>()
+    val qrCode: LiveData<Bitmap?> = _addressAndQrCode.map { it?.second }
 
     fun refreshSubaddresses(wallet: Wallet, backgroundColor: Int) {
         val newSubaddresses = (0 until wallet.numSubaddresses).map { wallet.getSubaddressObject(it) }
@@ -176,22 +177,26 @@ class ReceiveViewModel : ViewModel() {
     }
 
     fun selectAddress(subaddress: Subaddress?, backgroundColor: Int) {
+        _selectedSubaddress.postValue(subaddress)
         qrCodeJob.getAndUpdate { job ->
             job?.cancel()
-            _selectedSubaddress.postValue(subaddress)
-            _qrCode.postValue(null)
-            subaddress?.let {
-                viewModelScope.launch {
-                    withContext(Dispatchers.Default) {
-                        val (bitmap, time) = measureTimedValue {
-                            QrCodeHelper.generateQrCode(subaddress.address, 256, 256, backgroundColor)
-                        }
-                        Timber.d("Generated QR code bitmap in ${time.toInt(DurationUnit.MILLISECONDS)} milliseconds")
-                        if (isActive) {
-                            _qrCode.postValue(bitmap)
+            if (_addressAndQrCode.value?.first != subaddress?.address) {
+                _addressAndQrCode.postValue(null)
+                subaddress?.let {
+                    viewModelScope.launch {
+                        withContext(Dispatchers.Default) {
+                            val (bitmap, time) = measureTimedValue {
+                                QrCodeHelper.generateQrCode(subaddress.address, 256, 256, backgroundColor)
+                            }
+                            Timber.d("Generated QR code bitmap in ${time.toInt(DurationUnit.MILLISECONDS)} milliseconds")
+                            if (isActive) {
+                                _addressAndQrCode.postValue(Pair(subaddress.address, bitmap))
+                            }
                         }
                     }
                 }
+            } else {
+                null
             }
         }
     }
