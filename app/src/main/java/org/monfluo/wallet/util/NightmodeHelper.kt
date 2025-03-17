@@ -19,10 +19,7 @@ import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatDelegate
 
 object NightmodeHelper {
-    val preferredNightmode: Unit
-        get() {
-            setNightMode(DayNightMode.NIGHT)
-        }
+    fun setPreferredNightmode() = setNightMode(DayNightMode.NIGHT)
 
     @SuppressLint("WrongConstant")
     fun setNightMode(mode: DayNightMode) {

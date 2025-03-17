@@ -3,6 +3,8 @@ package org.monfluo.wallet.util
 object Constants {
     const val PREFERENCES_KEY = "monfluo"
 
+    const val FOREGROUND_SERVICE_NOTIFICATION_CHANNEL = "FOREGROUND_SERVICE_NOTIFICATION_CHANNEL"
+
     const val DEFAULT_WALLET_NAME = "xmr_wallet"
     const val MNEMONIC_LANGUAGE = "English"
     const val STREET_MODE_BALANCE = "#.############"

@@ -1,20 +1,27 @@
 package org.monfluo.wallet.service.wallet
 
+import android.app.Notification
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Binder
+import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.Message
+import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
 import androidx.lifecycle.AtomicReference
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import org.monfluo.wallet.R
 import org.monfluo.wallet.model.PendingTransaction
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.model.Wallet.Companion.NEW_ACCOUNT_NAME
 import org.monfluo.wallet.model.WalletListener
 import org.monfluo.wallet.model.WalletManager
+import org.monfluo.wallet.util.Constants.FOREGROUND_SERVICE_NOTIFICATION_CHANNEL
 import org.monfluo.wallet.util.TransactionDestination
 import timber.log.Timber
 import java.util.concurrent.ArrayBlockingQueue
@@ -44,6 +51,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
 
     companion object {
         val RUNNING: AtomicBoolean = AtomicBoolean(false)
+        private const val NOTIFICATION_ID: Int = 100
     }
 
     private var daemonHeight: AtomicLong = AtomicLong(0)
@@ -363,6 +371,20 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Timber.d("Wallet Service is being started")
         if (intent != null) {
+            val notification = NotificationCompat.Builder(this, FOREGROUND_SERVICE_NOTIFICATION_CHANNEL)
+                .setSmallIcon(R.drawable.monfluo)
+                .setContentTitle("Monfluo wallet service is running")
+                .build()
+            ServiceCompat.startForeground(
+                this,
+                NOTIFICATION_ID,
+                notification,
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+                } else {
+                    0
+                }
+            )
             return START_STICKY
         } else {
             stopSelf()

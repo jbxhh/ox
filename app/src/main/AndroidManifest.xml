@@ -7,15 +7,15 @@
         android:required="false" />
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
         android:name=".MoneroApplication"
         android:icon="@drawable/monfluo"
         android:label="@string/app_name"
-        android:preserveLegacyExternalStorage="true"
         android:supportsRtl="true"
         android:theme="@style/MyMaterialThemeOled"
         android:usesCleartextTraffic="true">

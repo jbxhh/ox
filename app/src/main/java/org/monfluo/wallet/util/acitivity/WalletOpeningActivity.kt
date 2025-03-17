@@ -18,7 +18,7 @@ open class WalletOpeningActivity : LoggingActivity() {
     fun openWallet(walletPath: String, walletPassword: String) {
         val uriData = intent.data?.let { UriData.parse(it.toString()) }
         val walletServiceIntent = Intent(applicationContext, WalletService::class.java)
-        startService(walletServiceIntent)
+        startForegroundService(walletServiceIntent)
         bindService(walletServiceIntent, object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 Timber.d("Wallet Service connected")
