@@ -1,5 +1,6 @@
 package org.monfluo.wallet.service.wallet
 
+import android.app.Notification
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
@@ -17,6 +18,8 @@ import androidx.lifecycle.AtomicReference
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import org.monfluo.wallet.R
+import org.monfluo.wallet.data.Heights
+import org.monfluo.wallet.data.SynchronizationStatus
 import org.monfluo.wallet.model.PendingTransaction
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.model.Wallet.Companion.NEW_ACCOUNT_NAME
@@ -171,6 +174,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             daemonTrusted: Boolean,
             proxy: String
         ) {
+            showServiceNotification(createServiceNotificationBuilder().setContentText("Opening a wallet...").build())
             WalletManager.instance.setProxyJ(proxy)
             WalletManager.instance.setDaemonAddressJ(daemonAddress)
             val wallet = WalletManager.instance.openWallet(walletName, walletPassword)
@@ -182,7 +186,9 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             updateWallet(wallet)
             this@WalletService.walletRef.set(wallet)
 
+            showServiceNotification(createServiceNotificationBuilder().setContentText("Fetching blockchain height...").build())
             handleFetchDaemonHeight() // TODO: investigate why there is a double free in Monero code when this is moved after startRefresh
+            updateSynchronizationStatusNotification(wallet)
             wallet.setListener(this@WalletService)
             wallet.startRefresh()
         }
@@ -205,10 +211,13 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             WalletManager.instance.setDaemonAddressJ(daemonAddress)
             walletRef.get()?.let { wallet ->
                 Timber.i("Re-initializing wallet with daemon address = $daemonAddress, daemon username = $daemonUsername, daemon password = ${"*".repeat(daemonPassword.length)}, proxy = $proxy")
+                showServiceNotification(createServiceNotificationBuilder().setContentText("Changing node...").build())
                 wallet.initJ(daemonAddress, 0, daemonUsername, daemonPassword, proxy)
                 wallet.setTrustedDaemon(daemonTrusted)
                 updateWallet(wallet)
+                showServiceNotification(createServiceNotificationBuilder().setContentText("Fetching blockchain height...").build())
                 handleFetchDaemonHeight()
+                updateSynchronizationStatusNotification(wallet)
                 wallet.setListener(this@WalletService)
                 wallet.startRefresh()
             }
@@ -372,10 +381,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Timber.d("Wallet Service is being started")
         if (intent != null) {
-            val notification = NotificationCompat.Builder(this, FOREGROUND_SERVICE_NOTIFICATION_CHANNEL)
-                .setSmallIcon(R.drawable.monfluo)
-                .setContentTitle("Monfluo wallet service is running")
-                .build()
+            val notification = createServiceNotificationBuilder().build()
             ServiceCompat.startForeground(
                 this,
                 NOTIFICATION_ID,
@@ -418,6 +424,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
 
     private fun updateWallet(wallet: Wallet) {
         wallet.update()
+        updateSynchronizationStatusNotification(wallet)
         forEachObserver {
             it.onWalletUpdated(wallet)
         }
@@ -465,6 +472,33 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         getWalletOrLog()?.let { wallet ->
             updateWallet(wallet)
         }
+    }
+
+    private fun updateSynchronizationStatusNotification(wallet: Wallet) {
+        showServiceNotification(
+            createServiceNotificationBuilder()
+                .setContentText(
+                    SynchronizationStatus.fromHeights(
+                        Heights(
+                            walletBeginSyncHeight.get(),
+                            wallet.getBlockChainHeightJ(),
+                            daemonHeight.get()
+                        )
+                    ).getText(applicationContext)
+                )
+                .build())
+    }
+
+    private fun showServiceNotification(notification: Notification) {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(NOTIFICATION_ID, notification)
+    }
+
+    private fun createServiceNotificationBuilder(): NotificationCompat.Builder {
+        return NotificationCompat.Builder(this, FOREGROUND_SERVICE_NOTIFICATION_CHANNEL)
+            .setSmallIcon(R.drawable.monfluo)
+            .setOnlyAlertOnce(true)
+            .setContentTitle("Monfluo wallet service is running")
     }
 
     fun addObserver(observer: WalletServiceObserver) {

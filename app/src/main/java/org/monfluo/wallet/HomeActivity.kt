@@ -16,6 +16,8 @@ import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.adapter.TransactionInfoAdapter
+import org.monfluo.wallet.data.Heights
+import org.monfluo.wallet.data.SynchronizationStatus
 import org.monfluo.wallet.livedata.combineLiveDatas
 import org.monfluo.wallet.model.Balance
 import org.monfluo.wallet.model.TransactionInfo
@@ -118,16 +120,12 @@ class HomeActivity : MoneroActivity() {
 
         viewModel.syncProgress.observe(this) { (walletConnected, heights) ->
             if (walletConnected) {
+                val synchronizationStatus = SynchronizationStatus.fromHeights(heights)
                 val (walletBeginSyncHeight, walletHeight, daemonHeight) = heights
-                val diff = daemonHeight - walletHeight
-                val synchronized = daemonHeight > 0 && diff == 0L
-                val walletDisplayHeight = NumberFormat.getInstance().format(walletHeight - 1)
-                val daemonDisplayHeight = if (daemonHeight > 0) NumberFormat.getInstance().format(daemonHeight - 1) else "???"
-                val diffDisplay = NumberFormat.getInstance().format(diff)
                 progressBarText.visibility = View.VISIBLE
-                if (synchronized) {
+                progressBarText.text = synchronizationStatus.getText(applicationContext)
+                if (synchronizationStatus is SynchronizationStatus.Synchronized) {
                     progressBar.visibility = View.INVISIBLE
-                    progressBarText.text = getString(R.string.synchronized_at_label, walletDisplayHeight)
                 } else {
                     progressBar.isIndeterminate = false
                     // Google employs the very rare kind of engineers to work on Android - engineers with negative fucking IQ
@@ -138,11 +136,6 @@ class HomeActivity : MoneroActivity() {
                     progressBar.min = walletBeginSyncHeight.toInt()
                     progressBar.setProgress(walletHeight.toInt(), true)
                     progressBar.visibility = View.VISIBLE
-                    if (walletHeight > walletBeginSyncHeight) {
-                        progressBarText.text = getString(R.string.synchronizing_blocks_remaining, walletDisplayHeight, daemonDisplayHeight, diffDisplay)
-                    } else {
-                        progressBarText.text = getString(R.string.starting_wallet_synchronization)
-                    }
                 }
             }
         }
@@ -365,5 +358,3 @@ internal class HomeActivityViewModel : ViewModel() {
         _transactions.postValue(newTransactions)
     }
 }
-
-internal data class Heights(val walletBeginSyncHeight: Long, val walletHeight: Long, val daemonHeight: Long)
