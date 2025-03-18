@@ -1,7 +1,8 @@
 package org.monfluo.wallet.service.wallet
 
-import android.app.Notification
+import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Binder
@@ -395,6 +396,8 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
     override fun onDestroy() {
         Timber.d("Wallet Service is being destroyed")
         closeWallet()
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(NOTIFICATION_ID)
         RUNNING.set(false)
     }
 
