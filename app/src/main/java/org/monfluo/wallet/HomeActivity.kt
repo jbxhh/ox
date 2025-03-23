@@ -27,7 +27,6 @@ import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.acitivity.MoneroActivity
 import timber.log.Timber
-import java.text.NumberFormat
 
 class HomeActivity : MoneroActivity() {
 

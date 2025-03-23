@@ -2,9 +2,12 @@ package org.monfluo.wallet.service.wallet
 
 import android.app.Notification
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ServiceInfo
 import android.os.Binder
 import android.os.Build
@@ -14,6 +17,7 @@ import android.os.Looper
 import android.os.Message
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.AtomicReference
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -56,7 +60,10 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
     companion object {
         val RUNNING: AtomicBoolean = AtomicBoolean(false)
         private const val NOTIFICATION_ID: Int = 100
+        private const val CLOSE_WALLET_ACTION = "org.monfluo.wallet.CLOSE_WALLET"
     }
+
+    private val broadcastReceiver = WalletServiceBroadcastReceiver()
 
     private var daemonHeight: AtomicLong = AtomicLong(0)
     // height of the wallet when it was opened
@@ -64,6 +71,23 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
     private var proxyRef: AtomicReference<String> = AtomicReference("")
     private var walletRef: AtomicReference<Wallet?> = AtomicReference(null)
     private val observers = mutableSetOf<WalletServiceObserver>()
+
+    inner class WalletServiceBroadcastReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (val action = intent?.action) {
+                CLOSE_WALLET_ACTION -> {
+                    Timber.i("Received intent with close wallet action")
+                    stopSelf()
+                }
+                null -> {
+                    Timber.e("Received intent with no action")
+                }
+                else -> {
+                    Timber.e("Received intent with unknown action: $action")
+                }
+            }
+        }
+    }
 
     inner class WalletServiceBinder : Binder() {
         val service: WalletService = this@WalletService
@@ -392,6 +416,12 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
                     0
                 }
             )
+            ContextCompat.registerReceiver(
+                applicationContext,
+                broadcastReceiver,
+                IntentFilter(CLOSE_WALLET_ACTION),
+                ContextCompat.RECEIVER_EXPORTED
+            )
             return START_STICKY
         } else {
             stopSelf()
@@ -475,6 +505,10 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
     }
 
     private fun updateSynchronizationStatusNotification(wallet: Wallet) {
+        val broadcastIntent = Intent(CLOSE_WALLET_ACTION)
+        val broadcastPendingIntent: PendingIntent =
+            PendingIntent.getBroadcast(application, 0, broadcastIntent, PendingIntent.FLAG_IMMUTABLE)
+
         showServiceNotification(
             createServiceNotificationBuilder()
                 .setContentText(
@@ -486,6 +520,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
                         )
                     ).getText(applicationContext)
                 )
+                .addAction(NotificationCompat.Action.Builder(R.drawable.monfluo, "Close wallet", broadcastPendingIntent).build())
                 .build())
     }
 
