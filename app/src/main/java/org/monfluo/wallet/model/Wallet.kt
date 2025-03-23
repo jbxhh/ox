@@ -28,6 +28,7 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     private var enotes: List<Enote>? = null
     private var balances: Map<Int, Balance>? = null
     private var history: Map<Int, List<TransactionInfo>>? = null
+    private var historyByTxId: Map<Int, Map<String, TransactionInfo>>? = null
 
     fun update() {
         refreshEnotes()
@@ -78,6 +79,7 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
             transactionInfos.getOrPut(it.accountIndex) { mutableListOf() }.add(it)
         }
         this.history = transactionInfos
+        this.historyByTxId = transactionInfos.mapValues { it.value.associateBy { it.hash ?: "" } }
     }
 
     fun getHistories(): Map<Int, List<TransactionInfo>> {
@@ -87,7 +89,16 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
         return history!!
     }
 
+    fun getHistoriesByTxId(): Map<Int, Map<String, TransactionInfo>> {
+        if (historyByTxId == null) {
+            refreshTransactionHistory()
+        }
+        return historyByTxId!!
+    }
+
     fun getHistory(): List<TransactionInfo> = getHistories()[accountIndex] ?: listOf()
+
+    fun getTransaction(txId: String): TransactionInfo? = getHistoriesByTxId()[accountIndex]?.get(txId)
 
     private fun calculateBalances(enotes: List<Enote>): Map<Int, Balance> {
         return (0 until getNumAccounts()).associateWith { account ->

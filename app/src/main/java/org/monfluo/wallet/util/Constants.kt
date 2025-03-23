@@ -4,6 +4,7 @@ object Constants {
     const val PREFERENCES_KEY = "monfluo"
 
     const val FOREGROUND_SERVICE_NOTIFICATION_CHANNEL = "FOREGROUND_SERVICE_NOTIFICATION_CHANNEL"
+    const val TRANSFERS_NOTIFICATION_CHANNEL = "TRANSFERS_NOTIFICATION_CHANNEL"
 
     const val DEFAULT_WALLET_NAME = "xmr_wallet"
     const val MNEMONIC_LANGUAGE = "English"
@@ -19,6 +20,7 @@ object Constants {
     const val PREF_ENABLE_MULTIPLE_ACCOUNTS = "pref_enable_multiple_accounts"
     const val PREF_ALLOW_COPYING_SECRETS = "pref_allow_copying_secrets"
     const val PREF_SORT_NODES_ASCENDING = "pref_sort_nodes_ascending"
+    const val PREF_SHOW_TRANSFER_NOTIFICATIONS = "pref_show_transfer_notifications"
 
     const val URI_PREFIX = "monero:"
     const val URI_ARG_AMOUNT = "tx_amount"
@@ -30,7 +32,10 @@ object Constants {
     const val EXTRA_SEND_AMOUNT = "send_amount"
     const val EXTRA_SEND_MAX = "send_max"
     const val EXTRA_SEND_ENOTES = "send_enotes"
+    const val EXTRA_TRANSACTION_ID = "transaction_id"
 
     // Donation address is also specified in strings.xml, it is used as a tooltip in address fields
     const val DONATE_ADDRESS = "48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ"
+
+    const val CONFIRMATIONS: Int = 10
 }

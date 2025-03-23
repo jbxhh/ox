@@ -193,6 +193,28 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/allow_fee_override_switch" />
 
+        <TextView
+            android:id="@+id/show_transfer_notifications_textview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:text="Show transfer notifications"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@id/show_transfer_notifications_switch"
+            app:layout_constraintEnd_toStartOf="@id/show_transfer_notifications_switch"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/show_transfer_notifications_switch" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/show_transfer_notifications_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/allow_copying_secrets_to_clipboard_switch" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/wallet_account_settings_layout"
@@ -202,7 +224,7 @@
             tools:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/allow_copying_secrets_to_clipboard_switch">
+            app:layout_constraintTop_toBottomOf="@+id/show_transfer_notifications_switch">
 
             <TextView
                 android:id="@+id/account_settings_textview"
