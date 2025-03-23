@@ -39,6 +39,7 @@ class SettingsActivity : MoneroActivity() {
     private lateinit var streetModeSwitch: SwitchCompat
     private lateinit var allowFeeOverrideSwitch: SwitchCompat
     private lateinit var allowCopyingSecretsToClipboardSwitch: SwitchCompat
+    private lateinit var showTransferNotificationsSwitch: SwitchCompat
     private lateinit var displaySeedButton: Button
     private lateinit var displayEnotesButton: Button
     private lateinit var proxySwitch: SwitchCompat
@@ -63,6 +64,7 @@ class SettingsActivity : MoneroActivity() {
         streetModeSwitch = findViewById(R.id.street_mode_switch)
         allowFeeOverrideSwitch = findViewById(R.id.allow_fee_override_switch)
         allowCopyingSecretsToClipboardSwitch = findViewById(R.id.allow_copying_secrets_to_clipboard_switch)
+        showTransferNotificationsSwitch = findViewById(R.id.show_transfer_notifications_switch)
         proxySwitch = findViewById(R.id.proxy_switch)
         proxySettingsLayout = findViewById(R.id.wallet_proxy_settings_layout)
         walletProxyAddressEditText = findViewById(R.id.wallet_proxy_address_edittext)
@@ -135,6 +137,9 @@ class SettingsActivity : MoneroActivity() {
         }
         allowCopyingSecretsToClipboardSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
             PreferenceUtils.setAllowCopyingSecrets(applicationContext, b)
+        }
+        showTransferNotificationsSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PreferenceUtils.setShowTransferNotifications(applicationContext, b)
         }
         proxySwitch.setOnCheckedChangeListener { _, b: Boolean ->
             PreferenceUtils.setUseProxy(applicationContext, b)

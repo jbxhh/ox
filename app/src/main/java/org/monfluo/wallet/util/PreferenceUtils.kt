@@ -50,6 +50,10 @@ object PreferenceUtils {
 
     fun setSortNodesAscending(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_SORT_NODES_ASCENDING, value)
 
+    fun isShowTransferNotifications(context: Context): Boolean = getBoolean(context, Constants.PREF_SHOW_TRANSFER_NOTIFICATIONS, false)
+
+    fun setShowTransferNotifications(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_SHOW_TRANSFER_NOTIFICATIONS, value)
+
     fun getProxy(context: Context): String? = getString(context, Constants.PREF_PROXY)
 
     fun setProxy(context: Context, value: String) = setString(context, Constants.PREF_PROXY, value)

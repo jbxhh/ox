@@ -4,6 +4,7 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import org.monfluo.wallet.util.Constants.FOREGROUND_SERVICE_NOTIFICATION_CHANNEL
+import org.monfluo.wallet.util.Constants.TRANSFERS_NOTIFICATION_CHANNEL
 import org.monfluo.wallet.util.NightmodeHelper
 import timber.log.Timber
 
@@ -19,14 +20,23 @@ class MoneroApplication : Application() {
         super.onCreate()
         Timber.plant(Timber.DebugTree())
         NightmodeHelper.setPreferredNightmode()
-        registerForegroundServiceNotificationChannel()
+
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        registerForegroundServiceNotificationChannel(notificationManager)
+        registerTransfersNotificationChannel(notificationManager)
     }
 
-    private fun registerForegroundServiceNotificationChannel() {
+    private fun registerForegroundServiceNotificationChannel(notificationManager: NotificationManager) {
         val name = "Monfluo wallet service"
         val importance = NotificationManager.IMPORTANCE_LOW
         val foregroundServiceNotificationChannel = NotificationChannel(FOREGROUND_SERVICE_NOTIFICATION_CHANNEL, name, importance)
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(foregroundServiceNotificationChannel)
+    }
+
+    private fun registerTransfersNotificationChannel(notificationManager: NotificationManager) {
+        val name = "Monfluo transfers"
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val transfersNotificationChannel = NotificationChannel(TRANSFERS_NOTIFICATION_CHANNEL, name, importance)
+        notificationManager.createNotificationChannel(transfersNotificationChannel)
     }
 }
