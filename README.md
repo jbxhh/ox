@@ -5,13 +5,26 @@ A no-bullshit, pure Monero wallet suitable for both newcomers and experienced us
 Monfluo is a fork of Mysu (previously known as MyNero) originally developed by pokkst.
 Mysu was a fork of Monerujo developed by m2049r.
 
-## QUICKSTART
+## Download
 
-- Download and install the latest apk from the [releases tab](https://codeberg.org/acx/monfluo/releases) (there are several files for different architectures, you probably want the one with "arm64" in the name, but if you are not sure you can just grab the universal one).
-- Run the app and either create a new wallet or restore an existing one.
-- Start using Monero.
+### Codeberg
 
-## Using experimental/nightly builds from CI
+You can download the latest APK from the [releases tab](https://codeberg.org/acx/monfluo/releases).  
+There are several APKs for different architectures, you probably want the one with "arm64" in the name, but if you are not sure you can just grab the universal one.  
+
+### F-Droid
+
+Monfluo is available in our F-Droid repositories.  
+
+* Clearnet (default): https://fdroid.monfluo.org/fdroid/repo/
+
+![](doc/fdroid-qr-clearnet.png)
+
+* Onion: http://fdroid.monfluovo5ghg5znchzsbkedeivinvyletxhn7f3ju5lre3syy2pezqd.onion/fdroid/repo/
+
+![](doc/fdroid-qr-onion.png)
+
+### Using experimental/nightly builds from CI
 
 The CI is configured to build the app for every new commit.
 You can use those builds if you want to help with testing.
@@ -65,6 +78,7 @@ XMR address: `48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU
 #### Expenses (excluding developer time)
 
 - Build server for CI/CD: 10 EUR / month
+- F-Droid servers: 8 EUR / month 
 - Domain (monfluo.org): 15 EUR / year
 
 ## Support / Chats
