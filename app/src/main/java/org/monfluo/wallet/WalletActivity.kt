@@ -5,22 +5,32 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.fragment.dialog.EditWalletBottomSheetDialog
 import org.monfluo.wallet.fragment.dialog.PasswordBottomSheetDialog
-import org.monfluo.wallet.model.WalletManager
 import org.monfluo.wallet.service.wallet.WalletService
+import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
-import org.monfluo.wallet.util.acitivity.WalletOpeningActivity
-import java.io.File
+import org.monfluo.wallet.util.acitivity.LoggingActivity
+import timber.log.Timber
 import kotlin.io.path.Path
-import kotlin.io.path.deleteExisting
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.moveTo
 import kotlin.io.path.name
 
-class WalletActivity : WalletOpeningActivity() {
+class WalletActivity : LoggingActivity() {
+
+    private val startOnboardingActivityToOpenWallet = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == 0) {
+            Timber.i("Onboarding activity returned result code 0")
+        } else {
+            Timber.i("Onboarding activity returned non-zero result code, finishing current activity")
+            setResult(1, result.data)
+            finish()
+        }
+    }
 
     private lateinit var createWalletButton: Button
     private lateinit var walletRecyclerView: RecyclerView
@@ -38,8 +48,13 @@ class WalletActivity : WalletOpeningActivity() {
             override fun onWalletSelected(self: WalletAdapter, walletPath: String) {
                 val passwordDialog = PasswordBottomSheetDialog(walletPath, false, object : PasswordBottomSheetDialog.Listener {
                     override fun onCorrectPasswordSubmitted(self: PasswordBottomSheetDialog, password: String) {
+                        Timber.i("Correct password submitted for wallet, finishing current activity")
                         self.dismiss()
-                        openWallet(walletPath, password)
+                        setResult(1, Intent().apply {
+                            putExtra(Constants.EXTRA_WALLET_PATH, walletPath)
+                            putExtra(Constants.EXTRA_WALLET_PASSWORD, password)
+                        })
+                        finish()
                     }
                 })
                 passwordDialog.show(supportFragmentManager, "password_dialog")
@@ -83,8 +98,7 @@ class WalletActivity : WalletOpeningActivity() {
 
         createWalletButton.setOnClickListener {
             val onboardingActivityIntent = Intent(this, OnboardingActivity::class.java)
-            onboardingActivityIntent.data = intent.data
-            startActivity(onboardingActivityIntent)
+            startOnboardingActivityToOpenWallet.launch(onboardingActivityIntent)
         }
     }
 

@@ -27,6 +27,8 @@ object Constants {
     const val URI_ARG_AMOUNT2 = "amount"
     const val NAV_ARG_TXINFO = "nav_arg_txinfo"
 
+    const val EXTRA_WALLET_PATH = "wallet_path"
+    const val EXTRA_WALLET_PASSWORD = "wallet_password"
     const val EXTRA_PREVENT_GOING_BACK = "prevent_going_back"
     const val EXTRA_SEND_ADDRESS = "send_address"
     const val EXTRA_SEND_AMOUNT = "send_amount"

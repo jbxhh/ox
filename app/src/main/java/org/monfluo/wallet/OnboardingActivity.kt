@@ -1,5 +1,6 @@
 package org.monfluo.wallet
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -31,11 +32,11 @@ import org.monfluo.wallet.model.WalletManager
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
-import org.monfluo.wallet.util.acitivity.WalletOpeningActivity
+import org.monfluo.wallet.util.acitivity.LoggingActivity
 import timber.log.Timber
 import java.io.File
 
-class OnboardingActivity : WalletOpeningActivity() {
+class OnboardingActivity : LoggingActivity() {
 
     private val viewModel: OnboardingViewModel by viewModels()
 
@@ -415,7 +416,11 @@ internal class OnboardingViewModel : ViewModel() {
         * */
         walletFile.delete()
         if (ok) {
-            activity.openWallet(walletFile.absolutePath, password)
+            activity.setResult(1, Intent().apply {
+                putExtra(Constants.EXTRA_WALLET_PATH, walletFile.absolutePath)
+                putExtra(Constants.EXTRA_WALLET_PASSWORD, password)
+            })
+            activity.finish()
         } else {
             activity.runOnUiThread {
                 _creatingWallet.postValue(false)
