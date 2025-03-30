@@ -79,6 +79,7 @@ class SettingsActivity : MoneroActivity() {
         val isStreetMode = PreferenceUtils.isStreetMode(applicationContext)
         val isAllowFeeOverride = PreferenceUtils.isAllowFeeOverride(applicationContext)
         val isAllowCopyingSecrets = PreferenceUtils.isAllowCopyingSecrets(applicationContext)
+        val isShowTransferNotifications = PreferenceUtils.isShowTransferNotifications(applicationContext)
         val isUseProxy = PreferenceUtils.isUseProxy(applicationContext)
 
         accountAdapter = AccountAdapter(emptyList(), null, object : AccountAdapter.AccountAdapterListener {
@@ -105,6 +106,7 @@ class SettingsActivity : MoneroActivity() {
         streetModeSwitch.isChecked = isStreetMode
         allowFeeOverrideSwitch.isChecked = isAllowFeeOverride
         allowCopyingSecretsToClipboardSwitch.isChecked = isAllowCopyingSecrets
+        showTransferNotificationsSwitch.isChecked = isShowTransferNotifications
         proxySwitch.isChecked = isUseProxy
 
         walletProxyAddressEditText.setText(PreferenceUtils.getProxy(this) ?: "")

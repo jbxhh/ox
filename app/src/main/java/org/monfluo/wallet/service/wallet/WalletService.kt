@@ -25,6 +25,7 @@ import org.monfluo.wallet.R
 import org.monfluo.wallet.data.Heights
 import org.monfluo.wallet.data.SynchronizationStatus
 import org.monfluo.wallet.model.PendingTransaction
+import org.monfluo.wallet.model.TransactionInfo
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.model.Wallet.Companion.NEW_ACCOUNT_NAME
 import org.monfluo.wallet.model.WalletListener
@@ -63,8 +64,8 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
 
     companion object {
         val RUNNING: AtomicBoolean = AtomicBoolean(false)
-        private const val SERVICE_NOTIFICATION_ID: Int = 100
-        private val TRANSFERS_NOTIFICATION_ID: AtomicInteger = AtomicInteger(1)
+        private const val SERVICE_NOTIFICATION_ID: Int = 1
+        private val NEXT_NOTIFICATION_ID: AtomicInteger = AtomicInteger(2)
         private const val CLOSE_WALLET_ACTION = "org.monfluo.wallet.CLOSE_WALLET"
         private const val DELETE_NOTIFICATION_ACTION = "org.monfluo.wallet.DELETE_NOTIFICATION"
     }
@@ -87,7 +88,6 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
                     Timber.i("Received intent with close wallet action")
                     stopSelf()
                 }
-                // TODO: fix notifications re-appearing despite closing them
                 DELETE_NOTIFICATION_ACTION -> {
                     val transactionId = intent.getStringExtra(Constants.EXTRA_TRANSACTION_ID)!!
                     Timber.i("Received intent with delete notification action for transaction id $transactionId")
@@ -484,18 +484,18 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         }
     }
 
-    override fun moneySpent(txId: String?, amount: Long) {
+    override fun moneySpent(txId: String, amount: Long) {
         Timber.d("Money spent callback with txId $txId and amount $amount")
     }
 
-    override fun moneyReceived(txId: String?, amount: Long) {
+    override fun moneyReceived(txId: String, amount: Long) {
         Timber.d("Money received callback txId $txId and amount $amount")
-        handleNewMoneyReceived(txId, amount)
+        handleNewMoneyReceived(txId, amount, confirmed = true)
     }
 
-    override fun unconfirmedMoneyReceived(txId: String?, amount: Long) {
+    override fun unconfirmedMoneyReceived(txId: String, amount: Long) {
         Timber.d("Unconfirmed money received callback txId $txId and amount $amount")
-        handleNewMoneyReceived(txId, amount)
+        handleNewMoneyReceived(txId, amount, confirmed = false)
     }
 
     override fun updated() {
@@ -523,13 +523,11 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
                 val transaction = wallet.getTransaction(txId)
                 if (transaction != null) {
                     Timber.d("Updating a notification on new block for transaction id $txId and notification id $notificationId")
-                    showTransfersNotification(
-                        createTransfersNotificationBuilder(
-                            transaction.amount,
-                            txId,
-                            firstSeenAt,
-                            transaction.confirmations.coerceAtMost(Constants.CONFIRMATIONS.toLong()).toInt()
-                        ).build(),
+                    createAndShowTransferNotification(
+                        transaction.amount,
+                        txId,
+                        firstSeenAt,
+                        transaction.confirmations.coerceAtMost(Constants.CONFIRMATIONS.toLong()).toInt(),
                         notificationId
                     )
                     return@removeIf transaction.confirmations >= Constants.CONFIRMATIONS
@@ -553,16 +551,40 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         }
     }
 
-    private fun handleNewMoneyReceived(txId: String?, amount: Long) {
-        if (PreferenceUtils.isShowTransferNotifications(this)) {
-            val time = System.currentTimeMillis()
-            val notificationBuilder = createTransfersNotificationBuilder(amount, txId ?: "null", time, txId?.let { 0 })
-            val notificationId = showTransfersNotification(notificationBuilder.build())
-            Timber.d("Spawned a notification for new money received with transaction id $txId and notification id $notificationId")
-            if (txId != null) {
-                transactionNotifications[txId] = TransactionNotificationData(txId, time, notificationId)
-            }
+    private fun handleNewMoneyReceived(txId: String, amount: Long, confirmed: Boolean) {
+        if (!PreferenceUtils.isShowTransferNotifications(this)) {
+            Timber.d("Not spawning transfer notification because transfer notifications are disabled")
+            return
         }
+
+        val wallet = walletRef.get()
+
+        if (wallet == null) {
+            val confirmedText = if (confirmed) "confirmed" else "unconfirmed"
+            Timber.w("Wallet is null in new $confirmedText money received callback")
+            return
+        }
+
+        Timber.d("Refreshing wallet transaction history")
+        wallet.refreshTransactionHistory()
+        val transaction = wallet.getTransaction(txId)
+        if (transaction == null) {
+            Timber.w("Transaction $txId not found despite just getting a callback about it")
+            return
+        }
+
+        if (transaction.direction == TransactionInfo.Direction.Direction_Out) {
+            // we are getting back our change, not new money
+            Timber.d("Not spawning a notification for incoming money because it is an outgoing transaction")
+            return
+        }
+
+        val confirmations = transaction.confirmations
+
+        val time = System.currentTimeMillis()
+        val notificationId = createAndShowTransferNotification(amount, txId, time, confirmations.toInt())
+        transactionNotifications[txId] = TransactionNotificationData(txId, time, notificationId)
+        Timber.d("Spawned a notification for new money received with transaction id $txId and notification id $notificationId")
     }
 
     private fun updateSynchronizationStatusNotification(wallet: Wallet) {
@@ -595,13 +617,6 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         notificationManager.notify(SERVICE_NOTIFICATION_ID, notification)
     }
 
-    private fun showTransfersNotification(notification: Notification, existingId: Int? = null): Int {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val id: Int = existingId ?: TRANSFERS_NOTIFICATION_ID.getAndIncrement()
-        notificationManager.notify(id, notification)
-        return id
-    }
-
     private fun createServiceNotificationBuilder(): NotificationCompat.Builder {
         return NotificationCompat.Builder(this, FOREGROUND_SERVICE_NOTIFICATION_CHANNEL)
             .setSmallIcon(R.drawable.monfluo)
@@ -609,24 +624,26 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             .setContentTitle("Monfluo wallet service is running")
     }
 
-    private fun createTransfersNotificationBuilder(amount: Long, txId: String, firstSeenAt: Long, progress: Int? = null): NotificationCompat.Builder {
-        val displayAmount = Wallet.getDisplayAmount(amount)
+    private fun createAndShowTransferNotification(amount: Long, txId: String, firstSeenAt: Long, progress: Int, existingId: Int? = null): Int {
+        val id: Int = existingId ?: NEXT_NOTIFICATION_ID.getAndIncrement()
+
         val broadcastIntent = Intent(DELETE_NOTIFICATION_ACTION).apply {
             putExtra(Constants.EXTRA_TRANSACTION_ID, txId)
         }
-        val broadcastPendingIntent: PendingIntent =
-            PendingIntent.getBroadcast(application, 0, broadcastIntent, PendingIntent.FLAG_IMMUTABLE)
+        val broadcastPendingIntent = PendingIntent.getBroadcast(application, id, broadcastIntent, PendingIntent.FLAG_IMMUTABLE)
 
-        val builder = NotificationCompat.Builder(this, TRANSFERS_NOTIFICATION_CHANNEL)
+        val notification = NotificationCompat.Builder(this, TRANSFERS_NOTIFICATION_CHANNEL)
             .setSmallIcon(R.drawable.monfluo)
             .setOnlyAlertOnce(true)
             .setWhen(firstSeenAt)
-            .setContentTitle("Received $displayAmount XMR in tx $txId")
+            .setContentTitle("Received ${Wallet.getDisplayAmount(amount)} XMR in tx $txId")
             .setDeleteIntent(broadcastPendingIntent)
-        if (progress != null) {
-            builder.setProgress(Constants.CONFIRMATIONS, progress, false)
-        }
-        return builder
+            .setProgress(Constants.CONFIRMATIONS, progress, false)
+            .build()
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(id, notification)
+        return id
     }
 
     fun addObserver(observer: WalletServiceObserver) {

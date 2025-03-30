@@ -22,7 +22,7 @@ interface WalletListener {
      * @param txId   - transaction id
      * @param amount - tvAmount
      */
-    fun moneySpent(txId: String?, amount: Long)
+    fun moneySpent(txId: String, amount: Long)
 
     /**
      * moneyReceived - called when money received
@@ -30,7 +30,7 @@ interface WalletListener {
      * @param txId   - transaction id
      * @param amount - tvAmount
      */
-    fun moneyReceived(txId: String?, amount: Long)
+    fun moneyReceived(txId: String, amount: Long)
 
     /**
      * unconfirmedMoneyReceived - called when payment arrived in tx pool
@@ -38,7 +38,7 @@ interface WalletListener {
      * @param txId   - transaction id
      * @param amount - tvAmount
      */
-    fun unconfirmedMoneyReceived(txId: String?, amount: Long)
+    fun unconfirmedMoneyReceived(txId: String, amount: Long)
 
     /**
      * newBlock      - called when new block received
