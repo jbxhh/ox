@@ -15,6 +15,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.Message
+import android.provider.CalendarContract.Colors
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
@@ -619,8 +620,9 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
 
     private fun createServiceNotificationBuilder(): NotificationCompat.Builder {
         return NotificationCompat.Builder(this, FOREGROUND_SERVICE_NOTIFICATION_CHANNEL)
-            .setSmallIcon(R.drawable.monfluo)
+            .setSmallIcon(R.drawable.monfluo_notification_icon)
             .setOnlyAlertOnce(true)
+            .setOngoing(true)
             .setContentTitle("Monfluo wallet service is running")
     }
 
