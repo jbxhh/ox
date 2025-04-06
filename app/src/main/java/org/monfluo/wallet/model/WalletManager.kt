@@ -195,6 +195,6 @@ class WalletManager {
         external fun setLogLevel(level: Int)
 
         @JvmStatic
-        external fun moneroVersion(): String?
+        external fun moneroVersion(): String
     }
 }
