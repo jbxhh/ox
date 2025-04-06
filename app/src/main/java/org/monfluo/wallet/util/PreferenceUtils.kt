@@ -22,6 +22,10 @@ object PreferenceUtils {
 
     fun setString(context: Context, key: String, value: String) = getSharedPreferences(context).edit().putString(key, value).apply()
 
+    fun isPostNotificationsPermissionRequested(context: Context) = getBoolean(context, Constants.PREF_POST_NOTIFICATIONS_PERMISSION_REQUESTED, false)
+
+    fun setPostNotificationsPermissionRequested(context: Context, value: Boolean = true) = setBoolean(context, Constants.PREF_POST_NOTIFICATIONS_PERMISSION_REQUESTED, value)
+
     fun isUseProxy(context: Context): Boolean = getBoolean(context, Constants.PREF_USE_PROXY, false)
 
     fun setUseProxy(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_USE_PROXY, value)

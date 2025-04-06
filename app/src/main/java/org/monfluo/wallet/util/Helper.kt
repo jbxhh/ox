@@ -17,24 +17,26 @@ package org.monfluo.wallet.util
 
 import android.Manifest
 import android.app.Activity
-import android.app.Dialog
 import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.pm.PackageManager
-import android.view.WindowManager
-import android.view.inputmethod.InputMethodManager
+import android.os.Build
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import org.monfluo.wallet.R
 import timber.log.Timber
 import java.io.File
 import java.math.BigDecimal
+import java.util.concurrent.atomic.AtomicInteger
 
 object Helper {
     private const val XMR_DECIMALS = 12
     private const val WALLET_DIR = "wallets"
+    private val REQUEST_CODE = AtomicInteger(1)
     var DISPLAY_DIGITS_INFO = 5
 
     fun getWalletRoot(context: Context): File {
@@ -117,5 +119,23 @@ object Helper {
                 null
             }
         }
+    }
+
+    fun requestPostNotificationsPermission(activity: Activity, force: Boolean = false) {
+        if (!force && PreferenceUtils.isPostNotificationsPermissionRequested(activity)) {
+            Timber.d("POST_NOTIFICATIONS permission has already been requested")
+            return
+        }
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            Timber.d("POST_NOTIFICATIONS permission has already been granted")
+            return
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            Timber.d("POST_NOTIFICATIONS permission does not need to be requested on this SDK version")
+            return
+        }
+        Timber.i("Requesting POST_NOTIFICATIONS permission")
+        ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), REQUEST_CODE.getAndIncrement())
+        PreferenceUtils.setPostNotificationsPermissionRequested(activity)
     }
 }

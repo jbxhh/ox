@@ -26,6 +26,7 @@ import org.monfluo.wallet.model.Account
 import org.monfluo.wallet.model.Balance
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.service.wallet.WalletService
+import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.acitivity.MoneroActivity
 import timber.log.Timber
@@ -142,6 +143,9 @@ class SettingsActivity : MoneroActivity() {
         }
         showTransferNotificationsSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
             PreferenceUtils.setShowTransferNotifications(applicationContext, b)
+            if (b) {
+                Helper.requestPostNotificationsPermission(this, force = true)
+            }
         }
         proxySwitch.setOnCheckedChangeListener { _, b: Boolean ->
             PreferenceUtils.setUseProxy(applicationContext, b)
