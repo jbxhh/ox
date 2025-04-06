@@ -21,6 +21,7 @@ object Constants {
     const val PREF_ALLOW_COPYING_SECRETS = "pref_allow_copying_secrets"
     const val PREF_SORT_NODES_ASCENDING = "pref_sort_nodes_ascending"
     const val PREF_SHOW_TRANSFER_NOTIFICATIONS = "pref_show_transfer_notifications"
+    const val PREF_POST_NOTIFICATIONS_PERMISSION_REQUESTED = "pref_post_notifications_permission_requested"
 
     const val URI_PREFIX = "monero:"
     const val URI_ARG_AMOUNT = "tx_amount"

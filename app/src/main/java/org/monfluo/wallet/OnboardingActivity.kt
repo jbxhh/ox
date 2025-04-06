@@ -88,6 +88,8 @@ class OnboardingActivity : LoggingActivity() {
         bindListeners()
         bindObservers()
 
+        Helper.requestPostNotificationsPermission(this)
+
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (!intent.getBooleanExtra(Constants.EXTRA_PREVENT_GOING_BACK, false)) {
