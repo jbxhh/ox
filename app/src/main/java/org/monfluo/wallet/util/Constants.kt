@@ -26,7 +26,6 @@ object Constants {
     const val URI_PREFIX = "monero:"
     const val URI_ARG_AMOUNT = "tx_amount"
     const val URI_ARG_AMOUNT2 = "amount"
-    const val NAV_ARG_TXINFO = "nav_arg_txinfo"
 
     const val EXTRA_WALLET_PATH = "wallet_path"
     const val EXTRA_WALLET_PASSWORD = "wallet_password"

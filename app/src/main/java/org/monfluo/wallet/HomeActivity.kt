@@ -48,7 +48,7 @@ class HomeActivity : MoneroActivity() {
     private val transactionInfoAdapter: TransactionInfoAdapter = TransactionInfoAdapter(false, object : TransactionInfoAdapter.Listener {
         override fun onClickTransaction(txInfo: TransactionInfo) {
             val intent = Intent(this@HomeActivity, TransactionActivity::class.java)
-            intent.putExtra(Constants.NAV_ARG_TXINFO, txInfo.hash)
+            intent.putExtra(Constants.EXTRA_TRANSACTION_ID, txInfo.hash)
             startActivity(intent)
         }
     })
