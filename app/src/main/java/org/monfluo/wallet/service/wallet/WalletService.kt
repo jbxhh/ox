@@ -21,7 +21,9 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.AtomicReference
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import org.monfluo.wallet.HomeActivity
 import org.monfluo.wallet.R
+import org.monfluo.wallet.TransactionActivity
 import org.monfluo.wallet.data.Heights
 import org.monfluo.wallet.data.SynchronizationStatus
 import org.monfluo.wallet.model.PendingTransaction
@@ -66,6 +68,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         val RUNNING: AtomicBoolean = AtomicBoolean(false)
         private const val SERVICE_NOTIFICATION_ID: Int = 1
         private val NEXT_NOTIFICATION_ID: AtomicInteger = AtomicInteger(2)
+        private const val SERVICE_NOTIFICATION_GROUP = "Wallet Service"
         private const val CLOSE_WALLET_ACTION = "org.monfluo.wallet.CLOSE_WALLET"
         private const val DELETE_NOTIFICATION_ACTION = "org.monfluo.wallet.DELETE_NOTIFICATION"
     }
@@ -618,28 +621,43 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
     }
 
     private fun createServiceNotificationBuilder(): NotificationCompat.Builder {
+        val openHomeActivityIntent = Intent(this, HomeActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        }
+        val openHomeActivityPendingIntent = PendingIntent.getActivity(application, 1, openHomeActivityIntent, PendingIntent.FLAG_IMMUTABLE)
+
         return NotificationCompat.Builder(this, FOREGROUND_SERVICE_NOTIFICATION_CHANNEL)
             .setSmallIcon(R.drawable.monfluo_notification_icon)
             .setOnlyAlertOnce(true)
             .setOngoing(true)
+            .setGroup(SERVICE_NOTIFICATION_GROUP)
             .setContentTitle("Monfluo wallet service is running")
+            .setContentIntent(openHomeActivityPendingIntent)
     }
 
     private fun createAndShowTransferNotification(amount: Long, txId: String, firstSeenAt: Long, progress: Int, existingId: Int? = null): Int {
         val id: Int = existingId ?: NEXT_NOTIFICATION_ID.getAndIncrement()
 
-        val broadcastIntent = Intent(DELETE_NOTIFICATION_ACTION).apply {
+        val deleteNotificationBroadcastIntent = Intent(DELETE_NOTIFICATION_ACTION).apply {
             putExtra(Constants.EXTRA_TRANSACTION_ID, txId)
         }
-        val broadcastPendingIntent = PendingIntent.getBroadcast(application, id, broadcastIntent, PendingIntent.FLAG_IMMUTABLE)
+        val deleteNotificationBroadcastPendingIntent = PendingIntent.getBroadcast(application, id, deleteNotificationBroadcastIntent, PendingIntent.FLAG_IMMUTABLE)
+
+        val openTransactionActivityIntent = Intent(this, TransactionActivity::class.java).apply {
+            putExtra(Constants.EXTRA_TRANSACTION_ID, txId)
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        }
+        val openTransactionActivityPendingIntent = PendingIntent.getActivity(application, id, openTransactionActivityIntent, PendingIntent.FLAG_IMMUTABLE)
 
         val notification = NotificationCompat.Builder(this, TRANSFERS_NOTIFICATION_CHANNEL)
-            .setSmallIcon(R.drawable.monfluo)
+            .setSmallIcon(R.drawable.monfluo_notification_icon)
             .setOnlyAlertOnce(true)
             .setWhen(firstSeenAt)
             .setContentTitle("Received ${Wallet.getDisplayAmount(amount)} XMR in tx $txId")
-            .setDeleteIntent(broadcastPendingIntent)
             .setProgress(Constants.CONFIRMATIONS, progress, false)
+            .setContentIntent(openTransactionActivityPendingIntent)
+            .setDeleteIntent(deleteNotificationBroadcastPendingIntent)
             .build()
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

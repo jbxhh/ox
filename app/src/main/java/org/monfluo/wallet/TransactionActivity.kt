@@ -58,7 +58,7 @@ class TransactionActivity : MoneroActivity() {
         DateHelper.DATETIME_FORMATTER.timeZone = tz
 
         if (viewModel.txHash == null) {
-            viewModel.txHash = intent.extras?.getString(Constants.NAV_ARG_TXINFO)
+            viewModel.txHash = intent.extras?.getString(Constants.EXTRA_TRANSACTION_ID)
         }
 
         if (viewModel.txHash == null) {
