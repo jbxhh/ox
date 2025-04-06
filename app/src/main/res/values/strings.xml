@@ -76,6 +76,10 @@
         Git repository is available on <a href="https://codeberg.org/acx/monfluo">Codeberg</a>.\n
         Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     </string>
+    <string name="monfluo_build_header">Build</string>
+    <string name="monfluo_build_application_id">Application id</string>
+    <string name="monfluo_build_application_version">Application version</string>
+    <string name="monfluo_build_monero_version">Monero version</string>
     <string name="add_node">Add Node</string>
     <string name="nodes">Nodes</string>
     <string name="node_name_hint">My Monero Node</string>

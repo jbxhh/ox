@@ -25,6 +25,7 @@ import org.monfluo.wallet.listener.NodeSelectionDialogListenerAdapter
 import org.monfluo.wallet.model.Account
 import org.monfluo.wallet.model.Balance
 import org.monfluo.wallet.model.Wallet
+import org.monfluo.wallet.model.WalletManager
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
@@ -50,6 +51,9 @@ class SettingsActivity : MoneroActivity() {
     private lateinit var addAccountButton: Button
     private lateinit var accountsRecyclerView: RecyclerView
     private lateinit var aboutMonfluoTextView: TextView
+    private lateinit var buildApplicationIdTextView: TextView
+    private lateinit var buildApplicationVersionTextView: TextView
+    private lateinit var buildMoneroVersionTextView: TextView
 
     private lateinit var accountAdapter: AccountAdapter
 
@@ -74,6 +78,9 @@ class SettingsActivity : MoneroActivity() {
         addAccountButton = findViewById(R.id.add_account_button)
         accountsRecyclerView = findViewById(R.id.accounts_recycler_view)
         aboutMonfluoTextView = findViewById(R.id.about_monfluo_textview)
+        buildApplicationIdTextView = findViewById(R.id.monfluo_build_application_id_textview)
+        buildApplicationVersionTextView = findViewById(R.id.monfluo_build_application_version_textview)
+        buildMoneroVersionTextView = findViewById(R.id.monfluo_build_monero_version_textview)
 
         val isMultiWalletMode = PreferenceUtils.isMultiWalletMode(applicationContext)
         val isMultiAccountMode = PreferenceUtils.isMultiAccountMode(applicationContext)
@@ -115,7 +122,11 @@ class SettingsActivity : MoneroActivity() {
         val node = PreferenceUtils.getOrSetDefaultNode(this, DefaultNode.defaultNode())
         selectNodeButton.text = getString(R.string.node_button_text, node.name)
 
-        aboutMonfluoTextView.movementMethod = LinkMovementMethod.getInstance();
+        aboutMonfluoTextView.movementMethod = LinkMovementMethod.getInstance()
+
+        buildApplicationIdTextView.text = BuildConfig.APPLICATION_ID
+        buildApplicationVersionTextView.text = BuildConfig.VERSION_NAME
+        buildMoneroVersionTextView.text = WalletManager.moneroVersion()
 
         bindListeners()
     }
