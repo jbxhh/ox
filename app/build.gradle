@@ -8,8 +8,8 @@ android {
         minSdkVersion 26
         targetSdkVersion 34
         compileSdk 34
-        versionCode 60000
-        versionName "0.6.0 'Fluorine Fermi'"
+        versionCode 70000
+        versionName "0.7.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
