@@ -1,1 +1,19 @@
-# TODO: an internal document describing how to release Monfluo
+# Internal document about maintaining Monfluo
+
+## Releasing
+
+* Bump `versionCode` & `versionName` in `build.gradle`
+* Build APKs: `./gradlew clean assembleRelease`
+  * The APKs will be in `app/build/outputs/apk/beta/release` directory
+* Sign the APKs
+```bash
+for f in ./*.apk; do
+    apksigner sign --ks ~/acx.jks "$f"
+done
+```
+* Generate SHA256 hashes: `sha256sum *.apk >> sha256sum.txt`
+* Sign the hashes: `gpg --clearsign sha256sum.txt`
+* Test the APKs
+* Create a new release on Codeberg
+* Copy APKs to fdroid repo: `cp *.apk ~/fdroid/repo/`
+* Deploy new APKs to fdroid: `cd ~/fdroid && fdroid-deploy-monfluo`
