@@ -89,11 +89,12 @@ android {
                 output.versionCodeOverride = abiCodes.get(abiName, 0) + 10 * versionCode
 
                 if (abiName == null) abiName = "universal"
-                def v = "${variant.versionName}".replaceFirst(" '.*' ?", "")
-                        .replace(".", "x")
-                        .replace("(", "-")
-                        .replace(")", "")
-                outputFileName = "$rootProject.ext.apkName-" + v + "_" + abiName + ".apk"
+                def v = "${variant.versionName}"
+                    .replace(" ", "")
+                    .replace(".", "x")
+                    .replace("(", "-")
+                    .replace(")", "")
+                outputFileName = "${rootProject.ext.apkName}-${v}-${abiName}.apk"
         }
     }
 
