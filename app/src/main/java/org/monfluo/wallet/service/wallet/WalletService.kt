@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.AtomicReference
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import org.monfluo.wallet.BuildConfig
 import org.monfluo.wallet.HomeActivity
 import org.monfluo.wallet.R
 import org.monfluo.wallet.TransactionActivity
@@ -69,8 +70,8 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         private const val SERVICE_NOTIFICATION_ID: Int = 1
         private val NEXT_NOTIFICATION_ID: AtomicInteger = AtomicInteger(2)
         private const val SERVICE_NOTIFICATION_GROUP = "Wallet Service"
-        private const val CLOSE_WALLET_ACTION = "org.monfluo.wallet.CLOSE_WALLET"
-        private const val DELETE_NOTIFICATION_ACTION = "org.monfluo.wallet.DELETE_NOTIFICATION"
+        private const val CLOSE_WALLET_ACTION = "${BuildConfig.APPLICATION_ID}.CLOSE_WALLET"
+        private const val DELETE_NOTIFICATION_ACTION = "${BuildConfig.APPLICATION_ID}.DELETE_NOTIFICATION"
     }
 
     private val broadcastReceiver = WalletServiceBroadcastReceiver()
