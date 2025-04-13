@@ -128,7 +128,16 @@ class SendActivity : MoneroActivity() {
         }
         sendMaxButton.setOnClickListener { viewModel.setSendingMax(!isSendAll) }
         createButton.setOnClickListener {
-            val outputsValid = checkDestsValidity(isSendAll)
+            val wallet = walletService?.getWallet()
+            if (wallet == null) {
+                Toast.makeText(
+                    this,
+                    getString(R.string.cannot_create_transaction_no_wallet),
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+            val outputsValid = checkDestsValidity(wallet, isSendAll)
             if (outputsValid) {
                 Toast.makeText(this, getString(R.string.creating_tx), Toast.LENGTH_SHORT).show()
                 createButton.isEnabled = false
@@ -237,7 +246,7 @@ class SendActivity : MoneroActivity() {
         sendTx(pendingTx)
     }
 
-    private fun checkDestsValidity(sendAll: Boolean): Boolean {
+    private fun checkDestsValidity(wallet: Wallet, sendAll: Boolean): Boolean {
         val dests = rawDests
         for (dest in dests) {
             val address = dest.component1()
@@ -252,7 +261,7 @@ class SendActivity : MoneroActivity() {
                     return false
                 }
                 val amountRaw = Wallet.getAmountFromString(amount)
-                val balance = walletService!!.getWalletOrThrow().unlockedBalance
+                val balance = wallet.unlockedBalance
                 if (amountRaw >= balance || amountRaw <= 0) {
                     Toast.makeText(
                         this,
