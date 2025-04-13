@@ -62,6 +62,7 @@
     <string name="receive">Receive</string>
     <string name="creating_tx">Creating transaction…</string>
     <string name="creating_tx_failed_invalid_outputs">Invalid destination combination</string>
+    <string name="cannot_create_transaction_no_wallet">Cannot create transaction - wallet is not opened yet</string>
     <string name="sending_tx">Sending transaction…</string>
     <string name="sent_tx">Sent transaction!</string>
     <string name="no_camera_permission">No camera permission</string>
