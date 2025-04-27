@@ -184,7 +184,7 @@ class SettingsActivity : MoneroActivity() {
                         },
                         {
                             Timber.e(it, "Failed to select node")
-                            Toast.makeText(this@SettingsActivity, "Failed to select node", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@SettingsActivity, getText(R.string.toast_failed_to_select_node), Toast.LENGTH_SHORT).show()
                             false
                         }
                     )
@@ -216,21 +216,21 @@ class SettingsActivity : MoneroActivity() {
             PreferenceUtils.setProxy(applicationContext, proxyAddress)
             if (proxySwitch.isChecked) {
                 if (proxyAddress.isBlank()) {
-                    Toast.makeText(this, "Proxy address is not set", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getText(R.string.toast_proxy_address_not_set), Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this, "Activating proxy", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getText(R.string.toast_activating_proxy), Toast.LENGTH_SHORT).show()
                     walletService?.setProxy(proxyAddress)
                 }
             } else if (walletService?.getProxy() != "") {
-                Toast.makeText(this, "Deactivating proxy", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getText(R.string.toast_deactivating_proxy), Toast.LENGTH_SHORT).show()
                 walletService?.setProxy("")
             } else {
-                Toast.makeText(this, "Proxy settings saved", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getText(R.string.toast_proxy_saved), Toast.LENGTH_SHORT).show()
             }
         }
 
         addAccountButton.setOnClickListener {
-            Toast.makeText(this, "Creating new account, please wait..", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getText(R.string.toast_creating_new_account), Toast.LENGTH_SHORT).show()
             walletService?.createAccount()
         }
     }
@@ -248,14 +248,14 @@ class SettingsActivity : MoneroActivity() {
     override fun onAccountCreated() {
         runOnUiThread {
             updateAccountAdapter()
-            Toast.makeText(this, "New account created", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getText(R.string.toast_new_account_created), Toast.LENGTH_SHORT).show()
         }
     }
 
     override fun onAccountSet(index: Int) {
         runOnUiThread {
             updateAccountAdapter()
-            Toast.makeText(this, "Account changed to #${index}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_account_selected, index), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -284,7 +284,7 @@ class SettingsActivity : MoneroActivity() {
             val informationDialog = WalletSecretsBottomSheetDialog(wallet)
             informationDialog.show(supportFragmentManager, "information_seed_dialog")
         } else {
-            Toast.makeText(this, "Wallet is not opened yet", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getText(R.string.toast_wallet_not_opened), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -292,15 +292,15 @@ class SettingsActivity : MoneroActivity() {
         runOnUiThread {
             if (proxy.isBlank()) {
                 if (success) {
-                    Toast.makeText(this, "Proxy deactivated", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getText(R.string.toast_proxy_deactivated), Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this, "Failed to deactivate proxy", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getText(R.string.toast_failed_to_deactivate_proxy), Toast.LENGTH_SHORT).show()
                 }
             } else {
                 if (success) {
-                    Toast.makeText(this, "Proxy activated", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getText(R.string.toast_proxy_activated), Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this, "Failed to activate proxy", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getText(R.string.toast_failed_to_activate_proxy), Toast.LENGTH_SHORT).show()
                 }
             }
         }

@@ -62,7 +62,7 @@ class WalletActivity : LoggingActivity() {
 
             override fun onWalletEdit(self: WalletAdapter, walletPath: String) {
                 if (WalletService.RUNNING.get()) {
-                    Toast.makeText(this@WalletActivity, "Please wait until wallet is closed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@WalletActivity, getText(R.string.toast_wallet_not_closed), Toast.LENGTH_SHORT).show()
                     return
                 }
                 val walletAdapter = self
@@ -73,7 +73,7 @@ class WalletActivity : LoggingActivity() {
                         Path(walletPath).deleteIfExists()
                         Path("$walletPath.keys").deleteIfExists()
                         walletAdapter.setWalletPaths(findWallets())
-                        Toast.makeText(this@WalletActivity, "Wallet deleted", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@WalletActivity, getText(R.string.toast_wallet_deleted), Toast.LENGTH_SHORT).show()
                         self.dismiss()
                     }
 
@@ -85,7 +85,7 @@ class WalletActivity : LoggingActivity() {
                             Path(walletPath).moveTo(Path(walletPath).resolveSibling(newWalletName))
                             Path("$walletPath.keys").moveTo(Path(walletPath).resolveSibling("$newWalletName.keys"))
                             walletAdapter.setWalletPaths(findWallets())
-                            Toast.makeText(this@WalletActivity, "Wallet renamed", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@WalletActivity, getText(R.string.toast_wallet_renamed), Toast.LENGTH_SHORT).show()
                         }
                         self.dismiss()
                     }

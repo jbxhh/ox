@@ -65,6 +65,10 @@ We are NOT responsible for lost or stolen funds.
 See [the instructions](doc/BUILDING-external-libs.md)  
 Then, fire up Android Studio and build the APK like any other android app.
 
+## Translations
+
+[Weblate](https://hosted.weblate.org/projects/monfluo) is used to translate Monfluo.
+
 ## Donations
 
 Maintaining Monfluo incurs some costs, so please consider donating.

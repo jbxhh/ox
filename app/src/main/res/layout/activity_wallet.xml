@@ -15,7 +15,7 @@
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/button_bg"
-        android:text="Create / Import wallet"
+        android:text="@string/new_wallet"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -53,10 +53,10 @@
         android:layout_height="wrap_content"
         android:ellipsize="middle"
         android:singleLine="true"
-        android:text="Wallets"
+        android:text="@string/wallets"
         android:textSize="14sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/wallet_list_recyclerview"
+        app:layout_constraintBottom_toTopOf="@id/wallet_list_recyclerview"
         app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -66,7 +66,7 @@
         android:layout_marginBottom="16dp"
         android:background="@drawable/round_bg"
         android:clipToPadding="true"
-        app:layout_constraintBottom_toTopOf="@+id/create_or_import_wallet"
+        app:layout_constraintBottom_toTopOf="@id/create_or_import_wallet"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent" />

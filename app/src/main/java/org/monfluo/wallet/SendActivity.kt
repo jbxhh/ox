@@ -189,7 +189,7 @@ class SendActivity : MoneroActivity() {
         viewModel.pendingTransaction.observe(this) { pendingTx: PendingTransaction? ->
             showConfirmationLayout(pendingTx != null)
             if (pendingTx != null) {
-                val address = if (destCount == 1) getAddressField(0).text.toString() else "Multiple"
+                val address = if (destCount == 1) getAddressField(0).text.toString() else getText(R.string.multiple_addresses)
                 addressTextView.text = getString(R.string.tx_address_text, address)
                 amountTextView.text =
                     getString(
@@ -255,7 +255,7 @@ class SendActivity : MoneroActivity() {
                 if (amount.isEmpty()) {
                     Toast.makeText(
                         this,
-                        getString(R.string.send_amount_empty),
+                        getString(R.string.toast_send_amount_empty),
                         Toast.LENGTH_SHORT
                     ).show()
                     return false
@@ -265,7 +265,7 @@ class SendActivity : MoneroActivity() {
                 if (amountRaw >= balance || amountRaw <= 0) {
                     Toast.makeText(
                         this,
-                        getString(R.string.send_amount_invalid),
+                        getString(R.string.toast_send_amount_invalid),
                         Toast.LENGTH_SHORT
                     ).show()
                     return false
@@ -273,7 +273,7 @@ class SendActivity : MoneroActivity() {
             } else if (dests.size > 1) {
                 Toast.makeText(
                     this,
-                    getString(R.string.send_amount_invalid_sendall_paytomany),
+                    getString(R.string.toast_send_amount_invalid_sendall_paytomany),
                     Toast.LENGTH_SHORT
                 ).show()
                 return false
@@ -283,7 +283,7 @@ class SendActivity : MoneroActivity() {
             if (!isValidAddress) {
                 Toast.makeText(
                     this,
-                    getString(R.string.send_address_invalid),
+                    getString(R.string.toast_send_address_invalid),
                     Toast.LENGTH_SHORT
                 ).show()
                 return false
@@ -399,7 +399,7 @@ class SendActivity : MoneroActivity() {
     }
 
     private val destCount: Int
-        get() = destList.childCount ?: -1
+        get() = destList.childCount
     private val rawDests: List<Pair<String, String>>
         get() {
             val dests = ArrayList<Pair<String, String>>()
@@ -493,7 +493,7 @@ class SendActivity : MoneroActivity() {
             } catch (e: Exception) {
                 Toast.makeText(
                     this,
-                    getString(R.string.send_amount_invalid),
+                    getString(R.string.toast_send_amount_invalid),
                     Toast.LENGTH_SHORT
                 ).show()
                 return
@@ -518,7 +518,7 @@ class SendActivity : MoneroActivity() {
                 setAmount(entryView, uriData.amount)
             }
         } else {
-            Toast.makeText(this, getString(R.string.send_address_invalid), Toast.LENGTH_SHORT)
+            Toast.makeText(this, getString(R.string.toast_send_address_invalid), Toast.LENGTH_SHORT)
                 .show()
         }
     }
@@ -570,7 +570,7 @@ class SendActivity : MoneroActivity() {
                 finish()
             } else {
                 sendTxSlider.resetSlider()
-                Toast.makeText(this, getString(R.string.error_sending_tx), Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_error_sending_tx), Toast.LENGTH_SHORT).show()
                 Timber.e("Transaction creation failed with status ${pendingTransaction.status}")
             }
         }

@@ -2,6 +2,7 @@ package org.monfluo.wallet.listener
 
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
+import org.monfluo.wallet.R
 import org.monfluo.wallet.data.DefaultNode
 import org.monfluo.wallet.data.Node
 import org.monfluo.wallet.data.SortOrder
@@ -31,13 +32,13 @@ abstract class NodeSelectionDialogListenerAdapter(
                 newNodes.remove(node)
                 PreferenceUtils.setNodes(activity, newNodes).fold(
                     {
-                        Toast.makeText(activity, "Node delete", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(activity, activity.getText(R.string.toast_node_deleted), Toast.LENGTH_SHORT).show()
                         nodeSelectionBottomSheetDialog.setNodes(newNodes)
                         self.dismiss()
                     },
                     {
                         Timber.e(it, "Failed to delete node")
-                        Toast.makeText(activity, "Failed to delete node", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(activity, activity.getText(R.string.toast_failed_to_delete_node), Toast.LENGTH_SHORT).show()
                     }
                 )
             }
@@ -51,13 +52,13 @@ abstract class NodeSelectionDialogListenerAdapter(
                     .map { node -> if (node != oldNode) node else newNode }
                 PreferenceUtils.setNodes(activity, newNodes).fold(
                     {
-                        Toast.makeText(activity, "Node saved", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(activity, activity.getText(R.string.toast_node_saved), Toast.LENGTH_SHORT).show()
                         nodeSelectionBottomSheetDialog.setNodes(newNodes)
                         self.dismiss()
                     },
                     {
                         Timber.e(it, "Failed to save node")
-                        Toast.makeText(activity, "Failed to save node", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(activity, activity.getText(R.string.toast_failed_to_save_node), Toast.LENGTH_SHORT).show()
                     }
                 )
             }
@@ -75,7 +76,7 @@ abstract class NodeSelectionDialogListenerAdapter(
                 val nodes = PreferenceUtils.getOrSetDefaultNodes(activity, DefaultNode.defaultNodes())
                 if (nodes.any { it.name == node.name }) {
                     Timber.i("Failed to add nodes due to node with the same name already existing")
-                    Toast.makeText(activity, "Node with this name already exists", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(activity, activity.getText(R.string.toast_node_with_name_already_exists), Toast.LENGTH_SHORT).show()
                 } else {
                     val newNodes = nodes.toMutableList()
                     newNodes.add(node)
@@ -83,12 +84,12 @@ abstract class NodeSelectionDialogListenerAdapter(
                         {
                             Timber.i("New node ${node.name} added successfully")
                             nodeSelectionBottomSheetDialog.setNodes(newNodes)
-                            Toast.makeText(activity, "Node added", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(activity, activity.getText(R.string.toast_node_added), Toast.LENGTH_SHORT).show()
                             self.dismiss()
                         },
                         {
                             Timber.e(it, "Failed to add new node")
-                            Toast.makeText(activity, "Failed to add node: ${it.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(activity, activity.getText(R.string.toast_failed_to_add_node), Toast.LENGTH_SHORT).show()
                         }
                     )
                 }

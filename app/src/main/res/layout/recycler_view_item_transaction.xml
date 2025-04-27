@@ -30,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="1dp"
-        android:text="8"
+        tools:text="8"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="@id/pbConfirmations"
         app:layout_constraintEnd_toEndOf="@id/pbConfirmations"

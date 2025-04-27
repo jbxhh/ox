@@ -190,7 +190,7 @@ class OnboardingActivity : LoggingActivity() {
                 if (text.isEmpty()) {
                     createWalletButton.setText(R.string.create_wallet)
                 } else {
-                    createWalletButton.setText(R.string.menu_restore)
+                    createWalletButton.setText(R.string.restore_wallet)
                 }
             }
         })
@@ -235,7 +235,7 @@ class OnboardingActivity : LoggingActivity() {
                         },
                         {
                             Timber.e(it, "Failed to select node")
-                            Toast.makeText(this@OnboardingActivity, "Failed to select node", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@OnboardingActivity, getText(R.string.toast_failed_to_select_node), Toast.LENGTH_SHORT).show()
                             false
                         }
                     )

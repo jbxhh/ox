@@ -58,7 +58,7 @@ class PasswordBottomSheetDialog(
         if (checkPassword(walletPassword)) {
             listener.onCorrectPasswordSubmitted(this, walletPassword)
         } else {
-            Toast.makeText(context, R.string.bad_password, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.toast_bad_password, Toast.LENGTH_SHORT).show()
         }
     }
 

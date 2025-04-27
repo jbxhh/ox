@@ -223,7 +223,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             daemonTrusted: Boolean,
             proxy: String
         ) {
-            showServiceNotification(createServiceNotificationBuilder().setContentText("Opening a wallet...").build())
+            showServiceNotification(createServiceNotificationBuilder().setContentText(getText(R.string.service_notification_description_opening_wallet)).build())
             WalletManager.instance.setProxyJ(proxy)
             WalletManager.instance.setDaemonAddressJ(daemonAddress)
             val wallet = WalletManager.instance.openWallet(walletName, walletPassword)
@@ -235,7 +235,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             updateWallet(wallet)
             this@WalletService.walletRef.set(wallet)
 
-            showServiceNotification(createServiceNotificationBuilder().setContentText("Fetching blockchain height...").build())
+            showServiceNotification(createServiceNotificationBuilder().setContentText(getText(R.string.service_notification_description_fetching_blockchain_height)).build())
             handleFetchDaemonHeight() // TODO: investigate why there is a double free in Monero code when this is moved after startRefresh
             updateSynchronizationStatusNotification(wallet)
             wallet.setListener(this@WalletService)
@@ -260,11 +260,11 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             WalletManager.instance.setDaemonAddressJ(daemonAddress)
             walletRef.get()?.let { wallet ->
                 Timber.i("Re-initializing wallet with daemon address = $daemonAddress, daemon username = $daemonUsername, daemon password = ${"*".repeat(daemonPassword.length)}, proxy = $proxy")
-                showServiceNotification(createServiceNotificationBuilder().setContentText("Changing node...").build())
+                showServiceNotification(createServiceNotificationBuilder().setContentText(getText(R.string.service_notification_description_changing_node)).build())
                 wallet.initJ(daemonAddress, 0, daemonUsername, daemonPassword, proxy)
                 wallet.setTrustedDaemon(daemonTrusted)
                 updateWallet(wallet)
-                showServiceNotification(createServiceNotificationBuilder().setContentText("Fetching blockchain height...").build())
+                showServiceNotification(createServiceNotificationBuilder().setContentText(getText(R.string.service_notification_description_fetching_blockchain_height)).build())
                 handleFetchDaemonHeight()
                 updateSynchronizationStatusNotification(wallet)
                 wallet.setListener(this@WalletService)
@@ -607,7 +607,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
                         )
                     ).getText(applicationContext)
                 )
-                .addAction(NotificationCompat.Action.Builder(R.drawable.monfluo, "Close wallet", broadcastPendingIntent).build())
+                .addAction(NotificationCompat.Action.Builder(R.drawable.monfluo, getText(R.string.service_notification_close_wallet_action), broadcastPendingIntent).build())
                 .build())
     }
 
@@ -633,7 +633,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             .setOnlyAlertOnce(true)
             .setOngoing(true)
             .setGroup(SERVICE_NOTIFICATION_GROUP)
-            .setContentTitle("Monfluo wallet service is running")
+            .setContentTitle(getText(R.string.service_notification_header))
             .setContentIntent(openHomeActivityPendingIntent)
     }
 
@@ -655,7 +655,8 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             .setSmallIcon(R.drawable.monfluo_notification_icon)
             .setOnlyAlertOnce(true)
             .setWhen(firstSeenAt)
-            .setContentTitle("Received ${Wallet.getDisplayAmount(amount)} XMR in tx $txId")
+            .setContentTitle(getString(R.string.transfer_notification_header, Wallet.getDisplayAmount(amount), getString(R.string.unit_xmr)))
+            .setContentText(getString(R.string.transfer_notification_description_transaction_id, txId))
             .setProgress(Constants.CONFIRMATIONS, progress, false)
             .setContentIntent(openTransactionActivityPendingIntent)
             .setDeleteIntent(deleteNotificationBroadcastPendingIntent)
