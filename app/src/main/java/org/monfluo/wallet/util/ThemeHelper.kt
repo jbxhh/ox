@@ -15,25 +15,12 @@
  */
 package org.monfluo.wallet.util
 
-import android.app.Activity
 import android.content.Context
 import android.graphics.Color
-import android.preference.PreferenceManager
 import android.util.TypedValue
 import androidx.annotation.ColorInt
-import org.monfluo.wallet.R
 
 object ThemeHelper {
-    fun getThemedResourceId(ctx: Context, attrId: Int): Int {
-        val typedValue = TypedValue()
-        return if (ctx.theme.resolveAttribute(
-                attrId,
-                typedValue,
-                true
-            )
-        ) typedValue.resourceId else 0
-    }
-
     @ColorInt
     fun getThemedColor(ctx: Context, attrId: Int): Int {
         val typedValue = TypedValue()
@@ -43,15 +30,5 @@ object ThemeHelper {
                 true
             )
         ) typedValue.data else Color.BLACK
-    }
-
-    fun setTheme(activity: Activity, theme: String) {
-        activity.setTheme(R.style.MyMaterialThemeOled)
-    }
-
-    fun setPreferred(activity: Activity) {
-        val theme = PreferenceManager.getDefaultSharedPreferences(activity)
-            .getString(activity.getString(R.string.preferred_theme), "Classic")
-        theme?.let { setTheme(activity, it) }
     }
 }

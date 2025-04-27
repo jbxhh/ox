@@ -84,14 +84,12 @@ class EnotesActivity : MoneroActivity() {
         }
 
         freezeUtxosButton.setOnClickListener {
-            Toast.makeText(this, "Freezing enotes, please wait.", Toast.LENGTH_SHORT)
-                .show()
+            Toast.makeText(this, getText(R.string.toast_freezing_enotes), Toast.LENGTH_SHORT).show()
             walletService?.freezeEnote(adapter.getSelectedEnotes().keys.toList())
         }
 
         unfreezeUtxosButton.setOnClickListener {
-            Toast.makeText(this, "Thawing enotes, please wait.", Toast.LENGTH_SHORT)
-                .show()
+            Toast.makeText(this, getText(R.string.toast_thawing_enotes), Toast.LENGTH_SHORT).show()
             walletService?.thawEnote(adapter.getSelectedEnotes().keys.toList())
         }
     }

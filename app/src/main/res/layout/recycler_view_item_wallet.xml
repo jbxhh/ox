@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_marginBottom="8dp"
     android:paddingStart="8dp"
     android:paddingEnd="8dp">
@@ -27,7 +28,7 @@
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
         android:singleLine="true"
-        android:text="Label"
+        tools:text="Label"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/wallet_imageview"

@@ -31,9 +31,9 @@ class EditAccountLabelBottomSheetDialog(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        pasteButton = view.findViewById(R.id.paste_password_imagebutton)
-        labelEditText = view.findViewById(R.id.wallet_password_edittext)
-        saveLabelButton = view.findViewById(R.id.unlock_wallet_button)
+        pasteButton = view.findViewById(R.id.set_account_label_imagebutton)
+        labelEditText = view.findViewById(R.id.set_account_label_edittext)
+        saveLabelButton = view.findViewById(R.id.set_account_label_button)
 
         labelEditText.setText(currentLabel)
         pasteButton.setOnClickListener {

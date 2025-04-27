@@ -77,13 +77,13 @@ class AddNodeBottomSheetDialog(val listener: AddNodeListener) : BottomSheetDialo
             val trusted = trustedDaemonCheckbox.isChecked
 
             if (name.isBlank()) {
-                Toast.makeText(context, "Enter node name", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getText(R.string.toast_enter_node_name), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             } else if (address.isBlank()) {
-                Toast.makeText(context, "Enter node address", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getText(R.string.toast_enter_node_address), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             } else if (username != null && password == null) {
-                Toast.makeText(context, "Enter password", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getText(R.string.toast_enter_node_password), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
