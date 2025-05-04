@@ -25,16 +25,18 @@ import com.journeyapps.barcodescanner.ScanOptions
 import com.ncorti.slidetoact.SlideToActView
 import com.ncorti.slidetoact.SlideToActView.OnSlideCompleteListener
 import org.monfluo.wallet.model.PendingTransaction
+import org.monfluo.wallet.model.PendingTransactionDestination
+import org.monfluo.wallet.model.TransactionDestinationWithAmount
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
-import org.monfluo.wallet.util.TransactionDestination
 import org.monfluo.wallet.util.UriData
 import org.monfluo.wallet.util.acitivity.MoneroActivity
 import timber.log.Timber
 
+// TODO: refactor transaction confirmation layout into a separate activity/fragment
 class SendActivity : MoneroActivity() {
 
     var priority: PendingTransaction.Priority = PendingTransaction.Priority.Priority_Default
@@ -50,6 +52,7 @@ class SendActivity : MoneroActivity() {
     private lateinit var feeRadioGroupLabelTextView: TextView
     private lateinit var feeTextView: TextView
     private lateinit var addressTextView: TextView
+    private lateinit var addressResolvedFromTextView: TextView
     private lateinit var amountTextView: TextView
     private lateinit var selectedUtxosValueTextView: TextView
     private var currentEntryIndex = -1
@@ -86,6 +89,7 @@ class SendActivity : MoneroActivity() {
         feeTextView = findViewById(R.id.fee_textview)
         sendTxSlider = findViewById(R.id.send_tx_slider)
         addressTextView = findViewById(R.id.address_pending_textview)
+        addressResolvedFromTextView = findViewById(R.id.address_resolved_from_pending_textview)
         amountTextView = findViewById(R.id.amount_pending_textview)
         feeRadioGroup = findViewById(R.id.tx_fee_radiogroup)
         feeRadioGroupLabelTextView = findViewById(R.id.tx_fee_radiogroup_label_textview)
@@ -137,7 +141,7 @@ class SendActivity : MoneroActivity() {
                 ).show()
                 return@setOnClickListener
             }
-            val outputsValid = checkDestsValidity(wallet, isSendAll)
+            val outputsValid = checkDestinationsValidity(wallet, isSendAll)
             if (outputsValid) {
                 Toast.makeText(this, getString(R.string.creating_tx), Toast.LENGTH_SHORT).show()
                 createButton.isEnabled = false
@@ -186,18 +190,32 @@ class SendActivity : MoneroActivity() {
                 if (show == true && !destsHasPaymentId()) View.VISIBLE else View.INVISIBLE
             )
         }
-        viewModel.pendingTransaction.observe(this) { pendingTx: PendingTransaction? ->
-            showConfirmationLayout(pendingTx != null)
-            if (pendingTx != null) {
-                val address = if (destCount == 1) getAddressField(0).text.toString() else getText(R.string.multiple_addresses)
-                addressTextView.text = getString(R.string.tx_address_text, address)
-                amountTextView.text =
-                    getString(
-                        R.string.tx_amount_text,
-                        Helper.getDisplayAmount(pendingTx.getAmount())
-                    )
-                feeTextView.text =
-                    getString(R.string.tx_fee_text, Helper.getDisplayAmount(pendingTx.getFee()))
+        viewModel.pendingTransaction.observe(this) { pair ->
+            showConfirmationLayout(pair != null)
+            if (pair != null) {
+                val (pendingTransaction, pendingTransactionGenericDestination) = pair
+
+                val resolvedDestinations = pendingTransactionGenericDestination.getResolvedDestinations()
+                val isSingleDestination = resolvedDestinations.size == 1
+                val firstResolvedDestination = resolvedDestinations[0]
+                val address = firstResolvedDestination.address
+                val resolvedFrom = firstResolvedDestination.resolvedFrom?.value
+
+                if (isSingleDestination && resolvedFrom != null) {
+                    addressTextView.text = getString(R.string.tx_address_text, address)
+                    addressResolvedFromTextView.visibility = View.VISIBLE
+                    addressResolvedFromTextView.text = getString(R.string.tx_address_resolved_from_text, getAddressField(0).text.toString())
+                } else {
+                    val displayAddress = if (isSingleDestination) address else getText(R.string.multiple_addresses)
+                    addressTextView.text = getString(R.string.tx_address_text, displayAddress)
+                    addressResolvedFromTextView.visibility = View.GONE
+                }
+
+                amountTextView.text = getString(
+                    R.string.tx_amount_text,
+                    Helper.getDisplayAmount(pendingTransaction.getAmount())
+                )
+                feeTextView.text = getString(R.string.tx_fee_text, Helper.getDisplayAmount(pendingTransaction.getFee()))
             }
         }
     }
@@ -240,17 +258,16 @@ class SendActivity : MoneroActivity() {
     }
 
     private fun confirmSlider() {
-        val pendingTx = viewModel.pendingTransaction.value ?: return
+        val (pendingTx) = viewModel.pendingTransaction.value ?: return
         Toast.makeText(this, getString(R.string.sending_tx), Toast.LENGTH_SHORT)
             .show()
         sendTx(pendingTx)
     }
 
-    private fun checkDestsValidity(wallet: Wallet, sendAll: Boolean): Boolean {
+    private fun checkDestinationsValidity(wallet: Wallet, sendAll: Boolean): Boolean {
         val dests = rawDests
         for (dest in dests) {
-            val address = dest.component1()
-            val amount = dest.component2()
+            val (address, amount) = dest
             if (!sendAll) {
                 if (amount.isEmpty()) {
                     Toast.makeText(
@@ -402,16 +419,16 @@ class SendActivity : MoneroActivity() {
         get() = destList.childCount
     private val rawDests: List<Pair<String, String>>
         get() {
-            val dests = ArrayList<Pair<String, String>>()
+            val destinations = mutableListOf<Pair<String, String>>()
             for (i in 0 until destCount) {
                 val entryView = getDestView(i)
                 val amountField = entryView.findViewById<EditText>(R.id.amount_edittext)
                 val addressField = entryView.findViewById<EditText>(R.id.address_edittext)
                 val amount = amountField.text.toString().trim { it <= ' ' }
                 val address = addressField.text.toString().trim { it <= ' ' }
-                dests.add(Pair(address, amount))
+                destinations.add(Pair<String, String>(address, amount))
             }
-            return dests
+            return destinations
         }
     private val isSendAll: Boolean
         get() = viewModel.sendingMax.value ?: false
@@ -465,6 +482,7 @@ class SendActivity : MoneroActivity() {
             sendTxSlider.visibility = View.GONE
             feeTextView.visibility = View.GONE
             addressTextView.visibility = View.GONE
+            addressResolvedFromTextView.visibility = View.GONE
             amountTextView.visibility = View.GONE
         }
     }
@@ -530,16 +548,16 @@ class SendActivity : MoneroActivity() {
     }
 
     private fun createTx(
-        dests: List<Pair<String, String>>,
+        destinations: List<Pair<String, String>>,
         sendAll: Boolean,
         feePriority: PendingTransaction.Priority,
-        utxos: ArrayList<String> = ArrayList()
+        enotes: ArrayList<String> = ArrayList()
     ) {
         if (sendAll) {
-            walletService?.createSweepTransaction(dests[0].first, feePriority, utxos)
+            walletService?.createSweepTransaction(destinations[0].first, feePriority, enotes)
         } else {
-            val destinations = dests.map { TransactionDestination(it.first, Wallet.getAmountFromString(it.second)) }
-            walletService?.createTransaction(destinations, feePriority, utxos)
+            val transactionDestinations = destinations.map { TransactionDestinationWithAmount(it.first, Wallet.getAmountFromString(it.second)) }
+            walletService?.createTransaction(transactionDestinations, feePriority, enotes)
         }
     }
 
@@ -547,9 +565,9 @@ class SendActivity : MoneroActivity() {
         walletService?.sendTransaction(pendingTx)
     }
 
-    override fun onTransactionCreated(pendingTransaction: PendingTransaction) {
+    override fun onTransactionCreated(pendingTransaction: PendingTransaction, destination: PendingTransactionDestination) {
         if (pendingTransaction.status === PendingTransaction.Status.Status_Ok) {
-            viewModel.setPendingTransaction(pendingTransaction)
+            viewModel.setPendingTransaction(Pair(pendingTransaction, destination))
         } else {
             runOnUiThread {
                 createButton.isEnabled = true
@@ -585,11 +603,11 @@ class SendViewModel : ViewModel() {
     private val _sendingMax = MutableLiveData(false)
     private val _showAddOutputButton = MutableLiveData(true)
     private val _enotes = MutableLiveData<ArrayList<String>>(ArrayList())
-    private val _pendingTransaction = MutableLiveData<PendingTransaction?>(null)
+    private val _pendingTransaction = MutableLiveData<Pair<PendingTransaction, PendingTransactionDestination>?>(null)
     var sendingMax: LiveData<Boolean?> = _sendingMax
     var showAddOutputButton: LiveData<Boolean?> = _showAddOutputButton
     var enotes: LiveData<ArrayList<String>> = _enotes
-    var pendingTransaction: LiveData<PendingTransaction?> = _pendingTransaction
+    var pendingTransaction: LiveData<Pair<PendingTransaction, PendingTransactionDestination>?> = _pendingTransaction
     fun setSendingMax(value: Boolean) {
         _sendingMax.value = value
         setShowAddOutputButton(!value)
@@ -603,7 +621,7 @@ class SendViewModel : ViewModel() {
         _enotes.value = value
     }
 
-    fun setPendingTransaction(pendingTx: PendingTransaction?) {
-        _pendingTransaction.postValue(pendingTx)
+    fun setPendingTransaction(pair: Pair<PendingTransaction, PendingTransactionDestination>?) {
+        _pendingTransaction.postValue(pair)
     }
 }

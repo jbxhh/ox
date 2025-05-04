@@ -28,9 +28,8 @@ class UriData(val address: String, val params: HashMap<String, String>) {
 
             if (uriParts.isEmpty()) return null
             val finalAddress = uriParts[0]
-            var queryParams = ""
             if (uriParts.size > 1) {
-                queryParams = uriParts[1]
+                val queryParams = uriParts[1]
                 val queryParts =
                     queryParams.split("&".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                 for (param in queryParts) {
@@ -43,7 +42,7 @@ class UriData(val address: String, val params: HashMap<String, String>) {
                     }
                 }
             }
-            val valid = isAddressValid(finalAddress)
+            val valid = isAddressValid(finalAddress) || Helper.isOpenaliasLike(finalAddress)
             return if (valid) {
                 UriData(finalAddress, params)
             } else {

@@ -24,6 +24,7 @@ extern "C"
 #endif
 
 static JavaVM *cachedJVM;
+static jclass class_Boolean;
 static jclass class_ArrayList;
 static jclass class_WalletListener;
 static jclass class_TransactionInfo;
@@ -43,6 +44,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
     }
     LOGI("JNI_OnLoad ok");
 
+    class_Boolean = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("java/lang/Boolean")));
     class_ArrayList = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("java/util/ArrayList")));
     class_Pair = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("kotlin/Pair")));
     class_TransactionInfo = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/model/TransactionInfo")));
@@ -329,6 +331,11 @@ jobject create_java_pair(JNIEnv *env, const jobject first, const jobject second)
     return result;
 }
 
+jobject create_java_boolean(JNIEnv *env, jboolean value) {
+    jmethodID constructor = env->GetMethodID(class_Boolean, "<init>", "(Z)V");
+    return env->NewObject(class_Boolean, constructor, value);
+}
+
 /// end helpers
 
 #ifdef __cplusplus
@@ -574,18 +581,13 @@ Java_org_monfluo_wallet_model_WalletManager_getBlockTarget(JNIEnv *env, jobject 
     return static_cast<jlong>(Monero::WalletManagerFactory::getWalletManager()->blockTarget());
 }
 
-JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_WalletManager_resolveOpenAlias(JNIEnv *env, jobject instance,
-                                                            jstring address,
-                                                            jboolean dnssec_valid) {
+JNIEXPORT jobject JNICALL
+Java_org_monfluo_wallet_model_WalletManager_resolveOpenAlias(JNIEnv *env, jobject instance, jstring address) {
     const char *_address = env->GetStringUTFChars(address, nullptr);
-    bool _dnssec_valid = (bool) dnssec_valid;
-    std::string resolvedAlias =
-            Monero::WalletManagerFactory::getWalletManager()->resolveOpenAlias(
-                    std::string(_address),
-                    _dnssec_valid);
+    bool dnssec_valid;
+    std::string resolvedAlias =Monero::WalletManagerFactory::getWalletManager()->resolveOpenAlias(std::string(_address), dnssec_valid);
     env->ReleaseStringUTFChars(address, _address);
-    return env->NewStringUTF(resolvedAlias.c_str());
+    return create_java_pair(env, env->NewStringUTF(resolvedAlias.c_str()), create_java_boolean(env, (jboolean) dnssec_valid));
 }
 
 JNIEXPORT jboolean JNICALL

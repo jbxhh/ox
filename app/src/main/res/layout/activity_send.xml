@@ -179,14 +179,16 @@
         tools:visibility="gone" />
 
     <TextView
-        android:id="@+id/amount_pending_textview"
+        android:id="@+id/address_resolved_from_pending_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="4dp"
         android:layout_marginEnd="24dp"
-        android:text="@string/tx_amount_text"
-        android:textSize="16sp"
+        android:ellipsize="middle"
+        android:singleLine="true"
+        android:text="@string/tx_address_resolved_from_text"
+        android:textSize="12sp"
         android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
@@ -195,11 +197,27 @@
         tools:visibility="gone" />
 
     <TextView
+        android:id="@+id/amount_pending_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
+        android:text="@string/tx_amount_text"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/address_resolved_from_pending_textview"
+        tools:visibility="gone" />
+
+    <TextView
         android:id="@+id/fee_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
         android:text="@string/tx_fee_text"
         android:textSize="16sp"
