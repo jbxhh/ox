@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger
 object Helper {
     private const val XMR_DECIMALS = 12
     private const val WALLET_DIR = "wallets"
+    private val DOMAIN_REGEX = Regex("([a-z0-9][a-z0-9-]*[a-z0-9])(\\.([a-z0-9][a-z0-9-]*[a-z0-9]))+")
     private val REQUEST_CODE = AtomicInteger(1)
     var DISPLAY_DIGITS_INFO = 5
 
@@ -62,6 +63,10 @@ object Helper {
             throw IllegalStateException(message)
         }
         return dir
+    }
+
+    fun isOpenaliasLike(string: String): Boolean {
+        return string.lowercase().replace('@', '.').matches(DOMAIN_REGEX)
     }
 
     fun getCameraPermission(context: Activity, launcher: ActivityResultLauncher<String?>): Boolean {

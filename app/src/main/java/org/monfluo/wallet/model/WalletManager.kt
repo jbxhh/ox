@@ -169,7 +169,7 @@ class WalletManager {
     external fun getNetworkDifficulty(): Long
     external fun getBlockTarget(): Long
 
-    external fun resolveOpenAlias(address: String?, dnssec_valid: Boolean): String?
+    external fun resolveOpenAlias(address: String): Pair<String, Boolean>
 
     external fun setProxyJ(address: String?): Boolean
 

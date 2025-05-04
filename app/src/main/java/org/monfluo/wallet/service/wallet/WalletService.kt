@@ -28,6 +28,10 @@ import org.monfluo.wallet.TransactionActivity
 import org.monfluo.wallet.data.Heights
 import org.monfluo.wallet.data.SynchronizationStatus
 import org.monfluo.wallet.model.PendingTransaction
+import org.monfluo.wallet.model.PendingTransactionDestination
+import org.monfluo.wallet.model.TransactionDestination
+import org.monfluo.wallet.model.TransactionDestinationResolved
+import org.monfluo.wallet.model.TransactionDestinationWithAmount
 import org.monfluo.wallet.model.TransactionInfo
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.model.Wallet.Companion.NEW_ACCOUNT_NAME
@@ -36,8 +40,8 @@ import org.monfluo.wallet.model.WalletManager
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Constants.FOREGROUND_SERVICE_NOTIFICATION_CHANNEL
 import org.monfluo.wallet.util.Constants.TRANSFERS_NOTIFICATION_CHANNEL
+import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
-import org.monfluo.wallet.util.TransactionDestination
 import timber.log.Timber
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
@@ -170,7 +174,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
                     handleCreateSweepTransaction(transactionDestination, transactionPriority, selectedUtxos)
                 }
                 WalletServiceCommand.CREATE_TX -> {
-                    val transactionDestinations = data.getParcelableArrayList<TransactionDestination>(
+                    val transactionDestinations = data.getParcelableArrayList<TransactionDestinationWithAmount>(
                         EXTRA_TRANSACTION_DESTINATIONS
                     )!!
                     val transactionPriority = PendingTransaction.Priority.fromInteger(message.data.getInt(
@@ -284,6 +288,21 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             }
         }
 
+        private fun resolveDestination(destination: TransactionDestination): TransactionDestinationResolved {
+            val value = destination.value
+            if (Wallet.isAddressValid(value)) {
+                return destination.toResolved()
+            } else if (Helper.isOpenaliasLike(destination.value)) {
+                Timber.d("Trying to resolve destination $value because it looks like an openalias")
+                val (resolvedAddress, dnssec) = WalletManager.instance.resolveOpenAlias(value)
+                Timber.d("Destination $value resolved as $resolvedAddress (dnssec = $dnssec)")
+                return destination.toResolved(resolvedAddress, dnssec)
+            } else {
+                Timber.w("Destination $value is neither a valid address nor looks like an openalias")
+                return destination.toResolved()
+            }
+        }
+
         private fun handleGenerateNewSubaddress(label: String) {
             val wallet = getWalletOrThrow()
             wallet.addSubaddress(wallet.getAccountIndex(), label)
@@ -306,24 +325,26 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         private fun handleCreateSweepTransaction(
             destination: String,
             feePriority: PendingTransaction.Priority,
-            selectedUtxos: ArrayList<String>
+            selectedEnotes: ArrayList<String>
         ) {
             val wallet = getWalletOrThrow()
-            val pendingTransaction = wallet.createSweepTransaction(destination, feePriority, selectedUtxos)
+            val destinationResolved = resolveDestination(TransactionDestination(destination))
+            val pendingTransaction = wallet.createSweepTransaction(destinationResolved, feePriority, selectedEnotes)
             forEachObserver {
-                it.onTransactionCreated(pendingTransaction)
+                it.onTransactionCreated(pendingTransaction, PendingTransactionDestination.Sweep(destinationResolved))
             }
         }
 
         private fun handleCreateTransaction(
-            destinations: List<TransactionDestination>,
+            destinations: List<TransactionDestinationWithAmount>,
             feePriority: PendingTransaction.Priority,
-            selectedUtxos: ArrayList<String>
+            selectedEnotes: ArrayList<String>
         ) {
             val wallet = getWalletOrThrow()
-            val pendingTransaction = wallet.createTransactionMultDest(destinations, feePriority, selectedUtxos)
+            val destinationsResolved = destinations.map { resolveDestination(it.withoutAmount()).withAmount(it.amount) }
+            val pendingTransaction = wallet.createTransactionMultDest(destinationsResolved, feePriority, selectedEnotes)
             forEachObserver {
-                it.onTransactionCreated(pendingTransaction)
+                it.onTransactionCreated(pendingTransaction, PendingTransactionDestination.Default(destinationsResolved))
             }
         }
 
@@ -793,7 +814,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         handler.sendMessage(message)
     }
 
-    fun createTransaction(destinations: List<TransactionDestination>, priority: PendingTransaction.Priority, selectedUtxos: ArrayList<String>) {
+    fun createTransaction(destinations: List<TransactionDestinationWithAmount>, priority: PendingTransaction.Priority, selectedUtxos: ArrayList<String>) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.CREATE_TX.value()
         message.data.putParcelableArrayList(EXTRA_TRANSACTION_DESTINATIONS, ArrayList(destinations))
@@ -851,7 +872,7 @@ interface WalletServiceObserver : LifecycleOwner {
     fun onNewBlock(wallet: Wallet) {}
     fun onBlockchainHeightFetched(height: Long) {}
     fun onSubaddressesUpdated() {}
-    fun onTransactionCreated(pendingTransaction: PendingTransaction) {}
+    fun onTransactionCreated(pendingTransaction: PendingTransaction, destination: PendingTransactionDestination) {}
     fun onTransactionSent(pendingTransaction: PendingTransaction, success: Boolean) {}
     fun onProxyUpdated(proxy: String, success: Boolean) {}
     fun onAccountCreated() {}

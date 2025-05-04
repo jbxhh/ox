@@ -46,6 +46,7 @@ We are NOT responsible for lost or stolen funds.
 - Coin control (UTXO/enote management)
 - Seed passphrases/offsets
 - Polyseed
+- OpenAlias
 - Multi wallet & multi account
 - Select your own node
 - NO support for other coins

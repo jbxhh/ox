@@ -16,8 +16,7 @@
 package org.monfluo.wallet.model
 
  import org.monfluo.wallet.data.Subaddress
-import org.monfluo.wallet.util.TransactionDestination
-import timber.log.Timber
+ import timber.log.Timber
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.name
@@ -277,19 +276,19 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     ): Long
 
     fun createSweepTransaction(
-        dstAddr: String,
+        transactionDestination: TransactionDestinationResolved,
         priority: PendingTransaction.Priority,
         keyImages: ArrayList<String>
     ): PendingTransaction {
         disposePendingTransaction()
-        val _priority = priority.ordinal
-        val txHandle = createSweepTransaction(dstAddr, "", 0, _priority, accountIndex, keyImages)
-        pendingTransaction = PendingTransaction(txHandle)
-        return pendingTransaction!!
+        val txHandle = createSweepTransaction(transactionDestination.address, "", 0, priority.ordinal, accountIndex, keyImages)
+        val pendingTransaction = PendingTransaction(txHandle)
+        this.pendingTransaction = pendingTransaction
+        return pendingTransaction
     }
 
     fun createTransactionMultDest(
-        outputs: List<TransactionDestination>,
+        outputs: List<TransactionDestinationWithAmountResolved>,
         priority: PendingTransaction.Priority,
         keyImages: ArrayList<String>
     ): PendingTransaction {
@@ -306,8 +305,9 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
             destinations, "", amounts, 0, _priority,
             accountIndex, keyImages
         )
-        pendingTransaction = PendingTransaction(txHandle)
-        return pendingTransaction!!
+        val pendingTransaction = PendingTransaction(txHandle)
+        this.pendingTransaction = pendingTransaction
+        return pendingTransaction
     }
 
     private external fun createTransactionMultDestJ(
