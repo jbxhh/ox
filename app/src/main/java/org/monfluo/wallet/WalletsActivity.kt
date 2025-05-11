@@ -4,6 +4,7 @@ import org.monfluo.wallet.adapter.WalletAdapter
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,7 +21,7 @@ import kotlin.io.path.deleteIfExists
 import kotlin.io.path.moveTo
 import kotlin.io.path.name
 
-class WalletActivity : LoggingActivity() {
+class WalletsActivity : LoggingActivity() {
 
     private val startOnboardingActivityToOpenWallet = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == 0) {
@@ -32,16 +33,19 @@ class WalletActivity : LoggingActivity() {
         }
     }
 
-    private lateinit var createWalletButton: Button
+    private lateinit var applicationSettingsImageView: ImageView
     private lateinit var walletRecyclerView: RecyclerView
+    private lateinit var createWalletButton: Button
+
     private lateinit var adapter: WalletAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_wallet)
+        setContentView(R.layout.activity_wallets)
 
-        createWalletButton = findViewById(R.id.create_or_import_wallet)
+        applicationSettingsImageView = findViewById(R.id.application_settings_imageview)
         walletRecyclerView = findViewById(R.id.wallet_list_recyclerview)
+        createWalletButton = findViewById(R.id.create_or_import_wallet)
 
         val walletPaths = findWallets()
         adapter = WalletAdapter(walletPaths, object : WalletAdapter.WalletAdapterListener {
@@ -62,7 +66,7 @@ class WalletActivity : LoggingActivity() {
 
             override fun onWalletEdit(self: WalletAdapter, walletPath: String) {
                 if (WalletService.RUNNING.get()) {
-                    Toast.makeText(this@WalletActivity, getText(R.string.toast_wallet_not_closed), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@WalletsActivity, getText(R.string.toast_wallet_not_closed), Toast.LENGTH_SHORT).show()
                     return
                 }
                 val walletAdapter = self
@@ -73,7 +77,7 @@ class WalletActivity : LoggingActivity() {
                         Path(walletPath).deleteIfExists()
                         Path("$walletPath.keys").deleteIfExists()
                         walletAdapter.setWalletPaths(findWallets())
-                        Toast.makeText(this@WalletActivity, getText(R.string.toast_wallet_deleted), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@WalletsActivity, getText(R.string.toast_wallet_deleted), Toast.LENGTH_SHORT).show()
                         self.dismiss()
                     }
 
@@ -85,7 +89,7 @@ class WalletActivity : LoggingActivity() {
                             Path(walletPath).moveTo(Path(walletPath).resolveSibling(newWalletName))
                             Path("$walletPath.keys").moveTo(Path(walletPath).resolveSibling("$newWalletName.keys"))
                             walletAdapter.setWalletPaths(findWallets())
-                            Toast.makeText(this@WalletActivity, getText(R.string.toast_wallet_renamed), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@WalletsActivity, getText(R.string.toast_wallet_renamed), Toast.LENGTH_SHORT).show()
                         }
                         self.dismiss()
                     }
@@ -96,9 +100,17 @@ class WalletActivity : LoggingActivity() {
         walletRecyclerView.layoutManager = LinearLayoutManager(this)
         walletRecyclerView.adapter = adapter
 
+        bindListeners()
+    }
+
+    private fun bindListeners() {
+        applicationSettingsImageView.setOnClickListener {
+            startActivity(Intent(this, ApplicationSettingsActivity::class.java))
+        }
+
         createWalletButton.setOnClickListener {
-            val onboardingActivityIntent = Intent(this, OnboardingActivity::class.java)
-            startOnboardingActivityToOpenWallet.launch(onboardingActivityIntent)
+            val createWalletActivityIntent = Intent(this, CreateWalletActivity::class.java)
+            startOnboardingActivityToOpenWallet.launch(createWalletActivityIntent)
         }
     }
 

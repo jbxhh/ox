@@ -40,13 +40,13 @@
         </activity>
 
         <activity
-            android:name=".WalletActivity"
+            android:name=".WalletsActivity"
             android:windowSoftInputMode="adjustPan"
             android:exported="true">
         </activity>
 
         <activity
-            android:name=".OnboardingActivity"
+            android:name=".CreateWalletActivity"
             android:exported="true">
         </activity>
 
@@ -66,7 +66,12 @@
         </activity>
 
         <activity
-            android:name=".SettingsActivity"
+            android:name=".ApplicationSettingsActivity"
+            android:exported="true">
+        </activity>
+
+        <activity
+            android:name=".WalletSettingsActivity"
             android:exported="true">
         </activity>
 

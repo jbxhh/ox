@@ -53,10 +53,10 @@ class StartActivity : LoggingActivity() {
         val walletPaths = Helper.findWallets(Helper.getWalletRoot(this))
         if (walletPaths.isEmpty()) {
             Timber.d("No wallets found, launching onboarding activity")
-            startActivityToOpenWallet.launch(Intent(this, OnboardingActivity::class.java))
+            startActivityToOpenWallet.launch(Intent(this, CreateWalletActivity::class.java))
         } else if (isMultiWalletMode) {
             Timber.d("${walletPaths.size} wallets found, launching wallet activity")
-            startActivityToOpenWallet.launch(Intent(this, WalletActivity::class.java))
+            startActivityToOpenWallet.launch(Intent(this, WalletsActivity::class.java))
         } else {
             Timber.d("${walletPaths.size} wallets found but multi-wallet mode is not enabled, asking for password to open a wallet")
             val walletPath = walletPaths.find { it.endsWith(Constants.DEFAULT_WALLET_NAME) } ?: walletPaths.first()

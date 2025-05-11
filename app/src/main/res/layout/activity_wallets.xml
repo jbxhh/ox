@@ -5,7 +5,66 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="24dp"
-    tools:context="org.monfluo.wallet.WalletActivity">
+    tools:context="org.monfluo.wallet.WalletsActivity">
+
+    <TextView
+        android:id="@+id/application_name_header_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:text="@string/app_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/monfluo_imageview"
+        android:layout_width="256dp"
+        android:layout_height="256dp"
+        android:layout_marginTop="32dp"
+        android:src="@drawable/monfluo"
+        android:contentDescription="@string/application_logo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/application_name_header_textview" />
+
+    <TextView
+        android:id="@+id/address_list_label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="middle"
+        android:singleLine="true"
+        android:text="@string/wallets"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/wallet_list_recyclerview"
+        app:layout_constraintStart_toStartOf="@id/wallet_list_recyclerview" />
+
+    <ImageView
+        android:id="@+id/application_settings_imageview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:contentDescription="@string/settings"
+        android:minWidth="40dp"
+        android:minHeight="40dp"
+        android:src="@drawable/ic_settings"
+        app:layout_constraintBottom_toTopOf="@id/wallet_list_recyclerview"
+        app:layout_constraintEnd_toEndOf="@id/wallet_list_recyclerview" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/wallet_list_recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="256dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/round_bg"
+        android:clipToPadding="true"
+        app:layout_constraintBottom_toTopOf="@id/create_or_import_wallet"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/create_or_import_wallet"
@@ -19,55 +78,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/recv_monero_textview"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
-        android:text="@string/app_name"
-        android:textAlignment="center"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/monfluo_imageview"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/monfluo_imageview"
-        android:layout_width="256dp"
-        android:layout_height="256dp"
-        android:layout_marginTop="16dp"
-        android:src="@drawable/monfluo"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/recv_monero_textview" />
-
-    <TextView
-        android:id="@+id/address_list_label_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ellipsize="middle"
-        android:singleLine="true"
-        android:text="@string/wallets"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/wallet_list_recyclerview"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/wallet_list_recyclerview"
-        android:layout_width="match_parent"
-        android:layout_height="256dp"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/round_bg"
-        android:clipToPadding="true"
-        app:layout_constraintBottom_toTopOf="@id/create_or_import_wallet"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
