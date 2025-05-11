@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:background="@color/oled_dialogBackgroundColor"
     android:fillViewport="true"
-    android:fitsSystemWindows="true" >
+    android:fitsSystemWindows="true"
+    tools:context="org.monfluo.wallet.CreateWalletActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -15,18 +16,40 @@
         android:paddingTop="24dp"
         android:paddingEnd="24dp">
 
-        <TextView
-            android:id="@+id/create_wallet_textview"
-            android:layout_width="0dp"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/create_wallet_header_layout"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:text="@string/create_wallet"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@id/wallet_name_edittext"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/create_wallet_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:layout_marginStart="0dp"
+                android:text="@string/create_wallet"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/application_settings_imageview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:contentDescription="@string/settings"
+                android:minWidth="40dp"
+                android:minHeight="40dp"
+                android:src="@drawable/ic_settings"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="@id/create_wallet_textview"
+                app:layout_constraintTop_toTopOf="@id/create_wallet_textview" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <EditText
             android:id="@+id/wallet_name_edittext"
@@ -40,7 +63,7 @@
             app:layout_constraintBottom_toTopOf="@id/wallet_password_edittext"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/create_wallet_textview"
+            app:layout_constraintTop_toBottomOf="@id/create_wallet_header_layout"
             tools:visibility="visible" />
 
         <EditText
@@ -189,63 +212,6 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/wallet_restore_height_edittext" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <Button
-                android:id="@+id/select_node_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/button_bg"
-                android:ellipsize="middle"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:singleLine="true"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/wallet_seed_layout"
-                app:layout_constraintHorizontal_bias="0.0"
-                tools:ignore="SpeakableTextPresentCheck"
-                tools:text="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" />
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/wallet_proxy_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/card_no_top"
-                app:layout_constraintTop_toBottomOf="@id/select_node_button">
-
-                <TextView
-                    android:id="@+id/tor_onboarding_switch_label"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tor_switch_label"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="@id/use_proxy_switch"
-                    app:layout_constraintEnd_toStartOf="@id/use_proxy_switch"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/use_proxy_switch" />
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/use_proxy_switch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:minWidth="48dp"
-                    android:minHeight="48dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <EditText
-                    android:id="@+id/wallet_proxy_address_edittext"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/edittext_bg"
-                    android:hint="@string/proxy_address_hint"
-                    android:minHeight="48dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/use_proxy_switch" />
-
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
 

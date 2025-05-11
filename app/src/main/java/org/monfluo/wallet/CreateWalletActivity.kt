@@ -12,7 +12,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
-import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -20,26 +19,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.monfluo.wallet.data.DefaultNode
-import org.monfluo.wallet.data.Node
 import org.monfluo.wallet.data.SeedType
-import org.monfluo.wallet.data.SortOrder
-import org.monfluo.wallet.fragment.dialog.NodeSelectionBottomSheetDialog
-import org.monfluo.wallet.listener.NodeSelectionDialogListenerAdapter
 import org.monfluo.wallet.livedata.combineLiveDatas
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.model.WalletManager
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
-import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.acitivity.LoggingActivity
 import timber.log.Timber
 import java.io.File
 
-class OnboardingActivity : LoggingActivity() {
+class CreateWalletActivity : LoggingActivity() {
 
-    private val viewModel: OnboardingViewModel by viewModels()
+    private val viewModel: CreateWalletViewModel by viewModels()
 
+    private lateinit var applicationSettingsImageView: ImageView
     private lateinit var walletNameEditText: EditText
     private lateinit var walletPasswordEditText: EditText
     private lateinit var walletPasswordConfirmEditText: EditText
@@ -51,15 +45,13 @@ class OnboardingActivity : LoggingActivity() {
     private lateinit var walletSeedEditText: EditText
     private lateinit var walletRestoreHeightEditText: EditText
     private lateinit var walletSeedOffsetPassphraseEditText: EditText
-    private lateinit var selectNodeButton: Button
-    private lateinit var useProxySwitch: SwitchCompat
-    private lateinit var walletProxyAddressEditText: EditText
     private lateinit var createWalletButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_onboarding)
+        setContentView(R.layout.activity_create_wallet)
 
+        applicationSettingsImageView = findViewById(R.id.application_settings_imageview)
         walletNameEditText = findViewById(R.id.wallet_name_edittext)
         walletPasswordEditText = findViewById(R.id.wallet_password_edittext)
         walletPasswordConfirmEditText = findViewById(R.id.wallet_password_confirm_edittext)
@@ -71,17 +63,7 @@ class OnboardingActivity : LoggingActivity() {
         walletSeedEditText = findViewById(R.id.wallet_seed_edittext)
         walletRestoreHeightEditText = findViewById(R.id.wallet_restore_height_edittext)
         walletSeedOffsetPassphraseEditText = findViewById(R.id.wallet_seed_offset_passphrase_edittext)
-        selectNodeButton = findViewById(R.id.select_node_button)
-        useProxySwitch = findViewById(R.id.use_proxy_switch)
-        walletProxyAddressEditText = findViewById(R.id.wallet_proxy_address_edittext)
         createWalletButton = findViewById(R.id.create_wallet_button)
-
-        val useProxy = PreferenceUtils.isUseProxy(this)
-
-        useProxySwitch.isChecked = useProxy
-
-        val node = PreferenceUtils.getOrSetDefaultNode(this, DefaultNode.defaultNode())
-        selectNodeButton.text = getString(R.string.node_button_text, node.name)
 
         walletNameEditText.setText(getWalletNameSuggestion())
 
@@ -142,21 +124,16 @@ class OnboardingActivity : LoggingActivity() {
                 walletSeedOffsetPassphraseEditText.visibility = View.GONE
             }
         }
-
-        viewModel.useProxy.observe(this) { useProxy ->
-            walletProxyAddressEditText.isEnabled = useProxy
-        }
     }
 
     private fun bindListeners() {
+        applicationSettingsImageView.setOnClickListener {
+            startActivity(Intent(this, ApplicationSettingsActivity::class.java))
+        }
+
         moreOptionsDropdownTextView.setOnClickListener { viewModel.showMoreOptions.value = !viewModel.showMoreOptions.value!! }
 
         moreOptionsChevronImageView.setOnClickListener { viewModel.showMoreOptions.value = !viewModel.showMoreOptions.value!! }
-
-        useProxySwitch.setOnCheckedChangeListener { _, b ->
-            PreferenceUtils.setUseProxy(this, b)
-            viewModel.setUseProxy(b)
-        }
 
         createWalletButton.setOnClickListener {
             createOrImportWallet(
@@ -204,47 +181,6 @@ class OnboardingActivity : LoggingActivity() {
         })
 
         seedTypeButton.setOnClickListener { toggleSeedType() }
-
-        walletProxyAddressEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-            override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-            override fun afterTextChanged(editable: Editable) {
-                val text = editable.toString()
-                PreferenceUtils.setProxy(this@OnboardingActivity, text)
-                viewModel.setProxyAddress(text)
-            }
-        })
-
-        selectNodeButton.setOnClickListener {
-            val nodes = PreferenceUtils.getOrSetDefaultNodes(this, DefaultNode.defaultNodes())
-            val node = PreferenceUtils.getOrSetDefaultNode(this, DefaultNode.defaultNode())
-            val sortOrder = SortOrder.fromBoolean(PreferenceUtils.isSortNodesAscending(this))
-
-            val listener = object : NodeSelectionDialogListenerAdapter(
-                activity = this,
-            ) {
-                override fun trySelectNode(
-                    self: NodeSelectionBottomSheetDialog,
-                    node: Node
-                ): Boolean {
-                    return PreferenceUtils.setNode(this@OnboardingActivity, node).fold(
-                        {
-                            selectNodeButton.text = getString(R.string.node_button_text, node.name)
-                            Timber.i("Node selected")
-                            true
-                        },
-                        {
-                            Timber.e(it, "Failed to select node")
-                            Toast.makeText(this@OnboardingActivity, getText(R.string.toast_failed_to_select_node), Toast.LENGTH_SHORT).show()
-                            false
-                        }
-                    )
-                }
-            }
-
-            val dialog = NodeSelectionBottomSheetDialog(sortOrder, nodes, node, listener)
-            dialog.show(supportFragmentManager, "node_selection_dialog")
-        }
     }
 
     private fun toggleSeedType() {
@@ -263,7 +199,7 @@ class OnboardingActivity : LoggingActivity() {
     ) {
         lifecycleScope.launch(Dispatchers.IO) {
             viewModel.createOrImportWallet(
-                this@OnboardingActivity,
+                this@CreateWalletActivity,
                 walletNameEditText.text.toString(),
                 walletSeed,
                 restoreHeightText,
@@ -287,13 +223,10 @@ class OnboardingActivity : LoggingActivity() {
     }
 }
 
-internal class OnboardingViewModel : ViewModel() {
+internal class CreateWalletViewModel : ViewModel() {
 
     val seedType = MutableLiveData(SeedType.MONERO)
     val showMoreOptions = MutableLiveData(false)
-    private val _useProxy = MutableLiveData(false)
-    val useProxy: LiveData<Boolean> = _useProxy
-    private val _proxyAddress = MutableLiveData("")
     private val _password = MutableLiveData("")
     val password: LiveData<String> = _password
     private val _confirmedPassphrase = MutableLiveData("")
@@ -303,16 +236,13 @@ internal class OnboardingViewModel : ViewModel() {
 
     val enableButton = combineLiveDatas(
         seedType,
-        _useProxy,
-        _proxyAddress,
         _password,
         _confirmedPassphrase,
         _creatingWallet,
-    ) { seedType, useProxy, proxyAddress, passphrase, confirmedPassphrase, creatingWallet ->
-        if (seedType == null || useProxy == null || proxyAddress == null || passphrase == null || confirmedPassphrase == null || creatingWallet == null) return@combineLiveDatas false
+    ) { seedType, passphrase, confirmedPassphrase, creatingWallet ->
+        if (seedType == null || passphrase == null || confirmedPassphrase == null || creatingWallet == null) return@combineLiveDatas false
         if ((passphrase.isNotEmpty() || confirmedPassphrase.isNotEmpty()) && passphrase != confirmedPassphrase) return@combineLiveDatas false
         if (creatingWallet) return@combineLiveDatas false
-        if (useProxy && proxyAddress.isEmpty()) return@combineLiveDatas false
 
         return@combineLiveDatas true
     }
@@ -325,7 +255,7 @@ internal class OnboardingViewModel : ViewModel() {
     }
 
     fun createOrImportWallet(
-        activity: OnboardingActivity,
+        activity: CreateWalletActivity,
         walletName: String,
         walletSeed: String,
         restoreHeightText: String,
@@ -448,14 +378,6 @@ internal class OnboardingViewModel : ViewModel() {
         } else {
             null
         }
-    }
-
-    fun setProxyAddress(address: String) {
-        _proxyAddress.value = address
-    }
-
-    fun setUseProxy(useProxy: Boolean) {
-        _useProxy.value = useProxy
     }
 
     fun setPassphrase(passphrase: String) {

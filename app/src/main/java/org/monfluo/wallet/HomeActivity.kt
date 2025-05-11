@@ -36,6 +36,7 @@ class HomeActivity : MoneroActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var progressBarText: TextView
 
+    private lateinit var walletSettingsImageView: ImageView
     private lateinit var settingsImageView: ImageView
     private lateinit var sendButton: Button
     private lateinit var receiveButton: Button
@@ -57,6 +58,7 @@ class HomeActivity : MoneroActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
+        walletSettingsImageView = findViewById(R.id.wallet_settings_imageview)
         settingsImageView = findViewById(R.id.settings_imageview)
         sendButton = findViewById(R.id.send_button)
         receiveButton = findViewById(R.id.receive_button)
@@ -92,8 +94,11 @@ class HomeActivity : MoneroActivity() {
             PreferenceUtils.setStreetMode(this, newStreetMode)
             viewModel.setStreetMode(newStreetMode)
         }
+        walletSettingsImageView.setOnClickListener {
+            startActivity(Intent(this, WalletSettingsActivity::class.java))
+        }
         settingsImageView.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
+            startActivity(Intent(this, ApplicationSettingsActivity::class.java))
         }
         sendButton.setOnClickListener {
             startActivity(Intent(this, SendActivity::class.java))
