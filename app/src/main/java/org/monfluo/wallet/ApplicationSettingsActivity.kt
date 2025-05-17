@@ -30,6 +30,7 @@ class ApplicationSettingsActivity : MoneroActivity() {
     private lateinit var allowFeeOverrideSwitch: SwitchCompat
     private lateinit var allowCopyingSecretsToClipboardSwitch: SwitchCompat
     private lateinit var showTransferNotificationsSwitch: SwitchCompat
+    private lateinit var showIconOnQrCodesSwitch: SwitchCompat
     private lateinit var proxySwitch: SwitchCompat
     private lateinit var proxySettingsLayout: ConstraintLayout
     private lateinit var saveProxyButton: Button
@@ -49,6 +50,7 @@ class ApplicationSettingsActivity : MoneroActivity() {
         allowFeeOverrideSwitch = findViewById(R.id.allow_fee_override_switch)
         allowCopyingSecretsToClipboardSwitch = findViewById(R.id.allow_copying_secrets_to_clipboard_switch)
         showTransferNotificationsSwitch = findViewById(R.id.show_transfer_notifications_switch)
+        showIconOnQrCodesSwitch = findViewById(R.id.show_icon_on_qr_codes_switch)
         proxySwitch = findViewById(R.id.proxy_switch)
         proxySettingsLayout = findViewById(R.id.wallet_proxy_settings_layout)
         walletProxyAddressEditText = findViewById(R.id.wallet_proxy_address_edittext)
@@ -64,6 +66,7 @@ class ApplicationSettingsActivity : MoneroActivity() {
         val isAllowFeeOverride = PreferenceUtils.isAllowFeeOverride(applicationContext)
         val isAllowCopyingSecrets = PreferenceUtils.isAllowCopyingSecrets(applicationContext)
         val isShowTransferNotifications = PreferenceUtils.isShowTransferNotifications(applicationContext)
+        val isShowIconOnQrCodes = PreferenceUtils.isShowIconOnQrCodes(applicationContext)
         val isUseProxy = PreferenceUtils.isUseProxy(applicationContext)
 
         multiWalletModeSwitch.isChecked = isMultiWalletMode
@@ -72,6 +75,7 @@ class ApplicationSettingsActivity : MoneroActivity() {
         allowFeeOverrideSwitch.isChecked = isAllowFeeOverride
         allowCopyingSecretsToClipboardSwitch.isChecked = isAllowCopyingSecrets
         showTransferNotificationsSwitch.isChecked = isShowTransferNotifications
+        showIconOnQrCodesSwitch.isChecked = isShowIconOnQrCodes
         proxySwitch.isChecked = isUseProxy
 
         walletProxyAddressEditText.setText(PreferenceUtils.getProxy(this) ?: "")
@@ -109,6 +113,9 @@ class ApplicationSettingsActivity : MoneroActivity() {
             if (b) {
                 Helper.requestPostNotificationsPermission(this, force = true)
             }
+        }
+        showIconOnQrCodesSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PreferenceUtils.setShowIconOnQrCodes(applicationContext, b)
         }
         proxySwitch.setOnCheckedChangeListener { _, b: Boolean ->
             PreferenceUtils.setUseProxy(applicationContext, b)

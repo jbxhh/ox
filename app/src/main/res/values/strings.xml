@@ -127,6 +127,8 @@
     <string name="allow_copying_secrets_to_clipboard">Allow copying secrets to clipboard</string>
     <!-- Label for showing transfer notifications setting toggle -->
     <string name="show_transfer_notifications">Show transfer notifications</string>
+    <!-- Label for showing icon on QR codes setting toggle -->
+    <string name="show_icon_on_qr_codes">Show icon on QR codes</string>
     <!-- Button for displaying wallet secrets (seed, private keys, etc.) -->
     <string name="display_wallet_secrets">Display wallet secrets</string>
     <!-- Button for creating new account -->

@@ -36,7 +36,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/settings_textview" />
+            app:layout_constraintTop_toBottomOf="@id/settings_textview" />
 
         <TextView
             android:id="@+id/enable_multiple_wallets_textview"
@@ -113,10 +113,10 @@
             android:text="@string/option_allow_fee_override"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="@id/allow_fee_override_switch"
-            app:layout_constraintEnd_toStartOf="@+id/allow_fee_override_switch"
+            app:layout_constraintEnd_toStartOf="@id/allow_fee_override_switch"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/allow_fee_override_switch" />
+            app:layout_constraintTop_toTopOf="@id/allow_fee_override_switch" />
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/allow_fee_override_switch"
@@ -126,7 +126,7 @@
             android:minWidth="48dp"
             android:minHeight="48dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/street_mode_switch" />
+            app:layout_constraintTop_toBottomOf="@id/street_mode_switch" />
 
         <TextView
             android:id="@+id/allow_copying_secrets_to_clipboard_textview"
@@ -149,7 +149,7 @@
             android:minWidth="48dp"
             android:minHeight="48dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/allow_fee_override_switch" />
+            app:layout_constraintTop_toBottomOf="@id/allow_fee_override_switch" />
 
         <TextView
             android:id="@+id/show_transfer_notifications_textview"
@@ -172,17 +172,30 @@
             android:minWidth="48dp"
             android:minHeight="48dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/allow_copying_secrets_to_clipboard_switch" />
+            app:layout_constraintTop_toBottomOf="@id/allow_copying_secrets_to_clipboard_switch" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/wallet_account_settings_layout"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/show_icon_on_qr_codes_textview"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            tools:visibility="visible"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="24dp"
+            android:text="@string/show_icon_on_qr_codes"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@id/show_icon_on_qr_codes_switch"
+            app:layout_constraintEnd_toStartOf="@id/show_icon_on_qr_codes_switch"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/show_transfer_notifications_switch"/>
+            app:layout_constraintTop_toTopOf="@id/show_icon_on_qr_codes_switch" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/show_icon_on_qr_codes_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/show_transfer_notifications_switch" />
 
         <TextView
             android:id="@+id/network_settings_textview"
@@ -195,7 +208,7 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/wallet_account_settings_layout" />
+            app:layout_constraintTop_toBottomOf="@id/show_icon_on_qr_codes_switch" />
 
         <Button
             android:id="@+id/select_node_button"
@@ -273,7 +286,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/wallet_proxy_address_edittext" />
+                app:layout_constraintTop_toBottomOf="@id/wallet_proxy_address_edittext" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout

@@ -41,7 +41,8 @@ class ReceiveActivity : MoneroActivity() {
 
     private lateinit var addressTextView: TextView
     private lateinit var addressLabelTextView: TextView
-    private lateinit var addressImageView: ImageView
+    private lateinit var addressQrCodeImageView: ImageView
+    private lateinit var addressQrCodeIconImageView: ImageView
     private lateinit var copyAddressImageButton: ImageButton
     private lateinit var freshAddressImageView : ImageButton
     private lateinit var recyclerView: RecyclerView
@@ -50,7 +51,8 @@ class ReceiveActivity : MoneroActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_receive)
 
-        addressImageView = findViewById(R.id.address_qrcode_imageview)
+        addressQrCodeImageView = findViewById(R.id.address_qrcode_imageview)
+        addressQrCodeIconImageView = findViewById(R.id.address_qrcode_icon_imageview)
         addressTextView = findViewById(R.id.address_textview)
         addressLabelTextView = findViewById(R.id.address_label_textview)
         copyAddressImageButton = findViewById(R.id.copy_address_imagebutton)
@@ -68,6 +70,14 @@ class ReceiveActivity : MoneroActivity() {
     }
 
     private fun bindObservers() {
+        viewModel.showIconOnQrCodes.observe(this) { isShowIconOnQrCodes ->
+            if (isShowIconOnQrCodes) {
+                addressQrCodeIconImageView.visibility = View.VISIBLE
+            } else {
+                addressQrCodeIconImageView.visibility = View.GONE
+            }
+        }
+
         val subaddressAdapterListener = object : SubaddressAdapterListener {
             override fun onSubaddressSelected(subaddress: Subaddress) {
                 viewModel.selectAddress(subaddress, qrCodeBackgroundColor())
@@ -89,16 +99,24 @@ class ReceiveActivity : MoneroActivity() {
         }
         viewModel.qrCode.observe(this) { bitmap: Bitmap? ->
             if (bitmap == null) {
-                addressImageView.visibility = View.INVISIBLE
+                addressQrCodeImageView.visibility = View.INVISIBLE
             } else {
-                addressImageView.setImageBitmap(bitmap)
-                addressImageView.visibility = View.VISIBLE
+                addressQrCodeImageView.setImageBitmap(bitmap)
+                addressQrCodeImageView.visibility = View.VISIBLE
             }
         }
         viewModel.subaddresses.observe(this) { addresses: List<Subaddress> ->
             // We want newer addresses addresses to be shown first
             adapter.submitAddresses(addresses.reversed())
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val isShowIconOnQrCodes = PreferenceUtils.isShowIconOnQrCodes(this)
+
+        viewModel.setShowIconOnQrCodes(isShowIconOnQrCodes)
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
@@ -153,7 +171,11 @@ class ReceiveActivity : MoneroActivity() {
 }
 
 class ReceiveViewModel : ViewModel() {
+
     private var qrCodeJob: AtomicReference<Job?> = AtomicReference(null)
+
+    private val _showIconOnQrCodes = MutableLiveData(false)
+    val showIconOnQrCodes: LiveData<Boolean> = _showIconOnQrCodes
 
     private val _selectedSubaddress = MutableLiveData<Subaddress?>()
     val selectedSubaddress: LiveData<Subaddress?> = _selectedSubaddress
@@ -163,6 +185,10 @@ class ReceiveViewModel : ViewModel() {
 
     private val _addressAndQrCode = MutableLiveData<Pair<String, Bitmap?>?>()
     val qrCode: LiveData<Bitmap?> = _addressAndQrCode.map { it?.second }
+
+    fun setShowIconOnQrCodes(showIconOnQrCodes: Boolean) {
+        _showIconOnQrCodes.value = showIconOnQrCodes
+    }
 
     fun refreshSubaddresses(wallet: Wallet, backgroundColor: Int) {
         val newSubaddresses = (0 until wallet.numSubaddresses).map { wallet.getSubaddressObject(it) }
