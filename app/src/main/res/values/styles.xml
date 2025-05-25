@@ -39,8 +39,11 @@
         <item name="colorControlActivated">@color/oled_colorSecondary</item>
     </style>
 
+    <!-- Can be overridden in configuration-specific resources -->
+    <style name="AppTheme" parent="MyMaterialThemeOled" />
+
     <!-- BottomSheet Dialog-->
-    <style name="BottomSheetDialog_Rounded" parent="MyMaterialThemeOled">
+    <style name="BottomSheetDialog_Rounded" parent="AppTheme">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
