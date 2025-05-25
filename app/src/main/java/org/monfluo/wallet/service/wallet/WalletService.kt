@@ -18,7 +18,6 @@ import android.os.Message
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.AtomicReference
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import org.monfluo.wallet.BuildConfig
@@ -47,6 +46,7 @@ import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicReference
 
 private const val EXTRA_WALLET_NAME = "wallet_name"
 private const val EXTRA_WALLET_PASSWORD = "wallet_password"
