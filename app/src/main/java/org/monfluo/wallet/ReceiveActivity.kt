@@ -8,7 +8,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.AtomicReference
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -32,6 +31,7 @@ import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.QrCodeHelper
 import org.monfluo.wallet.util.acitivity.MoneroActivity
 import timber.log.Timber
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
