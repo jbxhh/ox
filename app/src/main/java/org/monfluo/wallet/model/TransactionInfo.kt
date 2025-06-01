@@ -16,23 +16,20 @@
 package org.monfluo.wallet.model
 
 data class TransactionInfo(
-    var direction: Direction,
-    var isPending: Boolean,
-    var isFailed: Boolean,
-    var amount: Long,
-    var fee: Long,
-    var blockheight: Long,
-    var hash: String?,
-    var timestamp: Long,
-    var paymentId: String?,
-    var accountIndex: Int,
-    var addressIndex: Int,
-    var confirmations: Long,
-    var subaddressLabel: String?,
-    var transfers: List<Transfer>? = listOf(),
-    var txKey: String? = null,
-    var notes: String? = null,
-    var address: String? = null
+    val direction: Direction,
+    val isPending: Boolean,
+    val isFailed: Boolean,
+    val amount: Long,
+    val fee: Long,
+    val blockheight: Long,
+    val hash: String,
+    val timestamp: Long,
+    val paymentId: String,
+    val accountIndex: Int,
+    val addressIndex: Int,
+    val confirmations: Long,
+    val subaddressLabel: String,
+    val transfers: List<Transfer>,
 ) {
 
     constructor(
@@ -42,16 +39,16 @@ data class TransactionInfo(
         amount: Long,
         fee: Long,
         blockheight: Long,
-        hash: String?,
+        hash: String,
         timestamp: Long,
-        paymentId: String?,
+        paymentId: String,
         accountIndex: Int,
         addressIndex: Int,
         confirmations: Long,
-        subaddressLabel: String?,
-        transfers: List<Transfer>?
+        subaddressLabel: String,
+        transfers: List<Transfer>
     ) : this(
-        Direction.values()[direction],
+        Direction.fromInteger(direction),
         isPending,
         isFailed,
         amount,
@@ -64,7 +61,7 @@ data class TransactionInfo(
         addressIndex,
         confirmations,
         subaddressLabel,
-        transfers
+        transfers,
     )
 
     val isConfirmed: Boolean

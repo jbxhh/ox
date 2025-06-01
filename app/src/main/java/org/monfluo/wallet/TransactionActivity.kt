@@ -21,7 +21,6 @@ import org.monfluo.wallet.util.acitivity.MoneroActivity
 import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Date
-import java.util.Objects
 
 class TransactionActivity : MoneroActivity() {
 
@@ -29,10 +28,13 @@ class TransactionActivity : MoneroActivity() {
 
     private lateinit var txActionTextView: TextView
     private lateinit var confLabel2: TextView
+    private lateinit var txKeyLabelTextView: TextView
     private lateinit var txHashTextView: TextView
+    private lateinit var txKeyTextView: TextView
     private lateinit var txConfTextView: TextView
     private lateinit var copyTxAddressImageButton: ImageButton
     private lateinit var copyTxHashImageButton: ImageButton
+    private lateinit var copyTxKeyImageButton: ImageButton
     private lateinit var txDateTextView: TextView
     private lateinit var txAmountTextView: TextView
     private lateinit var blockHeightTextView: TextView
@@ -44,10 +46,13 @@ class TransactionActivity : MoneroActivity() {
 
         txActionTextView = findViewById(R.id.transaction_action_textview)
         confLabel2 = findViewById(R.id.transaction_conf_label2_textview)
+        txKeyLabelTextView = findViewById(R.id.transaction_key_label_textview)
         txHashTextView = findViewById(R.id.transaction_hash_textview)
+        txKeyTextView = findViewById(R.id.transaction_key_textview)
         txConfTextView = findViewById(R.id.transaction_conf_textview)
         copyTxAddressImageButton = findViewById(R.id.copy_txaddress_imagebutton)
         copyTxHashImageButton = findViewById(R.id.copy_txhash_imagebutton)
+        copyTxKeyImageButton = findViewById(R.id.copy_key_imagebutton)
         txDateTextView = findViewById(R.id.transaction_date_textview)
         txAmountTextView = findViewById(R.id.transaction_amount_textview)
         blockHeightTextView = findViewById(R.id.tx_block_height_textview)
@@ -82,6 +87,13 @@ class TransactionActivity : MoneroActivity() {
                 Helper.clipBoardCopy(this, "transaction_hash", txInfo.hash)
             }
         }
+        copyTxKeyImageButton.setOnClickListener {
+            val txInfo = viewModel.transactionInfo.value
+            if (txInfo != null) {
+                val key = txKeyTextView.text.toString()
+                Helper.clipBoardCopy(this, "transaction_key", key)
+            }
+        }
         copyTxAddressImageButton.setOnClickListener {
             val txInfo = viewModel.transactionInfo.value
             if (txInfo != null) {
@@ -98,6 +110,17 @@ class TransactionActivity : MoneroActivity() {
             }
             val wallet = walletService?.getWalletOrLog() ?: return@observe
             txHashTextView.text = transactionInfo.hash
+            val txKey = wallet.getTxKey(transactionInfo.hash)
+            if (txKey.isNotEmpty()) {
+                txKeyTextView.text = txKey
+                txKeyLabelTextView.visibility = View.VISIBLE
+                txKeyTextView.visibility = View.VISIBLE
+                copyTxKeyImageButton.visibility = View.VISIBLE
+            } else {
+                txKeyLabelTextView.visibility = View.GONE
+                txKeyTextView.visibility = View.GONE
+                copyTxKeyImageButton.visibility = View.GONE
+            }
             txConfTextView.text = NumberFormat.getInstance().format(transactionInfo.confirmations)
             txDateTextView.text = getDateTime(transactionInfo.timestamp)
             if (transactionInfo.confirmations > 1) {
@@ -135,25 +158,23 @@ class TransactionActivity : MoneroActivity() {
                 )
             }
             txAmountTextView.text = balanceString
-            var destination: String? = "-"
-            if (transactionInfo.txKey == null) {
-                transactionInfo.txKey = wallet.getTxKey(transactionInfo.hash)
-            }
-            if (transactionInfo.address == null && transactionInfo.direction === TransactionInfo.Direction.Direction_In) {
-                destination = wallet.getSubaddress(
-                    transactionInfo.accountIndex,
-                    transactionInfo.addressIndex
-                )
-            } else if (transactionInfo.address != null && transactionInfo.direction === TransactionInfo.Direction.Direction_In) {
-                destination = transactionInfo.address
-            } else if (transactionInfo.transfers != null && transactionInfo.direction === TransactionInfo.Direction.Direction_Out) {
-                if (transactionInfo.transfers?.size == 1) {
-                    destination = transactionInfo.transfers?.get(0)?.address
+            when (transactionInfo.direction) {
+                TransactionInfo.Direction.Direction_In -> {
+                    addressTextView.text = wallet.getSubaddress(transactionInfo.accountIndex, transactionInfo.addressIndex)
+                    copyTxAddressImageButton.visibility = View.VISIBLE
                 }
-            }
-            addressTextView.text = Objects.requireNonNullElse(destination, "-")
-            if (destination == null) {
-                copyTxAddressImageButton.visibility = View.INVISIBLE
+                TransactionInfo.Direction.Direction_Out -> {
+                    if (transactionInfo.transfers.isEmpty()) {
+                        addressTextView.text = getString(R.string.unknown_recipient)
+                        copyTxAddressImageButton.visibility = View.INVISIBLE
+                    } else if (transactionInfo.transfers.size == 1) {
+                        addressTextView.text = transactionInfo.transfers[0].address
+                        copyTxAddressImageButton.visibility = View.VISIBLE
+                    } else {
+                        addressTextView.text = getString(R.string.multiple_addresses)
+                        copyTxAddressImageButton.visibility = View.INVISIBLE
+                    }
+                }
             }
         }
     }
@@ -178,7 +199,7 @@ class TransactionActivity : MoneroActivity() {
 
     private fun updateState(wallet: Wallet) {
         val transactions = wallet.getHistory()
-        val newTransactionInfo = transactions.find { it.hash != null && it.hash == viewModel.txHash }
+        val newTransactionInfo = transactions.find { it.hash == viewModel.txHash }
         viewModel.updateTransactionInfo(newTransactionInfo)
     }
 

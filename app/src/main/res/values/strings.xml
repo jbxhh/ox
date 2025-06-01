@@ -212,6 +212,8 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="node_button_text">Node: %1$s</string>
     <string name="transaction_hash">Transaction Hash</string>
     <string name="transaction_hash_desc">in a transaction with id</string>
+    <string name="transaction_key">Transaction Key</string>
+    <string name="transaction_key_desc">and with key</string>
     <string name="transaction_destination">Destination</string>
     <string name="transaction_destination_desc">to address</string>
     <string name="transaction_conf_desc">It has been confirmed</string>
@@ -324,6 +326,8 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="address">Address</string>
     <!-- Amount label -->
     <string name="amount">Amount</string>
-    <!-- Text shown in place of an address when sending a transaction to more than one address -->
+    <!-- Text shown in place of an address when sending or displaying an outgoing transaction to multiple addresses -->
     <string name="multiple_addresses">multiple</string>
+    <!-- Text shown in place of an address when displaying an outgoing transaction to more than one address -->
+    <string name="unknown_recipient">unknown recipient</string>
 </resources>

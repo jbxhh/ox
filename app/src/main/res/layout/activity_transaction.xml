@@ -128,6 +128,46 @@
         app:layout_constraintTop_toBottomOf="@id/transaction_hash_label_textview" />
 
     <TextView
+        android:id="@+id/transaction_key_label_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/transaction_key_desc"
+        android:textColor="@color/oled_addressListColor"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/copy_txhash_imagebutton" />
+
+    <TextView
+        android:id="@+id/transaction_key_textview"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="middle"
+        android:singleLine="true"
+        android:text="@string/transaction_key"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/copy_key_imagebutton"
+        app:layout_constraintEnd_toStartOf="@id/copy_key_imagebutton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/copy_key_imagebutton" />
+
+    <ImageButton
+        android:id="@+id/copy_key_imagebutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/copy_transaction_hash"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:src="@drawable/ic_content_copy_24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/transaction_key_textview"
+        app:layout_constraintTop_toBottomOf="@id/transaction_key_label_textview" />
+
+    <TextView
         android:id="@+id/transaction_date_label_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -138,7 +178,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/copy_txhash_imagebutton" />
+        app:layout_constraintTop_toBottomOf="@id/copy_key_imagebutton" />
 
     <TextView
         android:id="@+id/transaction_date_textview"

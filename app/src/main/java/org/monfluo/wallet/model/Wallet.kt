@@ -34,7 +34,6 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
         refreshTransactionHistory()
     }
 
-
     fun getAccountIndex(): Int {
         return accountIndex
     }
@@ -339,7 +338,7 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
 
     external fun setUserNote(txid: String?, note: String?): Boolean
     external fun getUserNote(txid: String?): String?
-    external fun getTxKey(txid: String?): String?
+    external fun getTxKey(txid: String): String
 
     external fun addAccount(label: String)
 

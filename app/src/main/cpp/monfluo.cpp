@@ -1338,9 +1338,6 @@ jobject newTransferInstance(JNIEnv *env, uint64_t amount, const std::string &add
 
 jobject newTransferList(JNIEnv *env, Monero::TransactionInfo *info) {
     const std::vector<Monero::TransactionInfo::Transfer> &transfers = info->transfers();
-    if (transfers.empty()) { // don't create empty Lists
-        return nullptr;
-    }
     // make new ArrayList
     jmethodID java_util_ArrayList_ = env->GetMethodID(class_ArrayList, "<init>", "(I)V");
     jmethodID java_util_ArrayList_add = env->GetMethodID(class_ArrayList, "add", "(Ljava/lang/Object;)Z");
