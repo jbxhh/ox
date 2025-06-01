@@ -15,4 +15,4 @@
  */
 package org.monfluo.wallet.model
 
-data class Transfer(val amount: Long, val address: String?)
+data class Transfer(val amount: Long, val address: String)

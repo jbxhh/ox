@@ -16,26 +16,7 @@
 package org.monfluo.wallet.model
 
 class TransactionHistory(private val handle: Long) {
-    var all: List<TransactionInfo> = ArrayList()
-        private set
-
-    private fun loadNotes(wallet: Wallet) {
-        for (info in all) {
-            info.notes = wallet.getUserNote(info.hash)
-        }
-    }
-
     external fun getCount(): Int
-
-    fun refreshWithNotes(wallet: Wallet) {
-        refresh()
-        loadNotes(wallet)
-    }
-
-    private fun refresh() {
-        val transactionInfos = refreshJ()
-        all = transactionInfos
-    }
 
     external fun refreshJ(): MutableList<TransactionInfo>
     external fun getAllJ(): MutableList<TransactionInfo>

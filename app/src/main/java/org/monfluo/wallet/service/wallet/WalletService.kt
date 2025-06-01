@@ -350,6 +350,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
 
         private fun handleSendPendingTransaction(pendingTransaction: PendingTransaction) {
             val success = pendingTransaction.commit("", false)
+            getWalletOrLog()?.store()
             forEachObserver {
                 it.onTransactionSent(pendingTransaction, success)
             }
