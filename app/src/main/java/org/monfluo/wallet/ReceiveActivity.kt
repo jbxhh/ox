@@ -1,5 +1,6 @@
 package org.monfluo.wallet
 
+import android.app.Activity
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.View
@@ -25,6 +26,7 @@ import org.monfluo.wallet.adapter.SubaddressAdapter.SubaddressAdapterListener
 import org.monfluo.wallet.data.Subaddress
 import org.monfluo.wallet.fragment.dialog.EditAddressLabelBottomSheetDialog
 import org.monfluo.wallet.model.Wallet
+import org.monfluo.wallet.service.wallet.SubaddressUpdateReason
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Helper.clipBoardCopy
 import org.monfluo.wallet.util.PreferenceUtils
@@ -106,7 +108,7 @@ class ReceiveActivity : MoneroActivity() {
             }
         }
         viewModel.subaddresses.observe(this) { addresses: List<Subaddress> ->
-            // We want newer addresses addresses to be shown first
+            // We want newer addresses to be shown first
             adapter.submitAddresses(addresses.reversed())
         }
     }
@@ -121,17 +123,20 @@ class ReceiveActivity : MoneroActivity() {
 
     override fun onWalletServiceConnected(walletService: WalletService) {
         walletService.getWallet()?.let { wallet ->
-            viewModel.refreshSubaddresses(wallet, qrCodeBackgroundColor())
+            viewModel.refreshSubaddresses(this, wallet, qrCodeBackgroundColor())
+            autoRotateAddresses()
         }
     }
 
     override fun onWalletUpdated(wallet: Wallet) {
-        viewModel.refreshSubaddresses(wallet, qrCodeBackgroundColor())
+        viewModel.refreshSubaddresses(this, wallet, qrCodeBackgroundColor())
+        autoRotateAddresses()
     }
 
-    override fun onSubaddressesUpdated() {
+    override fun onSubaddressesUpdated(reason: SubaddressUpdateReason) {
         walletService?.getWallet()?.let { wallet ->
-            viewModel.refreshSubaddresses(wallet, qrCodeBackgroundColor())
+            val selectLatest = reason == SubaddressUpdateReason.GENERATED_NEW
+            viewModel.refreshSubaddresses(this, wallet, qrCodeBackgroundColor(), selectLatest)
         }
     }
 
@@ -168,11 +173,30 @@ class ReceiveActivity : MoneroActivity() {
             true
         }
     }
+
+    private fun autoRotateAddresses() {
+        if (PreferenceUtils.isAutoRotateAddresses(this)) {
+            viewModel.subaddresses.value?.lastOrNull()?.let { lastAddress ->
+                if (lastAddress.used) {
+                    val lastAutoRotatedAddress = viewModel.lastAutoRotatedAddress.getAndSet(lastAddress.address)
+                    if (lastAddress.address != lastAutoRotatedAddress) {
+                        Timber.i("Latest address ${lastAddress.address} has been used, auto-rotating it")
+                        walletService?.generateNewSubaddress("")
+                    } else {
+                        Timber.d("Not auto-rotating latest address ${lastAddress.address} because it was already rotated")
+                    }
+                }
+            }
+        }
+    }
 }
 
 class ReceiveViewModel : ViewModel() {
 
-    private var qrCodeJob: AtomicReference<Job?> = AtomicReference(null)
+    private val qrCodeJob: AtomicReference<Job?> = AtomicReference(null)
+    // we need to store this in order to avoid rotating a single address more than once
+    // which might happen when we get second callback before new address has been generated
+    val lastAutoRotatedAddress: AtomicReference<String?> = AtomicReference(null)
 
     private val _showIconOnQrCodes = MutableLiveData(false)
     val showIconOnQrCodes: LiveData<Boolean> = _showIconOnQrCodes
@@ -190,24 +214,26 @@ class ReceiveViewModel : ViewModel() {
         _showIconOnQrCodes.value = showIconOnQrCodes
     }
 
-    fun refreshSubaddresses(wallet: Wallet, backgroundColor: Int) {
-        val newSubaddresses = (0 until wallet.numSubaddresses).map { wallet.getSubaddressObject(it) }
-        _subaddresses.postValue(newSubaddresses)
+    fun refreshSubaddresses(activity: Activity, wallet: Wallet, backgroundColor: Int, selectLatest: Boolean = false) {
+        activity.runOnUiThread {
+            val newSubaddresses = (0 until wallet.numSubaddresses).map { wallet.getSubaddressObject(it) }
+            _subaddresses.value = newSubaddresses
 
-        val currentSelectedSubaddress = selectedSubaddress.value
-        if (currentSelectedSubaddress == null) {
-            selectAddress(newSubaddresses.lastOrNull(), backgroundColor)
-        } else {
-            selectAddress(newSubaddresses.getOrNull(currentSelectedSubaddress.addressIndex), backgroundColor)
+            val currentSelectedSubaddress = selectedSubaddress.value
+            if (currentSelectedSubaddress == null || selectLatest) {
+                selectAddress(newSubaddresses.lastOrNull(), backgroundColor)
+            } else {
+                selectAddress(newSubaddresses.getOrNull(currentSelectedSubaddress.addressIndex), backgroundColor)
+            }
         }
     }
 
     fun selectAddress(subaddress: Subaddress?, backgroundColor: Int) {
-        _selectedSubaddress.postValue(subaddress)
+        _selectedSubaddress.value = subaddress
         qrCodeJob.getAndUpdate { job ->
             job?.cancel()
             if (_addressAndQrCode.value?.first != subaddress?.address) {
-                _addressAndQrCode.postValue(null)
+                _addressAndQrCode.value = null
                 subaddress?.let {
                     viewModelScope.launch {
                         withContext(Dispatchers.Default) {

@@ -309,7 +309,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             wallet.store()
             updateWallet(wallet)
             forEachObserver {
-                it.onSubaddressesUpdated()
+                it.onSubaddressesUpdated(SubaddressUpdateReason.GENERATED_NEW)
             }
         }
 
@@ -318,7 +318,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             wallet.setSubaddressLabel(index, label)
             wallet.store()
             forEachObserver {
-                it.onSubaddressesUpdated()
+                it.onSubaddressesUpdated(SubaddressUpdateReason.LABEL_CHANGED)
             }
         }
 
@@ -872,7 +872,7 @@ interface WalletServiceObserver : LifecycleOwner {
     fun onWalletUpdated(wallet: Wallet) {}
     fun onNewBlock(wallet: Wallet) {}
     fun onBlockchainHeightFetched(height: Long) {}
-    fun onSubaddressesUpdated() {}
+    fun onSubaddressesUpdated(reason: SubaddressUpdateReason) {}
     fun onTransactionCreated(pendingTransaction: PendingTransaction, destination: PendingTransactionDestination) {}
     fun onTransactionSent(pendingTransaction: PendingTransaction, success: Boolean) {}
     fun onProxyUpdated(proxy: String, success: Boolean) {}
@@ -881,7 +881,12 @@ interface WalletServiceObserver : LifecycleOwner {
     fun onAccountLabelChanged(index: Int, label: String) {}
 }
 
-enum class WalletServiceCommand {
+enum class SubaddressUpdateReason {
+    LABEL_CHANGED,
+    GENERATED_NEW,
+}
+
+private enum class WalletServiceCommand {
     UNKNOWN, // to catch bugs when command is set to 0 by accident
     OPEN_WALLET,
     CLOSE_WALLET,
