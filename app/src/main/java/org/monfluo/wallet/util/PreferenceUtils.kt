@@ -62,6 +62,10 @@ object PreferenceUtils {
 
     fun setShowIconOnQrCodes(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_SHOW_ICON_ON_QR_CODES, value)
 
+    fun isAutoRotateAddresses(context: Context): Boolean = getBoolean(context, Constants.PREF_AUTO_ROTATE_ADDRESSES, true)
+
+    fun setAutoRotateAddresses(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_AUTO_ROTATE_ADDRESSES, value)
+
     fun getProxy(context: Context): String? = getString(context, Constants.PREF_PROXY)
 
     fun setProxy(context: Context, value: String) = setString(context, Constants.PREF_PROXY, value)

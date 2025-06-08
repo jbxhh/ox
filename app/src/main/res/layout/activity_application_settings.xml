@@ -198,6 +198,29 @@
             app:layout_constraintTop_toBottomOf="@id/show_transfer_notifications_switch" />
 
         <TextView
+            android:id="@+id/auto_rotate_addresses_textview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:text="@string/auto_rotate_addresses"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@id/auto_rotate_addresses_switch"
+            app:layout_constraintEnd_toStartOf="@id/auto_rotate_addresses_switch"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/auto_rotate_addresses_switch" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/auto_rotate_addresses_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/show_icon_on_qr_codes_switch" />
+
+        <TextView
             android:id="@+id/network_settings_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -208,7 +231,7 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/show_icon_on_qr_codes_switch" />
+            app:layout_constraintTop_toBottomOf="@id/auto_rotate_addresses_switch" />
 
         <Button
             android:id="@+id/select_node_button"
