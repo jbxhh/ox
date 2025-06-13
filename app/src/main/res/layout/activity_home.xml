@@ -6,49 +6,14 @@
     android:layout_height="match_parent"
     tools:context="org.monfluo.wallet.HomeActivity">
 
-    <TextView
-        android:id="@+id/wallet_and_account_textview"
-        android:layout_width="0dp"
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/status_bar_fragment"
+        android:name="org.monfluo.wallet.fragment.StatusBarFragment"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        android:textAlignment="center"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="wallet / account" />
-
-    <ProgressBar
-        android:id="@+id/sync_progress_bar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="0dp"
-        android:layout_height="16dp"
-        android:indeterminate="true"
-        android:indeterminateTint="@color/oled_colorSecondary"
-        android:progressDrawable="@drawable/sync_progress_bar_drawable"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/wallet_and_account_textview" />
-
-    <TextView
-        android:id="@+id/sync_progress_text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        android:textAlignment="center"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/sync_progress_bar"
-        app:layout_constraintEnd_toEndOf="@id/sync_progress_bar"
-        app:layout_constraintStart_toStartOf="@id/sync_progress_bar"
-        app:layout_constraintTop_toTopOf="@id/sync_progress_bar"
-        tools:text="Syncing... 3102333/40010203"
-        tools:visibility="visible" />
+        tools:layout="@layout/fragment_status_bar" />
 
     <TextView
         android:id="@+id/balance_unlocked_textview"
@@ -60,7 +25,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@id/wallet_settings_imageview"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sync_progress_text"
+        app:layout_constraintTop_toBottomOf="@id/status_bar_fragment"
         tools:text="100.000000000000" />
 
     <TextView

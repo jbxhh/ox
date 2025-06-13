@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
@@ -17,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.adapter.TransactionInfoAdapter
 import org.monfluo.wallet.data.Heights
-import org.monfluo.wallet.data.SynchronizationStatus
 import org.monfluo.wallet.livedata.combineLiveDatas
 import org.monfluo.wallet.model.Balance
 import org.monfluo.wallet.model.TransactionInfo
@@ -31,10 +29,6 @@ import timber.log.Timber
 class HomeActivity : MoneroActivity() {
 
     private val viewModel: HomeActivityViewModel by viewModels()
-
-    private lateinit var walletAndAccountTextView: TextView
-    private lateinit var progressBar: ProgressBar
-    private lateinit var progressBarText: TextView
 
     private lateinit var walletSettingsImageView: ImageView
     private lateinit var settingsImageView: ImageView
@@ -67,10 +61,6 @@ class HomeActivity : MoneroActivity() {
         unlockedBalanceTextView = findViewById(R.id.balance_unlocked_textview)
         frozenBalanceTextView = findViewById(R.id.balance_frozen_textview)
         lockedBalanceTextView = findViewById(R.id.balance_locked_textview)
-
-        walletAndAccountTextView = findViewById(R.id.wallet_and_account_textview)
-        progressBar = findViewById(R.id.sync_progress_bar)
-        progressBarText = findViewById(R.id.sync_progress_text)
 
         txHistoryRecyclerView.layoutManager = LinearLayoutManager(this)
         txHistoryRecyclerView.adapter = transactionInfoAdapter
@@ -109,39 +99,6 @@ class HomeActivity : MoneroActivity() {
     }
 
     private fun bindObservers() {
-        viewModel.showWalletLabel.observe(this) { isShowWalletLabel ->
-            if (isShowWalletLabel) {
-                walletService?.getWallet()?.let { wallet ->
-                    walletAndAccountTextView.visibility = View.VISIBLE
-                    walletAndAccountTextView.text = getString(R.string.wallet_name_and_account_label, wallet.name(), wallet.getAccountIndex())
-                }
-            } else {
-                walletAndAccountTextView.visibility = View.GONE
-            }
-        }
-
-        viewModel.syncProgress.observe(this) { (walletConnected, heights) ->
-            if (walletConnected) {
-                val synchronizationStatus = SynchronizationStatus.fromHeights(heights)
-                val (walletBeginSyncHeight, walletHeight, daemonHeight) = heights
-                progressBarText.visibility = View.VISIBLE
-                progressBarText.text = synchronizationStatus.getText(applicationContext)
-                if (synchronizationStatus is SynchronizationStatus.Synchronized) {
-                    progressBar.visibility = View.INVISIBLE
-                } else {
-                    progressBar.isIndeterminate = false
-                    // Google employs the very rare kind of engineers to work on Android - engineers with negative fucking IQ
-                    // try switching the order of setting max and min here to see their brilliance and true ingenuity
-                    // and after you do that, try to find an explanation (or even a mention) of this behaviour in the docs:
-                    // https://developer.android.com/reference/android/widget/ProgressBar.html
-                    progressBar.max = daemonHeight.toInt()
-                    progressBar.min = walletBeginSyncHeight.toInt()
-                    progressBar.setProgress(walletHeight.toInt(), true)
-                    progressBar.visibility = View.VISIBLE
-                }
-            }
-        }
-
         viewModel.balance.observe(this) { (isSynchronized, balance, streetMode) ->
             if (balance != null) {
                 val typeface = if (isSynchronized) Typeface.BOLD else Typeface.BOLD_ITALIC
@@ -288,15 +245,7 @@ internal class HomeActivityViewModel : ViewModel() {
     private val _transactions = MutableLiveData<List<TransactionInfo>?>(null)
     val transactions: LiveData<List<TransactionInfo>?> = _transactions
 
-    val showWalletLabel = combineLiveDatas(
-        _walletConnected,
-        _multiWalletMode,
-        _multiAccountMode,
-    ) { walletConnected, multiWalletMode, multiAccountMode ->
-        return@combineLiveDatas walletConnected!! && (multiWalletMode!! || multiAccountMode!!)
-    }
-
-    val syncProgress = combineLiveDatas(
+    private val syncProgress = combineLiveDatas(
         _walletConnected,
         _heights,
     ) { walletConnected, heights ->

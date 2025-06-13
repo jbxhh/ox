@@ -6,6 +6,15 @@
     android:layout_height="match_parent"
     tools:context="org.monfluo.wallet.SendActivity">
 
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/status_bar_fragment"
+        android:name="org.monfluo.wallet.fragment.StatusBarFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout="@layout/fragment_status_bar" />
+
     <TextView
         android:id="@+id/send_monero_textview"
         android:layout_width="0dp"
@@ -17,7 +26,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@id/top_controls"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/status_bar_fragment" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_controls"
