@@ -1,13 +1,13 @@
 package org.monfluo.wallet.util
 
-import org.monfluo.wallet.model.NetworkType
+import org.monfluo.wallet.model.MoneroNetworkType
 import org.monfluo.wallet.model.Wallet.Companion.getPaymentIdFromAddress
 import org.monfluo.wallet.model.Wallet.Companion.isAddressValid
 
 class UriData(val address: String, val params: HashMap<String, String>) {
 
     fun hasPaymentId(): Boolean {
-        return getPaymentIdFromAddress(address, NetworkType.NetworkType_Mainnet.value)?.isNotEmpty() == true
+        return getPaymentIdFromAddress(address, MoneroNetworkType.NetworkType_Mainnet.value)?.isNotEmpty() == true
     }
 
     val amount: String?

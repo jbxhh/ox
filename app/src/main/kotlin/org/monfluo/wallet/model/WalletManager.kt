@@ -19,7 +19,7 @@ import timber.log.Timber
 import java.io.File
 
 class WalletManager {
-    val networkType = NetworkType.NetworkType_Mainnet
+    val networkType = MoneroNetworkType.NetworkType_Mainnet
 
     fun createWallet(aFile: File, password: String, language: String): Wallet {
         val walletHandle = createWalletJ(aFile.absolutePath, password, language, networkType.value)
@@ -180,11 +180,11 @@ class WalletManager {
                 return@synchronized WalletManager()
             }
 
-        fun addressPrefix(networkType: NetworkType): String {
+        fun addressPrefix(networkType: MoneroNetworkType): String {
             return when (networkType) {
-                NetworkType.NetworkType_Testnet -> "9A-"
-                NetworkType.NetworkType_Mainnet -> "4-"
-                NetworkType.NetworkType_Stagenet -> "5-"
+                MoneroNetworkType.NetworkType_Testnet -> "9A-"
+                MoneroNetworkType.NetworkType_Mainnet -> "4-"
+                MoneroNetworkType.NetworkType_Stagenet -> "5-"
             }
         }
 

@@ -15,7 +15,7 @@
  */
 package org.monfluo.wallet.model
 
-enum class NetworkType(val value: Int, val string: String) {
+enum class MoneroNetworkType(val value: Int, val string: String) {
 
     NetworkType_Mainnet(0, "mainnet"),
     NetworkType_Testnet(1, "mainnet"),
@@ -23,8 +23,8 @@ enum class NetworkType(val value: Int, val string: String) {
 
     companion object {
 
-        fun fromInteger(n: Int): NetworkType? = entries.find { it.value == n }
+        fun fromInteger(n: Int): MoneroNetworkType? = entries.find { it.value == n }
 
-        fun fromString(s: String): NetworkType? = entries.find { it.string == s }
+        fun fromString(s: String): MoneroNetworkType? = entries.find { it.string == s }
     }
 }

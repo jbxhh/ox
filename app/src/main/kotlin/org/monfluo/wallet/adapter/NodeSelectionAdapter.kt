@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.R
 import org.monfluo.wallet.data.Node
+import org.monfluo.wallet.model.NodeNetworkType
 
 class NodeSelectionAdapter(
     private var nodes: List<Node>,
@@ -91,14 +92,19 @@ class NodeSelectionAdapter(
             if (node.trusted) {
                 trustedTextView.visibility = View.VISIBLE
             }
-            if (node.isOnion()) {
-                anonymityNetworkImageView.visibility = View.VISIBLE
-                anonymityNetworkImageView.setImageResource(R.drawable.tor)
-            } else if (node.isI2P()) {
-                anonymityNetworkImageView.visibility = View.VISIBLE
-                anonymityNetworkImageView.setImageResource(R.drawable.i2p)
-            } else {
-                anonymityNetworkImageView.visibility = View.GONE
+            val nodeType = NodeNetworkType.fromAddress(node.address)
+            when (nodeType) {
+                NodeNetworkType.TOR -> {
+                    anonymityNetworkImageView.visibility = View.VISIBLE
+                    anonymityNetworkImageView.setImageResource(R.drawable.tor)
+                }
+                NodeNetworkType.I2P -> {
+                    anonymityNetworkImageView.visibility = View.VISIBLE
+                    anonymityNetworkImageView.setImageResource(R.drawable.i2p)
+                }
+                else -> {
+                    anonymityNetworkImageView.visibility = View.GONE
+                }
             }
             itemView.setOnLongClickListener {
                 listener.onEditNode(node)
