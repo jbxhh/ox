@@ -15,7 +15,7 @@
  */
 package org.monfluo.wallet.data
 
-import org.monfluo.wallet.model.NetworkType
+import org.monfluo.wallet.model.MoneroNetworkType
 import org.json.JSONObject
 
 data class Node(
@@ -23,12 +23,9 @@ data class Node(
     val address: String,
     val username: String?,
     val password: String?,
-    val networkType: NetworkType = NetworkType.NetworkType_Mainnet,
+    val networkType: MoneroNetworkType = MoneroNetworkType.NetworkType_Mainnet,
     val trusted: Boolean = false,
 ) {
-
-    fun isOnion(): Boolean = kotlin.runCatching { address.split(":").getOrNull(0)?.endsWith(".onion") }.getOrNull() ?: false
-    fun isI2P(): Boolean = kotlin.runCatching { address.split(":").getOrNull(0)?.endsWith(".i2p") }.getOrNull() ?: false
 
     fun toJson(): Result<JSONObject> = runCatching {
         val jsonObject = JSONObject()
@@ -55,7 +52,7 @@ data class Node(
             val address = jsonObject.getString(ADDRESS)
             val username = if (jsonObject.has(USERNAME)) jsonObject.getString(USERNAME) else null
             val password = if (jsonObject.has(PASSWORD)) jsonObject.getString(PASSWORD) else null
-            val networkType = NetworkType.fromString(jsonObject.getString(NETWORK_TYPE))!!
+            val networkType = MoneroNetworkType.fromString(jsonObject.getString(NETWORK_TYPE))!!
             val trusted = jsonObject.getBoolean(TRUSTED)
             return Result.success(Node(name, address, username, password, networkType, trusted))
         }

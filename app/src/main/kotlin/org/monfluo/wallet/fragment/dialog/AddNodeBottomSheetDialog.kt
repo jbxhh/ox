@@ -14,13 +14,12 @@ import android.widget.Toast
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.monfluo.wallet.R
 import org.monfluo.wallet.data.Node
-import org.monfluo.wallet.model.NetworkType
+import org.monfluo.wallet.model.MoneroNetworkType
 import org.monfluo.wallet.util.Helper.getClipBoardText
 
-class EditNodeBottomSheetDialog(val listener: EditNodeListener, val node: Node) : BottomSheetDialogFragment() {
+class AddNodeBottomSheetDialog(val listener: AddNodeListener) : BottomSheetDialogFragment() {
 
-    private lateinit var deleteNodeButton: Button
-    private lateinit var doneEditingButton: Button
+    private lateinit var addNodeButton: Button
     private lateinit var addressEditText: EditText
     private lateinit var nodeNameEditText: EditText
     private lateinit var usernameEditText: EditText
@@ -33,14 +32,13 @@ class EditNodeBottomSheetDialog(val listener: EditNodeListener, val node: Node) 
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.bottom_sheet_dialog_edit_node, container)
+        return inflater.inflate(R.layout.bottom_sheet_dialog_add_node, container)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        deleteNodeButton = view.findViewById(R.id.delete_node_button)
-        doneEditingButton = view.findViewById(R.id.done_editing_button)
+        addNodeButton = view.findViewById(R.id.add_node_button)
         addressEditText = view.findViewById(R.id.address_edittext)
         nodeNameEditText = view.findViewById(R.id.node_name_edittext)
         usernameEditText = view.findViewById(R.id.username_edittext)
@@ -48,23 +46,16 @@ class EditNodeBottomSheetDialog(val listener: EditNodeListener, val node: Node) 
         trustedDaemonCheckbox = view.findViewById(R.id.trusted_node_checkbox)
         pastePasswordImageButton = view.findViewById(R.id.paste_password_imagebutton)
 
-        nodeNameEditText.setText(node.name)
-        addressEditText.setText(node.address)
-        node.username?.let {
-            usernameEditText.setText(it)
-            passwordEditText.visibility = View.VISIBLE
-            pastePasswordImageButton.visibility = View.VISIBLE
-        }
-        node.password.let {
-            passwordEditText.setText(it)
-        }
-        trustedDaemonCheckbox.isChecked = node.trusted
+        bindListeners(view)
+    }
 
+    private fun bindListeners(view: View) {
         usernameEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun afterTextChanged(editable: Editable) {
                 if (editable.toString().isEmpty()) {
+                    passwordEditText.text = null
                     passwordEditText.visibility = View.GONE
                     pastePasswordImageButton.visibility = View.GONE
                 } else {
@@ -78,11 +69,7 @@ class EditNodeBottomSheetDialog(val listener: EditNodeListener, val node: Node) 
         addPasteListener(view, usernameEditText, R.id.paste_username_imagebutton)
         addPasteListener(view, passwordEditText, R.id.paste_password_imagebutton)
 
-        deleteNodeButton.setOnClickListener {
-            listener.onDeleteNode(this, node)
-        }
-
-        doneEditingButton.setOnClickListener {
+        addNodeButton.setOnClickListener {
             val name = nodeNameEditText.text.toString()
             val address = addressEditText.text.toString()
             val username = usernameEditText.text.toString().ifBlank { null }
@@ -100,8 +87,8 @@ class EditNodeBottomSheetDialog(val listener: EditNodeListener, val node: Node) 
                 return@setOnClickListener
             }
 
-            val newNode = Node(name, address, username, password, NetworkType.NetworkType_Mainnet, trusted)
-            listener.onEditNode(this, node, newNode)
+            val node = Node(name, address, username, password, MoneroNetworkType.NetworkType_Mainnet, trusted)
+            listener.onAddNode(this, node)
         }
     }
 
@@ -115,8 +102,7 @@ class EditNodeBottomSheetDialog(val listener: EditNodeListener, val node: Node) 
         }
     }
 
-    interface EditNodeListener {
-        fun onDeleteNode(self: EditNodeBottomSheetDialog, node: Node)
-        fun onEditNode(self: EditNodeBottomSheetDialog, oldNode: Node, newNode: Node)
+    interface AddNodeListener {
+        fun onAddNode(self: AddNodeBottomSheetDialog, node: Node)
     }
 }
