@@ -22,7 +22,12 @@ import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Typeface
 import android.os.Build
+import android.os.Build.VERSION_CODES
+import android.text.Spannable
+import android.text.style.StyleSpan
+import android.text.style.TypefaceSpan
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityCompat
@@ -31,14 +36,14 @@ import org.monfluo.wallet.R
 import timber.log.Timber
 import java.io.File
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.util.concurrent.atomic.AtomicInteger
 
 object Helper {
-    private const val XMR_DECIMALS = 12
+
     private const val WALLET_DIR = "wallets"
     private val DOMAIN_REGEX = Regex("([a-z0-9][a-z0-9-]*[a-z0-9])(\\.([a-z0-9][a-z0-9-]*[a-z0-9]))+")
     private val REQUEST_CODE = AtomicInteger(1)
-    var DISPLAY_DIGITS_INFO = 5
 
     fun getWalletRoot(context: Context): File {
         return getStorage(context, WALLET_DIR)
@@ -79,24 +84,6 @@ object Helper {
         }
     }
 
-    fun getDecimalAmount(amount: Long): BigDecimal {
-        return BigDecimal(amount).scaleByPowerOfTen(-XMR_DECIMALS)
-    }
-
-    fun getDisplayAmount(amount: Long): String {
-        return getDisplayAmount(amount, XMR_DECIMALS)
-    }
-
-    fun getDisplayAmount(amount: Long, maxDecimals: Int): String {
-        // a Java bug does not strip zeros properly if the value is 0
-        if (amount == 0L) return "0.00"
-        var d = getDecimalAmount(amount)
-            .setScale(maxDecimals, BigDecimal.ROUND_HALF_UP)
-            .stripTrailingZeros()
-        if (d.scale() < 2) d = d.setScale(2, BigDecimal.ROUND_UNNECESSARY)
-        return d.toPlainString()
-    }
-
     fun clipBoardCopy(context: Context?, label: String?, text: String?) {
         if (context != null) {
             val clipboardManager =
@@ -135,7 +122,7 @@ object Helper {
             Timber.d("POST_NOTIFICATIONS permission has already been granted")
             return
         }
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT < VERSION_CODES.TIRAMISU) {
             Timber.d("POST_NOTIFICATIONS permission does not need to be requested on this SDK version")
             return
         }

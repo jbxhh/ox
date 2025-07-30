@@ -13,6 +13,10 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat.Type.displayCutout
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
+import androidx.core.view.updatePadding
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -23,15 +27,20 @@ import org.monfluo.wallet.data.SeedType
 import org.monfluo.wallet.livedata.combineLiveDatas
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.model.WalletManager
+import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.acitivity.LoggingActivity
 import timber.log.Timber
 import java.io.File
+import kotlin.math.max
 
 class CreateWalletActivity : LoggingActivity() {
 
     private val viewModel: CreateWalletViewModel by viewModels()
+
+    private lateinit var layoutView: View
+    private lateinit var backImageView: ImageView
 
     private lateinit var applicationSettingsImageView: ImageView
     private lateinit var walletNameEditText: EditText
@@ -51,6 +60,8 @@ class CreateWalletActivity : LoggingActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_wallet)
 
+        layoutView = findViewById(R.id.create_wallet_activity_view)
+        backImageView = findViewById(R.id.back_imageview)
         applicationSettingsImageView = findViewById(R.id.application_settings_imageview)
         walletNameEditText = findViewById(R.id.wallet_name_edittext)
         walletPasswordEditText = findViewById(R.id.wallet_password_edittext)
@@ -67,11 +78,28 @@ class CreateWalletActivity : LoggingActivity() {
 
         walletNameEditText.setText(getWalletNameSuggestion())
 
+        bindWindowInsetsListener()
+        bindBackPressedCallback()
         bindListeners()
         bindObservers()
 
         Helper.requestPostNotificationsPermission(this)
+    }
 
+    private fun bindWindowInsetsListener() {
+        ViewCompat.setOnApplyWindowInsetsListener(layoutView) { _, insetsCompat ->
+            val insets = insetsCompat.getInsets(systemBars() or displayCutout())
+            layoutView.updatePadding(
+                left = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.left),
+                top = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.top),
+                right = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.right),
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.bottom)
+            )
+            return@setOnApplyWindowInsetsListener insetsCompat
+        }
+    }
+
+    private fun bindBackPressedCallback() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (!intent.getBooleanExtra(Constants.EXTRA_PREVENT_GOING_BACK, false)) {
@@ -81,52 +109,11 @@ class CreateWalletActivity : LoggingActivity() {
         })
     }
 
-    private fun bindObservers() {
-        viewModel.password.observe(this) { text ->
-            if (text.isEmpty()) {
-                walletPasswordConfirmEditText.text = null
-                walletPasswordConfirmEditText.visibility = View.GONE
-            } else {
-                walletPasswordConfirmEditText.visibility = View.VISIBLE
-            }
-        }
-
-        viewModel.showMoreOptions.observe(this) { show: Boolean ->
-            if (show) {
-                moreOptionsChevronImageView.setImageResource(R.drawable.ic_keyboard_arrow_up)
-                advancedOptionsLayout.visibility = View.VISIBLE
-            } else {
-                moreOptionsChevronImageView.setImageResource(R.drawable.ic_keyboard_arrow_down)
-                advancedOptionsLayout.visibility = View.GONE
-            }
-        }
-
-        viewModel.enableButton.observe(this) { enable: Boolean ->
-            createWalletButton.isEnabled = enable
-        }
-
-        viewModel.seedType.observe(this) { seedType ->
-            seedTypeButton.text = seedType.toString()
-            seedTypeDescTextView.text = getText(seedType.getDescriptionResourceId())
-            if (seedType == SeedType.MONERO) {
-                walletRestoreHeightEditText.visibility = View.VISIBLE
-                walletSeedEditText.hint = getString(R.string.recovery_phrase_optional_legacy)
-            } else {
-                walletRestoreHeightEditText.visibility = View.GONE
-                walletSeedEditText.hint = getString(R.string.recovery_phrase_optional_polyseed)
-            }
-        }
-
-        viewModel.seedAndType.observe(this) { (seedType, seed) ->
-            if (seed.isNotBlank() || seedType == SeedType.POLYSEED) {
-                walletSeedOffsetPassphraseEditText.visibility = View.VISIBLE
-            } else {
-                walletSeedOffsetPassphraseEditText.visibility = View.GONE
-            }
-        }
-    }
-
     private fun bindListeners() {
+        backImageView.setOnClickListener {
+            finish()
+        }
+
         applicationSettingsImageView.setOnClickListener {
             startActivity(Intent(this, ApplicationSettingsActivity::class.java))
         }
@@ -183,6 +170,51 @@ class CreateWalletActivity : LoggingActivity() {
         seedTypeButton.setOnClickListener { toggleSeedType() }
     }
 
+    private fun bindObservers() {
+        viewModel.password.observe(this) { text ->
+            if (text.isEmpty()) {
+                walletPasswordConfirmEditText.text = null
+                walletPasswordConfirmEditText.visibility = View.GONE
+            } else {
+                walletPasswordConfirmEditText.visibility = View.VISIBLE
+            }
+        }
+
+        viewModel.showMoreOptions.observe(this) { show: Boolean ->
+            if (show) {
+                moreOptionsChevronImageView.setImageResource(R.drawable.ic_keyboard_arrow_up)
+                advancedOptionsLayout.visibility = View.VISIBLE
+            } else {
+                moreOptionsChevronImageView.setImageResource(R.drawable.ic_keyboard_arrow_down)
+                advancedOptionsLayout.visibility = View.GONE
+            }
+        }
+
+        viewModel.enableButton.observe(this) { enable: Boolean ->
+            createWalletButton.isEnabled = enable
+        }
+
+        viewModel.seedType.observe(this) { seedType ->
+            seedTypeButton.text = seedType.toString()
+            seedTypeDescTextView.text = getText(seedType.getDescriptionResourceId())
+            if (seedType == SeedType.MONERO) {
+                walletRestoreHeightEditText.visibility = View.VISIBLE
+                walletSeedEditText.hint = getString(R.string.recovery_phrase_optional_legacy)
+            } else {
+                walletRestoreHeightEditText.visibility = View.GONE
+                walletSeedEditText.hint = getString(R.string.recovery_phrase_optional_polyseed)
+            }
+        }
+
+        viewModel.seedAndType.observe(this) { (seedType, seed) ->
+            if (seed.isNotBlank() || seedType == SeedType.POLYSEED) {
+                walletSeedOffsetPassphraseEditText.visibility = View.VISIBLE
+            } else {
+                walletSeedOffsetPassphraseEditText.visibility = View.GONE
+            }
+        }
+    }
+
     private fun toggleSeedType() {
         val seedType = viewModel.seedType.value ?: return
         val newSeedType = if (seedType == SeedType.POLYSEED) {
@@ -213,7 +245,7 @@ class CreateWalletActivity : LoggingActivity() {
             return Constants.DEFAULT_WALLET_NAME
         }
         for (i in 2 until Int.MAX_VALUE) {
-            val name = Constants.DEFAULT_WALLET_NAME + i
+            val name = "${Constants.DEFAULT_WALLET_NAME} ($i)"
             if (!WalletManager.instance.walletExists(walletRoot.resolve(name))) {
                 return name
             }

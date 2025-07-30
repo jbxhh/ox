@@ -1,45 +1,39 @@
-/*
- * Copyright (c) 2017 m2049r
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.monfluo.wallet.adapter
 
+import android.graphics.Typeface
+import android.graphics.drawable.Drawable
+import android.icu.text.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.progressindicator.CircularProgressIndicator
 import org.monfluo.wallet.R
+import org.monfluo.wallet.model.MoneroUnit
 import org.monfluo.wallet.model.TransactionInfo
 import org.monfluo.wallet.util.Constants
-import org.monfluo.wallet.util.DateHelper
 import org.monfluo.wallet.util.Helper
-import org.monfluo.wallet.util.ThemeHelper
-import java.util.Calendar
+import org.monfluo.wallet.util.TextHelper
 import java.util.Date
 
+private const val VIEW_TYPE_ITEM: Int = 0
+// empty view at the end
+private const val VIEW_TYPE_VOID: Int = 2
+
 class TransactionInfoAdapter(
-    private var streetMode: Boolean,
     private val listener: Listener,
 ) : RecyclerView.Adapter<TransactionInfoAdapter.ViewHolder>() {
 
-    private var localDataSet: List<TransactionInfo> = emptyList()
+    private var transactions: List<TransactionInfo> = emptyList()
+    private var streetMode: Boolean = false
+    private var voidHeight: Int = 0
 
     fun submitList(dataSet: List<TransactionInfo>) {
-        if (localDataSet != dataSet) {
-            localDataSet = dataSet
+         if (transactions != dataSet) {
+            transactions = dataSet
             notifyDataSetChanged()
         }
     }
@@ -51,117 +45,114 @@ class TransactionInfoAdapter(
         }
     }
 
+    fun setVoidHeight(voidHeight: Int) {
+        this.voidHeight = voidHeight
+        notifyItemChanged(transactions.size)
+    }
+
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.recycler_view_item_transaction, viewGroup, false)
-        return ViewHolder(listener, view)
+        val inflater = LayoutInflater.from(viewGroup.context)
+        return when (viewType) {
+            VIEW_TYPE_ITEM -> {
+                val view = inflater.inflate(R.layout.recycler_view_transaction, viewGroup, false)
+                ItemViewHolder(listener, view)
+            }
+            VIEW_TYPE_VOID -> {
+                val view = LinearLayoutCompat(viewGroup.context)
+                view.orientation = LinearLayoutCompat.HORIZONTAL
+                VoidViewHolder(view)
+            }
+            else -> {
+                throw RuntimeException("Unknown view type")
+            }
+        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (position < transactions.size) {
+            VIEW_TYPE_ITEM
+        } else {
+            VIEW_TYPE_VOID
+        }
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        val tx = localDataSet[position]
-        viewHolder.bind(tx, streetMode)
+        when (viewHolder) {
+            is ItemViewHolder -> {
+                val transaction = transactions[position]
+                viewHolder.bind(transaction, streetMode)
+            }
+            is VoidViewHolder -> {
+                viewHolder.itemView.layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    voidHeight
+                )
+            }
+        }
     }
 
     override fun getItemCount(): Int {
-        return localDataSet.size
+        // we have an empty view at the end
+        return transactions.size + 1
     }
 
     interface Listener {
-        fun onClickTransaction(txInfo: TransactionInfo)
+        fun onClickTransaction(transactionInfo: TransactionInfo)
     }
 
-    class ViewHolder(val listener: Listener?, view: View) : RecyclerView.ViewHolder(view) {
+    sealed class ViewHolder(view: View) : RecyclerView.ViewHolder(view)
 
-        private val outboundColour: Int = ThemeHelper.getThemedColor(view.context, R.attr.negativeColor)
-        private val inboundColour: Int = ThemeHelper.getThemedColor(view.context, R.attr.positiveColor)
-        private val pendingColour: Int = ThemeHelper.getThemedColor(view.context, R.attr.neutralColor)
-        private val failedColour: Int = ThemeHelper.getThemedColor(view.context, R.attr.neutralColor)
+    class ItemViewHolder(val listener: Listener, view: View) : ViewHolder(view) {
 
-        private lateinit var amountTextView: TextView
-        private lateinit var confirmationsTextView: TextView
-        private lateinit var confirmationsProgressBar: CircularProgressIndicator
-        private lateinit var txFailedTextView: TextView
-        private lateinit var txDateTimeTextView: TextView
+        private val sentOrReceivedIconImageView: ImageView = itemView.findViewById(R.id.send_or_receive_icon_image_view)
+        private val sentOrReceivedLabelTextView: TextView = itemView.findViewById(R.id.sent_or_received_label_text_view)
+        private val amountTextView: TextView = itemView.findViewById(R.id.transaction_amount_text_view)
+        private val confirmationsTextView: TextView = itemView.findViewById(R.id.transaction_confirmations_text_view)
+        private val txDateTimeTextView: TextView = itemView.findViewById(R.id.transaction_date_text_view)
 
-        init {
-            val cal = Calendar.getInstance()
-            val tz = cal.timeZone //get the local time zone.
-            DateHelper.DATETIME_FORMATTER.timeZone = tz
-        }
+        private val receiveIconDrawable: Drawable = AppCompatResources.getDrawable(itemView.context, R.drawable.icon_receive)!!
+        private val sendIconDrawable: Drawable = AppCompatResources.getDrawable(itemView.context, R.drawable.icon_send)!!
+        private val transactionTypeReceivedText: CharSequence = itemView.resources.getText(R.string.transaction_type_received)
+        private val transactionTypeSentText: CharSequence = itemView.resources.getText(R.string.transaction_type_sent)
+        private val receivedAmountColor: Int = itemView.resources.getColor(R.color.oled_positiveColor)
+        private val sentAmountColor: Int = itemView.resources.getColor(R.color.oled_negativeColor)
+        private val transactionStatusFailedText: CharSequence = itemView.resources.getText(R.string.tx_list_failed_text)
+        private val transactionStatusUnconfirmedText: CharSequence = itemView.resources.getText(R.string.transaction_unconfirmed)
+        private val transactionStatusConfirmedText: CharSequence = itemView.resources.getText(R.string.transaction_confirmed)
 
-        fun bind(txInfo: TransactionInfo, streetMode: Boolean) {
-            confirmationsTextView = itemView.findViewById(R.id.tvConfirmations)
-            confirmationsProgressBar = itemView.findViewById(R.id.pbConfirmations)
-            amountTextView = itemView.findViewById(R.id.tx_amount)
-            txFailedTextView = itemView.findViewById(R.id.tx_failed)
-            txDateTimeTextView = itemView.findViewById(R.id.tx_datetime)
-
-            val displayAmount =
-                if (streetMode) Constants.STREET_MODE_BALANCE else Helper.getDisplayAmount(
-                    txInfo.amount,
-                    Helper.DISPLAY_DIGITS_INFO
-                )
-            confirmationsProgressBar.max = TransactionInfo.CONFIRMATION
-            txFailedTextView.visibility = View.GONE
-            if (txInfo.isFailed) {
-                amountTextView.text = itemView.context.getString(R.string.tx_list_amount_negative, displayAmount)
-                txFailedTextView.visibility = View.VISIBLE
-                setTxColour(failedColour)
-                confirmationsTextView.visibility = View.GONE
-                confirmationsProgressBar.visibility = View.GONE
-            } else if (txInfo.isPending) {
-                setTxColour(pendingColour)
-                confirmationsProgressBar.isIndeterminate = true
-                confirmationsProgressBar.visibility = View.VISIBLE
-                confirmationsTextView.visibility = View.GONE
-            } else if (txInfo.direction == TransactionInfo.Direction.Direction_In) {
-                setTxColour(inboundColour)
-                if (!txInfo.isConfirmed) {
-                    confirmationsProgressBar.visibility = View.VISIBLE
-                    val confirmations = txInfo.confirmations.toInt()
-                    confirmationsProgressBar.setProgressCompat(confirmations, true)
-                    val confCount = confirmations.toString()
-                    confirmationsTextView.text = confCount
-                    if (confCount.length == 1) // we only have space for character in the progress circle
-                        confirmationsTextView.visibility =
-                            View.VISIBLE else confirmationsTextView.visibility = View.GONE
-                } else {
-                    confirmationsProgressBar.visibility = View.GONE
-                    confirmationsTextView.visibility = View.GONE
+        fun bind(transactionInfo: TransactionInfo, streetMode: Boolean) {
+            when (transactionInfo.direction) {
+                TransactionInfo.Direction.In -> {
+                    sentOrReceivedIconImageView.setImageDrawable(receiveIconDrawable)
+                    sentOrReceivedLabelTextView.text = transactionTypeReceivedText
+                    amountTextView.setTextColor(receivedAmountColor)
                 }
-            } else {
-                setTxColour(outboundColour)
-                if (!txInfo.isConfirmed) {
-                    confirmationsProgressBar.visibility = View.VISIBLE
-                    val confirmations = txInfo.confirmations.toInt()
-                    confirmationsProgressBar.setProgressCompat(confirmations, true)
-                    val confCount = confirmations.toString()
-                    confirmationsTextView.text = confCount
-                    if (confCount.length == 1) // we only have space for character in the progress circle
-                        confirmationsTextView.visibility =
-                            View.VISIBLE else confirmationsTextView.visibility = View.GONE
-                } else {
-                    confirmationsProgressBar.visibility = View.GONE
-                    confirmationsTextView.visibility = View.GONE
+                TransactionInfo.Direction.Out -> {
+                    sentOrReceivedIconImageView.setImageDrawable(sendIconDrawable)
+                    sentOrReceivedLabelTextView.text = transactionTypeSentText
+                    amountTextView.setTextColor(sentAmountColor)
                 }
             }
-            if (txInfo.direction == TransactionInfo.Direction.Direction_Out) {
-                amountTextView.text =
-                    itemView.context.getString(R.string.tx_list_amount_negative, displayAmount)
+
+            if (transactionInfo.isFailed) {
+                confirmationsTextView.text = transactionStatusFailedText
+                confirmationsTextView.setTypeface(null, Typeface.BOLD)
+            } else if (transactionInfo.isPending) {
+                confirmationsTextView.text = transactionStatusUnconfirmedText
+                confirmationsTextView.setTypeface(null, Typeface.ITALIC)
+            } else if (!transactionInfo.isConfirmed) {
+                confirmationsTextView.text = itemView.resources.getString(R.string.transaction_confirming, transactionInfo.confirmations.toString())
+                confirmationsTextView.setTypeface(null, Typeface.ITALIC)
             } else {
-                amountTextView.text =
-                    itemView.context.getString(R.string.tx_list_amount_positive, displayAmount)
+                confirmationsTextView.text = transactionStatusConfirmedText
+                confirmationsTextView.setTypeface(null, Typeface.NORMAL)
             }
-            txDateTimeTextView.text = getDateTime(txInfo.timestamp)
-            itemView.setOnClickListener { _: View? -> listener?.onClickTransaction(txInfo) }
-        }
 
-        private fun setTxColour(clr: Int) {
-            amountTextView.setTextColor(clr)
-        }
-
-        private fun getDateTime(time: Long): String {
-            return DateHelper.DATETIME_FORMATTER.format(Date(time * 1000))
+            amountTextView.text = TextHelper.formatUnlockedBalance(itemView.context, transactionInfo.amount, MoneroUnit.MONERO, streetMode, Typeface.NORMAL)
+            txDateTimeTextView.text = DateFormat.getInstance().format(Date(transactionInfo.timestamp * 1000))
+            itemView.setOnClickListener { _ -> listener.onClickTransaction(transactionInfo) }
         }
     }
+
+    class VoidViewHolder(view: View) : ViewHolder(view)
 }

@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RadioGroup
 import android.widget.TextView
@@ -15,6 +16,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat.Type.displayCutout
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
+import androidx.core.view.updatePadding
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -24,6 +28,7 @@ import com.journeyapps.barcodescanner.ScanIntentResult
 import com.journeyapps.barcodescanner.ScanOptions
 import com.ncorti.slidetoact.SlideToActView
 import com.ncorti.slidetoact.SlideToActView.OnSlideCompleteListener
+import org.monfluo.wallet.model.MoneroUnit
 import org.monfluo.wallet.model.PendingTransaction
 import org.monfluo.wallet.model.PendingTransactionDestination
 import org.monfluo.wallet.model.TransactionDestinationWithAmount
@@ -32,9 +37,11 @@ import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
+import org.monfluo.wallet.util.TextHelper
 import org.monfluo.wallet.util.UriData
 import org.monfluo.wallet.util.acitivity.MoneroActivity
 import timber.log.Timber
+import kotlin.math.max
 
 // TODO: refactor transaction confirmation layout into a separate activity/fragment
 class SendActivity : MoneroActivity() {
@@ -42,6 +49,9 @@ class SendActivity : MoneroActivity() {
     var priority: PendingTransaction.Priority = PendingTransaction.Priority.Priority_Default
 
     private val viewModel: SendViewModel by viewModels()
+
+    private lateinit var layoutView: View
+    private lateinit var backImageView: ImageView
 
     private lateinit var sendMaxButton: Button
     private lateinit var addOutputImageView: ImageButton
@@ -55,7 +65,9 @@ class SendActivity : MoneroActivity() {
     private lateinit var addressResolvedFromTextView: TextView
     private lateinit var amountTextView: TextView
     private lateinit var selectedUtxosValueTextView: TextView
+
     private var currentEntryIndex = -1
+
     private val qrCodeLauncher =
         registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
             if (result.contents != null) {
@@ -65,6 +77,7 @@ class SendActivity : MoneroActivity() {
                 }
             }
         }
+
     private val cameraPermissionsLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted: Boolean ->
@@ -81,6 +94,8 @@ class SendActivity : MoneroActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_send)
 
+        layoutView = findViewById(R.id.send_activity_view)
+        backImageView = findViewById(R.id.back_imageview)
         sendMaxButton = findViewById(R.id.send_max_button)
         addOutputImageView = findViewById(R.id.add_output_button)
         destList = findViewById(R.id.transaction_destination_list)
@@ -95,12 +110,29 @@ class SendActivity : MoneroActivity() {
         feeRadioGroupLabelTextView = findViewById(R.id.tx_fee_radiogroup_label_textview)
         selectedUtxosValueTextView = findViewById(R.id.selected_utxos_value_textview)
 
+        bindWindowInsetsListener()
         bindListeners()
         bindObservers()
         init()
     }
 
+    private fun bindWindowInsetsListener() {
+        ViewCompat.setOnApplyWindowInsetsListener(layoutView) { _, insetsCompat ->
+            val insets = insetsCompat.getInsets(systemBars() or displayCutout())
+            layoutView.updatePadding(
+                left = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.left),
+                top = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.top),
+                right = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.right),
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.bottom)
+            )
+            return@setOnApplyWindowInsetsListener insetsCompat
+        }
+    }
+
     private fun bindListeners() {
+        backImageView.setOnClickListener {
+            finish()
+        }
         feeRadioGroup.check(R.id.default_fee_radiobutton)
         priority = PendingTransaction.Priority.Priority_Default
         feeRadioGroup.setOnCheckedChangeListener { _: RadioGroup?, i: Int ->
@@ -213,9 +245,9 @@ class SendActivity : MoneroActivity() {
 
                 amountTextView.text = getString(
                     R.string.tx_amount_text,
-                    Helper.getDisplayAmount(pendingTransaction.getAmount())
+                    TextHelper.getDisplayAmount(pendingTransaction.getAmount(), MoneroUnit.MONERO, false)
                 )
-                feeTextView.text = getString(R.string.tx_fee_text, Helper.getDisplayAmount(pendingTransaction.getFee()))
+                feeTextView.text = getString(R.string.tx_fee_text, TextHelper.getDisplayAmount(pendingTransaction.getFee(), MoneroUnit.MONERO, false))
             }
         }
     }

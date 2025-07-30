@@ -26,9 +26,9 @@ sealed interface SynchronizationStatus {
         }
     }
 
-    data class Synchronized(val walletDisplayHeight: String) : SynchronizationStatus {
-        override fun getText(context: Context): String {
-            return context.getString(R.string.synchronized_at_label, walletDisplayHeight)
+    data object StartingSynchronization : SynchronizationStatus {
+        override fun getText(context: Context): String  {
+            return context.getString(R.string.starting_wallet_synchronization)
         }
     }
 
@@ -38,9 +38,9 @@ sealed interface SynchronizationStatus {
         }
     }
 
-    data object StartingSynchronization : SynchronizationStatus {
-        override fun getText(context: Context): String  {
-            return context.getString(R.string.starting_wallet_synchronization)
+    data class Synchronized(val walletDisplayHeight: String) : SynchronizationStatus {
+        override fun getText(context: Context): String {
+            return context.getString(R.string.synchronized_at_label, walletDisplayHeight)
         }
     }
 }

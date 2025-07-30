@@ -1,167 +1,256 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    android:id="@+id/home_activity_view"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="org.monfluo.wallet.HomeActivity">
-
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/status_bar_fragment"
-        android:name="org.monfluo.wallet.fragment.StatusBarFragment"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout="@layout/fragment_status_bar" />
-
-    <TextView
-        android:id="@+id/balance_unlocked_textview"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="4dp"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/wallet_settings_imageview"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/status_bar_fragment"
-        tools:text="100.000000000000" />
-
-    <TextView
-        android:id="@+id/balance_frozen_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/balance_unlocked_textview"
-        tools:text="+ 100.000000000000 frozen"
-        tools:visibility="visible" />
-
-    <TextView
-        android:id="@+id/balance_locked_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/balance_frozen_textview"
-        tools:text="+ 100.000000000000 confirming"
-        tools:visibility="visible" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/transaction_history_recyclerview"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        android:clipToPadding="false"
-        android:paddingBottom="128dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/balance_locked_textview"
-        app:layout_constraintVertical_bias="0.0" />
+    android:layout_height="match_parent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/no_history_layout"
+        android:id="@+id/no_transactions_layout"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_height="match_parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/balance_locked_textview"
-        tools:visibility="visible">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/transaction_history_recyclerview">
+
+        <ImageView
+            android:id="@+id/home_image_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/wallet"
+            android:minWidth="40dp"
+            android:minHeight="40dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/home_image"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/no_transactions_header_text_view"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <TextView
-            android:id="@+id/empty_tx_textview"
-            android:layout_width="0dp"
+            android:id="@+id/no_transactions_header_text_view"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="12dp"
-            android:text="@string/no_history_nget_some_monero_in_here"
-            android:textAlignment="center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/no_transactions_text_text_view"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:paddingTop="8dp"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:text="@string/no_transactions_header"/>
+
+        <TextView
+            android:id="@+id/no_transactions_text_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:paddingTop="4dp"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:text="@string/no_transactions_description"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/home_activity_main_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/transparent"
+        android:paddingHorizontal="@dimen/standard_padding"
+        android:paddingTop="@dimen/standard_padding"
+        tools:context="org.monfluo.wallet.HomeActivity">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/wallet_card_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:padding="16dp"
+            android:background="@drawable/wallet_card_background">
+
+            <TextView
+                android:id="@+id/wallet_name_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:background="@color/transparent"
+                android:textSize="16sp"
+                android:textColor="?attr/colorOnPrimary"
+                android:text="@string/wallet_name_label"
+                android:contentDescription="@string/wallet_name_label" />
+
+            <TextView
+                android:id="@+id/account_name_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/wallet_name_textview"
+                android:layout_marginTop="4dp"
+                android:background="@color/transparent"
+                android:maxWidth="240dp"
+                android:textSize="20sp"
+                android:textColor="?attr/colorOnPrimary"
+                android:text="@string/account_name_label"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:contentDescription="@string/account_name_label" />
+
+            <TextView
+                android:id="@+id/balance_unlocked_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/account_name_textview"
+                android:layout_marginTop="4dp"
+                android:background="@color/transparent"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary"
+                android:text="@string/unlocked_balance_label"
+                android:contentDescription="@string/unlocked_balance_label"
+                tools:text="123.456789123456 XMR" />
+
+            <TextView
+                android:id="@+id/balance_locked_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/balance_unlocked_textview"
+                android:paddingTop="4dp"
+                android:background="@color/transparent"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary"
+                android:text="@string/locked_balance_label"
+                android:contentDescription="@string/locked_balance_label"
+                tools:text="123.456789123456 XMR pending" />
+
+            <TextView
+                android:id="@+id/balance_frozen_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/balance_locked_textview"
+                android:paddingTop="4dp"
+                android:background="@color/transparent"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary"
+                android:text="@string/frozen_balance_label"
+                android:contentDescription="@string/frozen_balance_label"
+                tools:text="123.456789123456 XMR frozen" />
+
+            <ImageView
+                android:id="@+id/enotes_imageview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toEndOf="@id/balance_unlocked_textview"
+                app:layout_constraintTop_toTopOf="@id/balance_unlocked_textview"
+                app:layout_constraintBottom_toBottomOf="@id/balance_unlocked_textview"
+                android:layout_marginStart="12dp"
+                android:background="@color/transparent"
+                android:minWidth="32dp"
+                android:minHeight="32dp"
+                android:src="@drawable/enotes"
+                android:contentDescription="TODO"/>
+
+            <ImageView
+                android:id="@+id/settings_imageview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:background="@color/transparent"
+                android:minWidth="32dp"
+                android:minHeight="32dp"
+                android:src="@drawable/settings"
+                android:contentDescription="TODO"/>
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/network_status_fragment"
+                android:name="org.monfluo.wallet.fragment.NetworkStatusFragment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toStartOf="@id/settings_imageview"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginHorizontal="@dimen/additional_padding"
+                android:background="@color/transparent"
+                tools:layout="@layout/fragment_network_status"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/transaction_history_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="12dp"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/wallet_card_layout"
+            tools:listitem="@layout/recycler_view_transaction"
+            tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:src="@drawable/gradient_bottom"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/receive_send_buttons_layout" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/receive_send_buttons_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="128dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        android:layout_height="match_parent"
+        android:background="@color/transparent">
 
-        <Button
-            android:id="@+id/receive_button"
-            android:layout_width="0dp"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/receive_send_buttons_layout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="1dp"
-            android:layout_marginBottom="24dp"
-            android:background="@drawable/button_bg_left"
-            android:text="@string/receive"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/send_button"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <Button
-            android:id="@+id/send_button"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="1dp"
-            android:layout_marginEnd="24dp"
-            android:layout_marginBottom="24dp"
-            android:background="@drawable/button_bg_right"
-            android:text="@string/send"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/receive_button" />
+            android:paddingHorizontal="@dimen/standard_padding"
+            android:paddingBottom="@dimen/standard_padding"
+            android:background="@drawable/transparent_gradient_background">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/receive_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:paddingVertical="12dp"
+                android:text="@string/receive"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="12dp"
+                app:icon="@drawable/icon_receive"
+                app:iconGravity="textStart"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/send_button"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/send_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:paddingVertical="12dp"
+                android:text="@string/send"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="12dp"
+                app:icon="@drawable/icon_send"
+                app:iconGravity="textStart"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/receive_button" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <ImageView
-        android:id="@+id/wallet_settings_imageview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/wallet_settings"
-        android:minWidth="40dp"
-        android:minHeight="40dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:src="@drawable/wallet_settings"
-        app:layout_constraintBottom_toBottomOf="@id/balance_unlocked_textview"
-        app:layout_constraintStart_toEndOf="@id/balance_unlocked_textview"
-        app:layout_constraintEnd_toStartOf="@id/settings_imageview"
-        app:layout_constraintTop_toTopOf="@id/balance_unlocked_textview" />
-
-    <ImageView
-        android:id="@+id/settings_imageview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="12dp"
-        android:contentDescription="@string/settings"
-        android:minWidth="40dp"
-        android:minHeight="40dp"
-        android:src="@drawable/ic_settings"
-        app:layout_constraintBottom_toBottomOf="@id/balance_unlocked_textview"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/balance_unlocked_textview" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

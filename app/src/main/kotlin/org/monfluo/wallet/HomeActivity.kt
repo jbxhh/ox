@@ -9,6 +9,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat.Type.displayCutout
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
+import androidx.core.view.updatePadding
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,32 +22,46 @@ import org.monfluo.wallet.adapter.TransactionInfoAdapter
 import org.monfluo.wallet.data.Heights
 import org.monfluo.wallet.livedata.combineLiveDatas
 import org.monfluo.wallet.model.Balance
+import org.monfluo.wallet.model.MoneroUnit
 import org.monfluo.wallet.model.TransactionInfo
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.PreferenceUtils
+import org.monfluo.wallet.util.TextHelper
 import org.monfluo.wallet.util.acitivity.MoneroActivity
 import timber.log.Timber
+import kotlin.math.max
 
 class HomeActivity : MoneroActivity() {
 
     private val viewModel: HomeActivityViewModel by viewModels()
 
-    private lateinit var walletSettingsImageView: ImageView
+    private lateinit var layoutView: View
+
+    private lateinit var walletCardLayoutView: View
+    private lateinit var walletNameTextView: TextView
+    private lateinit var accountNameTextView: TextView
+
+    private lateinit var unlockedBalanceTextView: TextView
+    private lateinit var lockedBalanceTextView: TextView
+    private lateinit var frozenBalanceTextView: TextView
+
     private lateinit var settingsImageView: ImageView
+    private lateinit var enotesImageView: ImageView
+
+    private lateinit var noTransactionsLayoutView: View
+    private lateinit var noTransactionsHeaderTextView: TextView
+    private lateinit var receiveSendButtonsLayoutView: View
     private lateinit var sendButton: Button
     private lateinit var receiveButton: Button
 
-    private lateinit var txHistoryRecyclerView: RecyclerView
-    private lateinit var unlockedBalanceTextView: TextView
-    private lateinit var frozenBalanceTextView: TextView
-    private lateinit var lockedBalanceTextView: TextView
+    private lateinit var transactionHistoryRecyclerView: RecyclerView
 
-    private val transactionInfoAdapter: TransactionInfoAdapter = TransactionInfoAdapter(false, object : TransactionInfoAdapter.Listener {
-        override fun onClickTransaction(txInfo: TransactionInfo) {
+    private val transactionInfoAdapter: TransactionInfoAdapter = TransactionInfoAdapter(object : TransactionInfoAdapter.Listener {
+        override fun onClickTransaction(transactionInfo: TransactionInfo) {
             val intent = Intent(this@HomeActivity, TransactionActivity::class.java)
-            intent.putExtra(Constants.EXTRA_TRANSACTION_ID, txInfo.hash)
+            intent.putExtra(Constants.EXTRA_TRANSACTION_ID, transactionInfo.hash)
             startActivity(intent)
         }
     })
@@ -52,22 +70,46 @@ class HomeActivity : MoneroActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
-        walletSettingsImageView = findViewById(R.id.wallet_settings_imageview)
+        layoutView = findViewById(R.id.home_activity_main_view)
+        walletCardLayoutView = findViewById(R.id.wallet_card_layout)
+        walletNameTextView = findViewById(R.id.wallet_name_textview)
+        accountNameTextView = findViewById(R.id.account_name_textview)
+        unlockedBalanceTextView = findViewById(R.id.balance_unlocked_textview)
+        lockedBalanceTextView = findViewById(R.id.balance_locked_textview)
+        frozenBalanceTextView = findViewById(R.id.balance_frozen_textview)
         settingsImageView = findViewById(R.id.settings_imageview)
+        enotesImageView = findViewById(R.id.enotes_imageview)
+        noTransactionsLayoutView = findViewById(R.id.no_transactions_layout)
+        noTransactionsHeaderTextView  = findViewById(R.id.no_transactions_header_text_view)
+        receiveSendButtonsLayoutView = findViewById(R.id.receive_send_buttons_layout)
         sendButton = findViewById(R.id.send_button)
         receiveButton = findViewById(R.id.receive_button)
+        transactionHistoryRecyclerView = findViewById(R.id.transaction_history_recyclerview)
 
-        txHistoryRecyclerView = findViewById(R.id.transaction_history_recyclerview)
-        unlockedBalanceTextView = findViewById(R.id.balance_unlocked_textview)
-        frozenBalanceTextView = findViewById(R.id.balance_frozen_textview)
-        lockedBalanceTextView = findViewById(R.id.balance_locked_textview)
+        transactionHistoryRecyclerView.layoutManager = LinearLayoutManager(this)
+        transactionHistoryRecyclerView.adapter = transactionInfoAdapter
 
-        txHistoryRecyclerView.layoutManager = LinearLayoutManager(this)
-        txHistoryRecyclerView.adapter = transactionInfoAdapter
-
+        bindWindowInsetsListener()
+        bindBackPressedCallback()
         bindListeners()
         bindObservers()
+    }
 
+    private fun bindWindowInsetsListener() {
+        ViewCompat.setOnApplyWindowInsetsListener(layoutView) { _, insetsCompat ->
+            val insets = insetsCompat.getInsets(systemBars() or displayCutout())
+            layoutView.updatePadding(
+                left = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.left),
+                top = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.top),
+                right = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.right),
+            )
+            receiveSendButtonsLayoutView.updatePadding(bottom = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.bottom) + resources.getDimensionPixelOffset(R.dimen.additional_padding))
+            transactionInfoAdapter.setVoidHeight(resources.getDimensionPixelOffset(R.dimen.activity_home_recycler_view_void_height) + insets.bottom)
+            return@setOnApplyWindowInsetsListener insetsCompat
+        }
+    }
+
+    private fun bindBackPressedCallback() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 Timber.d("Back pressed")
@@ -78,14 +120,19 @@ class HomeActivity : MoneroActivity() {
     }
 
     private fun bindListeners() {
-        unlockedBalanceTextView.setOnClickListener {
-            val streetMode = viewModel.streetMode.value!!
-            val newStreetMode = !streetMode
-            PreferenceUtils.setStreetMode(this, newStreetMode)
-            viewModel.setStreetMode(newStreetMode)
-        }
-        walletSettingsImageView.setOnClickListener {
+        walletNameTextView.setOnClickListener {
             startActivity(Intent(this, WalletSettingsActivity::class.java))
+        }
+        accountNameTextView.setOnClickListener {
+            startActivity(Intent(this, AccountsActivity::class.java))
+        }
+        unlockedBalanceTextView.setOnClickListener {
+            if (viewModel.balanceTapTogglesStreetMode.value!!) {
+                val streetMode = viewModel.streetMode.value!!
+                val newStreetMode = !streetMode
+                PreferenceUtils.setStreetMode(this, newStreetMode)
+                viewModel.setStreetMode(newStreetMode)
+            }
         }
         settingsImageView.setOnClickListener {
             startActivity(Intent(this, ApplicationSettingsActivity::class.java))
@@ -96,64 +143,100 @@ class HomeActivity : MoneroActivity() {
         receiveButton.setOnClickListener {
             startActivity(Intent(this, ReceiveActivity::class.java))
         }
+        enotesImageView.setOnClickListener {
+            startActivity(Intent(this, EnotesActivity::class.java))
+        }
     }
 
     private fun bindObservers() {
-        viewModel.balance.observe(this) { (isSynchronized, balance, streetMode) ->
-            if (balance != null) {
-                val typeface = if (isSynchronized) Typeface.BOLD else Typeface.BOLD_ITALIC
-                unlockedBalanceTextView.setTypeface(null, typeface)
-                frozenBalanceTextView.setTypeface(null, typeface)
-                lockedBalanceTextView.setTypeface(null, typeface)
+        viewModel.walletCardInfo.observe(this) { (walletConnected, isSynchronized, streetMode, multiAccountMode, enableEnoteManagement, balance) ->
+            val walletName = walletService?.getWalletName()
 
-                unlockedBalanceTextView.text = if (!streetMode) Wallet.getDisplayAmount(balance.unlocked) else Constants.STREET_MODE_BALANCE
-                if (balance.frozen != 0L) {
-                    val textFrozenBalance = if (!streetMode) Wallet.getDisplayAmount(balance.frozen) else Constants.STREET_MODE_BALANCE
-                    val formattedFrozenBalance = if (balance.frozen < 0) "- $textFrozenBalance" else "+ $textFrozenBalance"
-                    frozenBalanceTextView.text = getString(R.string.frozen_amount, formattedFrozenBalance)
-                    frozenBalanceTextView.visibility = View.VISIBLE
+            if (walletName != null) {
+                walletNameTextView.text = walletName
+            }
+
+            if (walletConnected) {
+                if (multiAccountMode) {
+                    accountNameTextView.visibility = View.VISIBLE
+
+                    walletService?.getWalletOrLog()?.let { wallet ->
+                        val accountName = wallet.getAccountLabel(wallet.getAccountIndex())
+                        accountNameTextView.text = accountName
+                    }
                 } else {
-                    frozenBalanceTextView.visibility = View.GONE
+                    accountNameTextView.visibility = View.INVISIBLE
                 }
-                if (balance.pending != 0L) {
-                    val textUnconfirmedBalance = if (!streetMode) Wallet.getDisplayAmount(balance.pending) else Constants.STREET_MODE_BALANCE
-                    val formattedUnconfirmedBalance = if (balance.pending < 0) "- $textUnconfirmedBalance" else "+ $textUnconfirmedBalance"
-                    lockedBalanceTextView.text = getString(R.string.unconfirmed_amount, formattedUnconfirmedBalance)
-                    lockedBalanceTextView.visibility = View.VISIBLE
+
+                if (balance != null) {
+                    val balanceTextStyle = if (isSynchronized) Typeface.BOLD else Typeface.BOLD_ITALIC
+
+                    unlockedBalanceTextView.text = TextHelper.formatUnlockedBalance(this, balance.unlocked, MoneroUnit.MONERO, streetMode, balanceTextStyle)
+                    unlockedBalanceTextView.visibility = View.VISIBLE
+
+                    if (balance.locked != 0L) {
+                        lockedBalanceTextView.text = TextHelper.formatLockedBalance(this, balance.locked, MoneroUnit.MONERO, streetMode, balanceTextStyle)
+                        lockedBalanceTextView.visibility = View.VISIBLE
+                    } else {
+                        lockedBalanceTextView.visibility = View.INVISIBLE
+                    }
+                    if (balance.frozen != 0L) {
+                        frozenBalanceTextView.text = TextHelper.formatFrozenBalance(this, balance.frozen, MoneroUnit.MONERO, streetMode, balanceTextStyle)
+                        frozenBalanceTextView.visibility = View.VISIBLE
+                    } else {
+                        frozenBalanceTextView.visibility = View.INVISIBLE
+                    }
                 } else {
-                    lockedBalanceTextView.visibility = View.GONE
+                    unlockedBalanceTextView.visibility = View.INVISIBLE
+                    lockedBalanceTextView.visibility = View.INVISIBLE
+                    frozenBalanceTextView.visibility = View.INVISIBLE
                 }
+
+                if (enableEnoteManagement) {
+                    enotesImageView.visibility = View.VISIBLE
+                } else {
+                    enotesImageView.visibility = View.INVISIBLE
+                }
+            } else {
+                accountNameTextView.visibility = View.INVISIBLE
+                unlockedBalanceTextView.visibility = View.INVISIBLE
+                lockedBalanceTextView.visibility = View.INVISIBLE
+                frozenBalanceTextView.visibility = View.INVISIBLE
+                enotesImageView.visibility = View.INVISIBLE
             }
         }
 
         viewModel.transactions.observe(this) { transactions ->
-            if (transactions.isNullOrEmpty()) {
-                val wallet = walletService?.getWallet()
-                val textResId: Int = if (wallet != null) {
-                    R.string.no_history_nget_some_monero_in_here
-                } else {
-                    R.string.no_history_loading
-                }
-                txHistoryRecyclerView.visibility = View.GONE
-                displayEmptyHistory(true, this, textResId)
+            if (transactions == null) {
+                noTransactionsLayoutView.visibility = View.VISIBLE
+                noTransactionsHeaderTextView.text = getString(R.string.loading_wallet_header)
+                transactionHistoryRecyclerView.visibility = View.GONE
+            } else if (transactions.isEmpty()) {
+                noTransactionsLayoutView.visibility = View.VISIBLE
+                noTransactionsHeaderTextView.text = getString(R.string.no_transactions_header)
+                transactionHistoryRecyclerView.visibility = View.GONE
             } else {
-                // POPULATED WALLET HISTORY
                 val sortedHistory = transactions.sortedByDescending { it.timestamp }
                 if (sortedHistory.size > 100) {
                     transactionInfoAdapter.submitList(sortedHistory.subList(0, 99))
                 } else {
                     transactionInfoAdapter.submitList(sortedHistory)
                 }
-                txHistoryRecyclerView.visibility = View.VISIBLE
-                displayEmptyHistory(
-                    false,
-                    this,
-                    R.string.no_history_nget_some_monero_in_here,
-                )
+                noTransactionsLayoutView.visibility = View.GONE
+                transactionHistoryRecyclerView.visibility = View.VISIBLE
             }
         }
+
         viewModel.streetMode.observe(this) { streetMode ->
             transactionInfoAdapter.submitStreetMode(streetMode)
+        }
+
+        viewModel.enoteManagement.observe(this) { enableEnoteManagement ->
+            if (enableEnoteManagement) {
+                enotesImageView.visibility = View.VISIBLE
+            } else {
+                enotesImageView.visibility = View.INVISIBLE
+            }
         }
     }
 
@@ -163,10 +246,14 @@ class HomeActivity : MoneroActivity() {
         val isMultiWalletMode = PreferenceUtils.isMultiWalletMode(this)
         val isMultiAccountMode = PreferenceUtils.isMultiAccountMode(this)
         val isStreetMode = PreferenceUtils.isStreetMode(this)
+        val isEnableEnoteManagement = PreferenceUtils.isEnableEnoteManagement(this)
+        val isBalanceTapTogglesStreetMode = PreferenceUtils.isBalanceTapTogglesStreetMode(this)
 
         viewModel.setMultiWalletMode(isMultiWalletMode)
         viewModel.setMultiAccountMode(isMultiAccountMode)
         viewModel.setStreetMode(isStreetMode)
+        viewModel.setEnoteManagement(isEnableEnoteManagement)
+        viewModel.setBalanceTapTogglesStreetMode(isBalanceTapTogglesStreetMode)
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
@@ -187,18 +274,6 @@ class HomeActivity : MoneroActivity() {
         Timber.d("Stopping")
         walletService?.closeWallet()
         finish()
-    }
-
-    private fun displayEmptyHistory(
-        display: Boolean,
-        view: HomeActivity,
-        textResId: Int,
-    ) {
-        val textView = view.findViewById<TextView>(R.id.empty_tx_textview)
-        view.findViewById<View>(R.id.no_history_layout).visibility =
-            if (display) View.VISIBLE else View.GONE
-            textView.visibility = View.VISIBLE
-        textView.setText(textResId)
     }
 
     override fun onWalletUpdated(wallet: Wallet) {
@@ -232,8 +307,11 @@ internal class HomeActivityViewModel : ViewModel() {
     private val _walletConnected = MutableLiveData(false)
 
     private val _multiWalletMode = MutableLiveData(false)
-
     private val _multiAccountMode = MutableLiveData(false)
+    private val _enoteManagement = MutableLiveData(false)
+    val enoteManagement: LiveData<Boolean> = _enoteManagement
+    private val _balanceTapTogglesStreetMode = MutableLiveData(false)
+    val balanceTapTogglesStreetMode: LiveData<Boolean> = _balanceTapTogglesStreetMode
 
     private val _streetMode = MutableLiveData(false)
     val streetMode: LiveData<Boolean> = _streetMode
@@ -252,11 +330,13 @@ internal class HomeActivityViewModel : ViewModel() {
         Pair(walletConnected!!, heights!!)
     }
 
-    val balance = combineLiveDatas(
+    val walletCardInfo = combineLiveDatas(
         syncProgress,
         _balance,
         _streetMode,
-    ) { syncProgress, balance, streetMode ->
+        _multiAccountMode,
+        _enoteManagement,
+    ) { syncProgress, balance, streetMode, multiAccountMode, enableEnoteManagement ->
         val (walletConnected, heights) = syncProgress!!
         val isSynchronized = if (walletConnected) {
             val (_, walletHeight, daemonHeight) = heights
@@ -265,7 +345,14 @@ internal class HomeActivityViewModel : ViewModel() {
         } else {
             false
         }
-        Triple(isSynchronized, balance, streetMode!!)
+        WalletCardState(
+            walletConnected = walletConnected,
+            isSynchronized = isSynchronized,
+            streetMode = streetMode!!,
+            multiAccountMode = multiAccountMode!!,
+            enableEnoteManagement = enableEnoteManagement!!,
+            balance = balance
+        )
     }
 
     fun setWalletConnected(walletConnected: Boolean) {
@@ -278,6 +365,14 @@ internal class HomeActivityViewModel : ViewModel() {
 
     fun setMultiAccountMode(multiAccountMode: Boolean) {
         _multiAccountMode.postValue(multiAccountMode)
+    }
+
+    fun setEnoteManagement(enoteManagement: Boolean) {
+        _enoteManagement.postValue(enoteManagement)
+    }
+
+    fun setBalanceTapTogglesStreetMode(balanceTapTogglesStreetMode: Boolean) {
+        _balanceTapTogglesStreetMode.postValue(balanceTapTogglesStreetMode)
     }
 
     fun setStreetMode(streetMode: Boolean) {
@@ -296,3 +391,12 @@ internal class HomeActivityViewModel : ViewModel() {
         _transactions.postValue(newTransactions)
     }
 }
+
+internal data class WalletCardState(
+    val walletConnected: Boolean,
+    val isSynchronized: Boolean,
+    val streetMode: Boolean,
+    val multiAccountMode: Boolean,
+    val enableEnoteManagement: Boolean,
+    val balance: Balance?,
+)

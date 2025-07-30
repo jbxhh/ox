@@ -1,31 +1,41 @@
 package org.monfluo.wallet
 
+import android.icu.text.DateFormat
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat.Type.displayCutout
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
+import androidx.core.view.updatePadding
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import org.monfluo.wallet.livedata.combineLiveDatas
+import org.monfluo.wallet.model.MoneroUnit
 import org.monfluo.wallet.model.TransactionInfo
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
-import org.monfluo.wallet.util.DateHelper
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
+import org.monfluo.wallet.util.TextHelper
 import org.monfluo.wallet.util.acitivity.MoneroActivity
 import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Date
+import kotlin.math.max
 
 class TransactionActivity : MoneroActivity() {
 
     private val viewModel: TransactionActivityViewModel by viewModels()
 
+    private lateinit var layoutView: View
+    private lateinit var backImageView: ImageView
     private lateinit var txActionTextView: TextView
     private lateinit var confLabel2: TextView
     private lateinit var txKeyLabelTextView: TextView
@@ -44,6 +54,9 @@ class TransactionActivity : MoneroActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_transaction)
 
+        layoutView = findViewById(R.id.transaction_activity_view)
+        backImageView = findViewById(R.id.back_imageview)
+
         txActionTextView = findViewById(R.id.transaction_action_textview)
         confLabel2 = findViewById(R.id.transaction_conf_label2_textview)
         txKeyLabelTextView = findViewById(R.id.transaction_key_label_textview)
@@ -58,10 +71,6 @@ class TransactionActivity : MoneroActivity() {
         blockHeightTextView = findViewById(R.id.tx_block_height_textview)
         addressTextView = findViewById(R.id.transaction_address_textview)
 
-        val cal = Calendar.getInstance()
-        val tz = cal.timeZone //get the local time zone.
-        DateHelper.DATETIME_FORMATTER.timeZone = tz
-
         if (viewModel.txHash == null) {
             viewModel.txHash = intent.extras?.getString(Constants.EXTRA_TRANSACTION_ID)
         }
@@ -70,11 +79,28 @@ class TransactionActivity : MoneroActivity() {
             finish()
         }
 
+        bindWindowInsetsListener()
         bindObservers()
         bindListeners()
     }
 
+    private fun bindWindowInsetsListener() {
+        ViewCompat.setOnApplyWindowInsetsListener(layoutView) { _, insetsCompat ->
+            val insets = insetsCompat.getInsets(systemBars() or displayCutout())
+            layoutView.updatePadding(
+                left = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.left),
+                top = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.top),
+                right = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.right),
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.bottom)
+            )
+            return@setOnApplyWindowInsetsListener insetsCompat
+        }
+    }
+
     private fun bindListeners() {
+        backImageView.setOnClickListener {
+            finish()
+        }
         txAmountTextView.setOnClickListener {
             val streetMode = viewModel.streetMode.value!!
             val newStreetMode = !streetMode
@@ -122,7 +148,7 @@ class TransactionActivity : MoneroActivity() {
                 copyTxKeyImageButton.visibility = View.GONE
             }
             txConfTextView.text = NumberFormat.getInstance().format(transactionInfo.confirmations)
-            txDateTextView.text = getDateTime(transactionInfo.timestamp)
+            txDateTextView.text = DateFormat.getInstance().format(Date(transactionInfo.timestamp * 1000))
             if (transactionInfo.confirmations > 1) {
                 confLabel2.text = getString(R.string.transaction_conf_desc2_confirmed)
                 blockHeightTextView.text = NumberFormat.getInstance().format(transactionInfo.blockheight)
@@ -135,12 +161,8 @@ class TransactionActivity : MoneroActivity() {
                 blockHeightTextView.visibility = View.GONE
                 confLabel2.text = getString(R.string.transaction_conf_desc2_unconfirmed)
             }
-            val balanceString =
-                if (streetMode) Constants.STREET_MODE_BALANCE else Helper.getDisplayAmount(
-                    transactionInfo.amount,
-                    12
-                )
-            if (transactionInfo.direction === TransactionInfo.Direction.Direction_In) {
+            val balanceString = TextHelper.getDisplayAmount(transactionInfo.amount, MoneroUnit.MONERO, streetMode)
+            if (transactionInfo.direction === TransactionInfo.Direction.In) {
                 txActionTextView.text = getString(R.string.transaction_action_recv)
                 txAmountTextView.setTextColor(
                     ContextCompat.getColor(
@@ -159,11 +181,11 @@ class TransactionActivity : MoneroActivity() {
             }
             txAmountTextView.text = balanceString
             when (transactionInfo.direction) {
-                TransactionInfo.Direction.Direction_In -> {
+                TransactionInfo.Direction.In -> {
                     addressTextView.text = wallet.getSubaddress(transactionInfo.accountIndex, transactionInfo.addressIndex)
                     copyTxAddressImageButton.visibility = View.VISIBLE
                 }
-                TransactionInfo.Direction.Direction_Out -> {
+                TransactionInfo.Direction.Out -> {
                     if (transactionInfo.transfers.isEmpty()) {
                         addressTextView.text = getString(R.string.unknown_recipient)
                         copyTxAddressImageButton.visibility = View.INVISIBLE
@@ -191,10 +213,6 @@ class TransactionActivity : MoneroActivity() {
         walletService.getWallet()?.let { wallet ->
             updateState(wallet)
         }
-    }
-
-    private fun getDateTime(time: Long): String {
-        return DateHelper.DATETIME_FORMATTER.format(Date(time * 1000))
     }
 
     private fun updateState(wallet: Wallet) {

@@ -24,8 +24,10 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.R
 import org.monfluo.wallet.model.Enote
+import org.monfluo.wallet.model.MoneroUnit
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.util.Constants
+import org.monfluo.wallet.util.TextHelper
 import java.text.NumberFormat
 
 class EnotesAdapter(
@@ -106,10 +108,7 @@ class EnotesAdapter(
             val addressTextView = itemView.findViewById<TextView>(R.id.utxo_address_textview)
             val globalIdxTextView = itemView.findViewById<TextView>(R.id.utxo_global_index_textview)
             val outpointTextView = itemView.findViewById<TextView>(R.id.utxo_outpoint_textview)
-            val balanceString =
-                if (streetMode) Constants.STREET_MODE_BALANCE else Wallet.getDisplayAmount(
-                    enote.amount
-                )
+            val balanceString = TextHelper.getDisplayAmount(enote.amount, MoneroUnit.MONERO, streetMode)
             amountTextView.text =
                 itemView.resources.getString(R.string.tx_amount_no_prefix, balanceString)
             pubKeyTextView.text = enote.pubKey

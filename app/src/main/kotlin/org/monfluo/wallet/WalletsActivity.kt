@@ -3,10 +3,15 @@ package org.monfluo.wallet
 import org.monfluo.wallet.adapter.WalletAdapter
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat.Type.displayCutout
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
+import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.fragment.dialog.EditWalletBottomSheetDialog
@@ -20,6 +25,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.moveTo
 import kotlin.io.path.name
+import kotlin.math.max
 
 class WalletsActivity : LoggingActivity() {
 
@@ -33,6 +39,7 @@ class WalletsActivity : LoggingActivity() {
         }
     }
 
+    private lateinit var layoutView: View
     private lateinit var applicationSettingsImageView: ImageView
     private lateinit var walletRecyclerView: RecyclerView
     private lateinit var createWalletButton: Button
@@ -43,6 +50,7 @@ class WalletsActivity : LoggingActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wallets)
 
+        layoutView = findViewById(R.id.activity_wallets)
         applicationSettingsImageView = findViewById(R.id.application_settings_imageview)
         walletRecyclerView = findViewById(R.id.wallet_list_recyclerview)
         createWalletButton = findViewById(R.id.create_or_import_wallet)
@@ -100,7 +108,21 @@ class WalletsActivity : LoggingActivity() {
         walletRecyclerView.layoutManager = LinearLayoutManager(this)
         walletRecyclerView.adapter = adapter
 
+        bindWindowInsetsListener()
         bindListeners()
+    }
+
+    private fun bindWindowInsetsListener() {
+        ViewCompat.setOnApplyWindowInsetsListener(layoutView) { _, insetsCompat ->
+            val insets = insetsCompat.getInsets(systemBars() or displayCutout())
+            layoutView.updatePadding(
+                left = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.left),
+                top = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.top),
+                right = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.right),
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.bottom)
+            )
+            return@setOnApplyWindowInsetsListener insetsCompat
+        }
     }
 
     private fun bindListeners() {
