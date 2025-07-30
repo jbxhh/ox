@@ -4,8 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat.Type.displayCutout
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
+import androidx.core.view.updatePadding
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,10 +24,15 @@ import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.acitivity.MoneroActivity
+import kotlin.math.max
 
 class EnotesActivity : MoneroActivity() {
 
     private val viewModel: EnotesViewModel by viewModels()
+
+    private lateinit var layoutView: View
+    private lateinit var backImageView: ImageView
+    private lateinit var headerTextView: TextView
 
     private lateinit var freezeUtxosButton: Button
     private lateinit var sendUtxosButton: Button
@@ -33,6 +44,9 @@ class EnotesActivity : MoneroActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_enotes)
 
+        layoutView = findViewById(R.id.enotes_activity_view)
+        backImageView = findViewById(R.id.back_imageview)
+        headerTextView = findViewById(R.id.header_textview)
         freezeUtxosButton = findViewById(R.id.freeze_enotes_button)
         sendUtxosButton = findViewById(R.id.send_enotes_button)
         unfreezeUtxosButton = findViewById(R.id.unfreeze_enotes_button)
@@ -68,11 +82,28 @@ class EnotesActivity : MoneroActivity() {
             }
         })
 
+        bindWindowInsetsListener()
         bindListeners()
         bindObservers()
     }
 
+    private fun bindWindowInsetsListener() {
+        ViewCompat.setOnApplyWindowInsetsListener(layoutView) { _, insetsCompat ->
+            val insets = insetsCompat.getInsets(systemBars() or displayCutout())
+            layoutView.updatePadding(
+                left = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.left),
+                top = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.top),
+                right = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.right),
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.bottom)
+            )
+            return@setOnApplyWindowInsetsListener insetsCompat
+        }
+    }
+
     private fun bindListeners() {
+        backImageView.setOnClickListener {
+            finish()
+        }
         sendUtxosButton.setOnClickListener {
             val selectedKeyImages = ArrayList<String>()
             for (coinsInfo in adapter.getSelectedEnotes().values) {
@@ -100,8 +131,10 @@ class EnotesActivity : MoneroActivity() {
         viewModel.enotes.observe(this) { enotes: List<Enote> ->
             val filteredEnotes = enotes.filter { !it.isSpent }
             if (filteredEnotes.isEmpty()) {
+                headerTextView.text = getString(R.string.enotes_header)
                 enotesRecyclerView.visibility = View.GONE
             } else {
+                headerTextView.text = getString(R.string.enotes_with_amount_header, filteredEnotes.size)
                 adapter.submitList(filteredEnotes)
                 enotesRecyclerView.visibility = View.VISIBLE
             }

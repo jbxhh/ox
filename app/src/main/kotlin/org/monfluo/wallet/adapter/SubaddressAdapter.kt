@@ -23,8 +23,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.R
 import org.monfluo.wallet.data.Subaddress
+import org.monfluo.wallet.model.MoneroUnit
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
+import org.monfluo.wallet.util.TextHelper
 
 class SubaddressAdapter(
     private var addresses: List<Subaddress>,
@@ -92,19 +94,8 @@ class SubaddressAdapter(
             } else {
                 addressTextView.setTextColor(view.resources.getColor(R.color.oled_colorPrimaryVariant))
             }
-            if (amount > 0) {
-                if (streetMode) {
-                    addressAmountTextView.text = itemView.context.getString(
-                        R.string.tx_list_amount_positive,
-                        Constants.STREET_MODE_BALANCE
-                    )
-                } else {
-                    addressAmountTextView.text = itemView.context.getString(
-                        R.string.tx_list_amount_positive,
-                        Helper.getDisplayAmount(amount, Helper.DISPLAY_DIGITS_INFO)
-                    )
-                }
-            } else addressAmountTextView.text = ""
+            if (amount > 0) addressAmountTextView.text = TextHelper.getDisplayAmount(amount, MoneroUnit.MONERO, streetMode)
+            else addressAmountTextView.text = ""
             itemView.setOnClickListener { listener.onSubaddressSelected(subaddress) }
             itemView.setOnLongClickListener { _: View? ->
                 listener.onSubaddressEditLabel(subaddress)

@@ -1,54 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/send_activity_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="@dimen/standard_padding"
     tools:context="org.monfluo.wallet.SendActivity">
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/status_bar_fragment"
-        android:name="org.monfluo.wallet.fragment.StatusBarFragment"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/header_layout_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout="@layout/fragment_status_bar" />
+        android:paddingBottom="@dimen/additional_padding"
+        tools:ignore="UseCompoundDrawables">
 
-    <TextView
-        android:id="@+id/send_monero_textview"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
-        android:text="@string/send_monero"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/top_controls"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/status_bar_fragment" />
+        <ImageView
+            android:id="@+id/back_imageview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:minHeight="32dp"
+            android:minWidth="32dp"
+            android:src="@drawable/left"
+            android:contentDescription="@string/content_description_back" />
+
+        <TextView
+            android:id="@+id/header_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/back_imageview"
+            app:layout_constraintTop_toTopOf="@id/back_imageview"
+            app:layout_constraintBottom_toBottomOf="@id/back_imageview"
+            android:text="@string/send_header"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorOnPrimary"/>
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/network_status_fragment"
+            android:name="org.monfluo.wallet.fragment.NetworkStatusFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginHorizontal="@dimen/additional_padding"
+            android:background="@color/transparent"
+            tools:layout="@layout/fragment_network_status"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_controls"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        app:layout_constraintBottom_toBottomOf="@id/send_monero_textview"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/send_monero_textview"
-        app:layout_constraintTop_toTopOf="@id/send_monero_textview">
-
-        <Button
-            android:id="@+id/send_max_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/button_bg"
-            android:text="@string/send_max"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/add_output_button"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="visible" />
+        app:layout_constraintTop_toBottomOf="@id/header_layout_view">
 
         <ImageButton
             android:id="@+id/add_output_button"
@@ -61,10 +72,20 @@
             android:src="@android:drawable/ic_input_add"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/send_max_button"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/oled_textColorPrimary"
             tools:ignore="SpeakableTextPresentCheck"
+            tools:visibility="visible" />
+
+        <Button
+            android:id="@+id/send_max_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_bg"
+            android:text="@string/send_max"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -81,8 +102,7 @@
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/send_monero_textview" />
-
+        app:layout_constraintTop_toBottomOf="@id/top_controls" />
 
     <TextView
         android:id="@+id/tx_fee_radiogroup_label_textview"
@@ -184,7 +204,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/send_monero_textview"
+        app:layout_constraintTop_toBottomOf="@id/top_controls"
         tools:visibility="gone" />
 
     <TextView

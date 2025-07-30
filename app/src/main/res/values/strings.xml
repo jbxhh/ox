@@ -87,10 +87,6 @@
 
     <!-- Label in failed transactions used in list views -->
     <string name="tx_list_failed_text">failed</string>
-    <!-- Label showing negative XMR amount. Used in transaction list views -->
-    <string name="tx_list_amount_negative">- <xliff:g>%1$s</xliff:g></string>
-    <!-- Label showing positive XMR amount. Used in transaction list views and in address list views -->
-    <string name="tx_list_amount_positive">+ <xliff:g>%1$s</xliff:g></string>
 
     <!-- Button for creating wallet in onboarding activity -->
     <string name="create_wallet">Create wallet</string>
@@ -119,6 +115,8 @@
     <string name="street_mode">Street mode (hide balances)</string>
     <!-- Label for manual fee selection setting toggle -->
     <string name="option_allow_fee_override">Manual fee selection</string>
+    <!-- Label for enote management setting toggle -->
+    <string name="option_enable_enote_management">Enable enote management</string>
     <!-- Label for multi-wallet mode setting toggle -->
     <string name="enable_multi_wallet_mode">Enable multi-wallet mode</string>
     <!-- Label for multi-account mode setting toggle -->
@@ -131,6 +129,8 @@
     <string name="show_icon_on_qr_codes">Show icon on QR codes</string>
     <!-- Label for auto rotating addresses setting toggle -->
     <string name="auto_rotate_addresses">Auto rotate addresses</string>
+    <!-- Label for balance tap triggers street mode setting toggle -->
+    <string name="balance_tap_toggles_street_mode">Tapping balance toggles street mode</string>
     <!-- Button for displaying wallet secrets (seed, private keys, etc.) -->
     <string name="display_wallet_secrets">Display wallet secrets</string>
     <!-- Button for creating new account -->
@@ -178,7 +178,6 @@
     <string name="sending_tx">Sending transaction…</string>
     <string name="sent_tx">Sent transaction!</string>
     <string name="no_camera_permission">No camera permission</string>
-    <string name="wallet_settings">Wallet settings</string>
     <string name="application_logo">Application logo</string>
     <string name="settings">Settings</string>
     <string name="wallet">Wallet</string>
@@ -304,6 +303,14 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="wallets">Wallets</string>
     <!-- Unit XMR -->
     <string name="unit_xmr">XMR</string>
+    <!-- Unit milli XMR -->
+    <string name="unit_milli_xmr">mXMR</string>
+    <!-- Unit micro XMR -->
+    <string name="unit_micro_xmr">μXMR</string>
+    <!-- Unit nano XMR -->
+    <string name="unit_nano_xmr">nXMR</string>
+    <!-- Unit pico XMR -->
+    <string name="unit_pico_xmr">pXMR</string>
     <!-- New wallet button -->
     <string name="new_wallet">New wallet</string>
     <!-- Label for applying seed offset passphrase toggle in show secrets fragment -->
@@ -332,4 +339,36 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="multiple_addresses">multiple</string>
     <!-- Text shown in place of an address when displaying an outgoing transaction to more than one address -->
     <string name="unknown_recipient">unknown recipient</string>
+    <string name="send_or_receive_icon_content_description">Either send or receive icon depending on transaction type</string>
+    <string name="transaction_type_received">Received</string>
+    <string name="transaction_type_sent">Sent</string>
+    <string name="transaction_unconfirmed">unconfirmed</string>
+    <string name="transaction_confirming"><xliff:g>%1$s</xliff:g> confirmations</string>
+    <string name="transaction_confirmed">confirmed</string>
+    <string name="loading_wallet_header">Loading Wallet…</string>
+    <string name="no_transactions_header">Looks Empty</string>
+    <string name="no_transactions_description">Your wallet transactions will show up here</string>
+    <string name="wallet_name_label">Wallet name</string>
+    <string name="account_name_label">Account name</string>
+    <string name="unlocked_balance_label">Unlocked balance</string>
+    <string name="locked_balance_label">Pending balance</string>
+    <string name="frozen_balance_label">Frozen balance</string>
+    <string name="balance_locked">unconfirmed</string>
+    <string name="balance_frozen">frozen</string>
+    <string name="wallet_header">Wallet</string>
+    <string name="enotes_header">Enotes</string>
+    <string name="enotes_with_amount_header">Enotes (<xliff:g>%1$d</xliff:g>)</string>
+    <string name="content_description_back">Return to previous activity</string>
+    <string name="network_header">Network</string>
+    <string name="accounts_header">Accounts</string>
+    <string name="transaction_header">Transaction</string>
+    <string name="send_header">Send</string>
+    <string name="create_wallet_header">Create wallet</string>
+    <string name="receive_header">Receive</string>
+    <string name="settings_header">Settings</string>
+    <string name="settings_appearance_header">Appearance</string>
+    <string name="settings_features_header">Features</string>
+    <string name="settings_behaviour_header">Behaviour</string>
+    <string name="settings_security_header">Security</string>
+    <string name="content_description_network_status_icon">Network status</string>
 </resources>

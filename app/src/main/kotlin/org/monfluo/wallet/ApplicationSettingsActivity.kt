@@ -2,13 +2,19 @@ package org.monfluo.wallet
 
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
+import android.view.View
 import android.widget.Button
 import android.widget.CompoundButton
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat.Type.displayCutout
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
+import androidx.core.view.updatePadding
 import org.monfluo.wallet.data.DefaultNode
 import org.monfluo.wallet.data.Node
 import org.monfluo.wallet.data.SortOrder
@@ -19,9 +25,12 @@ import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.acitivity.MoneroActivity
 import timber.log.Timber
+import kotlin.math.max
 
 class ApplicationSettingsActivity : MoneroActivity() {
 
+    private lateinit var layoutView: View
+    private lateinit var backImageView: ImageView
     private lateinit var walletProxyAddressEditText: EditText
     private lateinit var selectNodeButton: Button
     private lateinit var multiWalletModeSwitch: SwitchCompat
@@ -32,6 +41,8 @@ class ApplicationSettingsActivity : MoneroActivity() {
     private lateinit var showTransferNotificationsSwitch: SwitchCompat
     private lateinit var showIconOnQrCodesSwitch: SwitchCompat
     private lateinit var autoRotateAddressesSwitch: SwitchCompat
+    private lateinit var enoteManagementSwitch: SwitchCompat
+    private lateinit var balanceTapTogglesStreetModeSwitch: SwitchCompat
     private lateinit var proxySwitch: SwitchCompat
     private lateinit var proxySettingsLayout: ConstraintLayout
     private lateinit var saveProxyButton: Button
@@ -44,15 +55,19 @@ class ApplicationSettingsActivity : MoneroActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_application_settings)
 
+        layoutView = findViewById(R.id.activity_application_settings_layout)
+        backImageView = findViewById(R.id.back_imageview)
         selectNodeButton = findViewById(R.id.select_node_button)
         multiWalletModeSwitch = findViewById(R.id.enable_multiple_wallets_switch)
         multiAccountModeSwitch = findViewById(R.id.enable_multiple_accounts_switch)
         streetModeSwitch = findViewById(R.id.street_mode_switch)
-        allowFeeOverrideSwitch = findViewById(R.id.allow_fee_override_switch)
+        allowFeeOverrideSwitch = findViewById(R.id.manual_fee_selection_switch)
         allowCopyingSecretsToClipboardSwitch = findViewById(R.id.allow_copying_secrets_to_clipboard_switch)
         showTransferNotificationsSwitch = findViewById(R.id.show_transfer_notifications_switch)
         showIconOnQrCodesSwitch = findViewById(R.id.show_icon_on_qr_codes_switch)
         autoRotateAddressesSwitch = findViewById(R.id.auto_rotate_addresses_switch)
+        enoteManagementSwitch = findViewById(R.id.enable_enote_management_switch)
+        balanceTapTogglesStreetModeSwitch = findViewById(R.id.balance_tap_toggles_street_mode_switch)
         proxySwitch = findViewById(R.id.proxy_switch)
         proxySettingsLayout = findViewById(R.id.wallet_proxy_settings_layout)
         walletProxyAddressEditText = findViewById(R.id.wallet_proxy_address_edittext)
@@ -70,6 +85,8 @@ class ApplicationSettingsActivity : MoneroActivity() {
         val isShowTransferNotifications = PreferenceUtils.isShowTransferNotifications(applicationContext)
         val isShowIconOnQrCodes = PreferenceUtils.isShowIconOnQrCodes(applicationContext)
         val isAutoRotateAddresses = PreferenceUtils.isAutoRotateAddresses(applicationContext)
+        val isEnoteManagementEnabled = PreferenceUtils.isEnableEnoteManagement(applicationContext)
+        val isBalanceTapTogglesStreetMode = PreferenceUtils.isBalanceTapTogglesStreetMode(applicationContext)
         val isUseProxy = PreferenceUtils.isUseProxy(applicationContext)
 
         multiWalletModeSwitch.isChecked = isMultiWalletMode
@@ -80,6 +97,8 @@ class ApplicationSettingsActivity : MoneroActivity() {
         showTransferNotificationsSwitch.isChecked = isShowTransferNotifications
         showIconOnQrCodesSwitch.isChecked = isShowIconOnQrCodes
         autoRotateAddressesSwitch.isChecked = isAutoRotateAddresses
+        enoteManagementSwitch.isChecked = isEnoteManagementEnabled
+        balanceTapTogglesStreetModeSwitch.isChecked = isBalanceTapTogglesStreetMode
         proxySwitch.isChecked = isUseProxy
 
         walletProxyAddressEditText.setText(PreferenceUtils.getProxy(this) ?: "")
@@ -93,10 +112,27 @@ class ApplicationSettingsActivity : MoneroActivity() {
         buildApplicationVersionTextView.text = BuildConfig.VERSION_NAME
         buildMoneroVersionTextView.text = WalletManager.moneroVersion()
 
+        bindWindowInsetsListener()
         bindListeners()
     }
 
+    private fun bindWindowInsetsListener() {
+        ViewCompat.setOnApplyWindowInsetsListener(layoutView) { _, insetsCompat ->
+            val insets = insetsCompat.getInsets(systemBars() or displayCutout())
+            layoutView.updatePadding(
+                left = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.left),
+                top = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.top),
+                right = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.right),
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.bottom)
+            )
+            return@setOnApplyWindowInsetsListener insetsCompat
+        }
+    }
+
     private fun bindListeners() {
+        backImageView.setOnClickListener {
+            finish()
+        }
         multiWalletModeSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
             PreferenceUtils.setMultiWalletMode(applicationContext, b)
         }
@@ -123,6 +159,12 @@ class ApplicationSettingsActivity : MoneroActivity() {
         }
         autoRotateAddressesSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
             PreferenceUtils.setAutoRotateAddresses(applicationContext, b)
+        }
+        enoteManagementSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PreferenceUtils.setEnableEnoteManagement(applicationContext, b)
+        }
+        balanceTapTogglesStreetModeSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PreferenceUtils.setBalanceTapTogglesStreetMode(applicationContext, b)
         }
         proxySwitch.setOnCheckedChangeListener { _, b: Boolean ->
             PreferenceUtils.setUseProxy(applicationContext, b)

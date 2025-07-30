@@ -72,13 +72,15 @@ data class TransactionInfo(
     }
 
     enum class Direction(val value: Int) {
-        Direction_In(0), Direction_Out(1);
+
+        In(0),
+        Out(1);
 
         companion object {
             fun fromInteger(n: Int): Direction {
                 return when (n) {
-                    0 -> Direction_In
-                    else -> Direction_Out
+                    0 -> In
+                    else -> Out
                 }
             }
         }

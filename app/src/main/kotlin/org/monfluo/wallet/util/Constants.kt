@@ -6,9 +6,8 @@ object Constants {
     const val FOREGROUND_SERVICE_NOTIFICATION_CHANNEL = "FOREGROUND_SERVICE_NOTIFICATION_CHANNEL"
     const val TRANSFERS_NOTIFICATION_CHANNEL = "TRANSFERS_NOTIFICATION_CHANNEL"
 
-    const val DEFAULT_WALLET_NAME = "xmr_wallet"
+    const val DEFAULT_WALLET_NAME = "Monero Wallet"
     const val MNEMONIC_LANGUAGE = "English"
-    const val STREET_MODE_BALANCE = "#.############"
 
     const val PREF_USE_PROXY = "pref_use_proxy"
     const val PREF_PROXY = "pref_proxy"
@@ -23,6 +22,8 @@ object Constants {
     const val PREF_SHOW_TRANSFER_NOTIFICATIONS = "pref_show_transfer_notifications"
     const val PREF_SHOW_ICON_ON_QR_CODES = "pref_show_icon_on_qr_codes"
     const val PREF_AUTO_ROTATE_ADDRESSES = "pref_auto_rotate_addresses"
+    const val PREF_ENABLE_ENOTE_MANAGEMENT = "pref_enable_enote_management"
+    const val PREF_BALANCE_TAP_TOGGLES_STREET_MODE = "pref_balance_tap_toggles_street_mode"
     const val PREF_POST_NOTIFICATIONS_PERMISSION_REQUESTED = "pref_post_notifications_permission_requested"
 
     const val URI_PREFIX = "monero:"

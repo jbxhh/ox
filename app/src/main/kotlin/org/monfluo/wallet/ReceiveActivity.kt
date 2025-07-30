@@ -9,6 +9,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat.Type.displayCutout
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
+import androidx.core.view.updatePadding
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -34,12 +38,16 @@ import org.monfluo.wallet.util.QrCodeHelper
 import org.monfluo.wallet.util.acitivity.MoneroActivity
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.math.max
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
 class ReceiveActivity : MoneroActivity() {
 
     private val viewModel: ReceiveViewModel by viewModels()
+
+    private lateinit var layoutView: View
+    private lateinit var backImageView: ImageView
 
     private lateinit var addressTextView: TextView
     private lateinit var addressLabelTextView: TextView
@@ -53,6 +61,8 @@ class ReceiveActivity : MoneroActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_receive)
 
+        layoutView = findViewById(R.id.receive_activity_view)
+        backImageView = findViewById(R.id.back_imageview)
         addressQrCodeImageView = findViewById(R.id.address_qrcode_imageview)
         addressQrCodeIconImageView = findViewById(R.id.address_qrcode_icon_imageview)
         addressTextView = findViewById(R.id.address_textview)
@@ -61,11 +71,28 @@ class ReceiveActivity : MoneroActivity() {
         freshAddressImageView = findViewById(R.id.fresh_address_imageview)
         recyclerView = findViewById(R.id.address_list_recyclerview)
 
+        bindWindowInsetsListener()
         bindListeners()
         bindObservers()
     }
 
+    private fun bindWindowInsetsListener() {
+        ViewCompat.setOnApplyWindowInsetsListener(layoutView) { _, insetsCompat ->
+            val insets = insetsCompat.getInsets(systemBars() or displayCutout())
+            layoutView.updatePadding(
+                left = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.left),
+                top = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.top),
+                right = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.right),
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.bottom)
+            )
+            return@setOnApplyWindowInsetsListener insetsCompat
+        }
+    }
+
     private fun bindListeners() {
+        backImageView.setOnClickListener {
+            finish()
+        }
         freshAddressImageView.setOnClickListener {
             walletService?.generateNewSubaddress("")
         }

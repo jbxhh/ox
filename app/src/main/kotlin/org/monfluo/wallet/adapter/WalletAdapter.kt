@@ -48,7 +48,7 @@ class WalletAdapter(
         ) {
             this.walletPath = walletPath
 
-            walletNameTextView = itemView.findViewById(R.id.wallet_name_textview)
+            walletNameTextView = itemView.findViewById(R.id.account_name_textview)
 
             walletNameTextView.text = Path(walletPath).name
 

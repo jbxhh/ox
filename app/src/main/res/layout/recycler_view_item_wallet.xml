@@ -12,15 +12,14 @@
         android:id="@+id/wallet_imageview"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:src="@drawable/wallet"
+        android:src="@drawable/wallet_monero"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/wallet_name_textview"
-        style="@style/MoneroText.Subaddress"
+        android:id="@+id/account_name_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"

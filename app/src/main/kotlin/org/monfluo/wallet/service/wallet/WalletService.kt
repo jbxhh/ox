@@ -47,6 +47,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.io.path.Path
+import kotlin.io.path.name
 
 private const val EXTRA_WALLET_NAME = "wallet_name"
 private const val EXTRA_WALLET_PASSWORD = "wallet_password"
@@ -86,6 +88,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
     // height of the wallet when it was opened
     private var walletBeginSyncHeight: AtomicLong = AtomicLong(0)
     private var proxyRef: AtomicReference<String> = AtomicReference("")
+    private var walletPathRef: AtomicReference<String> = AtomicReference(null)
     private var walletRef: AtomicReference<Wallet?> = AtomicReference(null)
     private val observers = mutableSetOf<WalletServiceObserver>()
 
@@ -219,7 +222,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         }
 
         private fun handleOpenWallet(
-            walletName: String,
+            walletPath: String,
             walletPassword: String,
             daemonAddress: String,
             daemonUsername: String,
@@ -227,10 +230,11 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             daemonTrusted: Boolean,
             proxy: String
         ) {
+            this@WalletService.walletPathRef.set(walletPath)
             showServiceNotification(createServiceNotificationBuilder().setContentText(getText(R.string.service_notification_description_opening_wallet)).build())
             WalletManager.instance.setProxyJ(proxy)
             WalletManager.instance.setDaemonAddressJ(daemonAddress)
-            val wallet = WalletManager.instance.openWallet(walletName, walletPassword)
+            val wallet = WalletManager.instance.openWallet(walletPath, walletPassword)
             Timber.i("Initializing wallet with daemon address = $daemonAddress, daemon username = $daemonUsername, daemon password = ${"*".repeat(daemonPassword.length)}, proxy = $proxy")
             wallet.initJ(daemonAddress, 0, daemonUsername, daemonPassword, proxy)
             wallet.setTrustedDaemon(daemonTrusted)
@@ -537,8 +541,8 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             forEachObserver {
                 it.onNewBlock(wallet)
             }
-            if (last) {
-                Timber.d("Storing and updating wallet because the block is the last one of the batch")
+            if (last || height % 1000L == 0L) {
+                Timber.d("Storing and updating wallet because the block is the last one (or divisible by 1000) of the batch")
                 updateWallet(wallet)
                 wallet.store()
             }
@@ -599,7 +603,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             return
         }
 
-        if (transaction.direction == TransactionInfo.Direction.Direction_Out) {
+        if (transaction.direction == TransactionInfo.Direction.Out) {
             // we are getting back our change, not new money
             Timber.d("Not spawning a notification for incoming money because it is an outgoing transaction")
             return
@@ -711,6 +715,10 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
 
     fun getWallet(): Wallet? {
         return walletRef.get()
+    }
+
+    fun getWalletName(): String? {
+        return runCatching { walletPathRef.get()?.let { Path(it).name } }.getOrNull()
     }
 
     fun getWalletOrThrow(): Wallet {

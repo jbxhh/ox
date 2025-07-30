@@ -86,6 +86,21 @@
         </activity>
 
         <activity
+            android:name=".NetworkActivity"
+            android:exported="true">
+        </activity>
+
+        <activity
+            android:name=".PendingTransactionActivity"
+            android:exported="true">
+        </activity>
+
+        <activity
+            android:name=".AccountsActivity"
+            android:exported="true">
+        </activity>
+
+        <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="portrait"
             android:stateNotNeeded="true"
