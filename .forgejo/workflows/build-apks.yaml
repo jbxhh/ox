@@ -218,7 +218,7 @@ jobs:
   build-apk-arm64-v8a:
     runs-on: docker
     container:
-      image: docker.io/cimg/android:2024.04.1-ndk
+      image: docker.io/cimg/android:2025.04.1-ndk
     steps:
       - run: sudo apt update && sudo apt upgrade -y
       - run: curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh
