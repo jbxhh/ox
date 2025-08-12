@@ -3,7 +3,7 @@ jobs:
   build-native-libraries-arm64-v8a:
     runs-on: docker
     container:
-      image: debian:stable
+      image: debian:bookworm
     steps:
       - run: apt update && apt upgrade -y
       - run: apt install -y unzip automake build-essential curl file pkg-config git python3 python-is-python3 libtool libtinfo5 yacc clang libc6-dev nodejs
