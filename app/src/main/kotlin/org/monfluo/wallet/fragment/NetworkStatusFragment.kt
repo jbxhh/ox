@@ -10,11 +10,11 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import org.monfluo.wallet.NetworkActivity
+import org.monfluo.wallet.activity.ActivityNetwork
 import org.monfluo.wallet.R
-import org.monfluo.wallet.data.Heights
 import org.monfluo.wallet.data.SynchronizationStatus
 import org.monfluo.wallet.model.Wallet
+import org.monfluo.wallet.service.wallet.State
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.acitivity.MoneroFragment
 
@@ -43,45 +43,47 @@ class NetworkStatusFragment : MoneroFragment() {
 
     private fun bindListeners() {
         networkStatusImageView.setOnClickListener {
-            startActivity(Intent(requireContext(), NetworkActivity::class.java))
+            startActivity(Intent(requireContext(), ActivityNetwork::class.java))
         }
     }
 
     private fun bindObservers() {
-        viewModel.heights.observe(viewLifecycleOwner) { heights ->
-            val synchronizationStatus = SynchronizationStatus.fromHeights(heights)
-            // TODO: we should also detect errors and display an error drawable
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            val synchronizationStatus = SynchronizationStatus.from(state)
             val drawable = when (synchronizationStatus) {
-                SynchronizationStatus.StartingSynchronization -> R.drawable.synchronization_status_starting
-                is SynchronizationStatus.Synchronizing -> R.drawable.synchronization_status_in_progress
+                SynchronizationStatus.OpeningWallet -> R.drawable.synchronization_status_starting
+                SynchronizationStatus.StartingSynchronization -> R.drawable.synchronization_status_warning
+                is SynchronizationStatus.NodeSynchronization -> R.drawable.synchronization_status_in_progress
+                is SynchronizationStatus.WalletSynchronization -> R.drawable.synchronization_status_in_progress
                 is SynchronizationStatus.Synchronized -> R.drawable.synchronization_status_synced
+                is SynchronizationStatus.WalletError -> R.drawable.synchronization_status_error
             }
             networkStatusImageView.setImageDrawable(AppCompatResources.getDrawable(requireContext(), drawable))
         }
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
-        updateHeights(walletService, walletService.getWallet())
+        updateState(walletService)
     }
 
     override fun onWalletUpdated(wallet: Wallet) {
         walletService?.let { walletService ->
-            updateHeights(walletService, wallet)
+            updateState(walletService)
         }
     }
 
-    override fun onBlockchainHeightFetched(height: Long) {
+    override fun onBlockchainAndTargetHeightsFetched(blockchainHeight: Long, targetHeight: Long) {
         walletService?.let { walletService ->
-            updateHeights(walletService, walletService.getWallet())
+            updateState(walletService)
         }
     }
 
-    private fun updateHeights(walletService: WalletService, wallet: Wallet?) {
-        viewModel.heights.postValue(Heights(walletService.getWalletBeginSyncHeight(), wallet?.getBlockChainHeightJ() ?: 0, walletService.getDaemonHeight()))
+    private fun updateState(walletService: WalletService) {
+        viewModel.state.postValue(walletService.getState())
     }
 }
 
 internal class NetworkStatusFragmentViewModel : ViewModel() {
 
-    val heights = MutableLiveData(Heights(0L, 0L, 0L))
+    val state: MutableLiveData<State> = MutableLiveData()
 }

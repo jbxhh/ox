@@ -6,13 +6,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import android.widget.RadioButton
+import android.widget.ImageView
 import org.monfluo.wallet.R
 import org.monfluo.wallet.model.Account
+import org.monfluo.wallet.model.MoneroUnit
+import org.monfluo.wallet.util.TextHelper
 
 class AccountAdapter(
     private var accounts: List<Account>,
     private var selectedAccount: Account?,
-    private val listener: AccountAdapterListener
+    private val listener: Listener
 ) : RecyclerView.Adapter<AccountAdapter.ViewHolder>() {
 
     fun setAccounts(accounts: List<Account>) {
@@ -38,15 +42,19 @@ class AccountAdapter(
         holder.bind(accounts[position], accounts[position] == selectedAccount)
     }
 
-    interface AccountAdapterListener {
-        fun onAccountSelected(account: Account)
-        fun onAccountEditLabel(account: Account)
+    interface Listener {
+        fun onAccountSelected(self: AccountAdapter, account: Account)
+        fun onAccountEditClicked(self: AccountAdapter, account: Account)
     }
 
-    class ViewHolder(private val listener: AccountAdapterListener, view: View) : RecyclerView.ViewHolder(view) {
+    inner class ViewHolder(private val listener: Listener, view: View) : RecyclerView.ViewHolder(view) {
 
-        private lateinit var accountIndexTextView: TextView
+        private lateinit var accountWrapperLayout: View
+        private lateinit var accountRadioButton: RadioButton
+        private lateinit var accountIconImageView: ImageView
         private lateinit var accountLabelTextView: TextView
+        private lateinit var accountBalanceTextView: TextView
+        private lateinit var editAccountImageView: ImageView
 
         private lateinit var account: Account
 
@@ -56,24 +64,24 @@ class AccountAdapter(
         ) {
             this.account = account
 
-            accountIndexTextView = itemView.findViewById(R.id.account_index_textview)
+            accountWrapperLayout = itemView.findViewById(R.id.account_wrapper_layout)
+            accountRadioButton = itemView.findViewById(R.id.account_radiobutton)
+            accountIconImageView = itemView.findViewById(R.id.account_icon_imagebutton)
             accountLabelTextView = itemView.findViewById(R.id.account_label_textview)
+            accountBalanceTextView = itemView.findViewById(R.id.account_balance_textview)
+            editAccountImageView = itemView.findViewById(R.id.edit_account_imagebutton)
 
-            accountIndexTextView.text = account.index.toString()
-            accountLabelTextView.text = account.label
+            accountRadioButton.setChecked(isSelected)
+            accountLabelTextView.text = itemView.resources.getString(R.string.account_label, account.index, account.label)
+            accountBalanceTextView.text = TextHelper.formatUnlockedBalance(itemView.context, account.balance.unlocked, MoneroUnit.MONERO, false, 0)
 
-            if (isSelected) {
-                accountLabelTextView.setTypeface(null, Typeface.BOLD)
-            } else {
-                accountLabelTextView.setTypeface(null, Typeface.NORMAL)
-            }
+            val onAccountSelected = { _: View -> listener.onAccountSelected(this@AccountAdapter, account) }
+            accountWrapperLayout.setOnClickListener(onAccountSelected)
+            accountRadioButton.setOnClickListener(onAccountSelected)
+            accountIconImageView.setOnClickListener(onAccountSelected)
 
-            itemView.setOnClickListener {
-                listener.onAccountSelected(account)
-            }
-            itemView.setOnLongClickListener {
-                listener.onAccountEditLabel(account)
-                return@setOnLongClickListener true
+            editAccountImageView.setOnClickListener {
+                listener.onAccountEditClicked(this@AccountAdapter, account)
             }
         }
     }

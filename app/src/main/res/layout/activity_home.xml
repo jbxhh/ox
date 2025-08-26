@@ -65,7 +65,7 @@
         android:background="@color/transparent"
         android:paddingHorizontal="@dimen/standard_padding"
         android:paddingTop="@dimen/standard_padding"
-        tools:context="org.monfluo.wallet.HomeActivity">
+        tools:context="org.monfluo.wallet.ActivityHome">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/wallet_card_layout"
@@ -198,7 +198,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/wallet_card_layout"
-            tools:listitem="@layout/recycler_view_transaction"
+            tools:listitem="@layout/recycler_view_item_transaction"
             tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 

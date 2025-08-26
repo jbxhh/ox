@@ -15,15 +15,15 @@
  */
 package org.monfluo.wallet.model
 
- import org.monfluo.wallet.data.Subaddress
- import timber.log.Timber
+import org.monfluo.wallet.data.Subaddress
+import timber.log.Timber
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.name
 
 class Wallet(private val handle: Long, val info: WalletInfo, private var accountIndex: Int = 0) {
+
     private var listenerHandle: Long = 0
-    private var pendingTransaction: PendingTransaction? = null
     private var enotes: List<Enote>? = null
     private var balances: Map<Int, Balance>? = null
     private var history: Map<Int, List<TransactionInfo>>? = null
@@ -69,7 +69,7 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
         return balances!!
     }
 
-    fun getBalance(): Balance = getBalances()[accountIndex] ?: Balance(0, 0, 0, 0)
+    fun getBalance(accountIndex: Int? = null): Balance = getBalances()[accountIndex ?: this.accountIndex] ?: Balance(0, 0, 0, 0)
 
     fun refreshTransactionHistory() {
         val transactionInfos = mutableMapOf<Int, MutableList<TransactionInfo>>()
@@ -119,18 +119,6 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     external fun getLegacySeed(offset: String?): String?
     external fun isPolyseedSupported(): Boolean
     external fun getPolyseedSeedAndPassphrase(): Pair<String, String>?
-
-    val status: Status
-        get() = statusWithErrorString()
-    val fullStatus: Status
-        get() {
-            val walletStatus = statusWithErrorString()
-            walletStatus.connectionStatus = connectionStatus
-            return walletStatus
-        }
-
-    private external fun statusWithErrorString(): Status
-
     fun getTransactionHistory(): TransactionHistory {
         return TransactionHistory(getHistoryJ())
     }
@@ -193,7 +181,6 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     @Synchronized
     external fun store(path: String?): Boolean
     fun close(): Boolean {
-        disposePendingTransaction()
         return WalletManager.instance.closeJ(this)
     }
 
@@ -254,81 +241,25 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     external fun refreshAsync()
     private external fun rescanBlockchainAsyncJ()
 
-    private fun disposePendingTransaction() {
-        if (pendingTransaction != null) {
-            disposeTransaction(pendingTransaction)
-            pendingTransaction = null
-        }
-    }
-
-    fun estimateTransactionFee(
-        destinations: List<Pair<String, Long>>,
-        priority: PendingTransaction.Priority
-    ): Long {
-        val _priority = priority.ordinal
-        return estimateTransactionFee(destinations, _priority)
-    }
-
     private external fun estimateTransactionFee(
         destinations: List<Pair<String, Long>>,
         priority: Int
     ): Long
 
-    fun createSweepTransaction(
-        transactionDestination: TransactionDestinationResolved,
-        priority: PendingTransaction.Priority,
-        keyImages: ArrayList<String>
-    ): PendingTransaction {
-        disposePendingTransaction()
-        val txHandle = createSweepTransaction(transactionDestination.address, "", 0, priority.ordinal, accountIndex, keyImages)
-        val pendingTransaction = PendingTransaction(txHandle)
-        this.pendingTransaction = pendingTransaction
-        return pendingTransaction
-    }
-
-    fun createTransactionMultDest(
-        outputs: List<TransactionDestinationWithAmountResolved>,
-        priority: PendingTransaction.Priority,
-        keyImages: ArrayList<String>
-    ): PendingTransaction {
-        disposePendingTransaction()
-        val _priority = priority.ordinal
-        val destinations = ArrayList<String>()
-        val amounts = LongArray(outputs.size)
-        for (i in outputs.indices) {
-            val output = outputs[i]
-            destinations.add(output.address)
-            amounts[i] = output.amount
-        }
-        val txHandle = createTransactionMultDestJ(
-            destinations, "", amounts, 0, _priority,
-            accountIndex, keyImages
-        )
-        val pendingTransaction = PendingTransaction(txHandle)
-        this.pendingTransaction = pendingTransaction
-        return pendingTransaction
-    }
-
-    private external fun createTransactionMultDestJ(
-        dstAddrs: ArrayList<String>, paymentId: String,
+    external fun createTransactionMultDestJ(
+        dstAddrs: List<String>, paymentId: String,
         amount: LongArray, mixinCount: Int,
-        priority: Int, accountIndex: Int, keyImages: ArrayList<String>
+        priority: Int, accountIndex: Int, keyImages: List<String>
     ): Long
 
-    private external fun createTransactionJ(
-        dstAddr: String, paymentId: String,
-        amount: Long, mixinCount: Int,
-        priority: Int, accountIndex: Int, keyImages: ArrayList<String>
-    ): Long
-
-    private external fun createSweepTransaction(
+     external fun createSweepTransaction(
         dstAddr: String, paymentId: String,
         mixinCount: Int,
-        priority: Int, accountIndex: Int, keyImages: ArrayList<String>
+        priority: Int, accountIndex: Int, keyImages: List<String>
     ): Long
 
     private external fun createSweepUnmixableTransactionJ(): Long
-    private external fun disposeTransaction(pendingTransaction: PendingTransaction?)
+    external fun disposeTransaction(pendingTransaction: PendingTransaction)
     private external fun getHistoryJ(): Long
 
     private external fun setListenerJ(listener: WalletListener?): Long
@@ -369,29 +300,10 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
 
     external fun addSubaddress(accountIndex: Int, label: String?)
 
-    enum class StatusEnum {
-        Status_Ok, Status_Error, Status_Critical
-    }
+    external fun getWalletStatusWithError(): WalletStatusWithError
 
     enum class ConnectionStatus {
         ConnectionStatus_Disconnected, ConnectionStatus_Connected, ConnectionStatus_WrongVersion
-    }
-
-    class Status internal constructor(status: Int, val errorString: String) {
-        val status: StatusEnum
-        var connectionStatus: ConnectionStatus? = null // optional
-
-        init {
-            this.status = StatusEnum.values()[status]
-        }
-
-        val isOk: Boolean
-            get() = (status == StatusEnum.Status_Ok
-                    && (connectionStatus == null || connectionStatus == ConnectionStatus.ConnectionStatus_Connected))
-
-        override fun toString(): String {
-            return "Wallet.Status: $status/$errorString/$connectionStatus"
-        }
     }
 
     companion object {

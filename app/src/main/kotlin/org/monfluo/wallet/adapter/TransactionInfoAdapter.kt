@@ -54,7 +54,7 @@ class TransactionInfoAdapter(
         val inflater = LayoutInflater.from(viewGroup.context)
         return when (viewType) {
             VIEW_TYPE_ITEM -> {
-                val view = inflater.inflate(R.layout.recycler_view_transaction, viewGroup, false)
+                val view = inflater.inflate(R.layout.recycler_view_item_transaction, viewGroup, false)
                 ItemViewHolder(listener, view)
             }
             VIEW_TYPE_VOID -> {
@@ -149,7 +149,8 @@ class TransactionInfoAdapter(
             }
 
             amountTextView.text = TextHelper.formatUnlockedBalance(itemView.context, transactionInfo.amount, MoneroUnit.MONERO, streetMode, Typeface.NORMAL)
-            txDateTimeTextView.text = DateFormat.getInstance().format(Date(transactionInfo.timestamp * 1000))
+            val formattedDateTime = DateFormat.getInstance().format(Date(transactionInfo.timestamp * 1000))
+            txDateTimeTextView.text = if (streetMode) { "#".repeat(formattedDateTime.length) } else formattedDateTime
             itemView.setOnClickListener { _ -> listener.onClickTransaction(transactionInfo) }
         }
     }

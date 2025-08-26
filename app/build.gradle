@@ -4,12 +4,12 @@ apply plugin: 'kotlin-android'
 android {
     ndkVersion '28.2.13676358'
     defaultConfig {
-        applicationId "org.monfluo.wallet"
+        applicationId "org.monfluo.wallet.beta"
         minSdkVersion 26
-        targetSdkVersion 36
-        compileSdk 36
-        versionCode 80100
-        versionName "0.8.1"
+        targetSdkVersion 35
+        compileSdk 35
+        versionCode 90000
+        versionName "0.9.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -21,18 +21,6 @@ android {
     bundle {
         language {
             enableSplit = false
-        }
-    }
-
-    flavorDimensions 'type'
-    productFlavors {
-        beta {
-            dimension 'type'
-            applicationIdSuffix '.beta'
-            versionNameSuffix ' (beta)'
-        }
-        prod {
-            dimension 'type'
         }
     }
 
@@ -68,7 +56,7 @@ android {
     }
 
     // Map for the version code that gives each ABI a value.
-    def abiCodes = ['armeabi-v7a': 1, 'arm64-v8a': 2, 'x86': 3, 'x86_64': 4]
+    def abiCodes = ['armeabi-v7a': 1, 'arm64-v8a': 2, 'x86_64': 4]
 
     // Enumerate translated locales
     def availableLocales = ["en"]

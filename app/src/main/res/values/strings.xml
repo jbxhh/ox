@@ -160,6 +160,7 @@
     <string name="wallet_password_confirm_hint">Confirm wallet password</string>
     <string name="wallet_seed_offset_passphrase">Seed offset passphrase (optional)</string>
     <string name="wallet_name">Wallet name</string>
+    <string name="account_name">Acount name</string>
     <string name="password">Passphrase</string>
     <string name="label">Label</string>
     <string name="unlock">Unlock</string>
@@ -168,7 +169,6 @@
     <string name="edit_address_label">Set address label</string>
     <string name="edit_account_label">Set account label</string>
     <string name="tx_address_text">Address: %1$s</string>
-    <string name="tx_address_resolved_from_text">Resolved from: %1$s</string>
     <string name="tx_amount_text">Amount: %1$s XMR</string>
     <string name="tx_fee_text">Fee: %1$s XMR</string>
     <string name="receive">Receive</string>
@@ -234,6 +234,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="global_index_text">%1$s</string>
     <string name="outpoint_text">%1$s</string>
     <string name="create_wallet_failed">Create wallet failed: %1$s</string>
+    <string name="create_transaction_failed">Create transaction failed: %1$s</string>
     <string name="churn">Churn</string>
     <string name="freeze">Freeze</string>
     <string name="unfreeze">Unfreeze</string>
@@ -293,8 +294,11 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="service_description">Wallet is open</string>
     <string name="wallet_name_and_account_label">%1$s / %2$d</string>
     <string name="synchronized_at_label">Synchronized at %1$s</string>
-    <string name="synchronizing_blocks_remaining">Synchronizing: %1$s / %2$s (%3$s blocks remaining)</string>
+    <string name="wallet_error">Wallet error: %1$s</string>
+    <string name="node_synchronization_blocks_remaining">Synchronizing node: %1$s / %2$s (%3$s blocks remaining)</string>
+    <string name="wallet_synchronization_blocks_remaining">Synchronizing wallet: %1$s / %2$s (%3$s blocks remaining)</string>
     <string name="starting_wallet_synchronization">Starting wallet synchronization…</string>
+    <string name="opening_wallet">Opening wallet…</string>
     <!-- Label for seed type in onboarding activity -->
     <string name="seed_type">Seed type</string>
     <!-- Header for accounts list -->
@@ -333,8 +337,14 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="coin_global_index">Global index</string>
     <!-- Address label -->
     <string name="address">Address</string>
+    <!-- Address resolved from label -->
+    <string name="address_resolved_from">Resolved from</string>
     <!-- Amount label -->
     <string name="amount">Amount</string>
+    <!-- Fee label -->
+    <string name="fee">Fee</string>
+    <!-- Total label -->
+    <string name="total">Total</string>
     <!-- Text shown in place of an address when sending or displaying an outgoing transaction to multiple addresses -->
     <string name="multiple_addresses">multiple</string>
     <!-- Text shown in place of an address when displaying an outgoing transaction to more than one address -->
@@ -359,10 +369,16 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="enotes_header">Enotes</string>
     <string name="enotes_with_amount_header">Enotes (<xliff:g>%1$d</xliff:g>)</string>
     <string name="content_description_back">Return to previous activity</string>
+    <string name="content_description_account">Select account</string>
+    <string name="account_label">#<xliff:g>%1$d</xliff:g> <xliff:g>%2$s</xliff:g></string>
+
     <string name="network_header">Network</string>
     <string name="accounts_header">Accounts</string>
+    <string name="add_account_header">Add account</string>
+    <string name="account_details_header">Account details</string>
     <string name="transaction_header">Transaction</string>
     <string name="send_header">Send</string>
+    <string name="pending_transaction_header">Pending transaction</string>
     <string name="create_wallet_header">Create wallet</string>
     <string name="receive_header">Receive</string>
     <string name="settings_header">Settings</string>
@@ -370,5 +386,22 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="settings_features_header">Features</string>
     <string name="settings_behaviour_header">Behaviour</string>
     <string name="settings_security_header">Security</string>
+
     <string name="content_description_network_status_icon">Network status</string>
+
+    <string name="activity_network_node_status_header_waiting_for_wallet">Waiting for wallet…</string>
+    <string name="activity_network_node_status_header_fetching_blockchain_data">Fetching blockchain height…</string>
+    <string name="activity_network_node_status_header_node_is_synchronizing">Node is synchronizing…</string>
+    <string name="activity_network_node_status_description_node_is_synchronizing">%1$s / %2$s (%3$s blocks remaining)</string>
+    <string name="activity_network_node_status_header_node_is_synchronized">Node is synchronized</string>
+    <string name="activity_network_node_status_description_node_is_synchronized">Height: %1$s</string>
+    <string name="activity_network_node_last_updated_at">Last updated: %1$s</string>
+    <string name="activity_network_wallet_status_header_opening_wallet">Opening wallet…</string>
+    <string name="activity_network_wallet_status_header_error">Error</string>
+    <string name="activity_network_wallet_status_header_starting_synchronization">Starting synchronization</string>
+    <string name="activity_network_wallet_status_header_wallet_is_synchronizing">Wallet is synchronizing…</string>
+    <string name="activity_network_wallet_status_description_wallet_is_synchronizing">%1$s / %2$s (%3$s blocks remaining)</string>
+    <string name="activity_network_wallet_status_header_wallet_is_synchronized">Wallet is synchronized</string>
+    <string name="activity_network_wallet_status_description_wallet_is_synchronized">Height: %1$s</string>
+    <string name="activity_network_wallet_last_updated_at">Last updated: %1$s</string>
 </resources>

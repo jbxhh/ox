@@ -54,9 +54,9 @@ class WalletManager {
             walletHandle,
             WalletInfo(aFile, password)
         )
-        if (wallet.status.isOk) {
+        if (wallet.getWalletStatusWithError().status == WalletStatus.Ok) {
             wallet.setPassword(password) // this rewrites the keys file (which contains the restore height)
-        } else Timber.e("Failed to create polyseed wallet: ${wallet.status}")
+        } else Timber.e("Failed to create polyseed wallet: ${wallet.getWalletStatusWithError().status}")
         return wallet
     }
 
@@ -166,6 +166,7 @@ class WalletManager {
     external fun getDaemonVersion(): Int
     external fun getBlockchainHeight(): Long
     external fun getBlockchainTargetHeight(): Long
+    external fun getBlockchainAndTargetHeight(): Pair<Long, Long>
     external fun getNetworkDifficulty(): Long
     external fun getBlockTarget(): Long
 
