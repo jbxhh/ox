@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     android:padding="@dimen/standard_padding">
 
-    <androidx.appcompat.widget.LinearLayoutCompat
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/header_layout_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -40,7 +40,18 @@
             android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="?attr/colorOnPrimary"/>
-    </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/network_status_fragment"
+            android:name="org.monfluo.wallet.fragment.NetworkStatusFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:background="@color/transparent"
+            tools:layout="@layout/fragment_network_status"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <Button
         android:id="@+id/display_wallet_secrets_button"
@@ -50,10 +61,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/header_layout_view"
         app:layout_constraintHorizontal_bias="0.0"
-        android:paddingVertical="12dp"
+        android:background="@drawable/button_background"
         android:text="@string/display_wallet_secrets" />
 
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/close_wallet_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -61,7 +72,7 @@
         app:layout_constraintTop_toBottomOf="@id/display_wallet_secrets_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintVertical_bias="1"
-        android:paddingVertical="12dp"
+        android:background="@drawable/button_background"
         android:text="Close wallet"
         />
 

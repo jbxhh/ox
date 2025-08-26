@@ -24,7 +24,7 @@ object TextHelper {
         return spannable
     }
 
-    fun getDisplayAmount(amount: Long, unit: MoneroUnit, streetMode: Boolean,): String =
+    fun getDisplayAmount(amount: Long, unit: MoneroUnit, streetMode: Boolean): String =
         if (streetMode) unit.streetModeText
         else getDecimalAmount(amount, unit.decimals).setScale(unit.decimals, RoundingMode.HALF_UP).toPlainString()
 
@@ -38,6 +38,7 @@ object TextHelper {
         .append(context.getString(unit.unitResourceId))
 
     fun formatLockedBalance(context: Context, balance: Long, unit: MoneroUnit, streetMode: Boolean, style: Int): SpannableStringBuilder = formatUnlockedBalance(context, balance, unit, streetMode, style)
+        .append(' ')
         .append(context.getString(R.string.balance_locked))
 
     fun formatFrozenBalance(context: Context, balance: Long, unit: MoneroUnit, streetMode: Boolean, style: Int): SpannableStringBuilder = formatUnlockedBalance(context, balance, unit, streetMode, style)

@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="@dimen/standard_padding"
-    tools:context="org.monfluo.wallet.SendActivity">
+    tools:context="org.monfluo.wallet.ActivitySend">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/header_layout_view"
@@ -42,6 +42,20 @@
             android:textStyle="bold"
             android:textColor="?attr/colorOnPrimary"/>
 
+        <ImageView
+            android:id="@+id/go_to_account_list_imageview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toStartOf="@id/network_status_fragment"
+            app:layout_constraintTop_toTopOf="@id/network_status_fragment"
+            app:layout_constraintBottom_toBottomOf="@id/network_status_fragment"
+            android:layout_marginHorizontal="@dimen/additional_padding"
+            android:minHeight="32dp"
+            android:minWidth="32dp"
+            android:background="@drawable/account_background"
+            android:src="@drawable/account"
+            android:contentDescription="@string/content_description_account" />
+
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/network_status_fragment"
             android:name="org.monfluo.wallet.fragment.NetworkStatusFragment"
@@ -49,7 +63,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginHorizontal="@dimen/additional_padding"
+            app:layout_constraintBottom_toBottomOf="parent"
             android:background="@color/transparent"
             tools:layout="@layout/fragment_network_status"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -89,7 +103,6 @@
             tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- CREATE LAYOUT -->
     <TextView
         android:id="@+id/selected_utxos_value_textview"
         android:layout_width="match_parent"
@@ -156,15 +169,11 @@
         android:id="@+id/create_tx_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="24dp"
-        android:background="@drawable/button_bg"
-        android:text="@string/create"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="visible" />
+        android:layout_marginTop="24dp"
+        android:background="@drawable/button_background"
+        android:text="@string/create" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -188,96 +197,4 @@
 
         </LinearLayout>
     </ScrollView>
-    <!-- SEND LAYOUT -->
-    <TextView
-        android:id="@+id/address_pending_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="24dp"
-        android:ellipsize="middle"
-        android:singleLine="true"
-        android:text="@string/tx_address_text"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top_controls"
-        tools:visibility="gone" />
-
-    <TextView
-        android:id="@+id/address_resolved_from_pending_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="24dp"
-        android:ellipsize="middle"
-        android:singleLine="true"
-        android:text="@string/tx_address_resolved_from_text"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/address_pending_textview"
-        tools:visibility="gone" />
-
-    <TextView
-        android:id="@+id/amount_pending_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="24dp"
-        android:text="@string/tx_amount_text"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/address_resolved_from_pending_textview"
-        tools:visibility="gone" />
-
-    <TextView
-        android:id="@+id/fee_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="24dp"
-        android:text="@string/tx_fee_text"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/amount_pending_textview"
-        tools:visibility="gone" />
-
-    <com.ncorti.slidetoact.SlideToActView
-        android:id="@+id/send_tx_slider"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="24dp"
-        android:contentDescription="@string/slide_to_send_transaction"
-        android:elevation="6dp"
-        android:focusable="true"
-        android:importantForAccessibility="yes"
-        android:visibility="gone"
-        app:area_margin="10dp"
-        app:border_radius="20dp"
-        app:inner_color="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:outer_color="@color/oled_colorSecondary"
-        app:slider_height="72dp"
-        app:slider_locked="false"
-        app:text="@string/slide_to_send"
-        app:text_size="18sp"
-        tools:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>

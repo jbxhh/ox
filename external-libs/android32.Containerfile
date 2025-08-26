@@ -130,7 +130,7 @@ RUN set -x \
     && git clone https://github.com/jedisct1/libsodium.git -b ${SODIUM_VERSION} \
     && cd libsodium \
     && test `git rev-parse HEAD` = ${SODIUM_HASH} || exit 1 \
-    && ./autogen.sh \
+    && ./autogen.sh -b \
     && CC=clang CXX=clang++ ./configure --prefix=${PREFIX} --host=arm-linux-androideabi --enable-static --disable-shared \
     && make  -j${NPROC} \
     && make install

@@ -49,6 +49,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/header_layout_view"
         android:layout_marginVertical="@dimen/additional_padding"
+        android:padding="@dimen/additional_padding"
         android:background="@drawable/card_background">
 
         <ImageView
@@ -57,22 +58,23 @@
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
             android:padding="@dimen/additional_padding"
             android:background="@color/transparent"
-            android:minWidth="64dp"
-            android:minHeight="64dp"
+            android:minWidth="40dp"
+            android:minHeight="40dp"
             android:src="@drawable/server"
             android:contentDescription="@string/content_description_network_status_icon"/>
 
         <TextView
-            android:id="@+id/node_header_text_view"
+            android:id="@+id/node_status_header_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toEndOf="@id/node_imageview"
-            app:layout_constraintBottom_toTopOf="@id/node_status_progress_bar"
+            app:layout_constraintTop_toTopOf="@id/node_imageview"
             android:layout_marginHorizontal="@dimen/additional_padding"
             android:background="@color/transparent"
+            android:textColor="?attr/colorOnPrimary"
+            android:textStyle="bold"
             tools:text="Node header"/>
 
         <ProgressBar
@@ -80,23 +82,31 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toEndOf="@id/node_imageview"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/node_status_header_text_view"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
             android:paddingHorizontal="@dimen/additional_padding"
             android:background="@color/transparent"
             android:indeterminate="true"
             style="@style/Widget.AppCompat.ProgressBar.Horizontal"/>
 
         <TextView
-            android:id="@+id/node_status_text_view"
+            android:id="@+id/node_status_description_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toEndOf="@id/node_imageview"
-            app:layout_constraintTop_toBottomOf="@id/node_status_progress_bar"
-            android:layout_marginHorizontal="@dimen/additional_padding"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/node_imageview"
             android:background="@color/transparent"
+            android:textColor="?attr/colorOnPrimary"
             tools:text="Node status"/>
+
+        <TextView
+            android:id="@+id/node_status_updated_at_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/node_status_description_text_view"
+            android:background="@color/transparent"
+            tools:text="Updated at"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -106,6 +116,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/node_status_layout"
         android:layout_marginVertical="@dimen/additional_padding"
+        android:padding="@dimen/additional_padding"
         android:background="@drawable/card_background">
 
         <ImageView
@@ -114,22 +125,24 @@
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
             android:padding="@dimen/additional_padding"
             android:background="@color/transparent"
-            android:minWidth="64dp"
-            android:minHeight="64dp"
+            android:minWidth="40dp"
+            android:minHeight="40dp"
             android:src="@drawable/wallet"
+            android:textColor="?attr/colorOnPrimary"
             android:contentDescription="@string/content_description_network_status_icon"/>
 
         <TextView
-            android:id="@+id/wallet_header_text_view"
+            android:id="@+id/wallet_status_header_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toEndOf="@id/wallet_imageview"
-            app:layout_constraintBottom_toTopOf="@id/wallet_status_progress_bar"
+            app:layout_constraintTop_toTopOf="@id/wallet_imageview"
             android:layout_marginHorizontal="@dimen/additional_padding"
             android:background="@color/transparent"
+            android:textColor="?attr/colorOnPrimary"
+            android:textStyle="bold"
             tools:text="Wallet header"/>
 
         <ProgressBar
@@ -137,22 +150,30 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toEndOf="@id/wallet_imageview"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/wallet_status_header_text_view"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
             android:paddingHorizontal="@dimen/additional_padding"
             android:background="@color/transparent"
             android:indeterminate="true"
             style="@style/Widget.AppCompat.ProgressBar.Horizontal"/>
 
         <TextView
-            android:id="@+id/wallet_status_text_view"
+            android:id="@+id/wallet_status_description_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toEndOf="@id/wallet_imageview"
-            app:layout_constraintTop_toBottomOf="@id/wallet_status_progress_bar"
-            android:layout_marginHorizontal="@dimen/additional_padding"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/wallet_imageview"
             android:background="@color/transparent"
+            android:textColor="?attr/colorOnPrimary"
             tools:text="Wallet status"/>
+
+        <TextView
+            android:id="@+id/wallet_status_updated_at_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/wallet_status_description_text_view"
+            android:background="@color/transparent"
+            tools:text="Updated at"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

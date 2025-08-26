@@ -21,7 +21,7 @@
         android:usesCleartextTraffic="true">
 
         <activity
-            android:name=".StartActivity"
+            android:name=".activity.ActivityStart"
             android:exported="true">
 
             <intent-filter>
@@ -40,63 +40,73 @@
         </activity>
 
         <activity
-            android:name=".WalletsActivity"
+            android:name=".activity.ActivityWalletList"
             android:windowSoftInputMode="adjustPan"
             android:exported="true">
         </activity>
 
         <activity
-            android:name=".CreateWalletActivity"
+            android:name=".activity.ActivityWalletCreate"
             android:exported="true">
         </activity>
 
         <activity
-            android:name=".HomeActivity"
+            android:name=".activity.ActivityHome"
             android:exported="true">
         </activity>
 
         <activity
-            android:name=".SendActivity"
+            android:name=".activity.ActivitySend"
             android:exported="true">
         </activity>
 
         <activity
-            android:name=".ReceiveActivity"
+            android:name=".activity.ActivityReceive"
             android:exported="true">
         </activity>
 
         <activity
-            android:name=".ApplicationSettingsActivity"
+            android:name=".activity.ActivitySettingsApplication"
             android:exported="true">
         </activity>
 
         <activity
-            android:name=".WalletSettingsActivity"
+            android:name=".activity.ActivitySettingsWallet"
             android:exported="true">
         </activity>
 
         <activity
-            android:name=".TransactionActivity"
+            android:name=".activity.ActivityTransactionDetails"
             android:exported="true">
         </activity>
 
         <activity
-            android:name=".EnotesActivity"
+            android:name=".activity.ActivityEnoteList"
             android:exported="true">
         </activity>
 
         <activity
-            android:name=".NetworkActivity"
+            android:name=".activity.ActivityNetwork"
             android:exported="true">
         </activity>
 
         <activity
-            android:name=".PendingTransactionActivity"
+            android:name=".activity.ActivityTransactionPending"
             android:exported="true">
         </activity>
 
         <activity
-            android:name=".AccountsActivity"
+            android:name=".activity.ActivityAccountList"
+            android:exported="true">
+        </activity>
+
+        <activity
+            android:name=".activity.ActivityAccountAdd"
+            android:exported="true">
+        </activity>
+
+        <activity
+            android:name=".activity.ActivityAccountDetails"
             android:exported="true">
         </activity>
 

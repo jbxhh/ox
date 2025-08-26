@@ -38,6 +38,7 @@ object Constants {
     const val EXTRA_SEND_MAX = "send_max"
     const val EXTRA_SEND_ENOTES = "send_enotes"
     const val EXTRA_TRANSACTION_ID = "transaction_id"
+    const val EXTRA_ACCOUNT_INDEX = "account_index"
 
     // Donation address is also specified in strings.xml, it is used as a tooltip in address fields
     const val DONATE_ADDRESS = "48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ"

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="AppThemeBase" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="android:background">?attr/backgroundColor</item>
         <item name="backgroundColor">#0e0e0e</item>
         <item name="colorPrimary">#cc4e00</item>
         <item name="colorOnPrimary">#ffffff</item>
