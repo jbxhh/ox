@@ -280,6 +280,18 @@ uint64_t WalletManagerImpl::blockchainTargetHeight()
     return ires.target_height >= ires.height ? ires.target_height : ires.height;
 }
 
+std::pair<uint64_t, uint64_t> WalletManagerImpl::blockchainAndTargetHeight()
+{
+    cryptonote::COMMAND_RPC_GET_INFO::request ireq;
+    cryptonote::COMMAND_RPC_GET_INFO::response ires;
+
+    if (!epee::net_utils::invoke_http_json("/getinfo", ireq, ires, m_http_client))
+      return std::make_pair(0, 0);
+    uint64_t height = ires.height;
+    uint64_t target_height = ires.target_height >= ires.height ? ires.target_height : ires.height;
+    return std::make_pair(height, target_height);
+}
+
 uint64_t WalletManagerImpl::networkDifficulty()
 {
     cryptonote::COMMAND_RPC_GET_INFO::request ireq;
