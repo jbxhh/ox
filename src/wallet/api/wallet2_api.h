@@ -32,6 +32,11 @@
 
 
 #include <cstdint>
+#include <string>
+#include <utility>
+#include <vector>
+#include <list>
+#include <set>
 #include <ctime>
 #include <iostream>
 #include <list>
@@ -1419,6 +1424,9 @@ struct WalletManager
 
     //! returns current blockchain target height
     virtual uint64_t blockchainTargetHeight() = 0;
+
+    //! returns current blockchain and target height
+    virtual std::pair<uint64_t, uint64_t> blockchainAndTargetHeight() = 0;
 
     //! returns current network difficulty
     virtual uint64_t networkDifficulty() = 0;
