@@ -95,6 +95,7 @@ public:
     bool connected(uint32_t *version = NULL) override;
     uint64_t blockchainHeight() override;
     uint64_t blockchainTargetHeight() override;
+    std::pair<uint64_t, uint64_t> blockchainAndTargetHeight() override;
     uint64_t networkDifficulty() override;
     double miningHashRate() override;
     uint64_t blockTarget() override;
