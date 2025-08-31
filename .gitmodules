@@ -1,4 +1,4 @@
 [submodule "external-libs/monero"]
 	path = external-libs/monero
 	url = https://codeberg.org/acx/monero.git
-	branch = v0.18.4.2-monfluo-1
+	branch = v0.18.4.2-monfluo-2
