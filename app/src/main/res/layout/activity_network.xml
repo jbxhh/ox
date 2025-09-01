@@ -62,8 +62,7 @@
             android:background="@color/transparent"
             android:minWidth="40dp"
             android:minHeight="40dp"
-            android:src="@drawable/server"
-            android:contentDescription="@string/content_description_network_status_icon"/>
+            android:src="@drawable/server" />
 
         <TextView
             android:id="@+id/node_status_header_text_view"
@@ -130,8 +129,7 @@
             android:minWidth="40dp"
             android:minHeight="40dp"
             android:src="@drawable/wallet"
-            android:textColor="?attr/colorOnPrimary"
-            android:contentDescription="@string/content_description_network_status_icon"/>
+            android:textColor="?attr/colorOnPrimary" />
 
         <TextView
             android:id="@+id/wallet_status_header_text_view"
