@@ -86,8 +86,7 @@
                 android:background="@color/transparent"
                 android:textSize="16sp"
                 android:textColor="?attr/colorOnPrimary"
-                android:text="@string/wallet_name_label"
-                android:contentDescription="@string/wallet_name_label" />
+                android:text="@string/wallet_name_label" />
 
             <TextView
                 android:id="@+id/account_name_textview"
@@ -102,8 +101,7 @@
                 android:textColor="?attr/colorOnPrimary"
                 android:text="@string/account_name_label"
                 android:maxLines="1"
-                android:ellipsize="end"
-                android:contentDescription="@string/account_name_label" />
+                android:ellipsize="end" />
 
             <TextView
                 android:id="@+id/balance_unlocked_textview"
@@ -117,7 +115,6 @@
                 android:textStyle="bold"
                 android:textColor="?attr/colorOnPrimary"
                 android:text="@string/unlocked_balance_label"
-                android:contentDescription="@string/unlocked_balance_label"
                 tools:text="123.456789123456 XMR" />
 
             <TextView
@@ -132,7 +129,6 @@
                 android:textStyle="bold"
                 android:textColor="?attr/colorOnPrimary"
                 android:text="@string/locked_balance_label"
-                android:contentDescription="@string/locked_balance_label"
                 tools:text="123.456789123456 XMR pending" />
 
             <TextView
@@ -147,7 +143,6 @@
                 android:textStyle="bold"
                 android:textColor="?attr/colorOnPrimary"
                 android:text="@string/frozen_balance_label"
-                android:contentDescription="@string/frozen_balance_label"
                 tools:text="123.456789123456 XMR frozen" />
 
             <ImageView
@@ -162,7 +157,7 @@
                 android:minWidth="32dp"
                 android:minHeight="32dp"
                 android:src="@drawable/enotes"
-                android:contentDescription="TODO"/>
+                android:contentDescription="@string/content_description_enotes"/>
 
             <ImageView
                 android:id="@+id/settings_imageview"
@@ -174,7 +169,7 @@
                 android:minWidth="32dp"
                 android:minHeight="32dp"
                 android:src="@drawable/settings"
-                android:contentDescription="TODO"/>
+                android:contentDescription="@string/content_description_application_settings"/>
 
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/network_status_fragment"

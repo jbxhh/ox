@@ -160,7 +160,7 @@
     <string name="wallet_password_confirm_hint">Confirm wallet password</string>
     <string name="wallet_seed_offset_passphrase">Seed offset passphrase (optional)</string>
     <string name="wallet_name">Wallet name</string>
-    <string name="account_name">Acount name</string>
+    <string name="account_name">Account name</string>
     <string name="password">Passphrase</string>
     <string name="label">Label</string>
     <string name="unlock">Unlock</string>
@@ -349,7 +349,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="multiple_addresses">multiple</string>
     <!-- Text shown in place of an address when displaying an outgoing transaction to more than one address -->
     <string name="unknown_recipient">unknown recipient</string>
-    <string name="send_or_receive_icon_content_description">Either send or receive icon depending on transaction type</string>
     <string name="transaction_type_received">Received</string>
     <string name="transaction_type_sent">Sent</string>
     <string name="transaction_unconfirmed">unconfirmed</string>
@@ -368,8 +367,10 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="wallet_header">Wallet</string>
     <string name="enotes_header">Enotes</string>
     <string name="enotes_with_amount_header">Enotes (<xliff:g>%1$d</xliff:g>)</string>
-    <string name="content_description_back">Return to previous activity</string>
+    <string name="content_description_back">Back</string>
     <string name="content_description_account">Select account</string>
+    <string name="content_description_application_settings">Application settings</string>
+    <string name="content_description_enotes">Enotes</string>
     <string name="account_label">#<xliff:g>%1$d</xliff:g> <xliff:g>%2$s</xliff:g></string>
 
     <string name="network_header">Network</string>
@@ -387,7 +388,12 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="settings_behaviour_header">Behaviour</string>
     <string name="settings_security_header">Security</string>
 
-    <string name="content_description_network_status_icon">Network status</string>
+    <string name="content_description_network_status_icon_opening_wallet">Network status - opening wallet</string>
+    <string name="content_description_network_status_icon_starting_synchronization">Network status - starting synchronization</string>
+    <string name="content_description_network_status_icon_synchronizing_node">Network status - synchronizing node</string>
+    <string name="content_description_network_status_icon_synchronizing_wallet">Network status - synchronizing wallet</string>
+    <string name="content_description_network_status_icon_synchronized">Network status - synchronized</string>
+    <string name="content_description_network_status_icon_wallet_error">Network status - wallet error</string>
 
     <string name="activity_network_node_status_header_waiting_for_wallet">Waiting for wallet…</string>
     <string name="activity_network_node_status_header_fetching_blockchain_data">Fetching blockchain height…</string>

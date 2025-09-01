@@ -50,15 +50,17 @@ class NetworkStatusFragment : MoneroFragment() {
     private fun bindObservers() {
         viewModel.state.observe(viewLifecycleOwner) { state ->
             val synchronizationStatus = SynchronizationStatus.from(state)
-            val drawable = when (synchronizationStatus) {
-                SynchronizationStatus.OpeningWallet -> R.drawable.synchronization_status_starting
-                SynchronizationStatus.StartingSynchronization -> R.drawable.synchronization_status_warning
-                is SynchronizationStatus.NodeSynchronization -> R.drawable.synchronization_status_in_progress
-                is SynchronizationStatus.WalletSynchronization -> R.drawable.synchronization_status_in_progress
-                is SynchronizationStatus.Synchronized -> R.drawable.synchronization_status_synced
-                is SynchronizationStatus.WalletError -> R.drawable.synchronization_status_error
+            val (drawable, contentDescriptionResource) = when (synchronizationStatus) {
+                SynchronizationStatus.OpeningWallet -> Pair(R.drawable.synchronization_status_starting, R.string.content_description_network_status_icon_opening_wallet)
+                SynchronizationStatus.StartingSynchronization -> Pair(R.drawable.synchronization_status_warning, R.string.content_description_network_status_icon_starting_synchronization)
+                is SynchronizationStatus.NodeSynchronization -> Pair(R.drawable.synchronization_status_in_progress, R.string.content_description_network_status_icon_synchronizing_node)
+                is SynchronizationStatus.WalletSynchronization -> Pair(R.drawable.synchronization_status_in_progress, R.string.content_description_network_status_icon_synchronizing_wallet)
+                is SynchronizationStatus.Synchronized -> Pair(R.drawable.synchronization_status_synced, R.string.content_description_network_status_icon_synchronized)
+                is SynchronizationStatus.WalletError -> Pair(R.drawable.synchronization_status_error, R.string.content_description_network_status_icon_wallet_error)
             }
-            networkStatusImageView.setImageDrawable(AppCompatResources.getDrawable(requireContext(), drawable))
+            val context = requireContext()
+            networkStatusImageView.setImageDrawable(AppCompatResources.getDrawable(context, drawable))
+            networkStatusImageView.setContentDescription(context.getString(contentDescriptionResource))
         }
     }
 

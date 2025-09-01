@@ -19,8 +19,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:background="@color/transparent"
         android:layout_gravity="center"
-        android:src="@drawable/icon_receive"
-        android:contentDescription="@string/send_or_receive_icon_content_description" />
+        android:src="@drawable/icon_receive" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/sent_or_received_label_text_view"
