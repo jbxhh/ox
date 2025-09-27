@@ -91,6 +91,12 @@ object PreferenceUtils {
 
     fun getProxyIfEnabled(context: Context): String? = if (isUseProxy(context)) getProxy(context) else null
 
+    fun getNodeByName(context: Context, nodeName: String): Result<Node?> = getNodes(context).map { nodes ->
+        nodes.find { node ->
+            node.name == nodeName
+        }
+    }
+
     private fun getNodes(context: Context): Result<List<Node>> = runCatching {
         val jsonArrayString = getString(context, Constants.PREF_NODES, "[]")
         val jsonArray = JSONArray(jsonArrayString)

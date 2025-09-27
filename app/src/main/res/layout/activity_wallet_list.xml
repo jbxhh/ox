@@ -6,7 +6,7 @@
     android:id="@+id/activity_wallet_list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/standard_padding"  
+    android:padding="@dimen/padding_big"
     tools:context="org.monfluo.wallet.WalletsActivity">
 
     <TextView
@@ -20,7 +20,7 @@
         android:textAlignment="center"
         android:textSize="32sp"
         android:textStyle="bold"
-        android:textColor="?attr/colorOnPrimary"/>
+        android:textColor="?attr/colorOnPrimary" />
 
     <ImageView
         android:id="@+id/monfluo_icon_imageview"
@@ -32,17 +32,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/application_name_header_textview" />
-
-    <TextView
-        android:id="@+id/address_list_label_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@id/wallet_list_recyclerview"
-        app:layout_constraintStart_toStartOf="@id/wallet_list_recyclerview"
-        android:text="@string/wallets"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:textColor="?attr/colorOnPrimary"/>
 
     <ImageView
         android:id="@+id/application_settings_imageview"
@@ -64,10 +53,9 @@
         app:layout_constraintTop_toBottomOf="@id/monfluo_icon_imageview"
         app:layout_constraintBottom_toTopOf="@id/create_or_import_wallet"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="@dimen/standard_padding"
-        android:layout_marginBottom="@dimen/standard_padding"
-        app:layout_constraintHorizontal_bias="1.0"
-        android:background="@drawable/round_bg" />
+        android:layout_marginTop="@dimen/padding_big"
+        android:layout_marginBottom="@dimen/padding_big"
+        app:layout_constraintHorizontal_bias="1.0" />
 
     <Button
         android:id="@+id/create_or_import_wallet"

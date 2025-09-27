@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/transparent"
-    tools:context="org.monfluo.wallet.fragment.NetworkStatusFragment">
+    tools:context="org.monfluo.wallet.fragment.FragmentNetworkStatus">
 
     <ImageView
         android:id="@+id/network_status_imageview"
@@ -19,5 +19,5 @@
         android:minWidth="32dp"
         android:minHeight="32dp"
         android:src="@drawable/synchronization_status_starting"
-        android:contentDescription="@string/content_description_network_status_icon_opening_wallet"/>
+        android:contentDescription="@string/content_description_network_status_icon_opening_wallet" />
 </androidx.constraintlayout.widget.ConstraintLayout>

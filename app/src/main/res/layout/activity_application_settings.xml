@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:scrollbars="none"
-    tools:context="org.monfluo.wallet.ActivitySettingsApplication">
+    tools:context="org.monfluo.wallet.activity.ActivitySettingsApplication">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/activity_application_settings_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/standard_padding">
+        android:padding="@dimen/padding_big">
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:id="@+id/header_layout_view"
@@ -19,7 +20,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:paddingBottom="@dimen/additional_padding"
+            android:paddingBottom="@dimen/padding_big"
             tools:ignore="UseCompoundDrawables">
 
             <ImageView
@@ -42,9 +43,9 @@
                 app:layout_constraintTop_toTopOf="@id/back_imageview"
                 app:layout_constraintBottom_toBottomOf="@id/back_imageview"
                 android:text="@string/settings_header"
-                android:textSize="24sp"
+                android:textSize="@dimen/text_bigger"
                 android:textStyle="bold"
-                android:textColor="?attr/colorOnPrimary"/>
+                android:textColor="?attr/colorOnPrimary" />
         </androidx.appcompat.widget.LinearLayoutCompat>
 
         <androidx.appcompat.widget.LinearLayoutCompat
@@ -53,18 +54,18 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/header_layout_view"
             app:layout_constraintStart_toStartOf="parent"
-            android:paddingVertical="@dimen/additional_padding"
+            android:paddingVertical="@dimen/padding_small"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/appearance_header_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/additional_padding"
+                android:paddingTop="@dimen/padding_small"
                 android:text="@string/settings_appearance_header"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="?attr/colorOnPrimary"/>
+                android:textColor="?attr/colorOnPrimary" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/street_mode_settings_layout"
@@ -82,7 +83,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@id/street_mode_switch"
                     app:layout_constraintHorizontal_bias="0"
-                    android:textColor="?attr/colorOnPrimary"/>
+                    android:textColor="?attr/colorOnPrimary" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/street_mode_switch"
@@ -93,7 +94,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintHorizontal_bias="1"/>
+                    app:layout_constraintHorizontal_bias="1" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -112,7 +113,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@id/show_icon_on_qr_codes_switch"
                     app:layout_constraintHorizontal_bias="0"
-                    android:textColor="?attr/colorOnPrimary"/>
+                    android:textColor="?attr/colorOnPrimary" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/show_icon_on_qr_codes_switch"
@@ -123,7 +124,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintHorizontal_bias="1"/>
+                    app:layout_constraintHorizontal_bias="1" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -133,18 +134,18 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/appearance_settings_layout"
             app:layout_constraintStart_toStartOf="parent"
-            android:paddingVertical="@dimen/additional_padding"
+            android:paddingVertical="@dimen/padding_small"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/features_header_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/additional_padding"
+                android:paddingTop="@dimen/padding_small"
                 android:text="@string/settings_features_header"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="?attr/colorOnPrimary"/>
+                android:textColor="?attr/colorOnPrimary" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/enable_multiple_wallets_settings_layout"
@@ -162,7 +163,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@id/enable_multiple_wallets_switch"
                     app:layout_constraintHorizontal_bias="0"
-                    android:textColor="?attr/colorOnPrimary"/>
+                    android:textColor="?attr/colorOnPrimary" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/enable_multiple_wallets_switch"
@@ -173,7 +174,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintHorizontal_bias="1"/>
+                    app:layout_constraintHorizontal_bias="1" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -192,7 +193,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@id/enable_multiple_accounts_switch"
                     app:layout_constraintHorizontal_bias="0"
-                    android:textColor="?attr/colorOnPrimary"/>
+                    android:textColor="?attr/colorOnPrimary" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/enable_multiple_accounts_switch"
@@ -203,7 +204,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintHorizontal_bias="1"/>
+                    app:layout_constraintHorizontal_bias="1" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -222,7 +223,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@id/manual_fee_selection_switch"
                     app:layout_constraintHorizontal_bias="0"
-                    android:textColor="?attr/colorOnPrimary"/>
+                    android:textColor="?attr/colorOnPrimary" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/manual_fee_selection_switch"
@@ -233,7 +234,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintHorizontal_bias="1"/>
+                    app:layout_constraintHorizontal_bias="1" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -252,7 +253,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@id/enable_enote_management_switch"
                     app:layout_constraintHorizontal_bias="0"
-                    android:textColor="?attr/colorOnPrimary"/>
+                    android:textColor="?attr/colorOnPrimary" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/enable_enote_management_switch"
@@ -263,7 +264,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintHorizontal_bias="1"/>
+                    app:layout_constraintHorizontal_bias="1" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -282,7 +283,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@id/show_transfer_notifications_switch"
                     app:layout_constraintHorizontal_bias="0"
-                    android:textColor="?attr/colorOnPrimary"/>
+                    android:textColor="?attr/colorOnPrimary" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/show_transfer_notifications_switch"
@@ -293,7 +294,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintHorizontal_bias="1"/>
+                    app:layout_constraintHorizontal_bias="1" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -303,18 +304,18 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/features_settings_layout"
             app:layout_constraintStart_toStartOf="parent"
-            android:paddingVertical="@dimen/additional_padding"
+            android:paddingVertical="@dimen/padding_small"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/behaviour_header_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/additional_padding"
+                android:paddingTop="@dimen/padding_small"
                 android:text="@string/settings_behaviour_header"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="?attr/colorOnPrimary"/>
+                android:textColor="?attr/colorOnPrimary" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/auto_rotate_addresses_settings_layout"
@@ -332,7 +333,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@id/auto_rotate_addresses_switch"
                     app:layout_constraintHorizontal_bias="0"
-                    android:textColor="?attr/colorOnPrimary"/>
+                    android:textColor="?attr/colorOnPrimary" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/auto_rotate_addresses_switch"
@@ -343,7 +344,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintHorizontal_bias="1"/>
+                    app:layout_constraintHorizontal_bias="1" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -362,7 +363,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@id/balance_tap_toggles_street_mode_switch"
                     app:layout_constraintHorizontal_bias="0"
-                    android:textColor="?attr/colorOnPrimary"/>
+                    android:textColor="?attr/colorOnPrimary" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/balance_tap_toggles_street_mode_switch"
@@ -373,7 +374,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintHorizontal_bias="1"/>
+                    app:layout_constraintHorizontal_bias="1" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -383,18 +384,18 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/behaviour_settings_layout"
             app:layout_constraintStart_toStartOf="parent"
-            android:paddingVertical="@dimen/additional_padding"
+            android:paddingVertical="@dimen/padding_small"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/security_header_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/additional_padding"
+                android:paddingTop="@dimen/padding_small"
                 android:text="@string/settings_security_header"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="?attr/colorOnPrimary"/>
+                android:textColor="?attr/colorOnPrimary" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/allow_copying_secrets_to_clipboard_settings_layout"
@@ -412,7 +413,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@id/allow_copying_secrets_to_clipboard_switch"
                     app:layout_constraintHorizontal_bias="0"
-                    android:textColor="?attr/colorOnPrimary"/>
+                    android:textColor="?attr/colorOnPrimary" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/allow_copying_secrets_to_clipboard_switch"
@@ -423,7 +424,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintHorizontal_bias="1"/>
+                    app:layout_constraintHorizontal_bias="1" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -434,6 +435,7 @@
             android:text="@string/network"
             android:textSize="24sp"
             android:textStyle="bold"
+            android:textColor="?attr/colorOnPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/security_settings_layout" />
@@ -443,7 +445,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:background="@drawable/button_bg"
+            android:background="@drawable/button_background"
             android:ellipsize="middle"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
@@ -452,8 +454,7 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/network_settings_textview"
-            tools:ignore="SpeakableTextPresentCheck"
-            tools:text="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" />
+            tools:ignore="SpeakableTextPresentCheck" />
 
         <TextView
             android:id="@+id/proxy_textview"
@@ -461,6 +462,7 @@
             android:layout_height="wrap_content"
             android:text="@string/tor_switch_label"
             android:textSize="16sp"
+            android:textColor="?attr/colorOnPrimary"
             app:layout_constraintBottom_toBottomOf="@id/proxy_switch"
             app:layout_constraintEnd_toStartOf="@id/proxy_switch"
             app:layout_constraintStart_toStartOf="parent"
@@ -489,7 +491,7 @@
                 android:id="@+id/wallet_proxy_address_edittext"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:background="@drawable/edittext_bg"
+                android:background="@drawable/edittext_background"
                 android:hint="@string/proxy_address_hint"
                 android:minHeight="48dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -501,7 +503,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/button_bg"
+                android:background="@drawable/button_background"
                 android:text="@string/settings_save_proxy"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
@@ -526,6 +528,7 @@
                 android:text="@string/about_monfluo_header"
                 android:textSize="24sp"
                 android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -537,6 +540,7 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/about_monfluo"
                 android:textSize="16sp"
+                android:textColor="?attr/colorOnPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/about_monfluo_header_textview" />
@@ -559,6 +563,7 @@
                 android:text="@string/monfluo_build_header"
                 android:textSize="24sp"
                 android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -570,6 +575,7 @@
                 android:text="@string/monfluo_build_application_id"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/monfluo_build_header_textview" />
@@ -580,6 +586,7 @@
                 android:layout_height="wrap_content"
                 tools:text="application id"
                 android:textSize="12sp"
+                android:textColor="?attr/colorOnPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/monfluo_build_application_id_header" />
@@ -591,6 +598,7 @@
                 android:text="@string/monfluo_build_application_version"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/monfluo_build_application_id_textview" />
@@ -601,6 +609,7 @@
                 android:layout_height="wrap_content"
                 tools:text="application version"
                 android:textSize="12sp"
+                android:textColor="?attr/colorOnPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/monfluo_build_application_version_header" />
@@ -612,6 +621,7 @@
                 android:text="@string/monfluo_build_monero_version"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/monfluo_build_application_version_textview" />
@@ -622,6 +632,7 @@
                 android:layout_height="wrap_content"
                 tools:text="monero version"
                 android:textSize="12sp"
+                android:textColor="?attr/colorOnPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/monfluo_build_monero_version_header" />

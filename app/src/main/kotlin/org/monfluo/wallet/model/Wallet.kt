@@ -15,7 +15,7 @@
  */
 package org.monfluo.wallet.model
 
-import org.monfluo.wallet.data.Subaddress
+import org.monfluo.wallet.data.Address
 import timber.log.Timber
 import java.io.File
 import kotlin.io.path.Path
@@ -99,11 +99,11 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     fun getTransaction(txId: String): TransactionInfo? = getHistoriesByTxId()[accountIndex]?.get(txId)
 
     private fun calculateBalances(enotes: List<Enote>): Map<Int, Balance> {
-        return (0 until getNumAccounts()).associateWith { account ->
-            val totalBalance = getBalance(account)
-            val unlockedBalance = getUnlockedBalance(account)
+        return (0 until getNumAccounts()).associateWith { accountIndex ->
+            val totalBalance = getBalance(accountIndex)
+            val unlockedBalance = getUnlockedBalance(accountIndex)
             val pendingBalance = totalBalance - unlockedBalance
-            val addresses = (0 until getNumSubaddresses(account)).map { getSubaddress(it) }.toSet()
+            val addresses = (0 until getNumAddresses(accountIndex)).map { addressIndex -> getAddress(accountIndex, addressIndex) }.toSet()
             val frozenBalance = enotes.filter { it.isFrozen && it.address?.let { address -> addresses.contains(address) } ?: false }.sumOf { it.amount }
             Balance(totalBalance, unlockedBalance, frozenBalance, pendingBalance)
         }
@@ -125,31 +125,22 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
 
     @Synchronized
     external fun setPassword(password: String?): Boolean
-    val address: String
-        get() = getAddress(accountIndex)
 
-    fun getAddress(accountIndex: Int): String {
-        return getAddressJ(accountIndex, 0)
-    }
-
-    private fun getSubaddress(addressIndex: Int): String {
-        return getAddressJ(accountIndex, addressIndex)
-    }
-
-    fun getSubaddress(accountIndex: Int, addressIndex: Int): String {
+    fun getAddress(accountIndex: Int, addressIndex: Int): String {
         return getAddressJ(accountIndex, addressIndex)
     }
 
     private external fun getAddressJ(accountIndex: Int, addressIndex: Int): String
-    private fun getSubaddressObject(accountIndex: Int, subAddressIndex: Int): Subaddress {
-        return Subaddress(
-            accountIndex, subAddressIndex,
-            getSubaddress(subAddressIndex), getSubaddressLabel(subAddressIndex)
+
+    private fun getAddressObject(accountIndex: Int, addressIndex: Int): Address {
+        return Address(
+            accountIndex, addressIndex,
+            getAddress(accountIndex, addressIndex), getAddressLabel(accountIndex, addressIndex)
         )
     }
 
-    fun getSubaddressObject(subAddressIndex: Int): Subaddress {
-        val subaddress = getSubaddressObject(accountIndex, subAddressIndex)
+    fun getAddressObject(subAddressIndex: Int): Address {
+        val subaddress = getAddressObject(accountIndex, subAddressIndex)
         var used = false
         var totalBalance = 0L
         for (enote in getEnotes()) {
@@ -274,31 +265,33 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     external fun addAccount(label: String)
 
     fun getAccountLabel(accountIndex: Int): String {
-        val label = getSubaddressLabel(accountIndex, 0)
+        val label = getAddressLabel(accountIndex, 0)
         return label
     }
 
-    fun getSubaddressLabel(addressIndex: Int): String {
-        return getSubaddressLabel(accountIndex, addressIndex)
+    fun getAddressLabel(addressIndex: Int): String {
+        return getAddressLabel(accountIndex, addressIndex)
     }
 
-    private external fun getSubaddressLabel(accountIndex: Int, addressIndex: Int): String
+    external fun getAddressLabel(accountIndex: Int, addressIndex: Int): String
+    
     fun setAccountLabel(accountIndex: Int, label: String?) {
-        setSubaddressLabel(accountIndex, 0, label)
+        setAddressLabel(accountIndex, 0, label)
     }
 
-    fun setSubaddressLabel(addressIndex: Int, label: String?) {
-        setSubaddressLabel(accountIndex, addressIndex, label)
+    fun setAddressLabel(addressIndex: Int, label: String?) {
+        setAddressLabel(accountIndex, addressIndex, label)
     }
 
-    private external fun setSubaddressLabel(accountIndex: Int, addressIndex: Int, label: String?)
+    external fun setAddressLabel(accountIndex: Int, addressIndex: Int, label: String?)
+
     external fun getNumAccounts(): Int
-    val numSubaddresses: Int
-        get() = getNumSubaddresses(accountIndex)
+    val numAddresses: Int
+        get() = getNumAddresses(accountIndex)
 
-    private external fun getNumSubaddresses(accountIndex: Int): Int
+    private external fun getNumAddresses(accountIndex: Int): Int
 
-    external fun addSubaddress(accountIndex: Int, label: String?)
+    external fun addAddress(accountIndex: Int, label: String?)
 
     external fun getWalletStatusWithError(): WalletStatusWithError
 

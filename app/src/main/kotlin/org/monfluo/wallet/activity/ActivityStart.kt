@@ -10,16 +10,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.lifecycle.ViewModel
 import org.monfluo.wallet.data.DefaultNode
-import org.monfluo.wallet.fragment.dialog.PasswordBottomSheetDialog
+import org.monfluo.wallet.fragment.DialogFragmentPassword
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.UriData
-import org.monfluo.wallet.util.acitivity.LoggingActivity
+import org.monfluo.wallet.util.component.ActivityLogging
 import timber.log.Timber
 
-class ActivityStart : LoggingActivity() {
+class ActivityStart : ActivityLogging() {
 
     private val startActivityToOpenWallet = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == 0) {
@@ -60,8 +60,8 @@ class ActivityStart : LoggingActivity() {
         } else {
             Timber.d("${walletPaths.size} wallets found but multi-wallet mode is not enabled, asking for password to open a wallet")
             val walletPath = walletPaths.find { it.endsWith(Constants.DEFAULT_WALLET_NAME) } ?: walletPaths.first()
-            val passwordDialog = PasswordBottomSheetDialog(walletPath, true, object : PasswordBottomSheetDialog.Listener {
-                override fun onCorrectPasswordSubmitted(self: PasswordBottomSheetDialog, password: String) {
+            val passwordDialog = org.monfluo.wallet.fragment.DialogFragmentPassword(walletPath, true, object : DialogFragmentPassword.Listener {
+                override fun onCorrectPasswordSubmitted(self: DialogFragmentPassword, password: String) {
                     self.dismiss()
                     openWallet(walletPath, password, viewModel.takeUriData())
                 }

@@ -1,6 +1,6 @@
 package org.monfluo.wallet.activity
 
-import org.monfluo.wallet.util.acitivity.MoneroActivity
+import org.monfluo.wallet.util.component.ActivityMonero
 import org.monfluo.wallet.R
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.service.wallet.WalletService
@@ -19,7 +19,7 @@ import androidx.lifecycle.ViewModel
 import timber.log.Timber
 import kotlin.math.max
 
-class ActivityAccountDetails : MoneroActivity() {
+class ActivityAccountDetails : ActivityMonero() {
 
     private val viewModel: ActivityAccountDetailsViewModel by viewModels()
 
@@ -31,10 +31,6 @@ class ActivityAccountDetails : MoneroActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (!init()) {
-            finish()
-            return
-        }
         setContentView(R.layout.activity_account_details)
 
         layoutView = findViewById(R.id.activity_account_details_view)
@@ -44,31 +40,17 @@ class ActivityAccountDetails : MoneroActivity() {
 
         bindWindowInsetsListener()
         bindListeners()
-    }
-
-    private fun init(): Boolean {
-        if (viewModel.accountIndex == null) {
-            val extras = intent.extras
-            if (extras != null && extras.containsKey(Constants.EXTRA_ACCOUNT_INDEX)) {
-                viewModel.accountIndex = extras.getInt(Constants.EXTRA_ACCOUNT_INDEX)
-                return true
-            } else {
-                Timber.e("Account index is null in the view model and it was not present in extras")
-                return false
-            }
-        } else {
-            return true
-        }
+        init()
     }
 
     private fun bindWindowInsetsListener() {
         ViewCompat.setOnApplyWindowInsetsListener(layoutView) { _, insetsCompat ->
             val insets = insetsCompat.getInsets(systemBars() or displayCutout())
             layoutView.updatePadding(
-                left = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.left),
-                top = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.top),
-                right = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.bottom)
+                left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
+                top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
+                right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -81,6 +63,18 @@ class ActivityAccountDetails : MoneroActivity() {
         saveAccountButton.setOnClickListener {
             walletService?.let { walletService ->
                 walletService.setAccountLabel(viewModel.accountIndex!!, accountNameEditText.text.toString())
+                finish()
+            }
+        }
+    }
+
+    private fun init() {
+        if (viewModel.accountIndex == null) {
+            val extras = intent.extras
+            if (extras != null && extras.containsKey(Constants.EXTRA_ACCOUNT_INDEX)) {
+                viewModel.accountIndex = extras.getInt(Constants.EXTRA_ACCOUNT_INDEX)
+            } else {
+                Timber.e("Account index is null in the view model and it was not present in extras")
                 finish()
             }
         }

@@ -24,14 +24,14 @@ import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.TextHelper
-import org.monfluo.wallet.util.acitivity.MoneroActivity
+import org.monfluo.wallet.util.component.ActivityMonero
 import org.monfluo.wallet.R
 import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Date
 import kotlin.math.max
 
-class ActivityTransactionDetails : MoneroActivity() {
+class ActivityTransactionDetails : ActivityMonero() {
 
     private val viewModel: TransactionActivityViewModel by viewModels()
 
@@ -89,10 +89,10 @@ class ActivityTransactionDetails : MoneroActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(layoutView) { _, insetsCompat ->
             val insets = insetsCompat.getInsets(systemBars() or displayCutout())
             layoutView.updatePadding(
-                left = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.left),
-                top = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.top),
-                right = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.bottom)
+                left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
+                top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
+                right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -183,7 +183,7 @@ class ActivityTransactionDetails : MoneroActivity() {
             txAmountTextView.text = balanceString
             when (transactionInfo.direction) {
                 TransactionInfo.Direction.In -> {
-                    addressTextView.text = wallet.getSubaddress(transactionInfo.accountIndex, transactionInfo.addressIndex)
+                    addressTextView.text = wallet.getAddress(transactionInfo.accountIndex, transactionInfo.addressIndex)
                     copyTxAddressImageButton.visibility = View.VISIBLE
                 }
                 TransactionInfo.Direction.Out -> {

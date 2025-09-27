@@ -1,28 +1,27 @@
 package org.monfluo.wallet.activity
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageView
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.Toast
-import android.content.Intent
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.monfluo.wallet.util.acitivity.MoneroActivity
+import kotlin.math.max
 import org.monfluo.wallet.R
-import org.monfluo.wallet.adapter.AccountAdapter
+import org.monfluo.wallet.adapter.AdapterAccount
 import org.monfluo.wallet.model.Account
-import org.monfluo.wallet.model.Balance
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
-import kotlin.math.max
+import org.monfluo.wallet.util.component.ActivityMonero
 
-class ActivityAccountList : MoneroActivity() {
+class ActivityAccountList : ActivityMonero() {
 
     private lateinit var layoutView: View
     private lateinit var backImageView: ImageView
@@ -31,12 +30,14 @@ class ActivityAccountList : MoneroActivity() {
 
     private lateinit var adapterRecyclerView: RecyclerView
 
-    private val accountAdapter: AccountAdapter = AccountAdapter(listOf(), null, object : AccountAdapter.Listener {
-        override fun onAccountSelected(self: AccountAdapter, account: Account) {
+    private val adapterAccount: AdapterAccount = AdapterAccount(listOf(), null, object : AdapterAccount.Listener {
+
+        override fun onAccountSelected(self: AdapterAccount, account: Account) {
             self.setSelectedAccount(account)
             walletService?.setAccount(account.index)
         }
-        override fun onAccountEditClicked(self: AccountAdapter, account: Account) {
+
+        override fun onAccountEditClicked(self: AdapterAccount, account: Account) {
             startActivity(Intent(this@ActivityAccountList, ActivityAccountDetails::class.java).apply {
                 putExtra(Constants.EXTRA_ACCOUNT_INDEX, account.index)
             })
@@ -53,7 +54,7 @@ class ActivityAccountList : MoneroActivity() {
         adapterRecyclerView = findViewById(R.id.accounts_recyclerview)
 
         adapterRecyclerView.layoutManager = LinearLayoutManager(this)
-        adapterRecyclerView.adapter = accountAdapter
+        adapterRecyclerView.adapter = adapterAccount
 
         bindWindowInsetsListener()
         bindListeners()
@@ -63,55 +64,49 @@ class ActivityAccountList : MoneroActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(layoutView) { _, insetsCompat ->
             val insets = insetsCompat.getInsets(systemBars() or displayCutout())
             layoutView.updatePadding(
-                left = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.left),
-                top = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.top),
-                right = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.bottom)
+                left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
+                top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
+                right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
     }
 
     private fun bindListeners() {
-        backImageView.setOnClickListener {
-            finish()
-        }
+        backImageView.setOnClickListener { finish() }
         addAccountButton.setOnClickListener {
             startActivity(Intent(this, ActivityAccountAdd::class.java))
         }
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
-        updateAccountAdapter()
+        updateAdapterAccount()
     }
 
     override fun onWalletUpdated(wallet: Wallet) {
-        runOnUiThread {
-            updateAccountAdapter()
-        }
+        runOnUiThread { updateAdapterAccount() }
     }
 
     override fun onAccountCreated() {
         runOnUiThread {
-            updateAccountAdapter()
+            updateAdapterAccount()
             Toast.makeText(this, getText(R.string.toast_new_account_created), Toast.LENGTH_SHORT).show()
         }
     }
 
     override fun onAccountSet(index: Int) {
         runOnUiThread {
-            updateAccountAdapter()
+            updateAdapterAccount()
             Toast.makeText(this, getString(R.string.toast_account_selected, index), Toast.LENGTH_SHORT).show()
         }
     }
 
     override fun onAccountLabelChanged(index: Int, label: String) {
-        runOnUiThread {
-            updateAccountAdapter()
-        }
+        runOnUiThread { updateAdapterAccount() }
     }
 
-    private fun updateAccountAdapter() {
+    private fun updateAdapterAccount() {
         walletService?.getWallet()?.let { wallet ->
             val accounts = (0 until wallet.getNumAccounts()).map {
                 val index = it
@@ -119,8 +114,8 @@ class ActivityAccountList : MoneroActivity() {
                 val balance = wallet.getBalance(index)
                 Account(index, label, balance)
             }
-            accountAdapter.setAccounts(accounts)
-            accountAdapter.setSelectedAccount(accounts[wallet.getAccountIndex()])
+            adapterAccount.setAccounts(accounts)
+            adapterAccount.setSelectedAccount(accounts[wallet.getAccountIndex()])
         }
     }
 }

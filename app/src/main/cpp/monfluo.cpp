@@ -1252,7 +1252,7 @@ Java_org_monfluo_wallet_model_Wallet_addAccount(JNIEnv *env, jobject instance,
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_Wallet_getSubaddressLabel(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_model_Wallet_getAddressLabel(JNIEnv *env, jobject instance,
                                                        jint accountIndex, jint addressIndex) {
 
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
@@ -1264,7 +1264,7 @@ Java_org_monfluo_wallet_model_Wallet_getSubaddressLabel(JNIEnv *env, jobject ins
 }
 
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_Wallet_setSubaddressLabel(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_model_Wallet_setAddressLabel(JNIEnv *env, jobject instance,
                                                        jint accountIndex, jint addressIndex,
                                                        jstring label) {
 
@@ -1283,14 +1283,14 @@ Java_org_monfluo_wallet_model_Wallet_getNumAccounts(JNIEnv *env, jobject instanc
 }
 
 JNIEXPORT jint JNICALL
-Java_org_monfluo_wallet_model_Wallet_getNumSubaddresses(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_model_Wallet_getNumAddresses(JNIEnv *env, jobject instance,
                                                        jint accountIndex) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return static_cast<jint>(wallet->numSubaddresses(accountIndex));
 }
 
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_Wallet_addSubaddress(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_model_Wallet_addAddress(JNIEnv *env, jobject instance,
                                                   jint accountIndex,
                                                   jstring label) {
 
