@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_node_list_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/padding_big"
+    tools:context="org.monfluo.wallet.activity.ActivityNodeList">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/header_layout_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:paddingBottom="@dimen/padding_big"
+        tools:ignore="UseCompoundDrawables">
+
+        <ImageView
+            android:id="@+id/back_imageview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:minHeight="32dp"
+            android:minWidth="32dp"
+            android:maxHeight="32dp"
+            android:maxWidth="32dp"
+            android:src="@drawable/left"
+            android:contentDescription="@string/content_description_back" />
+
+        <TextView
+            android:id="@+id/header_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/back_imageview"
+            app:layout_constraintTop_toTopOf="@id/back_imageview"
+            app:layout_constraintBottom_toBottomOf="@id/back_imageview"
+            android:text="@string/nodes_header"
+            android:textSize="@dimen/text_bigger"
+            android:textStyle="bold"
+            android:textColor="?attr/colorOnPrimary" />
+
+        <ImageButton
+            android:id="@+id/sort_nodes_imagebutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/sort"
+            android:contentDescription="@string/sort_nodes" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/node_selection_recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_layout_view"
+        app:layout_constraintBottom_toTopOf="@id/node_add_button"
+        tools:listitem="@layout/recycler_view_item_node" />
+
+    <Button
+        android:id="@+id/node_add_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="1"
+        android:background="@drawable/button_background"
+        android:text="Add node" />
+</androidx.constraintlayout.widget.ConstraintLayout>

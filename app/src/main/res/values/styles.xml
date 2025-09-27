@@ -3,7 +3,7 @@
     <style name="AppThemeBase" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="backgroundColor">#0e0e0e</item>
         <item name="colorPrimary">#cc4e00</item>
-        <item name="colorOnPrimary">#ffffff</item>
+        <item name="colorOnPrimary">@color/text</item>
         <item name="bottomSheetDialogTheme">@style/ModalBottomSheet</item>
     </style>
 

@@ -13,6 +13,7 @@ import android.widget.LinearLayout
 import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
+import android.graphics.Typeface
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -35,12 +36,12 @@ import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.UriData
-import org.monfluo.wallet.util.acitivity.MoneroActivity
+import org.monfluo.wallet.util.component.ActivityMonero
 import org.monfluo.wallet.R
 import timber.log.Timber
 import kotlin.math.max
 
-class ActivitySend : MoneroActivity() {
+class ActivitySend : ActivityMonero() {
 
     private val startActivityToSendPendingTransaction = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == 0) {
@@ -114,10 +115,10 @@ class ActivitySend : MoneroActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(layoutView) { _, insetsCompat ->
             val insets = insetsCompat.getInsets(systemBars() or displayCutout())
             layoutView.updatePadding(
-                left = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.left),
-                top = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.top),
-                right = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.bottom)
+                left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
+                top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
+                right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -304,21 +305,22 @@ class ActivitySend : MoneroActivity() {
 
     private fun addOutput(initial: Boolean, address: String? = null, amount: String? = null) {
         val index = destCount
-        val entryView =
-            layoutInflater.inflate(R.layout.recycler_view_item_destination, null) as ConstraintLayout
-        val removeOutputImageButton =
-            entryView.findViewById<ImageButton>(R.id.remove_output_imagebutton)
-        val addressField = entryView.findViewById<EditText>(R.id.address_edittext)
-        val amountField = entryView.findViewById<EditText>(R.id.amount_edittext)
+        val entryView = layoutInflater.inflate(R.layout.recycler_view_item_destination, null) as ConstraintLayout
+        val removeOutputImageButton = entryView.findViewById<ImageButton>(R.id.remove_output_imagebutton)
+        val addressField = entryView.findViewById<EditText>(R.id.transaction_destination_address_edittext)
+        val amountField = entryView.findViewById<EditText>(R.id.transaction_destination_amount_edittext)
         val donateTextView = entryView.findViewById<TextView>(R.id.donate_label)
-        val donatingTextView = entryView.findViewById<TextView>(R.id.donating_label)
+
         donateTextView.setOnClickListener {
-            addressField.setText(
-                Constants.DONATE_ADDRESS
-            )
-        }
-        donatingTextView.setOnClickListener {
-            addressField.setText("")
+            if (addressField.text.toString() == Constants.DONATE_ADDRESS) {
+                addressField.setText("")
+                donateTextView.setText(getString(R.string.donate_label))
+                donateTextView.setTypeface(null, Typeface.NORMAL)
+            } else {
+                addressField.setText(Constants.DONATE_ADDRESS)
+                donateTextView.setText(getString(R.string.donating_label))
+                donateTextView.setTypeface(null, Typeface.BOLD)
+            }
         }
         address?.let { addressField.setText(it) }
         amount?.let { amountField.setText(it) }
@@ -350,28 +352,14 @@ class ActivitySend : MoneroActivity() {
                 }
 
                 if (s.toString() == Constants.DONATE_ADDRESS) {
-                    donateTextView.visibility = View.INVISIBLE
-                    donatingTextView.visibility = View.VISIBLE
+                    donateTextView.setText(getString(R.string.donating_label))
+                    donateTextView.setTypeface(null, Typeface.BOLD)
                 } else {
-                    donateTextView.visibility = View.VISIBLE
-                    donatingTextView.visibility = View.INVISIBLE
+                    donateTextView.setText(getString(R.string.donate_label))
+                    donateTextView.setTypeface(null, Typeface.NORMAL)
                 }
             }
         })
-        entryView.findViewById<View>(R.id.paste_amount_imagebutton)
-            .setOnClickListener {
-                val clipboard = Helper.getClipBoardText(this)
-                if (clipboard != null) {
-                    pasteAddress(entryView, clipboard, true)
-                }
-            }
-        entryView.findViewById<View>(R.id.paste_address_imagebutton)
-            .setOnClickListener {
-                val clipboard = Helper.getClipBoardText(this)
-                if (clipboard != null) {
-                    pasteAddress(entryView, clipboard, false)
-                }
-            }
         entryView.findViewById<View>(R.id.scan_address_imagebutton)
             .setOnClickListener { onScan(index) }
         if (initial) {
@@ -397,8 +385,8 @@ class ActivitySend : MoneroActivity() {
             val destinations = mutableListOf<Pair<String, String>>()
             for (i in 0 until destCount) {
                 val entryView = getDestView(i)
-                val amountField = entryView.findViewById<EditText>(R.id.amount_edittext)
-                val addressField = entryView.findViewById<EditText>(R.id.address_edittext)
+                val amountField = entryView.findViewById<EditText>(R.id.transaction_destination_amount_edittext)
+                val addressField = entryView.findViewById<EditText>(R.id.transaction_destination_address_edittext)
                 val amount = amountField.text.toString().trim { it <= ' ' }
                 val address = addressField.text.toString().trim { it <= ' ' }
                 destinations.add(Pair<String, String>(address, amount))
@@ -414,16 +402,16 @@ class ActivitySend : MoneroActivity() {
 
     private fun unprepareMaxSend() {
         val entryView = getDestView(0)
-        entryView.findViewById<View>(R.id.sending_all_textview).visibility = View.INVISIBLE
-        entryView.findViewById<View>(R.id.amount_edittext).visibility =
-            View.VISIBLE
+        val transactionDestinationAmountEditText = entryView.findViewById<EditText>(R.id.transaction_destination_amount_edittext)
+        transactionDestinationAmountEditText.setText("")
+        transactionDestinationAmountEditText.setFocusableInTouchMode(true)
     }
 
     private fun prepareOutputsForMaxSend() {
         val entryView = getDestView(0)
-        entryView.findViewById<View>(R.id.sending_all_textview).visibility = View.VISIBLE
-        entryView.findViewById<View>(R.id.amount_edittext).visibility =
-            View.INVISIBLE
+        val transactionDestinationAmountEditText = entryView.findViewById<EditText>(R.id.transaction_destination_amount_edittext)
+        transactionDestinationAmountEditText.setText(getString(R.string.sending_all))
+        transactionDestinationAmountEditText.setFocusable(false)
     }
 
     private fun onScan(index: Int) {
@@ -469,7 +457,7 @@ class ActivitySend : MoneroActivity() {
             } else if (currentOutputs == 1 && uriData.hasPaymentId()) {
                 viewModel.setShowAddOutputButton(false)
             }
-            val addressField = entryView.findViewById<EditText>(R.id.address_edittext)
+            val addressField = entryView.findViewById<EditText>(R.id.transaction_destination_address_edittext)
             addressField.setText(uriData.address)
             if (uriData.hasAmount()) {
                 setAmount(entryView, uriData.amount)
@@ -481,7 +469,7 @@ class ActivitySend : MoneroActivity() {
 
     private fun setAmount(entryView: ConstraintLayout, amount: String?) {
         sendMaxButton.isEnabled = false
-        val amountField = entryView.findViewById<EditText>(R.id.amount_edittext)
+        val amountField = entryView.findViewById<EditText>(R.id.transaction_destination_amount_edittext)
         amountField.setText(amount)
     }
 

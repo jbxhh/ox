@@ -6,7 +6,7 @@
     android:id="@+id/send_activity_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/standard_padding"
+    android:padding="@dimen/padding_big"
     tools:context="org.monfluo.wallet.ActivitySend">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:paddingBottom="@dimen/additional_padding"
+        android:paddingBottom="@dimen/padding_big"
         tools:ignore="UseCompoundDrawables">
 
         <ImageView
@@ -38,9 +38,9 @@
             app:layout_constraintTop_toTopOf="@id/back_imageview"
             app:layout_constraintBottom_toBottomOf="@id/back_imageview"
             android:text="@string/send_header"
-            android:textSize="24sp"
+            android:textSize="@dimen/text_bigger"
             android:textStyle="bold"
-            android:textColor="?attr/colorOnPrimary"/>
+            android:textColor="?attr/colorOnPrimary" />
 
         <ImageView
             android:id="@+id/go_to_account_list_imageview"
@@ -49,7 +49,7 @@
             app:layout_constraintEnd_toStartOf="@id/network_status_fragment"
             app:layout_constraintTop_toTopOf="@id/network_status_fragment"
             app:layout_constraintBottom_toBottomOf="@id/network_status_fragment"
-            android:layout_marginHorizontal="@dimen/additional_padding"
+            android:layout_marginHorizontal="@dimen/padding_small"
             android:minHeight="32dp"
             android:minWidth="32dp"
             android:background="@drawable/account_background"
@@ -58,14 +58,14 @@
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/network_status_fragment"
-            android:name="org.monfluo.wallet.fragment.NetworkStatusFragment"
+            android:name="org.monfluo.wallet.fragment.FragmentNetworkStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:background="@color/transparent"
-            tools:layout="@layout/fragment_network_status"/>
+            tools:layout="@layout/fragment_network_status" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -81,26 +81,22 @@
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:contentDescription="@string/add_recipient_to_transaction"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
             android:src="@android:drawable/ic_input_add"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/send_max_button"
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/oled_textColorPrimary"
-            tools:ignore="SpeakableTextPresentCheck"
-            tools:visibility="visible" />
+            tools:ignore="SpeakableTextPresentCheck" />
 
         <Button
             android:id="@+id/send_max_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/button_bg"
+            android:background="@drawable/button_background"
             android:text="@string/send_max"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="visible" />
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
@@ -111,8 +107,9 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
         android:text="@string/selected_utxos_value"
-        android:textSize="14sp"
-        android:visibility="invisible"
+        android:textSize="16sp"
+        android:visibility="gone"
+        android:textColor="?attr/colorOnPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/top_controls" />
@@ -178,22 +175,20 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:fillViewport="true"
-        android:fitsSystemWindows="true"
-        app:layout_constraintBottom_toTopOf="@id/tx_fee_radiogroup"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/selected_utxos_value_textview">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/selected_utxos_value_textview"
+        app:layout_constraintBottom_toTopOf="@id/tx_fee_radiogroup"
+        android:paddingTop="@dimen/padding_small">
 
         <LinearLayout
             android:id="@+id/transaction_destination_list"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="8dp"
+            android:paddingHorizontal="@dimen/padding_big"
             android:clickable="false"
             android:clipToPadding="false"
-            android:orientation="vertical"
-            android:paddingBottom="128dp">
+            android:orientation="vertical">
 
         </LinearLayout>
     </ScrollView>

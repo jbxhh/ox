@@ -17,14 +17,14 @@ import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.model.WalletStatus
 import org.monfluo.wallet.service.wallet.State
 import org.monfluo.wallet.service.wallet.WalletService
-import org.monfluo.wallet.util.acitivity.MoneroActivity
+import org.monfluo.wallet.util.component.ActivityMonero
 import org.monfluo.wallet.R
 import java.text.NumberFormat
 import java.util.Date
 import kotlin.getValue
 import kotlin.math.max
 
-class ActivityNetwork : MoneroActivity() {
+class ActivityNetwork : ActivityMonero() {
 
     private val viewModel: NetworkActivityViewModel by viewModels()
 
@@ -63,10 +63,10 @@ class ActivityNetwork : MoneroActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(layoutView) { _, insetsCompat ->
             val insets = insetsCompat.getInsets(systemBars() or displayCutout())
             layoutView.updatePadding(
-                left = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.left),
-                top = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.top),
-                right = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.bottom)
+                left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
+                top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
+                right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }

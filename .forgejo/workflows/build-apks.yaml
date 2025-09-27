@@ -48,7 +48,7 @@ jobs:
                 --api 21 \
                 --install-dir ${TOOLCHAIN_DIR} \
                 --stl=libc++
-          
+
           cd $WORKDIR
           export CMAKE_VERSION=3.14.6
           export CMAKE_HASH=82e08e50ba921035efa82b859c74c5fbe27d3e49a4003020e3c77618a4e912cd
@@ -91,7 +91,7 @@ jobs:
           set -x \
             && cd boost_${BOOST_VERSION} \
             && ./b2 --build-type=minimal link=static runtime-link=static --with-chrono --with-date_time --with-filesystem --with-program_options --with-regex --with-serialization --with-system --with-thread --with-locale --build-dir=android --stagedir=android toolset=clang threading=multi threadapi=pthread target-os=android -sICONV_PATH=${PREFIX} install -j${NPROC}
-          
+
           cd $WORKDIR
           export ZLIB_VERSION=1.3.1
           export ZLIB_HASH=9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23
@@ -148,7 +148,7 @@ jobs:
             && CC=clang CXX=clang++ ./configure --prefix=${PREFIX} --host=aarch64-linux-android --enable-static --disable-shared \
             && make  -j${NPROC} \
             && make install
-        
+
           cd $WORKDIR
           export LIBEXPAT_VERSION=R_2_4_8
           export LIBEXPAT_HASH=3bab6c09bbe8bf42d84b81563ddbcf4cca4be838
@@ -160,7 +160,7 @@ jobs:
             && CC=clang CXX=clang++ ./configure --prefix=${PREFIX} --host=aarch64-linux-android --enable-static --disable-shared \
             && make  -j${NPROC} \
             && make install
-          
+
           cd $WORKDIR
           export LIBUNBOUND_VERSION=release-1.16.1
           export LIBUNBOUND_HASH=903538c76e1d8eb30d0814bb55c3ef1ea28164e8
@@ -171,7 +171,7 @@ jobs:
             && CC=clang CXX=clang++ ./configure --prefix=${PREFIX} --host=aarch64-linux-android --enable-static --disable-shared --disable-flto --with-ssl=${PREFIX} --with-libexpat=${PREFIX} \
             && make  -j${NPROC} \
             && make install
-          
+
           cd $WORKDIR
           git clone https://github.com/tevador/polyseed.git
           set -x \
@@ -192,14 +192,14 @@ jobs:
             && CC=clang CXX=clang++ cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} .. \
             && make \
             && make install
-          
+
           cd $BASEDIR/external-libs/monero
           CMAKE_INCLUDE_PATH="${PREFIX}/include" \
             CMAKE_LIBRARY_PATH="${PREFIX}/lib" \
             ANDROID_STANDALONE_TOOLCHAIN_PATH=${TOOLCHAIN_DIR} \
             USE_SINGLE_BUILDDIR=1 \
             PATH=${HOST_PATH} make release-static-android-armv8-wallet_api -j${NPROC}
-          
+
           cd $BASEDIR/external-libs/monero/build/release
           find . -path ./lib -prune -o -name '*.a' -exec cp '{}' lib \;
 

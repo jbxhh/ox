@@ -6,9 +6,9 @@
     android:id="@+id/create_wallet_activity_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/standard_padding"
+    android:padding="@dimen/padding_big"
     android:background="@color/transparent"
-    tools:context="org.monfluo.wallet.ActivityWalletCreate">
+    tools:context="org.monfluo.wallet.activity.ActivityWalletCreate">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/create_wallet_activity_main_view"
@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:paddingBottom="@dimen/additional_padding"
+            android:paddingBottom="@dimen/padding_big"
             tools:ignore="UseCompoundDrawables">
 
             <ImageView
@@ -44,9 +44,9 @@
                 app:layout_constraintTop_toTopOf="@id/back_imageview"
                 app:layout_constraintBottom_toBottomOf="@id/back_imageview"
                 android:text="@string/create_wallet_header"
-                android:textSize="24sp"
+                android:textSize="@dimen/text_bigger"
                 android:textStyle="bold"
-                android:textColor="?attr/colorOnPrimary"/>
+                android:textColor="?attr/colorOnPrimary" />
 
             <ImageView
                 android:id="@+id/application_settings_imageview"
@@ -54,7 +54,7 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                android:layout_marginHorizontal="@dimen/additional_padding"
+                android:layout_marginHorizontal="@dimen/padding_small"
                 android:background="@color/transparent"
                 android:src="@drawable/settings"
                 android:minWidth="32dp"
@@ -67,7 +67,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:background="@drawable/edittext_bg"
+            android:background="@drawable/edittext_background"
             android:hint="@string/wallet_name"
             android:inputType="text"
             android:minHeight="48dp"
@@ -82,7 +82,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:background="@drawable/edittext_bg"
+            android:background="@drawable/edittext_background"
             android:hint="@string/wallet_password_hint"
             android:inputType="textPassword"
             android:minHeight="48dp"
@@ -97,7 +97,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:background="@drawable/edittext_bg"
+            android:background="@drawable/edittext_background"
             android:hint="@string/wallet_password_confirm_hint"
             android:inputType="textPassword"
             android:minHeight="48dp"
@@ -117,7 +117,8 @@
             android:paddingTop="4dp"
             android:paddingBottom="4dp"
             android:text="@string/more_options"
-            android:textSize="18sp"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="@dimen/text_big"
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@id/more_options_layout"
             app:layout_constraintEnd_toEndOf="parent"
@@ -133,6 +134,7 @@
             android:minWidth="24dp"
             android:minHeight="24dp"
             android:src="@drawable/ic_keyboard_arrow_down"
+            app:tint="?attr/colorOnPrimary"
             app:layout_constraintBottom_toBottomOf="@id/advanced_settings_dropdown_textview"
             app:layout_constraintStart_toEndOf="@id/advanced_settings_dropdown_textview"
             app:layout_constraintTop_toTopOf="@id/advanced_settings_dropdown_textview" />
@@ -158,6 +160,7 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/button_small_background"
                     tools:text="SEED TYPE"
+                    android:textColor="?attr/colorOnPrimary"
                     android:textSize="12sp"
                     app:layout_constraintBottom_toTopOf="@id/seed_type_desc_textview"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -168,6 +171,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/seed_type"
+                    android:textColor="?attr/colorOnPrimary"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="@id/seed_type_button"
                     app:layout_constraintEnd_toStartOf="@id/seed_type_button"
@@ -181,6 +185,7 @@
                     android:paddingTop="8dp"
                     android:paddingBottom="16dp"
                     tools:text="SEED TYPE DESCRIPTION"
+                    android:textColor="?attr/colorOnPrimary"
                     app:layout_constraintBottom_toTopOf="@id/wallet_seed_edittext"
                     app:layout_constraintTop_toBottomOf="@id/seed_type_button" />
 
@@ -188,7 +193,7 @@
                     android:id="@+id/wallet_seed_edittext"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/edittext_bg"
+                    android:background="@drawable/edittext_background"
                     android:hint="@string/recovery_phrase_optional_polyseed"
                     android:minHeight="48dp"
                     app:layout_constraintBottom_toTopOf="@id/wallet_restore_height_edittext"
@@ -201,7 +206,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:background="@drawable/edittext_bg"
+                    android:background="@drawable/edittext_background"
                     android:hint="@string/restore_height_optional"
                     android:inputType="number"
                     android:minHeight="48dp"
@@ -216,7 +221,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:background="@drawable/edittext_bg"
+                    android:background="@drawable/edittext_background"
                     android:hint="@string/wallet_seed_offset_passphrase"
                     android:minHeight="48dp"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -237,6 +242,6 @@
             android:layout_marginTop="32dp"
             android:enabled="false"
             android:text="@string/create_wallet"
-            app:flow_verticalBias="1"/>
+            app:flow_verticalBias="1" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

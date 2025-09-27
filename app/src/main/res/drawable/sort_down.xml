@@ -9,33 +9,33 @@
       android:strokeWidth="1.5"
       android:fillColor="@color/oled_textColorPrimary"
       android:strokeColor="@color/oled_textColorPrimary"
-      android:strokeLineCap="round"/>
+      android:strokeLineCap="round" />
   <path
       android:pathData="M10,14H2"
       android:strokeLineJoin="round"
       android:strokeWidth="1.5"
       android:fillColor="@color/oled_textColorPrimary"
       android:strokeColor="@color/oled_textColorPrimary"
-      android:strokeLineCap="round"/>
+      android:strokeLineCap="round" />
   <path
       android:pathData="M6,18H2"
       android:strokeLineJoin="round"
       android:strokeWidth="1.5"
       android:fillColor="@color/oled_textColorPrimary"
       android:strokeColor="@color/oled_textColorPrimary"
-      android:strokeLineCap="round"/>
+      android:strokeLineCap="round" />
   <path
       android:pathData="M18,6L2,6"
       android:strokeLineJoin="round"
       android:strokeWidth="1.5"
       android:fillColor="@color/oled_textColorPrimary"
       android:strokeColor="@color/oled_textColorPrimary"
-      android:strokeLineCap="round"/>
+      android:strokeLineCap="round" />
   <path
       android:pathData="M19,10V20M19,20L22,17M19,20L16,17"
       android:strokeLineJoin="round"
       android:strokeWidth="1.5"
       android:fillColor="@color/oled_textColorPrimary"
       android:strokeColor="@color/oled_textColorPrimary"
-      android:strokeLineCap="round"/>
+      android:strokeLineCap="round" />
 </vector>

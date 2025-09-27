@@ -1,6 +1,6 @@
 package org.monfluo.wallet.activity
 
-import org.monfluo.wallet.util.acitivity.MoneroActivity
+import org.monfluo.wallet.util.component.ActivityMonero
 import org.monfluo.wallet.R
 import android.view.View
 import android.widget.ImageView
@@ -13,7 +13,7 @@ import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
 import kotlin.math.max
 
-class ActivityAccountAdd : MoneroActivity() {
+class ActivityAccountAdd : ActivityMonero() {
 
     private lateinit var layoutView: View
     private lateinit var backImageView: ImageView
@@ -25,7 +25,7 @@ class ActivityAccountAdd : MoneroActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_account_add)
 
-        layoutView = findViewById(R.id.activity_account_add_layout_view)
+        layoutView = findViewById(R.id.activity_account_add_layout)
         backImageView = findViewById(R.id.back_imageview)
         accountNameEditText = findViewById(R.id.account_name_edittext)
         addAccountButton = findViewById(R.id.add_account_button)
@@ -38,10 +38,10 @@ class ActivityAccountAdd : MoneroActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(layoutView) { _, insetsCompat ->
             val insets = insetsCompat.getInsets(systemBars() or displayCutout())
             layoutView.updatePadding(
-                left = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.left),
-                top = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.top),
-                right = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.bottom)
+                left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
+                top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
+                right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }

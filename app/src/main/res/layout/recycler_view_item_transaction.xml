@@ -1,56 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/recycler_view_item_transaction_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_marginBottom="@dimen/additional_padding"
-    android:padding="@dimen/medium_padding"
+    android:layout_marginBottom="@dimen/padding_small"
+    android:padding="@dimen/padding_medium"
     android:background="@drawable/card_background"
     android:orientation="horizontal">
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <ImageView
         android:id="@+id/send_or_receive_icon_image_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:background="@color/transparent"
         android:layout_gravity="center"
+        android:background="@color/transparent"
         android:src="@drawable/icon_receive" />
 
-    <androidx.appcompat.widget.AppCompatTextView
+    <TextView
         android:id="@+id/sent_or_received_label_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toEndOf="@id/send_or_receive_icon_image_view"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/transaction_date_text_view"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
+        android:paddingHorizontal="@dimen/padding_medium"
         android:background="@color/transparent"
-        android:textColor="?attr/colorOnPrimary"
         android:text="@string/transaction_type_received"
-        android:textStyle="bold"
-        android:textSize="20sp"/>
+        android:textColor="?attr/colorOnPrimary"
+        android:textSize="@dimen/text_big"
+        android:textStyle="bold" />
 
-    <androidx.appcompat.widget.AppCompatTextView
+    <TextView
         android:id="@+id/transaction_confirmations_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toEndOf="@id/send_or_receive_icon_image_view"
         app:layout_constraintTop_toBottomOf="@id/sent_or_received_label_text_view"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
+        android:paddingHorizontal="@dimen/padding_medium"
         android:background="@color/transparent"
         android:textColor="@color/text_subtle"
-        android:textSize="16sp"
-        tools:text="Confirmations"/>
+        android:textSize="@dimen/text_medium"
+        tools:text="Confirmations" />
 
-    <androidx.appcompat.widget.AppCompatTextView
+    <TextView
         android:id="@+id/transaction_amount_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -59,11 +58,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:background="@color/transparent"
         android:textColor="?attr/colorOnPrimary"
-        android:textSize="18sp"
+        android:textSize="@dimen/text_medium"
         android:fontFamily="monospace"
-        tools:text="Received amount"/>
+        tools:text="Received amount" />
 
-    <androidx.appcompat.widget.AppCompatTextView
+    <TextView
         android:id="@+id/transaction_date_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -72,7 +71,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:background="@color/transparent"
         android:textColor="@color/text_subtle"
-        android:textSize="16sp"
-        tools:text="Transaction date"/>
+        android:textSize="@dimen/text_medium"
+        tools:text="Transaction date" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

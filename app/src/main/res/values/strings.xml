@@ -161,6 +161,7 @@
     <string name="wallet_seed_offset_passphrase">Seed offset passphrase (optional)</string>
     <string name="wallet_name">Wallet name</string>
     <string name="account_name">Account name</string>
+    <string name="address_name">Address name</string>
     <string name="password">Passphrase</string>
     <string name="label">Label</string>
     <string name="unlock">Unlock</string>
@@ -372,21 +373,61 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="content_description_application_settings">Application settings</string>
     <string name="content_description_enotes">Enotes</string>
     <string name="account_label">#<xliff:g>%1$d</xliff:g> <xliff:g>%2$s</xliff:g></string>
+    <string name="address_label">#<xliff:g>%1$d</xliff:g> <xliff:g>%2$s</xliff:g></string>
 
     <string name="network_header">Network</string>
     <string name="accounts_header">Accounts</string>
     <string name="add_account_header">Add account</string>
     <string name="account_details_header">Account details</string>
+    <string name="address_details_header">Address details</string>
     <string name="transaction_header">Transaction</string>
     <string name="send_header">Send</string>
     <string name="pending_transaction_header">Pending transaction</string>
     <string name="create_wallet_header">Create wallet</string>
+    <string name="wallet_secrets_header">Wallet secrets</string>
     <string name="receive_header">Receive</string>
+    <string name="nodes_header">Nodes</string>
+    <string name="add_node_header">Add node</string>
+    <string name="node_details_header">Node details</string>
+    <string name="wallet_details_header">Wallet details</string>
     <string name="settings_header">Settings</string>
     <string name="settings_appearance_header">Appearance</string>
     <string name="settings_features_header">Features</string>
     <string name="settings_behaviour_header">Behaviour</string>
     <string name="settings_security_header">Security</string>
+
+    <string name="activity_node_add_node_name_label">Name</string>
+    <string name="activity_node_add_node_name_placeholder">My Monero Node</string>
+    <string name="activity_node_add_node_address_label">Address</string>
+    <string name="activity_node_add_node_address_placeholder" translatable="false">127.0.0.1:18081</string>
+    <string name="activity_node_add_node_daemon_trusted_label">Trusted daemon</string>
+    <string name="activity_node_add_node_username_label">Username</string>
+    <string name="activity_node_add_node_username_placeholder">Username (optional)</string>
+    <string name="activity_node_add_node_password_label">Password</string>
+    <string name="activity_node_add_node_password_placeholder">Password (optional)</string>
+    <string name="activity_node_add_node_add_button">Add node</string>
+
+    <string name="activity_node_details_node_name_label">Name</string>
+    <string name="activity_node_details_node_name_placeholder">My Monero Node</string>
+    <string name="activity_node_details_node_address_label">Address</string>
+    <string name="activity_node_details_node_address_placeholder" translatable="false">127.0.0.1:18081</string>
+    <string name="activity_node_details_node_daemon_trusted_label">Trusted daemon</string>
+    <string name="activity_node_details_node_username_label">Username</string>
+    <string name="activity_node_details_node_username_placeholder">Username (optional)</string>
+    <string name="activity_node_details_node_password_label">Password</string>
+    <string name="activity_node_details_node_password_placeholder">Password (optional)</string>
+    <string name="activity_node_details_node_delete_button">Delete node</string>
+    <string name="activity_node_details_node_save_button">Save node</string>
+
+    <string name="dialog_delete_node_title">Delete node</string>
+    <string name="dialog_delete_node_message">Are you sure that you want to delete your node?</string>
+    <string name="dialog_delete_node_action_yes">Yes, delete node</string>
+    <string name="dialog_delete_node_action_no">No</string>
+
+    <string name="dialog_delete_wallet_title">Delete wallet</string>
+    <string name="dialog_delete_wallet_message">Are you sure that you want to delete your wallet? This action is irreversible and you will permanently lose your funds unless you have backed up your wallet.</string>
+    <string name="dialog_delete_wallet_action_yes">Yes, delete wallet</string>
+    <string name="dialog_delete_wallet_action_no">No</string>
 
     <string name="content_description_network_status_icon_opening_wallet">Network status - opening wallet</string>
     <string name="content_description_network_status_icon_starting_synchronization">Network status - starting synchronization</string>

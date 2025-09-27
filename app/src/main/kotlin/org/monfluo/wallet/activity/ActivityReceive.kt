@@ -1,7 +1,6 @@
 package org.monfluo.wallet.activity
 
 import android.content.Intent
-import android.app.Activity
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.View
@@ -26,25 +25,24 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.monfluo.wallet.adapter.SubaddressAdapter
-import org.monfluo.wallet.adapter.SubaddressAdapter.SubaddressAdapterListener
-import org.monfluo.wallet.data.Subaddress
-import org.monfluo.wallet.fragment.dialog.EditAddressLabelBottomSheetDialog
+import org.monfluo.wallet.adapter.AdapterAddress
+import org.monfluo.wallet.adapter.AdapterAddress.AdapterAddressListener
+import org.monfluo.wallet.data.Address
 import org.monfluo.wallet.model.Wallet
-import org.monfluo.wallet.service.wallet.SubaddressUpdateReason
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Helper.clipBoardCopy
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.QrCodeHelper
-import org.monfluo.wallet.util.acitivity.MoneroActivity
+import org.monfluo.wallet.util.component.ActivityMonero
 import org.monfluo.wallet.R
+import org.monfluo.wallet.util.Constants
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.max
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
-class ActivityReceive : MoneroActivity() {
+class ActivityReceive : ActivityMonero() {
 
     private val viewModel: ReceiveViewModel by viewModels()
 
@@ -52,6 +50,7 @@ class ActivityReceive : MoneroActivity() {
     private lateinit var backImageView: ImageView
     private lateinit var goToAccountListImageView: ImageView
 
+    private lateinit var mainLayoutView: View
     private lateinit var addressTextView: TextView
     private lateinit var addressLabelTextView: TextView
     private lateinit var addressQrCodeImageView: ImageView
@@ -67,6 +66,7 @@ class ActivityReceive : MoneroActivity() {
         layoutView = findViewById(R.id.receive_activity_view)
         backImageView = findViewById(R.id.back_imageview)
         goToAccountListImageView = findViewById(R.id.go_to_account_list_imageview)
+        mainLayoutView = findViewById(R.id.activity_receive_main_view)
         addressQrCodeImageView = findViewById(R.id.address_qrcode_imageview)
         addressQrCodeIconImageView = findViewById(R.id.address_qrcode_icon_imageview)
         addressTextView = findViewById(R.id.address_textview)
@@ -84,10 +84,10 @@ class ActivityReceive : MoneroActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(layoutView) { _, insetsCompat ->
             val insets = insetsCompat.getInsets(systemBars() or displayCutout())
             layoutView.updatePadding(
-                left = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.left),
-                top = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.top),
-                right = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.bottom)
+                left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
+                top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
+                right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -101,7 +101,11 @@ class ActivityReceive : MoneroActivity() {
             startActivity(Intent(this, ActivityAccountList::class.java))
         }
         freshAddressImageView.setOnClickListener {
-            walletService?.generateNewSubaddress("")
+            walletService?.let { walletService ->
+                walletService.getWalletOrLog()?.let { wallet ->
+                    walletService.generateNewAddress(wallet.getAccountIndex(), "")
+                }
+            }
         }
     }
 
@@ -114,20 +118,20 @@ class ActivityReceive : MoneroActivity() {
             }
         }
 
-        val subaddressAdapterListener = object : SubaddressAdapterListener {
-            override fun onSubaddressSelected(subaddress: Subaddress) {
+        val subAdapterAddressListener = object : AdapterAddressListener {
+            override fun onAddressSelected(subaddress: Address) {
                 viewModel.selectAddress(subaddress, qrCodeBackgroundColor())
             }
 
-            override fun onSubaddressEditLabel(subaddress: Subaddress) {
+            override fun onAddressEditLabel(subaddress: Address) {
                 editAddressLabel(subaddress)
             }
         }
         val streetMode = PreferenceUtils.isStreetMode(this)
-        val adapter = SubaddressAdapter(emptyList(), null, streetMode, subaddressAdapterListener)
+        val adapter = AdapterAddress(emptyList(), null, streetMode, subAdapterAddressListener)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
-        viewModel.selectedSubaddress.observe(this) { address: Subaddress? ->
+        viewModel.selectedAddress.observe(this) { address: Address? ->
             if (address != null) {
                 setAddress(address)
                 adapter.submitSelectedAddress(address)
@@ -141,7 +145,7 @@ class ActivityReceive : MoneroActivity() {
                 addressQrCodeImageView.visibility = View.VISIBLE
             }
         }
-        viewModel.subaddresses.observe(this) { addresses: List<Subaddress> ->
+        viewModel.subaddresses.observe(this) { addresses: List<Address> ->
             // We want newer addresses to be shown first
             adapter.submitAddresses(addresses.reversed())
         }
@@ -157,62 +161,72 @@ class ActivityReceive : MoneroActivity() {
 
     override fun onWalletServiceConnected(walletService: WalletService) {
         walletService.getWallet()?.let { wallet ->
-            viewModel.refreshSubaddresses(this, wallet, qrCodeBackgroundColor())
+            showUi()
+            viewModel.refreshAddresses(wallet, qrCodeBackgroundColor())
             autoRotateAddresses()
         }
     }
 
     override fun onWalletUpdated(wallet: Wallet) {
-        viewModel.refreshSubaddresses(this, wallet, qrCodeBackgroundColor())
-        autoRotateAddresses()
+        runOnUiThread {
+            showUi()
+            viewModel.refreshAddresses(wallet, qrCodeBackgroundColor())
+            autoRotateAddresses()
+        }
     }
 
-    override fun onSubaddressesUpdated(reason: SubaddressUpdateReason) {
-        walletService?.getWallet()?.let { wallet ->
-            val selectLatest = reason == SubaddressUpdateReason.GENERATED_NEW
-            viewModel.refreshSubaddresses(this, wallet, qrCodeBackgroundColor(), selectLatest)
+    override fun onAddressGenerated() {
+        runOnUiThread {
+            walletService?.getWallet()?.let { wallet ->
+                showUi()
+                viewModel.refreshAddresses(wallet, qrCodeBackgroundColor(), true)
+            }
+        }
+    }
+
+    override fun onAddressLabelChanged(accountIndex: Int, addressIndex: Int, label: String) {
+        runOnUiThread {
+            walletService?.getWallet()?.let { wallet ->
+                showUi()
+                viewModel.refreshAddresses(wallet, qrCodeBackgroundColor(), false)
+            }
         }
     }
 
     override fun onAccountSet(index: Int) {
         runOnUiThread {
             walletService?.getWallet()?.let { wallet ->
-                viewModel.refreshSubaddresses(this, wallet, qrCodeBackgroundColor())
+                showUi()
+                viewModel.refreshAddresses(wallet, qrCodeBackgroundColor())
             }
         }
     }
 
-    private fun qrCodeBackgroundColor(): Int = ContextCompat.getColor(this, R.color.oled_colorBackground)
-
-    private fun editAddressLabel(subaddress: Subaddress) {
-        val dialog = EditAddressLabelBottomSheetDialog(subaddress.label) {
-            walletService?.setSubaddressLabel(subaddress.addressIndex, it)
-        }
-        dialog.show(supportFragmentManager, "edit_address_dialog")
+    private fun showUi() {
+        mainLayoutView.visibility = View.VISIBLE
+        freshAddressImageView.visibility = View.VISIBLE
     }
 
-    private fun setAddress(subaddress: Subaddress) {
-        val label = subaddress.displayLabel
-        val address = getString(
-            R.string.subbaddress_info_subtitle,
-            subaddress.addressIndex, subaddress.squashedAddress
-        )
-        addressLabelTextView.text = label.ifEmpty { address }
-        addressLabelTextView.visibility = View.VISIBLE
-        addressTextView.text = subaddress.address
-        addressTextView.visibility = View.VISIBLE
+    private fun qrCodeBackgroundColor(): Int = ContextCompat.getColor(this, R.color.oled_colorBackground)
+
+    private fun editAddressLabel(address: Address) {
+        startActivity(Intent(this, ActivityAddressDetails::class.java).apply {
+            putExtra(Constants.EXTRA_ACCOUNT_INDEX, address.accountIndex)
+            putExtra(Constants.EXTRA_ADDRESS_INDEX, address.addressIndex)
+        })
+    }
+
+    private fun setAddress(address: Address) {
+        addressLabelTextView.text = getString(R.string.address_label, address.addressIndex, address.label)
+        addressTextView.text = address.address
+        if (address.used) {
+            addressTextView.setTextColor(getColor(R.color.text_subtle))
+        } else {
+            addressTextView.setTextColor(getColor(R.color.text))
+        }
+
         copyAddressImageButton.setOnClickListener {
-            clipBoardCopy(
-                this, "address", subaddress.address
-            )
-        }
-        addressLabelTextView.setOnLongClickListener {
-            editAddressLabel(subaddress)
-            true
-        }
-        addressTextView.setOnLongClickListener {
-            editAddressLabel(subaddress)
-            true
+            clipBoardCopy(this, "address", address.address)
         }
     }
 
@@ -223,7 +237,11 @@ class ActivityReceive : MoneroActivity() {
                     val lastAutoRotatedAddress = viewModel.lastAutoRotatedAddress.getAndSet(lastAddress.address)
                     if (lastAddress.address != lastAutoRotatedAddress) {
                         Timber.i("Latest address ${lastAddress.address} has been used, auto-rotating it")
-                        walletService?.generateNewSubaddress("")
+                        walletService?.let { walletService ->
+                            walletService.getWallet()?.let { wallet ->
+                                walletService.generateNewAddress(wallet.getAccountIndex(), "")
+                            }
+                        }
                     } else {
                         Timber.d("Not auto-rotating latest address ${lastAddress.address} because it was already rotated")
                     }
@@ -243,11 +261,11 @@ class ReceiveViewModel : ViewModel() {
     private val _showIconOnQrCodes = MutableLiveData(false)
     val showIconOnQrCodes: LiveData<Boolean> = _showIconOnQrCodes
 
-    private val _selectedSubaddress = MutableLiveData<Subaddress?>()
-    val selectedSubaddress: LiveData<Subaddress?> = _selectedSubaddress
+    private val _selectedAddress = MutableLiveData<Address?>()
+    val selectedAddress: LiveData<Address?> = _selectedAddress
 
-    private val _subaddresses = MutableLiveData<List<Subaddress>>()
-    val subaddresses: LiveData<List<Subaddress>> = _subaddresses
+    private val _subaddresses = MutableLiveData<List<Address>>()
+    val subaddresses: LiveData<List<Address>> = _subaddresses
 
     private val _addressAndQrCode = MutableLiveData<Pair<String, Bitmap?>?>()
     val qrCode: LiveData<Bitmap?> = _addressAndQrCode.map { it?.second }
@@ -256,22 +274,20 @@ class ReceiveViewModel : ViewModel() {
         _showIconOnQrCodes.value = showIconOnQrCodes
     }
 
-    fun refreshSubaddresses(activity: Activity, wallet: Wallet, backgroundColor: Int, selectLatest: Boolean = false) {
-        activity.runOnUiThread {
-            val newSubaddresses = (0 until wallet.numSubaddresses).map { wallet.getSubaddressObject(it) }
-            _subaddresses.value = newSubaddresses
+    fun refreshAddresses(wallet: Wallet, backgroundColor: Int, selectLatest: Boolean = false) {
+        val newAddresses = (0 until wallet.numAddresses).map { wallet.getAddressObject(it) }
+        _subaddresses.value = newAddresses
 
-            val currentSelectedSubaddress = selectedSubaddress.value
-            if (currentSelectedSubaddress == null || selectLatest) {
-                selectAddress(newSubaddresses.lastOrNull(), backgroundColor)
-            } else {
-                selectAddress(newSubaddresses.getOrNull(currentSelectedSubaddress.addressIndex), backgroundColor)
-            }
+        val currentSelectedAddress = selectedAddress.value
+        if (currentSelectedAddress == null || selectLatest) {
+            selectAddress(newAddresses.lastOrNull(), backgroundColor)
+        } else {
+            selectAddress(newAddresses.getOrNull(currentSelectedAddress.addressIndex), backgroundColor)
         }
     }
 
-    fun selectAddress(subaddress: Subaddress?, backgroundColor: Int) {
-        _selectedSubaddress.value = subaddress
+    fun selectAddress(subaddress: Address?, backgroundColor: Int) {
+        _selectedAddress.value = subaddress
         qrCodeJob.getAndUpdate { job ->
             job?.cancel()
             if (_addressAndQrCode.value?.first != subaddress?.address) {

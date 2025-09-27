@@ -34,14 +34,14 @@ import org.monfluo.wallet.model.WalletStatus
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
-import org.monfluo.wallet.util.acitivity.LoggingActivity
+import org.monfluo.wallet.util.component.ActivityLogging
 import org.monfluo.wallet.R
 import org.monfluo.wallet.MoneroApplication
 import timber.log.Timber
 import java.io.File
 import kotlin.math.max
 
-class ActivityWalletCreate : LoggingActivity() {
+class ActivityWalletCreate : ActivityLogging() {
 
     private val viewModel: CreateWalletViewModel by viewModels()
 
@@ -96,10 +96,10 @@ class ActivityWalletCreate : LoggingActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(layoutView) { _, insetsCompat ->
             val insets = insetsCompat.getInsets(systemBars() or displayCutout())
             layoutView.updatePadding(
-                left = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.left),
-                top = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.top),
-                right = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.bottom)
+                left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
+                top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
+                right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -121,7 +121,7 @@ class ActivityWalletCreate : LoggingActivity() {
         }
 
         applicationSettingsImageView.setOnClickListener {
-            startActivity(Intent(this, ActivitySettingsApplication::class.java))
+            startActivity(Intent(this, ActivityApplicationSettings::class.java))
         }
 
         moreOptionsDropdownTextView.setOnClickListener { viewModel.showMoreOptions.value = !viewModel.showMoreOptions.value!! }

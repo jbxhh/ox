@@ -51,25 +51,6 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlin.io.path.Path
 import kotlin.io.path.name
 
-private const val EXTRA_WALLET_NAME = "wallet_name"
-private const val EXTRA_WALLET_PASSWORD = "wallet_password"
-private const val EXTRA_DAEMON_ADDRESS = "daemon_address"
-private const val EXTRA_DAEMON_USERNAME = "daemon_username"
-private const val EXTRA_DAEMON_PASSWORD = "daemon_password"
-private const val EXTRA_DAEMON_TRUSTED = "daemon_trusted"
-private const val EXTRA_SUBADDRESS_LABEL = "subaddress_label"
-private const val EXTRA_SUBADDRESS_INDEX = "subaddress_index"
-private const val EXTRA_ACCOUNT_LABEL = "account_label"
-private const val EXTRA_ACCOUNT_INDEX = "account_index"
-private const val EXTRA_TRANSACTION_DESTINATION = "transaction_destination"
-private const val EXTRA_TRANSACTION_DESTINATIONS = "transaction_destinations"
-private const val EXTRA_TRANSACTION_PRIORITY = "transaction_priority"
-private const val EXTRA_TRANSACTION_SELECTED_UTXOS = "transaction_selected_utxos"
-private const val EXTRA_PENDING_TRANSACTION = "pending_transaction"
-private const val EXTRA_PROXY = "proxy"
-private const val EXTRA_ENOTE = "enote"
-private const val EXTRA_ENOTES = "enotes"
-
 class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
 
     companion object {
@@ -137,66 +118,67 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
                     Timber.e("WalletHandler received UNKNOWN(%d) command", commandType)
                 }
                 WalletServiceCommand.INIT_WALLET -> {
-                    val daemonAddress = data.getString(EXTRA_DAEMON_ADDRESS)!!
-                    val daemonUsername = data.getString(EXTRA_DAEMON_USERNAME)!!
-                    val daemonPassword = data.getString(EXTRA_DAEMON_PASSWORD)!!
-                    val daemonTrusted = data.getBoolean(EXTRA_DAEMON_TRUSTED, false)
-                    val proxy = data.getString(EXTRA_PROXY)!!
+                    val daemonAddress = data.getString(Constants.EXTRA_DAEMON_ADDRESS)!!
+                    val daemonUsername = data.getString(Constants.EXTRA_DAEMON_USERNAME)!!
+                    val daemonPassword = data.getString(Constants.EXTRA_DAEMON_PASSWORD)!!
+                    val daemonTrusted = data.getBoolean(Constants.EXTRA_DAEMON_TRUSTED, false)
+                    val proxy = data.getString(Constants.EXTRA_PROXY)!!
                     handleInitWallet(daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
                 }
                 WalletServiceCommand.OPEN_WALLET -> {
-                    val walletName = data.getString(EXTRA_WALLET_NAME)!!
-                    val walletPassword = data.getString(EXTRA_WALLET_PASSWORD)!!
-                    val daemonAddress = data.getString(EXTRA_DAEMON_ADDRESS)!!
-                    val daemonUsername = data.getString(EXTRA_DAEMON_USERNAME)!!
-                    val daemonPassword = data.getString(EXTRA_DAEMON_PASSWORD)!!
-                    val daemonTrusted = data.getBoolean(EXTRA_DAEMON_TRUSTED, false)
-                    val proxy = data.getString(EXTRA_PROXY)!!
-                    handleOpenWallet(walletName, walletPassword, daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
+                    val walletPath = data.getString(Constants.EXTRA_WALLET_PATH)!!
+                    val walletPassword = data.getString(Constants.EXTRA_WALLET_PASSWORD)!!
+                    val daemonAddress = data.getString(Constants.EXTRA_DAEMON_ADDRESS)!!
+                    val daemonUsername = data.getString(Constants.EXTRA_DAEMON_USERNAME)!!
+                    val daemonPassword = data.getString(Constants.EXTRA_DAEMON_PASSWORD)!!
+                    val daemonTrusted = data.getBoolean(Constants.EXTRA_DAEMON_TRUSTED, false)
+                    val proxy = data.getString(Constants.EXTRA_PROXY)!!
+                    handleOpenWallet(walletPath, walletPassword, daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
                 }
                 WalletServiceCommand.CLOSE_WALLET -> {
                     handleCloseWallet()
                 }
                 WalletServiceCommand.SET_DAEMON_ADDRESS -> {
-                    val daemonAddress = data.getString(EXTRA_DAEMON_ADDRESS)!!
-                    val daemonUsername = data.getString(EXTRA_DAEMON_USERNAME)!!
-                    val daemonPassword = data.getString(EXTRA_DAEMON_PASSWORD)!!
-                    val daemonTrusted = data.getBoolean(EXTRA_DAEMON_TRUSTED, false)
-                    val proxy = data.getString(EXTRA_PROXY)!!
+                    val daemonAddress = data.getString(Constants.EXTRA_DAEMON_ADDRESS)!!
+                    val daemonUsername = data.getString(Constants.EXTRA_DAEMON_USERNAME)!!
+                    val daemonPassword = data.getString(Constants.EXTRA_DAEMON_PASSWORD)!!
+                    val daemonTrusted = data.getBoolean(Constants.EXTRA_DAEMON_TRUSTED, false)
+                    val proxy = data.getString(Constants.EXTRA_PROXY)!!
                     setDaemonAddress(daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
                 }
                 WalletServiceCommand.FETCH_BLOCKCHAIN_AND_TARGET_HEIGHTS -> {
                     handleFetchBlockchainAndTargetHeights()
                 }
                 WalletServiceCommand.GENERATE_NEW_ADDRESS -> {
-                    val subaddressLabel = data.getString(EXTRA_SUBADDRESS_LABEL)!!
-                    handleGenerateNewSubaddress(subaddressLabel)
+                    val subaddressLabel = data.getString(Constants.EXTRA_ADDRESS_LABEL)!!
+                    handleGenerateNewAddress(subaddressLabel)
                 }
                 WalletServiceCommand.SET_ADDRESS_LABEL -> {
-                    val subaddressIndex = data.getInt(EXTRA_SUBADDRESS_INDEX)
-                    val subaddressLabel = data.getString(EXTRA_SUBADDRESS_LABEL)!!
-                    handleSetSubaddressLabel(subaddressIndex, subaddressLabel)
+                    val accountIndex = data.getInt(Constants.EXTRA_ACCOUNT_INDEX)
+                    val addressIndex = data.getInt(Constants.EXTRA_ADDRESS_INDEX)
+                    val addressLabel = data.getString(Constants.EXTRA_ADDRESS_LABEL)!!
+                    handleSetAddressLabel(accountIndex, addressIndex, addressLabel)
                 }
                 WalletServiceCommand.CREATE_SWEEP_TX -> {
-                    val transactionDestination = data.getString(EXTRA_TRANSACTION_DESTINATION)!!
+                    val transactionDestination = data.getString(Constants.EXTRA_TRANSACTION_DESTINATION)!!
                     val transactionPriority = PendingTransaction.Priority.fromInteger(message.data.getInt(
-                        EXTRA_TRANSACTION_PRIORITY
+                        Constants.EXTRA_TRANSACTION_PRIORITY
                     ))!!
                     val selectedUtxos = message.data.getStringArrayList(
-                        EXTRA_TRANSACTION_SELECTED_UTXOS
+                        Constants.EXTRA_TRANSACTION_SELECTED_UTXOS
                     )!!
                     handleCreateSweepTransaction(transactionDestination, transactionPriority, selectedUtxos)
                 }
                 WalletServiceCommand.CREATE_TX -> {
                 Timber.d("Received message to create a transaction")
                     val transactionDestinations = data.getParcelableArrayList<TransactionDestinationWithAmount>(
-                        EXTRA_TRANSACTION_DESTINATIONS
+                        Constants.EXTRA_TRANSACTION_DESTINATIONS
                     )!!
                     val transactionPriority = PendingTransaction.Priority.fromInteger(message.data.getInt(
-                        EXTRA_TRANSACTION_PRIORITY
+                        Constants.EXTRA_TRANSACTION_PRIORITY
                     ))!!
                     val selectedUtxos = message.data.getStringArrayList(
-                        EXTRA_TRANSACTION_SELECTED_UTXOS
+                        Constants.EXTRA_TRANSACTION_SELECTED_UTXOS
                     )!!
                     handleCreateTransaction(transactionDestinations, transactionPriority, selectedUtxos)
                 }
@@ -209,28 +191,28 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
                     }
                 }
                 WalletServiceCommand.SET_PROXY -> {
-                    val proxy = data.getString(EXTRA_PROXY)!!
+                    val proxy = data.getString(Constants.EXTRA_PROXY)!!
                     handleSetProxy(proxy)
                 }
                 WalletServiceCommand.FREEZE_ENOTES -> {
-                    val enotes = data.getLongArray(EXTRA_ENOTES)!!
+                    val enotes = data.getLongArray(Constants.EXTRA_ENOTES)!!
                     handleFreezeEnotes(enotes)
                 }
                 WalletServiceCommand.THAW_ENOTES -> {
-                    val enotes = data.getLongArray(EXTRA_ENOTES)!!
+                    val enotes = data.getLongArray(Constants.EXTRA_ENOTES)!!
                     handleThawEnotes(enotes)
                 }
                 WalletServiceCommand.CREATE_ACCOUNT -> {
-                    val label = data.getString(EXTRA_ACCOUNT_LABEL)
+                    val label = data.getString(Constants.EXTRA_ACCOUNT_LABEL)
                     handleCreateAccount(label)
                 }
                 WalletServiceCommand.SET_ACCOUNT -> {
-                    val index = data.getInt(EXTRA_ACCOUNT_INDEX)
+                    val index = data.getInt(Constants.EXTRA_ACCOUNT_INDEX)
                     handleSetAccount(index)
                 }
                 WalletServiceCommand.SET_ACCOUNT_LABEL -> {
-                    val index = data.getInt(EXTRA_ACCOUNT_INDEX)
-                    val label = data.getString(EXTRA_ACCOUNT_LABEL)!!
+                    val index = data.getInt(Constants.EXTRA_ACCOUNT_INDEX)
+                    val label = data.getString(Constants.EXTRA_ACCOUNT_LABEL)!!
                     handleSetAccountLabel(index, label)
                 }
             }
@@ -367,22 +349,22 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             }
         }
 
-        private fun handleGenerateNewSubaddress(label: String) {
+        private fun handleGenerateNewAddress(label: String) {
             val wallet = getWalletOrThrow()
-            wallet.addSubaddress(wallet.getAccountIndex(), label)
+            wallet.addAddress(wallet.getAccountIndex(), label)
             wallet.store()
             updateWallet(wallet)
             forEachObserver {
-                it.onSubaddressesUpdated(SubaddressUpdateReason.GENERATED_NEW)
+                it.onAddressGenerated()
             }
         }
 
-        private fun handleSetSubaddressLabel(index: Int, label: String) {
+        private fun handleSetAddressLabel(accountIndex: Int, addressIndex: Int, label: String) {
             val wallet = getWalletOrThrow()
-            wallet.setSubaddressLabel(index, label)
+            wallet.setAddressLabel(accountIndex, addressIndex, label)
             wallet.store()
             forEachObserver {
-                it.onSubaddressesUpdated(SubaddressUpdateReason.LABEL_CHANGED)
+                it.onAddressLabelChanged(accountIndex, addressIndex, label)
             }
         }
 
@@ -865,17 +847,17 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         closeWallet()
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.INIT_WALLET.value()
-        message.data.putString(EXTRA_DAEMON_ADDRESS, daemonAddress)
-        message.data.putString(EXTRA_DAEMON_USERNAME, daemonUsername)
-        message.data.putString(EXTRA_DAEMON_PASSWORD, daemonPassword)
-        message.data.putBoolean(EXTRA_DAEMON_TRUSTED, daemonTrusted)
-        message.data.putString(EXTRA_PROXY, proxy)
+        message.data.putString(Constants.EXTRA_DAEMON_ADDRESS, daemonAddress)
+        message.data.putString(Constants.EXTRA_DAEMON_USERNAME, daemonUsername)
+        message.data.putString(Constants.EXTRA_DAEMON_PASSWORD, daemonPassword)
+        message.data.putBoolean(Constants.EXTRA_DAEMON_TRUSTED, daemonTrusted)
+        message.data.putString(Constants.EXTRA_PROXY, proxy)
         handler.sendMessage(message)
     }
 
     // used by activities that [want to] OPEN wallets (but do not have one opened yet)
     fun openWallet(
-        walletName: String,
+        walletPath: String,
         walletPassword: String,
         daemonAddress: String,
         daemonUsername: String,
@@ -886,13 +868,13 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         closeWallet()
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.OPEN_WALLET.value()
-        message.data.putString(EXTRA_WALLET_NAME, walletName)
-        message.data.putString(EXTRA_WALLET_PASSWORD, walletPassword)
-        message.data.putString(EXTRA_DAEMON_ADDRESS, daemonAddress)
-        message.data.putString(EXTRA_DAEMON_USERNAME, daemonUsername)
-        message.data.putString(EXTRA_DAEMON_PASSWORD, daemonPassword)
-        message.data.putBoolean(EXTRA_DAEMON_TRUSTED, daemonTrusted)
-        message.data.putString(EXTRA_PROXY, proxy)
+        message.data.putString(Constants.EXTRA_WALLET_PATH, walletPath)
+        message.data.putString(Constants.EXTRA_WALLET_PASSWORD, walletPassword)
+        message.data.putString(Constants.EXTRA_DAEMON_ADDRESS, daemonAddress)
+        message.data.putString(Constants.EXTRA_DAEMON_USERNAME, daemonUsername)
+        message.data.putString(Constants.EXTRA_DAEMON_PASSWORD, daemonPassword)
+        message.data.putBoolean(Constants.EXTRA_DAEMON_TRUSTED, daemonTrusted)
+        message.data.putString(Constants.EXTRA_PROXY, proxy)
         handler.sendMessage(message)
     }
 
@@ -911,11 +893,11 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
     ) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.SET_DAEMON_ADDRESS.value()
-        message.data.putString(EXTRA_DAEMON_ADDRESS, daemonAddress)
-        message.data.putString(EXTRA_DAEMON_USERNAME, daemonUsername)
-        message.data.putString(EXTRA_DAEMON_PASSWORD, daemonPassword)
-        message.data.putBoolean(EXTRA_DAEMON_TRUSTED, daemonTrusted)
-        message.data.putString(EXTRA_PROXY, proxy)
+        message.data.putString(Constants.EXTRA_DAEMON_ADDRESS, daemonAddress)
+        message.data.putString(Constants.EXTRA_DAEMON_USERNAME, daemonUsername)
+        message.data.putString(Constants.EXTRA_DAEMON_PASSWORD, daemonPassword)
+        message.data.putBoolean(Constants.EXTRA_DAEMON_TRUSTED, daemonTrusted)
+        message.data.putString(Constants.EXTRA_PROXY, proxy)
         handler.sendMessage(message)
     }
 
@@ -925,34 +907,35 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         handler.sendMessage(message)
     }
 
-    fun generateNewSubaddress(label: String) {
+    fun generateNewAddress(accountIndex: Int, label: String) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.GENERATE_NEW_ADDRESS.value()
-        message.data.putString(EXTRA_SUBADDRESS_LABEL, label)
+        message.data.putString(Constants.EXTRA_ADDRESS_LABEL, label)
         handler.sendMessage(message)
     }
 
-    fun setSubaddressLabel(index: Int, label: String) {
+    fun setAddressLabel(accountIndex: Int, addressIndex: Int, label: String) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.SET_ADDRESS_LABEL.value()
-        message.data.putInt(EXTRA_SUBADDRESS_INDEX, index)
-        message.data.putString(EXTRA_SUBADDRESS_LABEL, label)
+        message.data.putInt(Constants.EXTRA_ACCOUNT_INDEX, accountIndex)
+        message.data.putInt(Constants.EXTRA_ADDRESS_INDEX, addressIndex)
+        message.data.putString(Constants.EXTRA_ADDRESS_LABEL, label)
         handler.sendMessage(message)
     }
 
     fun sendTransaction(pendingTransaction: PendingTransaction) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.SEND_TX.value()
-        message.data.putLong(EXTRA_PENDING_TRANSACTION, pendingTransaction.handle)
+        message.data.putLong(Constants.EXTRA_PENDING_TRANSACTION, pendingTransaction.handle)
         handler.sendMessage(message)
     }
 
     fun createSweepTransaction(destination: String, priority: PendingTransaction.Priority, selectedUtxos: ArrayList<String>) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.CREATE_SWEEP_TX.value()
-        message.data.putString(EXTRA_TRANSACTION_DESTINATION, destination)
-        message.data.putInt(EXTRA_TRANSACTION_PRIORITY, priority.value)
-        message.data.putStringArrayList(EXTRA_TRANSACTION_SELECTED_UTXOS, selectedUtxos)
+        message.data.putString(Constants.EXTRA_TRANSACTION_DESTINATION, destination)
+        message.data.putInt(Constants.EXTRA_TRANSACTION_PRIORITY, priority.value)
+        message.data.putStringArrayList(Constants.EXTRA_TRANSACTION_SELECTED_UTXOS, selectedUtxos)
         handler.sendMessage(message)
     }
 
@@ -960,52 +943,52 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         Timber.d("Sending message to create a transaction")
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.CREATE_TX.value()
-        message.data.putParcelableArrayList(EXTRA_TRANSACTION_DESTINATIONS, ArrayList(destinations))
-        message.data.putInt(EXTRA_TRANSACTION_PRIORITY, priority.value)
-        message.data.putStringArrayList(EXTRA_TRANSACTION_SELECTED_UTXOS, selectedUtxos)
+        message.data.putParcelableArrayList(Constants.EXTRA_TRANSACTION_DESTINATIONS, ArrayList(destinations))
+        message.data.putInt(Constants.EXTRA_TRANSACTION_PRIORITY, priority.value)
+        message.data.putStringArrayList(Constants.EXTRA_TRANSACTION_SELECTED_UTXOS, selectedUtxos)
         handler.sendMessage(message)
     }
 
     fun setProxy(value: String) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.SET_PROXY.value()
-        message.data.putString(EXTRA_PROXY, value)
+        message.data.putString(Constants.EXTRA_PROXY, value)
         handler.sendMessage(message)
     }
 
     fun freezeEnote(enotes: List<Long>) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.FREEZE_ENOTES.value()
-        message.data.putLongArray(EXTRA_ENOTES, enotes.toLongArray())
+        message.data.putLongArray(Constants.EXTRA_ENOTES, enotes.toLongArray())
         handler.sendMessage(message)
     }
 
     fun thawEnote(enotes: List<Long>) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.THAW_ENOTES.value()
-        message.data.putLongArray(EXTRA_ENOTES, enotes.toLongArray())
+        message.data.putLongArray(Constants.EXTRA_ENOTES, enotes.toLongArray())
         handler.sendMessage(message)
     }
 
     fun createAccount(label: String? = null) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.CREATE_ACCOUNT.value()
-        message.data.putString(EXTRA_ACCOUNT_LABEL, label)
+        message.data.putString(Constants.EXTRA_ACCOUNT_LABEL, label)
         handler.sendMessage(message)
     }
 
     fun setAccount(index: Int) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.SET_ACCOUNT.value()
-        message.data.putInt(EXTRA_ACCOUNT_INDEX, index)
+        message.data.putInt(Constants.EXTRA_ACCOUNT_INDEX, index)
         handler.sendMessage(message)
     }
 
     fun setAccountLabel(index: Int, label: String) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.SET_ACCOUNT_LABEL.value()
-        message.data.putInt(EXTRA_ACCOUNT_INDEX, index)
-        message.data.putString(EXTRA_ACCOUNT_LABEL, label)
+        message.data.putInt(Constants.EXTRA_ACCOUNT_INDEX, index)
+        message.data.putString(Constants.EXTRA_ACCOUNT_LABEL, label)
         handler.sendMessage(message)
     }
 }
@@ -1014,18 +997,14 @@ interface WalletServiceObserver : LifecycleOwner {
     fun onWalletUpdated(wallet: Wallet) {}
     fun onNewBlock(wallet: Wallet) {}
     fun onBlockchainAndTargetHeightsFetched(blockchainHeight: Long, targetHeight: Long) {}
-    fun onSubaddressesUpdated(reason: SubaddressUpdateReason) {}
+    fun onAddressGenerated() {}
+    fun onAddressLabelChanged(accountIndex: Int, addressIndex: Int, label: String) {}
     fun onTransactionCreated(pendingTransaction: PendingTransaction) {}
     fun onTransactionSent(pendingTransaction: PendingTransaction, success: Boolean) {}
     fun onProxyUpdated(proxy: String, success: Boolean) {}
     fun onAccountCreated() {}
     fun onAccountSet(index: Int) {}
     fun onAccountLabelChanged(index: Int, label: String) {}
-}
-
-enum class SubaddressUpdateReason {
-    LABEL_CHANGED,
-    GENERATED_NEW,
 }
 
 data class State(

@@ -17,17 +17,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.monfluo.wallet.adapter.EnotesAdapter
+import org.monfluo.wallet.adapter.AdapterEnote
 import org.monfluo.wallet.model.Enote
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.PreferenceUtils
-import org.monfluo.wallet.util.acitivity.MoneroActivity
+import org.monfluo.wallet.util.component.ActivityMonero
 import org.monfluo.wallet.R
 import kotlin.math.max
 
-class ActivityEnoteList : MoneroActivity() {
+class ActivityEnoteList : ActivityMonero() {
 
     private val viewModel: EnotesViewModel by viewModels()
 
@@ -40,7 +40,7 @@ class ActivityEnoteList : MoneroActivity() {
     private lateinit var sendUtxosButton: Button
     private lateinit var unfreezeUtxosButton: Button
     private lateinit var enotesRecyclerView: RecyclerView
-    private lateinit var adapter: EnotesAdapter
+    private lateinit var adapter: AdapterEnote
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +56,7 @@ class ActivityEnoteList : MoneroActivity() {
         enotesRecyclerView = findViewById(R.id.transaction_history_recyclerview)
 
         val streetMode = PreferenceUtils.isStreetMode(this)
-        adapter = EnotesAdapter(listOf(), streetMode, object : EnotesAdapter.EnotesAdapterListener {
+        adapter = AdapterEnote(listOf(), streetMode, object : AdapterEnote.AdapterEnoteListener {
             override fun onEnoteSelected(enote: Enote) {
                 val selected = adapter.contains(enote)
                 if (selected) {
@@ -94,10 +94,10 @@ class ActivityEnoteList : MoneroActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(layoutView) { _, insetsCompat ->
             val insets = insetsCompat.getInsets(systemBars() or displayCutout())
             layoutView.updatePadding(
-                left = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.left),
-                top = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.top),
-                right = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.standard_padding), insets.bottom)
+                left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
+                top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
+                right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -159,8 +159,8 @@ class ActivityEnoteList : MoneroActivity() {
 
     private fun updateState(wallet: Wallet) {
         val enotes = wallet.getEnotes()
-        val addresses = (0 until wallet.numSubaddresses).map {
-            wallet.getSubaddress(wallet.getAccountIndex(), it)
+        val addresses = (0 until wallet.numAddresses).map {
+            wallet.getAddress(wallet.getAccountIndex(), it)
         }.toSet()
         val filteredEnotes = enotes.filter {
             it.address != null && addresses.contains(it.address)
