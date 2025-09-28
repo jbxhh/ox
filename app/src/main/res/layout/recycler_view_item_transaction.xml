@@ -1,73 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/recycler_view_item_transaction_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="2dp"
-    android:background="@color/oled_txBackgroundColor"
-    android:padding="16dp">
+    android:layout_marginBottom="@dimen/padding_small"
+    android:padding="@dimen/padding_medium"
+    android:background="@drawable/card_background"
+    android:orientation="horizontal">
 
-    <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@+id/pbConfirmations"
+    <ImageView
+        android:id="@+id/send_or_receive_icon_image_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminate="false"
-        android:max="10"
-        android:progress="8"
-        android:visibility="visible"
-        app:indicatorInset="0dp"
-        app:indicatorSize="30dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:trackThickness="4dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_gravity="center"
+        android:background="@color/transparent"
+        android:src="@drawable/icon_receive" />
 
     <TextView
-        android:id="@+id/tvConfirmations"
-        style="@style/MoneroText.Small"
+        android:id="@+id/sent_or_received_label_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingBottom="1dp"
-        tools:text="8"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="@id/pbConfirmations"
-        app:layout_constraintEnd_toEndOf="@id/pbConfirmations"
-        app:layout_constraintStart_toStartOf="@id/pbConfirmations"
-        app:layout_constraintTop_toTopOf="@id/pbConfirmations" />
+        app:layout_constraintStart_toEndOf="@id/send_or_receive_icon_image_view"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/transaction_date_text_view"
+        android:paddingHorizontal="@dimen/padding_medium"
+        android:background="@color/transparent"
+        android:text="@string/transaction_type_received"
+        android:textColor="?attr/colorOnPrimary"
+        android:textSize="@dimen/text_big"
+        android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/tx_amount"
-        style="@style/MoneroText.PosAmount"
-        android:layout_width="0dp"
+        android:id="@+id/transaction_confirmations_text_view"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        app:layout_constraintBottom_toTopOf="@id/tx_failed"
-        app:layout_constraintEnd_toStartOf="@id/tx_datetime"
-        app:layout_constraintStart_toEndOf="@id/pbConfirmations"
-        app:layout_constraintTop_toTopOf="@id/pbConfirmations"
-        tools:text="+ 999.999999" />
+        app:layout_constraintStart_toEndOf="@id/send_or_receive_icon_image_view"
+        app:layout_constraintTop_toBottomOf="@id/sent_or_received_label_text_view"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:paddingHorizontal="@dimen/padding_medium"
+        android:background="@color/transparent"
+        android:textColor="@color/text_subtle"
+        android:textSize="@dimen/text_medium"
+        tools:text="Confirmations" />
 
     <TextView
-        android:id="@+id/tx_failed"
-        style="@style/MoneroText.PosFee"
-        android:layout_width="0dp"
+        android:id="@+id/transaction_amount_text_view"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="@string/tx_list_failed_text"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/pbConfirmations"
-        app:layout_constraintStart_toEndOf="@id/pbConfirmations"
-        app:layout_constraintTop_toBottomOf="@id/tx_amount" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/transaction_confirmations_text_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="@color/transparent"
+        android:textColor="?attr/colorOnPrimary"
+        android:textSize="@dimen/text_medium"
+        android:fontFamily="monospace"
+        tools:text="Received amount" />
 
     <TextView
-        android:id="@+id/tx_datetime"
-        style="@style/MoneroText.PosDate"
-        android:layout_width="0dp"
+        android:id="@+id/transaction_date_text_view"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/transaction_amount_text_view"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="2017-05-22 21:32" />
+        android:background="@color/transparent"
+        android:textColor="@color/text_subtle"
+        android:textSize="@dimen/text_medium"
+        tools:text="Transaction date" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

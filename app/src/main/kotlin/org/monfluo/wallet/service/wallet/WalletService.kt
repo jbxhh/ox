@@ -21,9 +21,9 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import org.monfluo.wallet.BuildConfig
-import org.monfluo.wallet.HomeActivity
+import org.monfluo.wallet.activity.ActivityHome
 import org.monfluo.wallet.R
-import org.monfluo.wallet.TransactionActivity
+import org.monfluo.wallet.activity.ActivityTransactionDetails
 import org.monfluo.wallet.data.Heights
 import org.monfluo.wallet.data.SynchronizationStatus
 import org.monfluo.wallet.model.PendingTransaction
@@ -36,36 +36,20 @@ import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.model.Wallet.Companion.NEW_ACCOUNT_NAME
 import org.monfluo.wallet.model.WalletListener
 import org.monfluo.wallet.model.WalletManager
+import org.monfluo.wallet.model.WalletStatusWithError
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Constants.FOREGROUND_SERVICE_NOTIFICATION_CHANNEL
 import org.monfluo.wallet.util.Constants.TRANSFERS_NOTIFICATION_CHANNEL
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
 import timber.log.Timber
+import java.time.Clock
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
-
-private const val EXTRA_WALLET_NAME = "wallet_name"
-private const val EXTRA_WALLET_PASSWORD = "wallet_password"
-private const val EXTRA_DAEMON_ADDRESS = "daemon_address"
-private const val EXTRA_DAEMON_USERNAME = "daemon_username"
-private const val EXTRA_DAEMON_PASSWORD = "daemon_password"
-private const val EXTRA_DAEMON_TRUSTED = "daemon_trusted"
-private const val EXTRA_SUBADDRESS_LABEL = "subaddress_label"
-private const val EXTRA_SUBADDRESS_INDEX = "subaddress_index"
-private const val EXTRA_ACCOUNT_LABEL = "account_label"
-private const val EXTRA_ACCOUNT_INDEX = "account_index"
-private const val EXTRA_TRANSACTION_DESTINATION = "transaction_destination"
-private const val EXTRA_TRANSACTION_DESTINATIONS = "transaction_destinations"
-private const val EXTRA_TRANSACTION_PRIORITY = "transaction_priority"
-private const val EXTRA_TRANSACTION_SELECTED_UTXOS = "transaction_selected_utxos"
-private const val EXTRA_PENDING_TRANSACTION = "pending_transaction"
-private const val EXTRA_PROXY = "proxy"
-private const val EXTRA_ENOTE = "enote"
-private const val EXTRA_ENOTES = "enotes"
+import kotlin.io.path.Path
+import kotlin.io.path.name
 
 class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
 
@@ -78,15 +62,18 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         private const val DELETE_NOTIFICATION_ACTION = "${BuildConfig.APPLICATION_ID}.DELETE_NOTIFICATION"
     }
 
+    private val clock = Clock.systemUTC()
+
     private val broadcastReceiver = WalletServiceBroadcastReceiver()
 
     private val transactionNotifications = mutableMapOf<String, TransactionNotificationData>()
 
-    private var daemonHeight: AtomicLong = AtomicLong(0)
-    // height of the wallet when it was opened
-    private var walletBeginSyncHeight: AtomicLong = AtomicLong(0)
+    private var stateRef: AtomicReference<State> = AtomicReference(State())
     private var proxyRef: AtomicReference<String> = AtomicReference("")
+    private var walletNameRef: AtomicReference<String> = AtomicReference("")
+    private var uninitWalletRef: AtomicReference<Wallet?> = AtomicReference(null)
     private var walletRef: AtomicReference<Wallet?> = AtomicReference(null)
+    private var pendingTransactionRef: AtomicReference<PendingTransaction?> = AtomicReference(null)
     private val observers = mutableSetOf<WalletServiceObserver>()
 
     inner class WalletServiceBroadcastReceiver : BroadcastReceiver() {
@@ -130,96 +117,126 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
                 WalletServiceCommand.UNKNOWN, null -> {
                     Timber.e("WalletHandler received UNKNOWN(%d) command", commandType)
                 }
+                WalletServiceCommand.INIT_WALLET -> {
+                    val daemonAddress = data.getString(Constants.EXTRA_DAEMON_ADDRESS)!!
+                    val daemonUsername = data.getString(Constants.EXTRA_DAEMON_USERNAME)!!
+                    val daemonPassword = data.getString(Constants.EXTRA_DAEMON_PASSWORD)!!
+                    val daemonTrusted = data.getBoolean(Constants.EXTRA_DAEMON_TRUSTED, false)
+                    val proxy = data.getString(Constants.EXTRA_PROXY)!!
+                    handleInitWallet(daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
+                }
                 WalletServiceCommand.OPEN_WALLET -> {
-                    val walletName = data.getString(EXTRA_WALLET_NAME)!!
-                    val walletPassword = data.getString(EXTRA_WALLET_PASSWORD)!!
-                    val daemonAddress = data.getString(EXTRA_DAEMON_ADDRESS)!!
-                    val daemonUsername = data.getString(EXTRA_DAEMON_USERNAME)!!
-                    val daemonPassword = data.getString(EXTRA_DAEMON_PASSWORD)!!
-                    val daemonTrusted = data.getBoolean(EXTRA_DAEMON_TRUSTED, false)
-                    val proxy = data.getString(EXTRA_PROXY)!!
-                    handleOpenWallet(walletName, walletPassword, daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
+                    val walletPath = data.getString(Constants.EXTRA_WALLET_PATH)!!
+                    val walletPassword = data.getString(Constants.EXTRA_WALLET_PASSWORD)!!
+                    val daemonAddress = data.getString(Constants.EXTRA_DAEMON_ADDRESS)!!
+                    val daemonUsername = data.getString(Constants.EXTRA_DAEMON_USERNAME)!!
+                    val daemonPassword = data.getString(Constants.EXTRA_DAEMON_PASSWORD)!!
+                    val daemonTrusted = data.getBoolean(Constants.EXTRA_DAEMON_TRUSTED, false)
+                    val proxy = data.getString(Constants.EXTRA_PROXY)!!
+                    handleOpenWallet(walletPath, walletPassword, daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
                 }
                 WalletServiceCommand.CLOSE_WALLET -> {
                     handleCloseWallet()
                 }
                 WalletServiceCommand.SET_DAEMON_ADDRESS -> {
-                    val daemonAddress = data.getString(EXTRA_DAEMON_ADDRESS)!!
-                    val daemonUsername = data.getString(EXTRA_DAEMON_USERNAME)!!
-                    val daemonPassword = data.getString(EXTRA_DAEMON_PASSWORD)!!
-                    val daemonTrusted = data.getBoolean(EXTRA_DAEMON_TRUSTED, false)
-                    val proxy = data.getString(EXTRA_PROXY)!!
+                    val daemonAddress = data.getString(Constants.EXTRA_DAEMON_ADDRESS)!!
+                    val daemonUsername = data.getString(Constants.EXTRA_DAEMON_USERNAME)!!
+                    val daemonPassword = data.getString(Constants.EXTRA_DAEMON_PASSWORD)!!
+                    val daemonTrusted = data.getBoolean(Constants.EXTRA_DAEMON_TRUSTED, false)
+                    val proxy = data.getString(Constants.EXTRA_PROXY)!!
                     setDaemonAddress(daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
                 }
-                WalletServiceCommand.FETCH_BLOCKCHAIN_HEIGHT -> {
-                    handleFetchDaemonHeight()
+                WalletServiceCommand.FETCH_BLOCKCHAIN_AND_TARGET_HEIGHTS -> {
+                    handleFetchBlockchainAndTargetHeights()
                 }
                 WalletServiceCommand.GENERATE_NEW_ADDRESS -> {
-                    val subaddressLabel = data.getString(EXTRA_SUBADDRESS_LABEL)!!
-                    handleGenerateNewSubaddress(subaddressLabel)
+                    val subaddressLabel = data.getString(Constants.EXTRA_ADDRESS_LABEL)!!
+                    handleGenerateNewAddress(subaddressLabel)
                 }
                 WalletServiceCommand.SET_ADDRESS_LABEL -> {
-                    val subaddressIndex = data.getInt(EXTRA_SUBADDRESS_INDEX)
-                    val subaddressLabel = data.getString(EXTRA_SUBADDRESS_LABEL)!!
-                    handleSetSubaddressLabel(subaddressIndex, subaddressLabel)
+                    val accountIndex = data.getInt(Constants.EXTRA_ACCOUNT_INDEX)
+                    val addressIndex = data.getInt(Constants.EXTRA_ADDRESS_INDEX)
+                    val addressLabel = data.getString(Constants.EXTRA_ADDRESS_LABEL)!!
+                    handleSetAddressLabel(accountIndex, addressIndex, addressLabel)
                 }
                 WalletServiceCommand.CREATE_SWEEP_TX -> {
-                    val transactionDestination = data.getString(EXTRA_TRANSACTION_DESTINATION)!!
+                    val transactionDestination = data.getString(Constants.EXTRA_TRANSACTION_DESTINATION)!!
                     val transactionPriority = PendingTransaction.Priority.fromInteger(message.data.getInt(
-                        EXTRA_TRANSACTION_PRIORITY
+                        Constants.EXTRA_TRANSACTION_PRIORITY
                     ))!!
                     val selectedUtxos = message.data.getStringArrayList(
-                        EXTRA_TRANSACTION_SELECTED_UTXOS
+                        Constants.EXTRA_TRANSACTION_SELECTED_UTXOS
                     )!!
                     handleCreateSweepTransaction(transactionDestination, transactionPriority, selectedUtxos)
                 }
                 WalletServiceCommand.CREATE_TX -> {
+                Timber.d("Received message to create a transaction")
                     val transactionDestinations = data.getParcelableArrayList<TransactionDestinationWithAmount>(
-                        EXTRA_TRANSACTION_DESTINATIONS
+                        Constants.EXTRA_TRANSACTION_DESTINATIONS
                     )!!
                     val transactionPriority = PendingTransaction.Priority.fromInteger(message.data.getInt(
-                        EXTRA_TRANSACTION_PRIORITY
+                        Constants.EXTRA_TRANSACTION_PRIORITY
                     ))!!
                     val selectedUtxos = message.data.getStringArrayList(
-                        EXTRA_TRANSACTION_SELECTED_UTXOS
+                        Constants.EXTRA_TRANSACTION_SELECTED_UTXOS
                     )!!
                     handleCreateTransaction(transactionDestinations, transactionPriority, selectedUtxos)
                 }
                 WalletServiceCommand.SEND_TX -> {
-                    val pendingTransactionHandle = data.getLong(EXTRA_PENDING_TRANSACTION)
-                    val pendingTransaction = PendingTransaction(pendingTransactionHandle)
-                    handleSendPendingTransaction(pendingTransaction)
+                    val pendingTransaction = this@WalletService.pendingTransactionRef.getAndSet(null)
+                    if (pendingTransaction != null) {
+                        handleSendPendingTransaction(pendingTransaction)
+                    } else {
+                        Timber.e("Attempted to send non-existent transaction")
+                    }
                 }
                 WalletServiceCommand.SET_PROXY -> {
-                    val proxy = data.getString(EXTRA_PROXY)!!
+                    val proxy = data.getString(Constants.EXTRA_PROXY)!!
                     handleSetProxy(proxy)
                 }
                 WalletServiceCommand.FREEZE_ENOTES -> {
-                    val enotes = data.getLongArray(EXTRA_ENOTES)!!
+                    val enotes = data.getLongArray(Constants.EXTRA_ENOTES)!!
                     handleFreezeEnotes(enotes)
                 }
                 WalletServiceCommand.THAW_ENOTES -> {
-                    val enotes = data.getLongArray(EXTRA_ENOTES)!!
+                    val enotes = data.getLongArray(Constants.EXTRA_ENOTES)!!
                     handleThawEnotes(enotes)
                 }
                 WalletServiceCommand.CREATE_ACCOUNT -> {
-                    val label = data.getString(EXTRA_ACCOUNT_LABEL)
+                    val label = data.getString(Constants.EXTRA_ACCOUNT_LABEL)
                     handleCreateAccount(label)
                 }
                 WalletServiceCommand.SET_ACCOUNT -> {
-                    val index = data.getInt(EXTRA_ACCOUNT_INDEX)
+                    val index = data.getInt(Constants.EXTRA_ACCOUNT_INDEX)
                     handleSetAccount(index)
                 }
                 WalletServiceCommand.SET_ACCOUNT_LABEL -> {
-                    val index = data.getInt(EXTRA_ACCOUNT_INDEX)
-                    val label = data.getString(EXTRA_ACCOUNT_LABEL)!!
+                    val index = data.getInt(Constants.EXTRA_ACCOUNT_INDEX)
+                    val label = data.getString(Constants.EXTRA_ACCOUNT_LABEL)!!
                     handleSetAccountLabel(index, label)
                 }
             }
         }
 
+        private fun handleInitWallet(
+            daemonAddress: String,
+            daemonUsername: String,
+            daemonPassword: String,
+            daemonTrusted: Boolean,
+            proxy: String
+        ) {
+            val wallet = this@WalletService.uninitWalletRef.getAndSet(null)
+            if (wallet == null) {
+                Timber.e("Init wallet was called, but uninit wallet ref is null")
+                return
+            }
+            this@WalletService.walletNameRef.set(wallet.info.name)
+            preOpenWallet(daemonAddress, proxy)
+            postOpenWallet(wallet, daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
+        }
+
         private fun handleOpenWallet(
-            walletName: String,
+            walletPath: String,
             walletPassword: String,
             daemonAddress: String,
             daemonUsername: String,
@@ -227,20 +244,45 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             daemonTrusted: Boolean,
             proxy: String
         ) {
+            this@WalletService.walletNameRef.set(runCatching { Path(walletPath).name }.getOrNull())
+            preOpenWallet(daemonAddress, proxy)
+            val wallet = WalletManager.instance.openWallet(walletPath, walletPassword)
+            postOpenWallet(wallet, daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
+        }
+
+        private fun preOpenWallet(
+            daemonAddress: String,
+            proxy: String
+        ) {
             showServiceNotification(createServiceNotificationBuilder().setContentText(getText(R.string.service_notification_description_opening_wallet)).build())
             WalletManager.instance.setProxyJ(proxy)
             WalletManager.instance.setDaemonAddressJ(daemonAddress)
-            val wallet = WalletManager.instance.openWallet(walletName, walletPassword)
+        }
+
+        private fun postOpenWallet(
+            wallet: Wallet,
+            daemonAddress: String,
+            daemonUsername: String,
+            daemonPassword: String,
+            daemonTrusted: Boolean,
+            proxy: String
+        ) {
             Timber.i("Initializing wallet with daemon address = $daemonAddress, daemon username = $daemonUsername, daemon password = ${"*".repeat(daemonPassword.length)}, proxy = $proxy")
             wallet.initJ(daemonAddress, 0, daemonUsername, daemonPassword, proxy)
             wallet.setTrustedDaemon(daemonTrusted)
 
-            this@WalletService.walletBeginSyncHeight.set(wallet.getBlockChainHeightJ())
+            this@WalletService.stateRef.updateAndGet { state ->
+                val walletHeight = wallet.getBlockChainHeightJ()
+                Timber.i("Wallet height when opened = $walletHeight")
+                val heights = state.heights.copy(walletBeginSyncHeight = walletHeight, walletHeight = walletHeight)
+                val status = wallet.getWalletStatusWithError()
+                return@updateAndGet state.copy(heights = heights, initialWalletStatus = status)
+            }
             updateWallet(wallet)
             this@WalletService.walletRef.set(wallet)
 
             showServiceNotification(createServiceNotificationBuilder().setContentText(getText(R.string.service_notification_description_fetching_blockchain_height)).build())
-            handleFetchDaemonHeight() // TODO: investigate why there is a double free in Monero code when this is moved after startRefresh
+            handleFetchBlockchainAndTargetHeights() // TODO: investigate why there is a double free in Monero code when this is moved after startRefresh
             updateSynchronizationStatusNotification(wallet)
             wallet.setListener(this@WalletService)
             wallet.startRefresh()
@@ -269,22 +311,26 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
                 wallet.setTrustedDaemon(daemonTrusted)
                 updateWallet(wallet)
                 showServiceNotification(createServiceNotificationBuilder().setContentText(getText(R.string.service_notification_description_fetching_blockchain_height)).build())
-                handleFetchDaemonHeight()
+                handleFetchBlockchainAndTargetHeights()
                 updateSynchronizationStatusNotification(wallet)
                 wallet.setListener(this@WalletService)
                 wallet.startRefresh()
             }
         }
 
-        private fun handleFetchDaemonHeight() {
-            val newHeight = WalletManager.instance.getBlockchainHeight()
-            if (newHeight > 0) {
-                daemonHeight.set(newHeight)
+        private fun handleFetchBlockchainAndTargetHeights() {
+            val newHeights = WalletManager.instance.getBlockchainAndTargetHeight()
+            if (newHeights.first > 0) {
+                Timber.i("Fetched blockchain height is ${newHeights.first} and target height is ${newHeights.second}")
+                stateRef.updateAndGet { state ->
+                    val heights = state.heights.copy(blockchainHeight = newHeights.first, blockchainTargetHeight = newHeights.second)
+                    return@updateAndGet state.copy(heights = heights, nodeLastRefreshedAt = clock.millis())
+                }
             } else {
-                Timber.w("Fetched blockchain height is 0")
+                Timber.w("Fetched blockchain height is ${newHeights.first} and target height is ${newHeights.second}")
             }
             forEachObserver {
-                it.onBlockchainHeightFetched(newHeight)
+                it.onBlockchainAndTargetHeightsFetched(newHeights.first, newHeights.second)
             }
         }
 
@@ -303,53 +349,65 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             }
         }
 
-        private fun handleGenerateNewSubaddress(label: String) {
+        private fun handleGenerateNewAddress(label: String) {
             val wallet = getWalletOrThrow()
-            wallet.addSubaddress(wallet.getAccountIndex(), label)
+            wallet.addAddress(wallet.getAccountIndex(), label)
             wallet.store()
             updateWallet(wallet)
             forEachObserver {
-                it.onSubaddressesUpdated(SubaddressUpdateReason.GENERATED_NEW)
+                it.onAddressGenerated()
             }
         }
 
-        private fun handleSetSubaddressLabel(index: Int, label: String) {
+        private fun handleSetAddressLabel(accountIndex: Int, addressIndex: Int, label: String) {
             val wallet = getWalletOrThrow()
-            wallet.setSubaddressLabel(index, label)
+            wallet.setAddressLabel(accountIndex, addressIndex, label)
             wallet.store()
             forEachObserver {
-                it.onSubaddressesUpdated(SubaddressUpdateReason.LABEL_CHANGED)
+                it.onAddressLabelChanged(accountIndex, addressIndex, label)
             }
         }
 
         private fun handleCreateSweepTransaction(
             destination: String,
-            feePriority: PendingTransaction.Priority,
+            priority: PendingTransaction.Priority,
             selectedEnotes: ArrayList<String>
         ) {
             val wallet = getWalletOrThrow()
             val destinationResolved = resolveDestination(TransactionDestination(destination))
-            val pendingTransaction = wallet.createSweepTransaction(destinationResolved, feePriority, selectedEnotes)
+            val pendingTransactionHandle = wallet.createSweepTransaction(destinationResolved.address, "", 0, priority.ordinal, wallet.getAccountIndex(), selectedEnotes)
+            val pendingTransaction = PendingTransaction(pendingTransactionHandle, PendingTransactionDestination.Sweep(destinationResolved))
+            disposePendingTransaction(newPendingTransaction = pendingTransaction)
             forEachObserver {
-                it.onTransactionCreated(pendingTransaction, PendingTransactionDestination.Sweep(destinationResolved))
+                it.onTransactionCreated(pendingTransaction)
             }
         }
 
         private fun handleCreateTransaction(
-            destinations: List<TransactionDestinationWithAmount>,
-            feePriority: PendingTransaction.Priority,
+            destinationAndAmounts: List<TransactionDestinationWithAmount>,
+            priority: PendingTransaction.Priority,
             selectedEnotes: ArrayList<String>
         ) {
             val wallet = getWalletOrThrow()
-            val destinationsResolved = destinations.map { resolveDestination(it.withoutAmount()).withAmount(it.amount) }
-            val pendingTransaction = wallet.createTransactionMultDest(destinationsResolved, feePriority, selectedEnotes)
+            val destinationsResolved = destinationAndAmounts.map { resolveDestination(it.withoutAmount()).withAmount(it.amount) }
+            val destinations = destinationsResolved.map { it.address }
+            val amounts = destinationsResolved.map { it.amount }.toLongArray()
+            val pendingTransactionHandle = wallet.createTransactionMultDestJ(
+                destinations, "", amounts, 0, priority.ordinal,
+                wallet.getAccountIndex(), selectedEnotes
+            )
+            val pendingTransaction = PendingTransaction(pendingTransactionHandle, PendingTransactionDestination.Default(destinationsResolved))
+            disposePendingTransaction(newPendingTransaction = pendingTransaction)
             forEachObserver {
-                it.onTransactionCreated(pendingTransaction, PendingTransactionDestination.Default(destinationsResolved))
+                it.onTransactionCreated(pendingTransaction)
             }
         }
 
         private fun handleSendPendingTransaction(pendingTransaction: PendingTransaction) {
             val success = pendingTransaction.commit("", false)
+            if (!success) {
+                Timber.e("Failed to send transaction: ${pendingTransaction.getErrorString()}")
+            }
             getWalletOrLog()?.store()
             forEachObserver {
                 it.onTransactionSent(pendingTransaction, success)
@@ -391,7 +449,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             label: String?
         ) {
             getWallet()?.let { wallet ->
-                wallet.addAccount(label ?: NEW_ACCOUNT_NAME)
+                wallet.addAccount(label?.ifBlank { null } ?: NEW_ACCOUNT_NAME)
                 wallet.store("")
                 forEachObserver {
                     it.onAccountCreated()
@@ -482,6 +540,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
 
     override fun onDestroy() {
         Timber.d("Wallet Service is being destroyed")
+        disposePendingTransaction()
         closeWallet()
         removeNotification(SERVICE_NOTIFICATION_ID)
         RUNNING.set(false)
@@ -531,16 +590,33 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
     override fun newBlock(height: Long, last: Boolean) {
         Timber.d("New block callback at height $height, is last: $last")
         // Monero heights are fucked up. Wallet and blockchain heights are always +1 to real height, but this callback receives real height
-        daemonHeight.updateAndGet { if (it > 0 && it < (height + 1)) (height + 1) else it }
-        walletBeginSyncHeight.updateAndGet { if (it <= 1) (height + 1) else it }
+        val prevState = stateRef.getAndUpdate { state ->
+            val (_, _, blockchainHeight, blockchainTargetHeight) = state.heights
+
+            val newWalletHeight = height + 1
+            val newBlockchainHeight = if (blockchainHeight > 0 && blockchainHeight < (height + 1)) (height + 1) else blockchainHeight
+            val newTargetHeight = if (blockchainTargetHeight > newBlockchainHeight) blockchainTargetHeight else newBlockchainHeight
+
+            val heights = state.heights.copy(
+                walletHeight = newWalletHeight,
+                blockchainHeight = newBlockchainHeight,
+                blockchainTargetHeight = newTargetHeight,
+            )
+
+            return@getAndUpdate state.copy(heights = heights, walletLastRefreshedAt = clock.millis())
+        }
         getWalletOrLog()?.let { wallet ->
             forEachObserver {
                 it.onNewBlock(wallet)
             }
-            if (last) {
-                Timber.d("Storing and updating wallet because the block is the last one of the batch")
+            if (last || prevState.heights.walletHeight <= 1L) {
+                Timber.d("Storing and updating wallet")
                 updateWallet(wallet)
                 wallet.store()
+            } else if (height % 1000L == 0L) {
+                // wallet is probably fast syncing
+                Timber.d("Updating synchronization status notification")
+                updateSynchronizationStatusNotification(wallet)
             }
             // we do not check here whether user has enabled notifications for transfers
             // because we checked it before adding it to the map
@@ -568,9 +644,19 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
 
     override fun refreshed() {
         Timber.d("Refreshed callback")
-        if (daemonHeight.get() <= 1) {
+        val wallet = getWallet()
+        val newWalletHeight = wallet?.getBlockChainHeightJ()
+        val oldState = stateRef.updateAndGet { state ->
+            state.copy(walletLastRefreshedAt = clock.millis(), heights = state.heights.copy(walletHeight = newWalletHeight ?: state.heights.walletHeight))
+        }
+        if (wallet != null && newWalletHeight != null && oldState.heights.walletHeight < newWalletHeight) {
+            forEachObserver {
+                it.onWalletUpdated(wallet)
+            }
+        }
+        if (oldState.heights.blockchainHeight == 0L) {
             Timber.d("Fetching blockchain height")
-            fetchBlockchainHeight()
+            fetchBlockchainAndTargetHeights()
         }
         getWalletOrLog()?.let { wallet ->
             updateWallet(wallet)
@@ -599,7 +685,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             return
         }
 
-        if (transaction.direction == TransactionInfo.Direction.Direction_Out) {
+        if (transaction.direction == TransactionInfo.Direction.Out) {
             // we are getting back our change, not new money
             Timber.d("Not spawning a notification for incoming money because it is an outgoing transaction")
             return
@@ -621,13 +707,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         showServiceNotification(
             createServiceNotificationBuilder()
                 .setContentText(
-                    SynchronizationStatus.fromHeights(
-                        Heights(
-                            walletBeginSyncHeight.get(),
-                            wallet.getBlockChainHeightJ(),
-                            daemonHeight.get()
-                        )
-                    ).getText(applicationContext)
+                    SynchronizationStatus.from(stateRef.get()).getText(applicationContext)
                 )
                 .addAction(NotificationCompat.Action.Builder(R.drawable.monfluo, getText(R.string.service_notification_close_wallet_action), broadcastPendingIntent).build())
                 .build())
@@ -644,11 +724,11 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
     }
 
     private fun createServiceNotificationBuilder(): NotificationCompat.Builder {
-        val openHomeActivityIntent = Intent(this, HomeActivity::class.java).apply {
+        val openActivityHomeIntent = Intent(this, ActivityHome::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
         }
-        val openHomeActivityPendingIntent = PendingIntent.getActivity(application, 1, openHomeActivityIntent, PendingIntent.FLAG_IMMUTABLE)
+        val openActivityHomePendingIntent = PendingIntent.getActivity(application, 1, openActivityHomeIntent, PendingIntent.FLAG_IMMUTABLE)
 
         return NotificationCompat.Builder(this, FOREGROUND_SERVICE_NOTIFICATION_CHANNEL)
             .setSmallIcon(R.drawable.monfluo_notification_icon)
@@ -656,7 +736,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             .setOngoing(true)
             .setGroup(SERVICE_NOTIFICATION_GROUP)
             .setContentTitle(getText(R.string.service_notification_header))
-            .setContentIntent(openHomeActivityPendingIntent)
+            .setContentIntent(openActivityHomePendingIntent)
     }
 
     private fun createAndShowTransferNotification(amount: Long, txId: String, firstSeenAt: Long, progress: Int, existingId: Int? = null): Int {
@@ -667,7 +747,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         }
         val deleteNotificationBroadcastPendingIntent = PendingIntent.getBroadcast(application, id, deleteNotificationBroadcastIntent, PendingIntent.FLAG_IMMUTABLE)
 
-        val openTransactionActivityIntent = Intent(this, TransactionActivity::class.java).apply {
+        val openTransactionActivityIntent = Intent(this, ActivityTransactionDetails::class.java).apply {
             putExtra(Constants.EXTRA_TRANSACTION_ID, txId)
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         }
@@ -697,12 +777,8 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         }
     }
 
-    fun getWalletBeginSyncHeight(): Long {
-        return walletBeginSyncHeight.get()
-    }
-
-    fun getDaemonHeight(): Long {
-        return daemonHeight.get()
+    fun getState(): State {
+        return stateRef.get()
     }
 
     fun getProxy(): String {
@@ -711,6 +787,10 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
 
     fun getWallet(): Wallet? {
         return walletRef.get()
+    }
+
+    fun getWalletName(): String? {
+        return walletNameRef.get()
     }
 
     fun getWalletOrThrow(): Wallet {
@@ -733,8 +813,51 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         }
     }
 
+    private fun disposePendingTransaction(newPendingTransaction: PendingTransaction? = null) {
+        val pendingTransaction = pendingTransactionRef.getAndSet(newPendingTransaction)
+        if (pendingTransaction != null) {
+            val wallet = getWallet()
+            if (wallet != null) {
+                wallet.disposeTransaction(pendingTransaction)
+            } else {
+                Timber.e("Could not dispose of a transaction because there is no wallet")
+            }
+        }
+    }
+
+    fun getPendingTransaction(): PendingTransaction? {
+        return pendingTransactionRef.get();
+    }
+
+    fun setUninitWallet(
+        wallet: Wallet,
+    ) {
+        uninitWalletRef.set(wallet)
+    }
+
+    // used by activities that CREATE wallets (and therefore have a wallet already opened but not initialized)
+    // setUninitWallet must be called before that method
+    fun initWallet(
+        daemonAddress: String,
+        daemonUsername: String,
+        daemonPassword: String,
+        daemonTrusted: Boolean,
+        proxy: String
+    ) {
+        closeWallet()
+        val message = handler.obtainMessage()
+        message.arg1 = WalletServiceCommand.INIT_WALLET.value()
+        message.data.putString(Constants.EXTRA_DAEMON_ADDRESS, daemonAddress)
+        message.data.putString(Constants.EXTRA_DAEMON_USERNAME, daemonUsername)
+        message.data.putString(Constants.EXTRA_DAEMON_PASSWORD, daemonPassword)
+        message.data.putBoolean(Constants.EXTRA_DAEMON_TRUSTED, daemonTrusted)
+        message.data.putString(Constants.EXTRA_PROXY, proxy)
+        handler.sendMessage(message)
+    }
+
+    // used by activities that [want to] OPEN wallets (but do not have one opened yet)
     fun openWallet(
-        walletName: String,
+        walletPath: String,
         walletPassword: String,
         daemonAddress: String,
         daemonUsername: String,
@@ -745,13 +868,13 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         closeWallet()
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.OPEN_WALLET.value()
-        message.data.putString(EXTRA_WALLET_NAME, walletName)
-        message.data.putString(EXTRA_WALLET_PASSWORD, walletPassword)
-        message.data.putString(EXTRA_DAEMON_ADDRESS, daemonAddress)
-        message.data.putString(EXTRA_DAEMON_USERNAME, daemonUsername)
-        message.data.putString(EXTRA_DAEMON_PASSWORD, daemonPassword)
-        message.data.putBoolean(EXTRA_DAEMON_TRUSTED, daemonTrusted)
-        message.data.putString(EXTRA_PROXY, proxy)
+        message.data.putString(Constants.EXTRA_WALLET_PATH, walletPath)
+        message.data.putString(Constants.EXTRA_WALLET_PASSWORD, walletPassword)
+        message.data.putString(Constants.EXTRA_DAEMON_ADDRESS, daemonAddress)
+        message.data.putString(Constants.EXTRA_DAEMON_USERNAME, daemonUsername)
+        message.data.putString(Constants.EXTRA_DAEMON_PASSWORD, daemonPassword)
+        message.data.putBoolean(Constants.EXTRA_DAEMON_TRUSTED, daemonTrusted)
+        message.data.putString(Constants.EXTRA_PROXY, proxy)
         handler.sendMessage(message)
     }
 
@@ -770,100 +893,102 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
     ) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.SET_DAEMON_ADDRESS.value()
-        message.data.putString(EXTRA_DAEMON_ADDRESS, daemonAddress)
-        message.data.putString(EXTRA_DAEMON_USERNAME, daemonUsername)
-        message.data.putString(EXTRA_DAEMON_PASSWORD, daemonPassword)
-        message.data.putBoolean(EXTRA_DAEMON_TRUSTED, daemonTrusted)
-        message.data.putString(EXTRA_PROXY, proxy)
+        message.data.putString(Constants.EXTRA_DAEMON_ADDRESS, daemonAddress)
+        message.data.putString(Constants.EXTRA_DAEMON_USERNAME, daemonUsername)
+        message.data.putString(Constants.EXTRA_DAEMON_PASSWORD, daemonPassword)
+        message.data.putBoolean(Constants.EXTRA_DAEMON_TRUSTED, daemonTrusted)
+        message.data.putString(Constants.EXTRA_PROXY, proxy)
         handler.sendMessage(message)
     }
 
-    private fun fetchBlockchainHeight() {
+    private fun fetchBlockchainAndTargetHeights() {
         val message = handler.obtainMessage()
-        message.arg1 = WalletServiceCommand.FETCH_BLOCKCHAIN_HEIGHT.value()
+        message.arg1 = WalletServiceCommand.FETCH_BLOCKCHAIN_AND_TARGET_HEIGHTS.value()
         handler.sendMessage(message)
     }
 
-    fun generateNewSubaddress(label: String) {
+    fun generateNewAddress(accountIndex: Int, label: String) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.GENERATE_NEW_ADDRESS.value()
-        message.data.putString(EXTRA_SUBADDRESS_LABEL, label)
+        message.data.putString(Constants.EXTRA_ADDRESS_LABEL, label)
         handler.sendMessage(message)
     }
 
-    fun setSubaddressLabel(index: Int, label: String) {
+    fun setAddressLabel(accountIndex: Int, addressIndex: Int, label: String) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.SET_ADDRESS_LABEL.value()
-        message.data.putInt(EXTRA_SUBADDRESS_INDEX, index)
-        message.data.putString(EXTRA_SUBADDRESS_LABEL, label)
+        message.data.putInt(Constants.EXTRA_ACCOUNT_INDEX, accountIndex)
+        message.data.putInt(Constants.EXTRA_ADDRESS_INDEX, addressIndex)
+        message.data.putString(Constants.EXTRA_ADDRESS_LABEL, label)
         handler.sendMessage(message)
     }
 
     fun sendTransaction(pendingTransaction: PendingTransaction) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.SEND_TX.value()
-        message.data.putLong(EXTRA_PENDING_TRANSACTION, pendingTransaction.handle)
+        message.data.putLong(Constants.EXTRA_PENDING_TRANSACTION, pendingTransaction.handle)
         handler.sendMessage(message)
     }
 
     fun createSweepTransaction(destination: String, priority: PendingTransaction.Priority, selectedUtxos: ArrayList<String>) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.CREATE_SWEEP_TX.value()
-        message.data.putString(EXTRA_TRANSACTION_DESTINATION, destination)
-        message.data.putInt(EXTRA_TRANSACTION_PRIORITY, priority.value)
-        message.data.putStringArrayList(EXTRA_TRANSACTION_SELECTED_UTXOS, selectedUtxos)
+        message.data.putString(Constants.EXTRA_TRANSACTION_DESTINATION, destination)
+        message.data.putInt(Constants.EXTRA_TRANSACTION_PRIORITY, priority.value)
+        message.data.putStringArrayList(Constants.EXTRA_TRANSACTION_SELECTED_UTXOS, selectedUtxos)
         handler.sendMessage(message)
     }
 
     fun createTransaction(destinations: List<TransactionDestinationWithAmount>, priority: PendingTransaction.Priority, selectedUtxos: ArrayList<String>) {
+        Timber.d("Sending message to create a transaction")
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.CREATE_TX.value()
-        message.data.putParcelableArrayList(EXTRA_TRANSACTION_DESTINATIONS, ArrayList(destinations))
-        message.data.putInt(EXTRA_TRANSACTION_PRIORITY, priority.value)
-        message.data.putStringArrayList(EXTRA_TRANSACTION_SELECTED_UTXOS, selectedUtxos)
+        message.data.putParcelableArrayList(Constants.EXTRA_TRANSACTION_DESTINATIONS, ArrayList(destinations))
+        message.data.putInt(Constants.EXTRA_TRANSACTION_PRIORITY, priority.value)
+        message.data.putStringArrayList(Constants.EXTRA_TRANSACTION_SELECTED_UTXOS, selectedUtxos)
         handler.sendMessage(message)
     }
 
     fun setProxy(value: String) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.SET_PROXY.value()
-        message.data.putString(EXTRA_PROXY, value)
+        message.data.putString(Constants.EXTRA_PROXY, value)
         handler.sendMessage(message)
     }
 
     fun freezeEnote(enotes: List<Long>) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.FREEZE_ENOTES.value()
-        message.data.putLongArray(EXTRA_ENOTES, enotes.toLongArray())
+        message.data.putLongArray(Constants.EXTRA_ENOTES, enotes.toLongArray())
         handler.sendMessage(message)
     }
 
     fun thawEnote(enotes: List<Long>) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.THAW_ENOTES.value()
-        message.data.putLongArray(EXTRA_ENOTES, enotes.toLongArray())
+        message.data.putLongArray(Constants.EXTRA_ENOTES, enotes.toLongArray())
         handler.sendMessage(message)
     }
 
     fun createAccount(label: String? = null) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.CREATE_ACCOUNT.value()
-        message.data.putString(EXTRA_ACCOUNT_LABEL, label)
+        message.data.putString(Constants.EXTRA_ACCOUNT_LABEL, label)
         handler.sendMessage(message)
     }
 
     fun setAccount(index: Int) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.SET_ACCOUNT.value()
-        message.data.putInt(EXTRA_ACCOUNT_INDEX, index)
+        message.data.putInt(Constants.EXTRA_ACCOUNT_INDEX, index)
         handler.sendMessage(message)
     }
 
     fun setAccountLabel(index: Int, label: String) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.SET_ACCOUNT_LABEL.value()
-        message.data.putInt(EXTRA_ACCOUNT_INDEX, index)
-        message.data.putString(EXTRA_ACCOUNT_LABEL, label)
+        message.data.putInt(Constants.EXTRA_ACCOUNT_INDEX, index)
+        message.data.putString(Constants.EXTRA_ACCOUNT_LABEL, label)
         handler.sendMessage(message)
     }
 }
@@ -871,9 +996,10 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
 interface WalletServiceObserver : LifecycleOwner {
     fun onWalletUpdated(wallet: Wallet) {}
     fun onNewBlock(wallet: Wallet) {}
-    fun onBlockchainHeightFetched(height: Long) {}
-    fun onSubaddressesUpdated(reason: SubaddressUpdateReason) {}
-    fun onTransactionCreated(pendingTransaction: PendingTransaction, destination: PendingTransactionDestination) {}
+    fun onBlockchainAndTargetHeightsFetched(blockchainHeight: Long, targetHeight: Long) {}
+    fun onAddressGenerated() {}
+    fun onAddressLabelChanged(accountIndex: Int, addressIndex: Int, label: String) {}
+    fun onTransactionCreated(pendingTransaction: PendingTransaction) {}
     fun onTransactionSent(pendingTransaction: PendingTransaction, success: Boolean) {}
     fun onProxyUpdated(proxy: String, success: Boolean) {}
     fun onAccountCreated() {}
@@ -881,17 +1007,20 @@ interface WalletServiceObserver : LifecycleOwner {
     fun onAccountLabelChanged(index: Int, label: String) {}
 }
 
-enum class SubaddressUpdateReason {
-    LABEL_CHANGED,
-    GENERATED_NEW,
-}
+data class State(
+    val heights: Heights = Heights(),
+    val initialWalletStatus: WalletStatusWithError? = null,
+    val walletLastRefreshedAt: Long? = null,
+    val nodeLastRefreshedAt: Long? = null,
+)
 
 private enum class WalletServiceCommand {
     UNKNOWN, // to catch bugs when command is set to 0 by accident
+    INIT_WALLET,
     OPEN_WALLET,
     CLOSE_WALLET,
     SET_DAEMON_ADDRESS,
-    FETCH_BLOCKCHAIN_HEIGHT,
+    FETCH_BLOCKCHAIN_AND_TARGET_HEIGHTS,
     GENERATE_NEW_ADDRESS,
     SET_ADDRESS_LABEL,
     CREATE_SWEEP_TX,

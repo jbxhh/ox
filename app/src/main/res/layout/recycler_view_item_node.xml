@@ -1,76 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/recycler_view_item_node_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    android:padding="8dp">
+    android:layout_marginBottom="@dimen/padding_small"
+    android:padding="@dimen/padding_medium"
+    android:background="@drawable/card_background">
 
-    <ImageView
-        android:id="@+id/anonymity_network_imageview"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginEnd="8dp"
-        android:src="@drawable/monfluo"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/node_uri_textview"
-        app:layout_constraintEnd_toStartOf="@id/node_name_textview"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/node_wrapper_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible" />
+        app:layout_constraintEnd_toStartOf="@id/node_edit_imagebutton"
+        android:background="@color/transparent">
 
-    <TextView
-        android:id="@+id/node_name_textview"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        tools:text="Node Name"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/node_uri_textview"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/anonymity_network_imageview"
-        app:layout_constraintTop_toTopOf="parent" />
+        <RadioButton
+            android:id="@+id/node_radiobutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:minWidth="0dp"
+            android:minHeight="0dp" />
 
-    <TextView
-        android:id="@+id/node_uri_textview"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:ellipsize="middle"
-        android:singleLine="true"
-        tools:text="NODE::"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/node_name_textview" />
+        <ImageButton
+            android:id="@+id/node_icon_imagebutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/node_radiobutton"
+            app:layout_constraintBottom_toBottomOf="@id/node_radiobutton"
+            app:layout_constraintTop_toTopOf="@id/node_radiobutton"
+            android:minWidth="40dp"
+            android:minHeight="40dp"
+            android:maxWidth="40dp"
+            android:maxHeight="40dp"
+            android:background="@drawable/highlighted_on_card_background"
+            android:src="@drawable/logo_monero_alternative" />
 
-    <TextView
-        android:id="@+id/authenticated_textview"
+        <TextView
+            android:id="@+id/node_name_textview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/node_icon_imagebutton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/node_icon_imagebutton"
+            android:paddingStart="@dimen/padding_small"
+            android:background="@color/transparent"
+            android:textColor="?attr/colorOnPrimary"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/node_address_textview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/node_icon_imagebutton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/node_icon_imagebutton"
+            android:paddingStart="@dimen/padding_small"
+            android:background="@color/transparent"
+            android:textColor="?attr/colorOnPrimary"
+            android:maxLines="1"
+            android:ellipsize="end" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ImageButton
+        android:id="@+id/node_edit_imagebutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
-        android:ellipsize="middle"
-        android:singleLine="true"
-        android:text="@string/auth"
-        android:textColor="@color/oled_colorPrimaryVariant"
-        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/trusted_node_textview"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/node_uri_textview" />
-
-    <TextView
-        android:id="@+id/trusted_node_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
-        android:ellipsize="middle"
-        android:singleLine="true"
-        android:text="@string/trusted"
-        android:textColor="@color/oled_colorPrimaryVariant"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/authenticated_textview"
-        app:layout_constraintTop_toBottomOf="@id/node_uri_textview" />
+        android:minWidth="40dp"
+        android:minHeight="40dp"
+        android:background="@color/transparent"
+        android:src="@drawable/edit"
+        android:contentDescription="@string/recycler_view_item_node_edit_content_description" />
 </androidx.constraintlayout.widget.ConstraintLayout>

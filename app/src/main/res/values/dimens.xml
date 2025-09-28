@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="padding_big">16dp</dimen>
+    <dimen name="padding_medium">12dp</dimen>
+    <dimen name="padding_small">8dp</dimen>
+    <dimen name="padding_mini">4dp</dimen>
 
+    <dimen name="text_bigger">24sp</dimen>
+    <dimen name="text_big">20sp</dimen>
+    <dimen name="text_medium">16sp</dimen>
+    <dimen name="text_mini">12sp</dimen>
+
+    <dimen name="activity_home_recycler_view_void_height">64dp</dimen>
 </resources>

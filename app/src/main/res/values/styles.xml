@@ -1,121 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="MyMaterialTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <item name="windowNoTitle">true</item>
-        <item name="windowActionBar">false</item>
-        <item name="materialCardViewStyle">@style/AppCard</item>
+    <style name="AppThemeBase" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="backgroundColor">#0e0e0e</item>
+        <item name="colorPrimary">#cc4e00</item>
+        <item name="colorOnPrimary">@color/text</item>
+        <item name="bottomSheetDialogTheme">@style/ModalBottomSheet</item>
     </style>
 
-    <style name="MyMaterialThemeOled" parent="MyMaterialTheme">
-        <item name="toolbarTextColor">@color/oled_toolbarTextColor</item>
-        <item name="gradientTopColor">@color/oled_gradientTopColor</item>
-        <item name="gradientBottomColor">@color/oled_gradientBottomColor</item>
-        <item name="favouriteColor">@color/oled_favouriteColor</item>
-        <item name="softFavouriteColor">@color/oled_softFavouriteColor</item>
-        <item name="positiveColor">@color/oled_positiveColor</item>
-        <item name="negativeColor">@color/oled_negativeColor</item>
-        <item name="neutralColor">@color/oled_neutralColor</item>
-        <item name="streetColorA">@color/oled_streetColorA</item>
-        <item name="streetColorB">@color/oled_streetColorB</item>
-        <item name="noticeColor">@color/oled_noticeColor</item>
-        <item name="colorPrimary">@color/oled_colorPrimary</item>
-        <item name="colorPrimaryVariant">@color/oled_colorPrimaryVariant</item>
-        <item name="colorOnPrimary">@color/oled_colorOnPrimary</item>
-        <item name="colorSecondary">@color/oled_colorSecondary</item>
-        <item name="colorSecondaryVariant">@color/oled_colorSecondaryVariant</item>
-        <item name="colorOnSecondary">@color/oled_colorOnSecondary</item>
-        <item name="colorError">@color/oled_colorError</item>
-        <item name="colorOnError">@color/oled_colorOnError</item>
-        <item name="colorSurface">@color/oled_colorSurface</item>
-        <item name="colorOnSurface">@color/oled_colorOnSurface</item>
-        <item name="android:colorBackground">@color/oled_colorBackground</item>
-        <item name="colorOnBackground">@color/oled_colorOnBackground</item>
-        <item name="android:statusBarColor">@color/oled_statusBarColor</item>
-        <item name="android:navigationBarColor">@color/oled_navigationBarColor</item>
-        <item name="android:textColorPrimary">@color/oled_textColorPrimary</item>
-        <item name="android:textColorSecondary">@color/oled_textColorSecondary</item>
-        <item name="bottomSheetDialogTheme">@style/BottomSheetDialog_Rounded</item>
-        <item name="colorControlActivated">@color/oled_colorSecondary</item>
+    <style name="ModalBottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
     </style>
 
-    <!-- Can be overridden in configuration-specific resources -->
-    <style name="AppTheme" parent="MyMaterialThemeOled" />
-
-    <!-- BottomSheet Dialog-->
-    <style name="BottomSheetDialog_Rounded" parent="AppTheme">
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:windowSoftInputMode">adjustResize</item>
-        <item name="android:windowAnimationStyle">
-            @style/Animation.MaterialComponents.BottomSheetDialog
-        </item>
-        <item name="enableEdgeToEdge">true</item>
-        <item name="paddingBottomSystemWindowInsets">true</item>
-        <item name="paddingLeftSystemWindowInsets">true</item>
-        <item name="paddingRightSystemWindowInsets">true</item>
-        <item name="paddingTopSystemWindowInsets">true</item>
-        <item name="bottomSheetStyle">@style/BottomSheet_Rounded</item>
-    </style>
-
-    <style name="BottomSheet_Rounded" parent="Widget.MaterialComponents.BottomSheet">
-        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceBottomSheetDialog_Rounded</item>
-    </style>
-
-    <style name="ShapeAppearanceBottomSheetDialog_Rounded" parent="">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSizeTopRight">16dp</item>
-        <item name="cornerSizeTopLeft">16dp</item>
-        <item name="cornerSizeBottomRight">0dp</item>
-        <item name="cornerSizeBottomLeft">0dp</item>
-    </style>
-
-    <style name="AppCard" parent="Widget.MaterialComponents.CardView">
-        <item name="cardElevation">1dp</item>
-    </style>
-
-    <style name="MoneroText.Subaddress">
-        <item name="android:background">@color/oled_favouriteColor</item>
-        <item name="android:textColor">?android:colorBackground</item>
-    </style>
-
-    <style name="MoneroText.PosAmount">
-        <item name="android:textSize">16sp</item>
-        <!--item name="android:textColor">@color/moneroBlack</item-->
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="MoneroText.PosFee">
-        <item name="android:textSize">10sp</item>
-        <!--item name="android:textColor">#FF898989</item-->
-        <item name="android:textStyle">normal</item>
-    </style>
-
-    <style name="MoneroText.PosDate">
-        <item name="android:textSize">10sp</item>
-        <!--item name="android:textColor">#FF616161</item-->
-        <item name="android:textStyle">normal</item>
-    </style>
-
-    <!-- textSize is in dp here to match the layout of the numpad-->
-
-    <style name="MoneroText" parent="@android:style/TextAppearance.DeviceDefault.Medium">
-        <!--item name="android:textColor">@color/darkMain</item-->
-        <!--item name="android:textColorHint">@color/moneroText</item-->
-    </style>
-
-    <style name="MoneroText.Small">
-        <item name="android:textSize">10sp</item>
-    </style>
-
-
-    <!--style name="MoneroSpinner" parent="@style/Widget.AppCompat.Spinner">
-        <item name="android:background">@drawable/backgound_spinner</item>
-    </style-->
-
-
-    <!--style name="MoneroSpinnerGray" parent="@style/Widget.AppCompat.Spinner">
-        <item name="android:background">@drawable/backgound_spinner_gray</item>
-    </style-->
-
+    <style name="AppTheme" parent="AppThemeBase" />
 </resources>

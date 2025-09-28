@@ -25,11 +25,13 @@ extern "C"
 
 static JavaVM *cachedJVM;
 static jclass class_Boolean;
+static jclass class_Long;
+static jclass class_List;
 static jclass class_ArrayList;
 static jclass class_WalletListener;
 static jclass class_TransactionInfo;
 static jclass class_Transfer;
-static jclass class_WalletStatus;
+static jclass class_WalletStatusWithError;
 static jclass class_CoinsInfo;
 static jclass class_Pair;
 
@@ -45,12 +47,14 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
     LOGI("JNI_OnLoad ok");
 
     class_Boolean = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("java/lang/Boolean")));
+    class_Long = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("java/lang/Long")));
+    class_List = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("java/util/List")));
     class_ArrayList = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("java/util/ArrayList")));
     class_Pair = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("kotlin/Pair")));
     class_TransactionInfo = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/model/TransactionInfo")));
     class_Transfer = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/model/Transfer")));
     class_WalletListener = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/model/WalletListener")));
-    class_WalletStatus = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/model/Wallet$Status")));
+    class_WalletStatusWithError = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/model/WalletStatusWithError")));
     class_CoinsInfo = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/model/Enote")));
     return JNI_VERSION_1_6;
 }
@@ -233,14 +237,14 @@ struct DelegatingWalletListener final : Monero::WalletListener {
 //// helper methods
 std::vector<std::string> java2cpp(JNIEnv *env, jobject arrayList) {
 
-    jmethodID java_util_ArrayList_size = env->GetMethodID(class_ArrayList, "size", "()I");
-    jmethodID java_util_ArrayList_get = env->GetMethodID(class_ArrayList, "get", "(I)Ljava/lang/Object;");
+    jmethodID java_util_List_size = env->GetMethodID(class_List, "size", "()I");
+    jmethodID java_util_List_get = env->GetMethodID(class_List, "get", "(I)Ljava/lang/Object;");
 
-    jint len = env->CallIntMethod(arrayList, java_util_ArrayList_size);
+    jint len = env->CallIntMethod(arrayList, java_util_List_size);
     std::vector<std::string> result;
     result.reserve(len);
     for (jint i = 0; i < len; i++) {
-        auto element = reinterpret_cast<jstring>(env->CallObjectMethod(arrayList, java_util_ArrayList_get, i));
+        auto element = reinterpret_cast<jstring>(env->CallObjectMethod(arrayList, java_util_List_get, i));
         const char *pchars = env->GetStringUTFChars(element, nullptr);
         result.emplace_back(pchars);
         env->ReleaseStringUTFChars(element, pchars);
@@ -266,15 +270,15 @@ std::vector<std::uint64_t> java2cpp_long(JNIEnv *env, jlongArray longArray) {
     return result;
 }
 
-std::set<std::string> java2cpp_set(JNIEnv *env, jobject arrayList) {
+std::set<std::string> java2cpp_set(JNIEnv *env, jobject list) {
 
-    jmethodID java_util_ArrayList_size = env->GetMethodID(class_ArrayList, "size", "()I");
-    jmethodID java_util_ArrayList_get = env->GetMethodID(class_ArrayList, "get", "(I)Ljava/lang/Object;");
+    jmethodID java_util_List_size = env->GetMethodID(class_List, "size", "()I");
+    jmethodID java_util_List_get = env->GetMethodID(class_List, "get", "(I)Ljava/lang/Object;");
 
-    jint len = env->CallIntMethod(arrayList, java_util_ArrayList_size);
+    jint len = env->CallIntMethod(list, java_util_List_size);
     std::set<std::string> result;
     for (jint i = 0; i < len; i++) {
-        auto element = reinterpret_cast<jstring>(env->CallObjectMethod(arrayList,java_util_ArrayList_get, i));
+        auto element = reinterpret_cast<jstring>(env->CallObjectMethod(list, java_util_List_get, i));
         const char *pchars = env->GetStringUTFChars(element, nullptr);
         result.emplace(pchars);
         env->ReleaseStringUTFChars(element, pchars);
@@ -293,32 +297,18 @@ std::pair<std::string, uint64_t> extract_pair(JNIEnv *env, jobject p) {
     return pair;
 }
 
-std::vector<std::pair<std::string, uint64_t>> java2cpp_pairvector(JNIEnv *env, jobject arrayList) {
+std::vector<std::pair<std::string, uint64_t>> java2cpp_pairvector(JNIEnv *env, jobject list) {
 
-    jmethodID java_util_ArrayList_size = env->GetMethodID(class_ArrayList, "size", "()I");
-    jmethodID java_util_ArrayList_get = env->GetMethodID(class_ArrayList, "get", "(I)Ljava/lang/Object;");
+    jmethodID java_util_List_size = env->GetMethodID(class_List, "size", "()I");
+    jmethodID java_util_List_get = env->GetMethodID(class_List, "get", "(I)Ljava/lang/Object;");
 
-    jint len = env->CallIntMethod(arrayList, java_util_ArrayList_size);
+    jint len = env->CallIntMethod(list, java_util_List_size);
     std::vector<std::pair<std::string, uint64_t>> result;
 
     for (jint i = 0; i < len; i++) {
-        jobject element = env->CallObjectMethod(arrayList,java_util_ArrayList_get, i);
+        jobject element = env->CallObjectMethod(list, java_util_List_get, i);
         auto pair = extract_pair(env, element);
         result.emplace_back(pair);
-    }
-    return result;
-}
-
-jobject cpp2java(JNIEnv *env, const std::vector<std::string> &vector) {
-
-    jmethodID java_util_ArrayList_ = env->GetMethodID(class_ArrayList, "<init>", "(I)V");
-    jmethodID java_util_ArrayList_add = env->GetMethodID(class_ArrayList, "add", "(Ljava/lang/Object;)Z");
-
-    jobject result = env->NewObject(class_ArrayList, java_util_ArrayList_, static_cast<jint> (vector.size()));
-    for (const std::string &s: vector) {
-        jstring element = env->NewStringUTF(s.c_str());
-        env->CallBooleanMethod(result, java_util_ArrayList_add, element);
-        env->DeleteLocalRef(element);
     }
     return result;
 }
@@ -334,6 +324,11 @@ jobject create_java_pair(JNIEnv *env, const jobject first, const jobject second)
 jobject create_java_boolean(JNIEnv *env, jboolean value) {
     jmethodID constructor = env->GetMethodID(class_Boolean, "<init>", "(Z)V");
     return env->NewObject(class_Boolean, constructor, value);
+}
+
+jobject create_java_long(JNIEnv *env, jlong value) {
+    jmethodID constructor = env->GetMethodID(class_Long, "<init>", "(J)V");
+    return env->NewObject(class_Long, constructor, value);
 }
 
 /// end helpers
@@ -571,6 +566,15 @@ Java_org_monfluo_wallet_model_WalletManager_getBlockchainTargetHeight(JNIEnv *en
     return static_cast<jlong>(Monero::WalletManagerFactory::getWalletManager()->blockchainTargetHeight());
 }
 
+JNIEXPORT jobject JNICALL
+Java_org_monfluo_wallet_model_WalletManager_getBlockchainAndTargetHeight(JNIEnv *env, jobject instance) {
+    auto wm = Monero::WalletManagerFactory::getWalletManager();
+    auto result = wm->blockchainAndTargetHeight();
+    auto height = static_cast<jlong>(result.first);
+    auto targetHeight = static_cast<jlong>(result.second);
+    return create_java_pair(env, create_java_long(env, height), create_java_long(env, targetHeight));
+}
+
 JNIEXPORT jlong JNICALL
 Java_org_monfluo_wallet_model_WalletManager_getNetworkDifficulty(JNIEnv *env, jobject instance) {
     return static_cast<jlong>(Monero::WalletManagerFactory::getWalletManager()->networkDifficulty());
@@ -694,16 +698,16 @@ Java_org_monfluo_wallet_model_Wallet_getPolyseedSeedAndPassphrase(JNIEnv *env, j
 }
 
 jobject newWalletStatusInstance(JNIEnv *env, int status, const std::string &errorString) {
-    jmethodID init = env->GetMethodID(class_WalletStatus, "<init>", "(ILjava/lang/String;)V");
+    jmethodID init = env->GetMethodID(class_WalletStatusWithError, "<init>", "(ILjava/lang/String;)V");
     jstring _errorString = env->NewStringUTF(errorString.c_str());
-    jobject instance = env->NewObject(class_WalletStatus, init, status, _errorString);
+    jobject instance = env->NewObject(class_WalletStatusWithError, init, status, _errorString);
     env->DeleteLocalRef(_errorString);
     return instance;
 }
 
 
 JNIEXPORT jobject JNICALL
-Java_org_monfluo_wallet_model_Wallet_statusWithErrorString(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_model_Wallet_getWalletStatusWithError(JNIEnv *env, jobject instance) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
 
     int status;
@@ -1019,30 +1023,6 @@ Java_org_monfluo_wallet_model_Wallet_rescanBlockchainAsyncJ(JNIEnv *env, jobject
     wallet->rescanBlockchainAsync();
 }
 
-
-JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_createTransactionJ(JNIEnv *env, jobject instance,
-                                                       jstring dst_addr, jstring payment_id,
-                                                       jlong amount, jint mixin_count,
-                                                       jint priority,
-                                                       jint accountIndex, jobject key_images) {
-    const std::set<std::string> _key_images = java2cpp_set(env, key_images);
-    const char *_dst_addr = env->GetStringUTFChars(dst_addr, nullptr);
-    const char *_payment_id = env->GetStringUTFChars(payment_id, nullptr);
-    auto _priority = static_cast<Monero::PendingTransaction::Priority>(priority);
-    auto *wallet = getHandle<Monero::Wallet>(env, instance);
-
-    Monero::PendingTransaction *tx = wallet->createTransaction(_dst_addr, _payment_id,
-                                                               amount, (uint32_t) mixin_count,
-                                                               _priority,
-                                                               (uint32_t) accountIndex, {},
-                                                               _key_images);
-
-    env->ReleaseStringUTFChars(dst_addr, _dst_addr);
-    env->ReleaseStringUTFChars(payment_id, _payment_id);
-    return reinterpret_cast<jlong>(tx);
-}
-
 JNIEXPORT jlong JNICALL
 Java_org_monfluo_wallet_model_Wallet_createTransactionMultDestJ(JNIEnv *env, jobject instance,
                                                                jobject dst_addrs,
@@ -1272,7 +1252,7 @@ Java_org_monfluo_wallet_model_Wallet_addAccount(JNIEnv *env, jobject instance,
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_Wallet_getSubaddressLabel(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_model_Wallet_getAddressLabel(JNIEnv *env, jobject instance,
                                                        jint accountIndex, jint addressIndex) {
 
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
@@ -1284,7 +1264,7 @@ Java_org_monfluo_wallet_model_Wallet_getSubaddressLabel(JNIEnv *env, jobject ins
 }
 
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_Wallet_setSubaddressLabel(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_model_Wallet_setAddressLabel(JNIEnv *env, jobject instance,
                                                        jint accountIndex, jint addressIndex,
                                                        jstring label) {
 
@@ -1303,14 +1283,14 @@ Java_org_monfluo_wallet_model_Wallet_getNumAccounts(JNIEnv *env, jobject instanc
 }
 
 JNIEXPORT jint JNICALL
-Java_org_monfluo_wallet_model_Wallet_getNumSubaddresses(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_model_Wallet_getNumAddresses(JNIEnv *env, jobject instance,
                                                        jint accountIndex) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return static_cast<jint>(wallet->numSubaddresses(accountIndex));
 }
 
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_Wallet_addSubaddress(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_model_Wallet_addAddress(JNIEnv *env, jobject instance,
                                                   jint accountIndex,
                                                   jstring label) {
 

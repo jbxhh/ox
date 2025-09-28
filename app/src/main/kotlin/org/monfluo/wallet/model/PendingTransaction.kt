@@ -15,7 +15,7 @@
  */
 package org.monfluo.wallet.model
 
-class PendingTransaction internal constructor(val handle: Long) {
+class PendingTransaction internal constructor(val handle: Long, val destination: PendingTransactionDestination) {
     val status: Status
         get() = Status.entries[getStatusJ()]
 

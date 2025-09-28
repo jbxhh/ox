@@ -6,6 +6,7 @@ import org.monfluo.wallet.data.Node
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
+import androidx.core.content.edit
 
 object PreferenceUtils {
 
@@ -16,11 +17,21 @@ object PreferenceUtils {
 
     fun getBoolean(context: Context, key: String, default: Boolean): Boolean = getSharedPreferences(context).getBoolean(key, default)
 
-    fun setBoolean(context: Context, key: String, value: Boolean) = getSharedPreferences(context).edit().putBoolean(key, value).apply()
+    fun setBoolean(context: Context, key: String, value: Boolean) = getSharedPreferences(context).edit {
+        putBoolean(
+            key,
+            value
+        )
+    }
 
     fun getString(context: Context, key: String, default: String? = null): String? = getSharedPreferences(context).getString(key, default)
 
-    fun setString(context: Context, key: String, value: String) = getSharedPreferences(context).edit().putString(key, value).apply()
+    fun setString(context: Context, key: String, value: String) = getSharedPreferences(context).edit {
+        putString(
+            key,
+            value
+        )
+    }
 
     fun isPostNotificationsPermissionRequested(context: Context) = getBoolean(context, Constants.PREF_POST_NOTIFICATIONS_PERMISSION_REQUESTED, false)
 
@@ -66,11 +77,25 @@ object PreferenceUtils {
 
     fun setAutoRotateAddresses(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_AUTO_ROTATE_ADDRESSES, value)
 
+    fun isEnableEnoteManagement(context: Context): Boolean = getBoolean(context, Constants.PREF_ENABLE_ENOTE_MANAGEMENT, false)
+
+    fun setEnableEnoteManagement(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_ENABLE_ENOTE_MANAGEMENT, value)
+
+    fun isBalanceTapTogglesStreetMode(context: Context): Boolean = getBoolean(context, Constants.PREF_BALANCE_TAP_TOGGLES_STREET_MODE, false)
+
+    fun setBalanceTapTogglesStreetMode(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_BALANCE_TAP_TOGGLES_STREET_MODE, value)
+
     fun getProxy(context: Context): String? = getString(context, Constants.PREF_PROXY)
 
     fun setProxy(context: Context, value: String) = setString(context, Constants.PREF_PROXY, value)
 
     fun getProxyIfEnabled(context: Context): String? = if (isUseProxy(context)) getProxy(context) else null
+
+    fun getNodeByName(context: Context, nodeName: String): Result<Node?> = getNodes(context).map { nodes ->
+        nodes.find { node ->
+            node.name == nodeName
+        }
+    }
 
     private fun getNodes(context: Context): Result<List<Node>> = runCatching {
         val jsonArrayString = getString(context, Constants.PREF_NODES, "[]")

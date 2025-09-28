@@ -87,10 +87,6 @@
 
     <!-- Label in failed transactions used in list views -->
     <string name="tx_list_failed_text">failed</string>
-    <!-- Label showing negative XMR amount. Used in transaction list views -->
-    <string name="tx_list_amount_negative">- <xliff:g>%1$s</xliff:g></string>
-    <!-- Label showing positive XMR amount. Used in transaction list views and in address list views -->
-    <string name="tx_list_amount_positive">+ <xliff:g>%1$s</xliff:g></string>
 
     <!-- Button for creating wallet in onboarding activity -->
     <string name="create_wallet">Create wallet</string>
@@ -119,6 +115,8 @@
     <string name="street_mode">Street mode (hide balances)</string>
     <!-- Label for manual fee selection setting toggle -->
     <string name="option_allow_fee_override">Manual fee selection</string>
+    <!-- Label for enote management setting toggle -->
+    <string name="option_enable_enote_management">Enable enote management</string>
     <!-- Label for multi-wallet mode setting toggle -->
     <string name="enable_multi_wallet_mode">Enable multi-wallet mode</string>
     <!-- Label for multi-account mode setting toggle -->
@@ -131,6 +129,8 @@
     <string name="show_icon_on_qr_codes">Show icon on QR codes</string>
     <!-- Label for auto rotating addresses setting toggle -->
     <string name="auto_rotate_addresses">Auto rotate addresses</string>
+    <!-- Label for balance tap triggers street mode setting toggle -->
+    <string name="balance_tap_toggles_street_mode">Tapping balance toggles street mode</string>
     <!-- Button for displaying wallet secrets (seed, private keys, etc.) -->
     <string name="display_wallet_secrets">Display wallet secrets</string>
     <!-- Button for creating new account -->
@@ -153,13 +153,15 @@
     <string name="recv_monero">Receive</string>
     <!-- Header (spoiler) for showing more options in onboarding activity -->
     <string name="more_options">More options</string>
-    <string name="recovery_phrase_optional_legacy">Recovery seed (legacy)</string>
-    <string name="recovery_phrase_optional_polyseed">Recovery seed (polyseed)</string>
-    <string name="restore_height_optional">Restore height (optional)</string>
+    <string name="recovery_phrase_optional_legacy">Recovery seed (legacy, optional)</string>
+    <string name="recovery_phrase_optional_polyseed">Recovery seed (polyseed, optional)</string>
+    <string name="restore_height_optional">Recovery height (optional)</string>
     <string name="wallet_password_hint">Wallet password (optional)</string>
     <string name="wallet_password_confirm_hint">Confirm wallet password</string>
     <string name="wallet_seed_offset_passphrase">Seed offset passphrase (optional)</string>
     <string name="wallet_name">Wallet name</string>
+    <string name="account_name">Account name</string>
+    <string name="address_name">Address name</string>
     <string name="password">Passphrase</string>
     <string name="label">Label</string>
     <string name="unlock">Unlock</string>
@@ -168,7 +170,6 @@
     <string name="edit_address_label">Set address label</string>
     <string name="edit_account_label">Set account label</string>
     <string name="tx_address_text">Address: %1$s</string>
-    <string name="tx_address_resolved_from_text">Resolved from: %1$s</string>
     <string name="tx_amount_text">Amount: %1$s XMR</string>
     <string name="tx_fee_text">Fee: %1$s XMR</string>
     <string name="receive">Receive</string>
@@ -178,7 +179,6 @@
     <string name="sending_tx">Sending transaction…</string>
     <string name="sent_tx">Sent transaction!</string>
     <string name="no_camera_permission">No camera permission</string>
-    <string name="wallet_settings">Wallet settings</string>
     <string name="application_logo">Application logo</string>
     <string name="settings">Settings</string>
     <string name="wallet">Wallet</string>
@@ -235,6 +235,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="global_index_text">%1$s</string>
     <string name="outpoint_text">%1$s</string>
     <string name="create_wallet_failed">Create wallet failed: %1$s</string>
+    <string name="create_transaction_failed">Create transaction failed: %1$s</string>
     <string name="churn">Churn</string>
     <string name="freeze">Freeze</string>
     <string name="unfreeze">Unfreeze</string>
@@ -252,7 +253,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="copy_secrets_warning">Copying the secrets of your wallet to clipboard is dangerous because other apps on your device can view the clipboard and steal them</string>
     <string name="wallet_keys_label">Keys</string>
     <string name="wallet_viewkey_desc">Anyone with your private view-key can see all incoming transactions!</string>
-    <string name="wallet_restore_height_label">Restore height</string>
+    <string name="wallet_restore_height_label">Recovery height</string>
     <string name="wallet_address">Wallet address</string>
     <string name="use_password_as_seed_offset">Use passphrase as seed offset</string>
     <string name="trusted_daemon">Trusted daemon</string>
@@ -273,7 +274,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="copy_seed">Copy wallet\'s seed</string>
     <string name="copy_polyseed_offset_passphrase">Copy wallet\'s polyseed offset passphrase</string>
     <string name="add_recipient_to_transaction">Add recipient to transaction</string>
-    <string name="copy_restore_height">Copy wallet\'s restore height</string>
+    <string name="copy_restore_height">Copy wallet\'s recovery height</string>
     <string name="copy_wallet_s_address">Copy wallet\'s address</string>
     <string name="copy_wallet_s_private_view_key">Copy wallet\'s private view-key</string>
     <string name="copy_wallet_s_public_view_key">Copy wallet\'s public view-key</string>
@@ -294,8 +295,11 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="service_description">Wallet is open</string>
     <string name="wallet_name_and_account_label">%1$s / %2$d</string>
     <string name="synchronized_at_label">Synchronized at %1$s</string>
-    <string name="synchronizing_blocks_remaining">Synchronizing: %1$s / %2$s (%3$s blocks remaining)</string>
+    <string name="wallet_error">Wallet error: %1$s</string>
+    <string name="node_synchronization_blocks_remaining">Synchronizing node: %1$s / %2$s (%3$s blocks remaining)</string>
+    <string name="wallet_synchronization_blocks_remaining">Synchronizing wallet: %1$s / %2$s (%3$s blocks remaining)</string>
     <string name="starting_wallet_synchronization">Starting wallet synchronization…</string>
+    <string name="opening_wallet">Opening wallet…</string>
     <!-- Label for seed type in onboarding activity -->
     <string name="seed_type">Seed type</string>
     <!-- Header for accounts list -->
@@ -304,6 +308,14 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="wallets">Wallets</string>
     <!-- Unit XMR -->
     <string name="unit_xmr">XMR</string>
+    <!-- Unit milli XMR -->
+    <string name="unit_milli_xmr">mXMR</string>
+    <!-- Unit micro XMR -->
+    <string name="unit_micro_xmr">μXMR</string>
+    <!-- Unit nano XMR -->
+    <string name="unit_nano_xmr">nXMR</string>
+    <!-- Unit pico XMR -->
+    <string name="unit_pico_xmr">pXMR</string>
     <!-- New wallet button -->
     <string name="new_wallet">New wallet</string>
     <!-- Label for applying seed offset passphrase toggle in show secrets fragment -->
@@ -326,10 +338,131 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="coin_global_index">Global index</string>
     <!-- Address label -->
     <string name="address">Address</string>
+    <!-- Address resolved from label -->
+    <string name="address_resolved_from">Resolved from</string>
     <!-- Amount label -->
     <string name="amount">Amount</string>
+    <!-- Fee label -->
+    <string name="fee">Fee</string>
+    <!-- Total label -->
+    <string name="total">Total</string>
     <!-- Text shown in place of an address when sending or displaying an outgoing transaction to multiple addresses -->
     <string name="multiple_addresses">multiple</string>
     <!-- Text shown in place of an address when displaying an outgoing transaction to more than one address -->
     <string name="unknown_recipient">unknown recipient</string>
+    <string name="transaction_type_received">Received</string>
+    <string name="transaction_type_sent">Sent</string>
+    <string name="transaction_unconfirmed">unconfirmed</string>
+    <string name="transaction_confirming"><xliff:g>%1$s</xliff:g> confirmations</string>
+    <string name="transaction_confirmed">confirmed</string>
+    <string name="loading_wallet_header">Loading Wallet…</string>
+    <string name="no_transactions_header">Looks Empty</string>
+    <string name="no_transactions_description">Your wallet transactions will show up here</string>
+    <string name="wallet_name_label">Wallet name</string>
+    <string name="account_name_label">Account name</string>
+    <string name="unlocked_balance_label">Unlocked balance</string>
+    <string name="locked_balance_label">Pending balance</string>
+    <string name="frozen_balance_label">Frozen balance</string>
+    <string name="balance_locked">unconfirmed</string>
+    <string name="balance_frozen">frozen</string>
+    <string name="wallet_header">Wallet</string>
+    <string name="enotes_header">Enotes</string>
+    <string name="enotes_with_amount_header">Enotes (<xliff:g>%1$d</xliff:g>)</string>
+    <string name="content_description_back">Back</string>
+    <string name="content_description_account">Select account</string>
+    <string name="content_description_application_settings">Application settings</string>
+    <string name="content_description_enotes">Enotes</string>
+    <string name="account_label">#<xliff:g>%1$d</xliff:g> <xliff:g>%2$s</xliff:g></string>
+    <string name="address_label">#<xliff:g>%1$d</xliff:g> <xliff:g>%2$s</xliff:g></string>
+
+    <string name="network_header">Network</string>
+    <string name="accounts_header">Accounts</string>
+    <string name="add_account_header">Add account</string>
+    <string name="account_details_header">Account details</string>
+    <string name="address_details_header">Address details</string>
+    <string name="transaction_header">Transaction</string>
+    <string name="send_header">Send</string>
+    <string name="pending_transaction_header">Pending transaction</string>
+    <string name="create_wallet_header">Create wallet</string>
+    <string name="wallet_secrets_header">Wallet secrets</string>
+    <string name="receive_header">Receive</string>
+    <string name="nodes_header">Nodes</string>
+    <string name="add_node_header">Add node</string>
+    <string name="node_details_header">Node details</string>
+    <string name="wallet_details_header">Wallet details</string>
+    <string name="settings_header">Settings</string>
+    <string name="settings_appearance_header">Appearance</string>
+    <string name="settings_features_header">Features</string>
+    <string name="settings_behaviour_header">Behaviour</string>
+    <string name="settings_security_header">Security</string>
+
+    <string name="activity_wallet_create_wallet_name_label">Name</string>
+    <string name="activity_wallet_create_wallet_password_label">Password</string>
+    <string name="activity_wallet_create_wallet_seed_label">Recovery seed</string>
+    <string name="activity_wallet_create_wallet_height_label">Recovery height</string>
+    <string name="activity_wallet_create_wallet_seed_offset_label">Seed offset passphrase</string>
+
+    <string name="activity_home_wallet_name_content_description">Wallet - <xliff:g>%1$s</xliff:g></string>
+    <string name="activity_home_account_name_content_description">Account - <xliff:g>%1$s</xliff:g></string>
+
+    <string name="recycler_view_item_wallet_edit_content_description">Edit wallet</string>
+    <string name="recycler_view_item_node_edit_content_description">Edit node</string>
+    <string name="recycler_view_item_account_edit_content_description">Edit account</string>
+    <string name="recycler_view_item_address_edit_content_description">Edit address</string>
+
+    <string name="activity_node_add_node_name_label">Name</string>
+    <string name="activity_node_add_node_name_placeholder">My Monero Node</string>
+    <string name="activity_node_add_node_address_label">Address</string>
+    <string name="activity_node_add_node_address_placeholder" translatable="false">127.0.0.1:18081</string>
+    <string name="activity_node_add_node_daemon_trusted_label">Trusted daemon</string>
+    <string name="activity_node_add_node_username_label">Username</string>
+    <string name="activity_node_add_node_username_placeholder">Username (optional)</string>
+    <string name="activity_node_add_node_password_label">Password</string>
+    <string name="activity_node_add_node_password_placeholder">Password (optional)</string>
+    <string name="activity_node_add_node_add_button">Add node</string>
+
+    <string name="activity_node_details_node_name_label">Name</string>
+    <string name="activity_node_details_node_name_placeholder">My Monero Node</string>
+    <string name="activity_node_details_node_address_label">Address</string>
+    <string name="activity_node_details_node_address_placeholder" translatable="false">127.0.0.1:18081</string>
+    <string name="activity_node_details_node_daemon_trusted_label">Trusted daemon</string>
+    <string name="activity_node_details_node_username_label">Username</string>
+    <string name="activity_node_details_node_username_placeholder">Username (optional)</string>
+    <string name="activity_node_details_node_password_label">Password</string>
+    <string name="activity_node_details_node_password_placeholder">Password (optional)</string>
+    <string name="activity_node_details_node_delete_button">Delete node</string>
+    <string name="activity_node_details_node_save_button">Save node</string>
+
+    <string name="dialog_delete_node_title">Delete node</string>
+    <string name="dialog_delete_node_message">Are you sure that you want to delete your node?</string>
+    <string name="dialog_delete_node_action_yes">Yes, delete node</string>
+    <string name="dialog_delete_node_action_no">No</string>
+
+    <string name="dialog_delete_wallet_title">Delete wallet</string>
+    <string name="dialog_delete_wallet_message">Are you sure that you want to delete your wallet? This action is irreversible and you will permanently lose your funds unless you have backed up your wallet.</string>
+    <string name="dialog_delete_wallet_action_yes">Yes, delete wallet</string>
+    <string name="dialog_delete_wallet_action_no">No</string>
+
+    <string name="content_description_network_status_icon_opening_wallet">Network status - opening wallet</string>
+    <string name="content_description_network_status_icon_starting_synchronization">Network status - starting synchronization</string>
+    <string name="content_description_network_status_icon_synchronizing_node">Network status - synchronizing node</string>
+    <string name="content_description_network_status_icon_synchronizing_wallet">Network status - synchronizing wallet</string>
+    <string name="content_description_network_status_icon_synchronized">Network status - synchronized</string>
+    <string name="content_description_network_status_icon_wallet_error">Network status - wallet error</string>
+
+    <string name="activity_network_node_status_header_waiting_for_wallet">Waiting for wallet…</string>
+    <string name="activity_network_node_status_header_fetching_blockchain_data">Fetching blockchain height…</string>
+    <string name="activity_network_node_status_header_node_is_synchronizing">Node is synchronizing…</string>
+    <string name="activity_network_node_status_description_node_is_synchronizing">%1$s / %2$s (%3$s blocks remaining)</string>
+    <string name="activity_network_node_status_header_node_is_synchronized">Node is synchronized</string>
+    <string name="activity_network_node_status_description_node_is_synchronized">Height: %1$s</string>
+    <string name="activity_network_node_last_updated_at">Last updated: %1$s</string>
+    <string name="activity_network_wallet_status_header_opening_wallet">Opening wallet…</string>
+    <string name="activity_network_wallet_status_header_error">Error</string>
+    <string name="activity_network_wallet_status_header_starting_synchronization">Starting synchronization</string>
+    <string name="activity_network_wallet_status_header_wallet_is_synchronizing">Wallet is synchronizing…</string>
+    <string name="activity_network_wallet_status_description_wallet_is_synchronizing">%1$s / %2$s (%3$s blocks remaining)</string>
+    <string name="activity_network_wallet_status_header_wallet_is_synchronized">Wallet is synchronized</string>
+    <string name="activity_network_wallet_status_description_wallet_is_synchronized">Height: %1$s</string>
+    <string name="activity_network_wallet_last_updated_at">Last updated: %1$s</string>
 </resources>

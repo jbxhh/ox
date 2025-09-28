@@ -1,246 +1,451 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.monfluo.wallet.ApplicationSettingsActivity">
+    android:scrollbars="none"
+    tools:context="org.monfluo.wallet.activity.ActivitySettingsApplication">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/activity_application_settings_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:padding="@dimen/padding_big">
 
-        <TextView
-            android:id="@+id/settings_textview"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="24dp"
-            android:text="@string/settings"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/appearance_settings_textview"
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/header_layout_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="24dp"
-            android:text="@string/appearance"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/settings_textview" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:paddingBottom="@dimen/padding_big"
+            tools:ignore="UseCompoundDrawables">
 
-        <TextView
-            android:id="@+id/enable_multiple_wallets_textview"
-            android:layout_width="0dp"
+            <ImageView
+                android:id="@+id/back_imageview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:minHeight="32dp"
+                android:minWidth="32dp"
+                android:src="@drawable/left"
+                android:contentDescription="@string/content_description_back" />
+
+            <TextView
+                android:id="@+id/header_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toEndOf="@id/back_imageview"
+                app:layout_constraintTop_toTopOf="@id/back_imageview"
+                app:layout_constraintBottom_toBottomOf="@id/back_imageview"
+                android:text="@string/settings_header"
+                android:textSize="@dimen/text_bigger"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/appearance_settings_layout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="@string/enable_multi_wallet_mode"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@id/enable_multiple_wallets_switch"
-            app:layout_constraintEnd_toStartOf="@id/enable_multiple_wallets_switch"
+            app:layout_constraintTop_toBottomOf="@id/header_layout_view"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/enable_multiple_wallets_switch" />
+            android:paddingVertical="@dimen/padding_small"
+            android:orientation="vertical">
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/enable_multiple_wallets_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="24dp"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/appearance_settings_textview" />
+            <TextView
+                android:id="@+id/appearance_header_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/padding_small"
+                android:text="@string/settings_appearance_header"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary" />
 
-        <TextView
-            android:id="@+id/enable_multiple_accounts_textview"
-            android:layout_width="0dp"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/street_mode_settings_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/street_mode_label_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/street_mode"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="@id/street_mode_switch"
+                    app:layout_constraintEnd_toStartOf="@id/street_mode_switch"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/street_mode_switch"
+                    app:layout_constraintHorizontal_bias="0"
+                    android:textColor="?attr/colorOnPrimary" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/street_mode_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHorizontal_bias="1" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/show_icon_on_qr_codes_settings_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/show_icon_on_qr_codes_label_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/show_icon_on_qr_codes"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="@id/show_icon_on_qr_codes_switch"
+                    app:layout_constraintEnd_toStartOf="@id/show_icon_on_qr_codes_switch"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/show_icon_on_qr_codes_switch"
+                    app:layout_constraintHorizontal_bias="0"
+                    android:textColor="?attr/colorOnPrimary" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/show_icon_on_qr_codes_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHorizontal_bias="1" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/features_settings_layout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="@string/enable_multi_account_mode"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@id/enable_multiple_accounts_switch"
-            app:layout_constraintEnd_toStartOf="@id/enable_multiple_accounts_switch"
+            app:layout_constraintTop_toBottomOf="@id/appearance_settings_layout"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/enable_multiple_accounts_switch" />
+            android:paddingVertical="@dimen/padding_small"
+            android:orientation="vertical">
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/enable_multiple_accounts_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/enable_multiple_wallets_switch" />
+            <TextView
+                android:id="@+id/features_header_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/padding_small"
+                android:text="@string/settings_features_header"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary" />
 
-        <TextView
-            android:id="@+id/street_mode_label_textview"
-            android:layout_width="0dp"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/enable_multiple_wallets_settings_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/enable_multiple_wallets_label_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/enable_multi_wallet_mode"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="@id/enable_multiple_wallets_switch"
+                    app:layout_constraintEnd_toStartOf="@id/enable_multiple_wallets_switch"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/enable_multiple_wallets_switch"
+                    app:layout_constraintHorizontal_bias="0"
+                    android:textColor="?attr/colorOnPrimary" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/enable_multiple_wallets_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHorizontal_bias="1" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/enable_multiple_accounts_settings_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/enable_multiple_accounts_label_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/enable_multi_account_mode"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="@id/enable_multiple_accounts_switch"
+                    app:layout_constraintEnd_toStartOf="@id/enable_multiple_accounts_switch"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/enable_multiple_accounts_switch"
+                    app:layout_constraintHorizontal_bias="0"
+                    android:textColor="?attr/colorOnPrimary" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/enable_multiple_accounts_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHorizontal_bias="1" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/manual_fee_selection_settings_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/manual_fee_selection_label_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/option_allow_fee_override"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="@id/manual_fee_selection_switch"
+                    app:layout_constraintEnd_toStartOf="@id/manual_fee_selection_switch"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/manual_fee_selection_switch"
+                    app:layout_constraintHorizontal_bias="0"
+                    android:textColor="?attr/colorOnPrimary" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/manual_fee_selection_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHorizontal_bias="1" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/enable_enote_management_settings_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/enable_enote_management_label_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/option_enable_enote_management"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="@id/enable_enote_management_switch"
+                    app:layout_constraintEnd_toStartOf="@id/enable_enote_management_switch"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/enable_enote_management_switch"
+                    app:layout_constraintHorizontal_bias="0"
+                    android:textColor="?attr/colorOnPrimary" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/enable_enote_management_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHorizontal_bias="1" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/show_transfer_notifications_settings_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/show_transfer_notifications_label_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/show_transfer_notifications"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="@id/show_transfer_notifications_switch"
+                    app:layout_constraintEnd_toStartOf="@id/show_transfer_notifications_switch"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/show_transfer_notifications_switch"
+                    app:layout_constraintHorizontal_bias="0"
+                    android:textColor="?attr/colorOnPrimary" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/show_transfer_notifications_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHorizontal_bias="1" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/behaviour_settings_layout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="@string/street_mode"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@id/street_mode_switch"
-            app:layout_constraintEnd_toStartOf="@id/street_mode_switch"
+            app:layout_constraintTop_toBottomOf="@id/features_settings_layout"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/street_mode_switch" />
+            android:paddingVertical="@dimen/padding_small"
+            android:orientation="vertical">
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/street_mode_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/enable_multiple_accounts_switch" />
+            <TextView
+                android:id="@+id/behaviour_header_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/padding_small"
+                android:text="@string/settings_behaviour_header"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary" />
 
-        <TextView
-            android:id="@+id/allow_fee_override_label_textview"
-            android:layout_width="0dp"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/auto_rotate_addresses_settings_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/auto_rotate_addresses_label_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/auto_rotate_addresses"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="@id/auto_rotate_addresses_switch"
+                    app:layout_constraintEnd_toStartOf="@id/auto_rotate_addresses_switch"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/auto_rotate_addresses_switch"
+                    app:layout_constraintHorizontal_bias="0"
+                    android:textColor="?attr/colorOnPrimary" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/auto_rotate_addresses_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHorizontal_bias="1" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/balance_tap_toggles_street_mode_settings_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/balance_tap_toggles_street_mode_label_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/balance_tap_toggles_street_mode"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="@id/balance_tap_toggles_street_mode_switch"
+                    app:layout_constraintEnd_toStartOf="@id/balance_tap_toggles_street_mode_switch"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/balance_tap_toggles_street_mode_switch"
+                    app:layout_constraintHorizontal_bias="0"
+                    android:textColor="?attr/colorOnPrimary" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/balance_tap_toggles_street_mode_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHorizontal_bias="1" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/security_settings_layout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="@string/option_allow_fee_override"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@id/allow_fee_override_switch"
-            app:layout_constraintEnd_toStartOf="@id/allow_fee_override_switch"
-            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintTop_toBottomOf="@id/behaviour_settings_layout"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/allow_fee_override_switch" />
+            android:paddingVertical="@dimen/padding_small"
+            android:orientation="vertical">
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/allow_fee_override_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/street_mode_switch" />
+            <TextView
+                android:id="@+id/security_header_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/padding_small"
+                android:text="@string/settings_security_header"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary" />
 
-        <TextView
-            android:id="@+id/allow_copying_secrets_to_clipboard_textview"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="@string/allow_copying_secrets_to_clipboard"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@id/allow_copying_secrets_to_clipboard_switch"
-            app:layout_constraintEnd_toStartOf="@id/allow_copying_secrets_to_clipboard_switch"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/allow_copying_secrets_to_clipboard_switch" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/allow_copying_secrets_to_clipboard_settings_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/allow_copying_secrets_to_clipboard_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/allow_fee_override_switch" />
+                <TextView
+                    android:id="@+id/allow_copying_secrets_to_clipboard_label_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/allow_copying_secrets_to_clipboard"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="@id/allow_copying_secrets_to_clipboard_switch"
+                    app:layout_constraintEnd_toStartOf="@id/allow_copying_secrets_to_clipboard_switch"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/allow_copying_secrets_to_clipboard_switch"
+                    app:layout_constraintHorizontal_bias="0"
+                    android:textColor="?attr/colorOnPrimary" />
 
-        <TextView
-            android:id="@+id/show_transfer_notifications_textview"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="@string/show_transfer_notifications"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@id/show_transfer_notifications_switch"
-            app:layout_constraintEnd_toStartOf="@id/show_transfer_notifications_switch"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/show_transfer_notifications_switch" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/show_transfer_notifications_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/allow_copying_secrets_to_clipboard_switch" />
-
-        <TextView
-            android:id="@+id/show_icon_on_qr_codes_textview"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="@string/show_icon_on_qr_codes"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@id/show_icon_on_qr_codes_switch"
-            app:layout_constraintEnd_toStartOf="@id/show_icon_on_qr_codes_switch"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/show_icon_on_qr_codes_switch" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/show_icon_on_qr_codes_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/show_transfer_notifications_switch" />
-
-        <TextView
-            android:id="@+id/auto_rotate_addresses_textview"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="@string/auto_rotate_addresses"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@id/auto_rotate_addresses_switch"
-            app:layout_constraintEnd_toStartOf="@id/auto_rotate_addresses_switch"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/auto_rotate_addresses_switch" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/auto_rotate_addresses_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/show_icon_on_qr_codes_switch" />
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/allow_copying_secrets_to_clipboard_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHorizontal_bias="1" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.appcompat.widget.LinearLayoutCompat>
 
         <TextView
             android:id="@+id/network_settings_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp"
             android:text="@string/network"
             android:textSize="24sp"
             android:textStyle="bold"
+            android:textColor="?attr/colorOnPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/auto_rotate_addresses_switch" />
+            app:layout_constraintTop_toBottomOf="@id/security_settings_layout" />
 
         <Button
             android:id="@+id/select_node_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
             android:layout_marginTop="16dp"
-            android:layout_marginEnd="24dp"
-            android:background="@drawable/button_bg"
+            android:background="@drawable/button_background"
             android:ellipsize="middle"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
@@ -249,16 +454,15 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/network_settings_textview"
-            tools:ignore="SpeakableTextPresentCheck"
-            tools:text="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" />
+            tools:ignore="SpeakableTextPresentCheck" />
 
         <TextView
             android:id="@+id/proxy_textview"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
             android:text="@string/tor_switch_label"
             android:textSize="16sp"
+            android:textColor="?attr/colorOnPrimary"
             app:layout_constraintBottom_toBottomOf="@id/proxy_switch"
             app:layout_constraintEnd_toStartOf="@id/proxy_switch"
             app:layout_constraintStart_toStartOf="parent"
@@ -269,7 +473,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:layout_marginEnd="24dp"
             android:minWidth="48dp"
             android:minHeight="48dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -288,9 +491,7 @@
                 android:id="@+id/wallet_proxy_address_edittext"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:background="@drawable/edittext_bg"
+                android:background="@drawable/edittext_background"
                 android:hint="@string/proxy_address_hint"
                 android:minHeight="48dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -301,10 +502,8 @@
                 android:id="@+id/save_proxy_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="24dp"
-                android:background="@drawable/button_bg"
+                android:background="@drawable/button_background"
                 android:text="@string/settings_save_proxy"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
@@ -325,12 +524,11 @@
                 android:id="@+id/about_monfluo_header_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
                 android:layout_marginTop="12dp"
-                android:layout_marginEnd="24dp"
                 android:text="@string/about_monfluo_header"
                 android:textSize="24sp"
                 android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -339,11 +537,10 @@
                 android:id="@+id/about_monfluo_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="24dp"
                 android:text="@string/about_monfluo"
                 android:textSize="16sp"
+                android:textColor="?attr/colorOnPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/about_monfluo_header_textview" />
@@ -362,11 +559,11 @@
                 android:id="@+id/monfluo_build_header_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
                 android:layout_marginTop="8dp"
                 android:text="@string/monfluo_build_header"
                 android:textSize="24sp"
                 android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -375,10 +572,10 @@
                 android:id="@+id/monfluo_build_application_id_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
                 android:text="@string/monfluo_build_application_id"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/monfluo_build_header_textview" />
@@ -387,9 +584,9 @@
                 android:id="@+id/monfluo_build_application_id_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
                 tools:text="application id"
                 android:textSize="12sp"
+                android:textColor="?attr/colorOnPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/monfluo_build_application_id_header" />
@@ -398,10 +595,10 @@
                 android:id="@+id/monfluo_build_application_version_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
                 android:text="@string/monfluo_build_application_version"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/monfluo_build_application_id_textview" />
@@ -410,9 +607,9 @@
                 android:id="@+id/monfluo_build_application_version_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
                 tools:text="application version"
                 android:textSize="12sp"
+                android:textColor="?attr/colorOnPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/monfluo_build_application_version_header" />
@@ -421,10 +618,10 @@
                 android:id="@+id/monfluo_build_monero_version_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
                 android:text="@string/monfluo_build_monero_version"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/monfluo_build_application_version_textview" />
@@ -433,9 +630,9 @@
                 android:id="@+id/monfluo_build_monero_version_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
                 tools:text="monero version"
                 android:textSize="12sp"
+                android:textColor="?attr/colorOnPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/monfluo_build_monero_version_header" />
