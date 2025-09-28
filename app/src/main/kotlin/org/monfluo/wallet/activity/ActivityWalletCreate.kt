@@ -58,7 +58,9 @@ class ActivityWalletCreate : ActivityLogging() {
     private lateinit var advancedOptionsLayout: ConstraintLayout
     private lateinit var seedTypeDescTextView: TextView
     private lateinit var walletSeedEditText: EditText
+    private lateinit var walletHeightLabelTextView: TextView
     private lateinit var walletRestoreHeightEditText: EditText
+    private lateinit var walletSeedOffsetLabelTextView: TextView
     private lateinit var walletSeedOffsetPassphraseEditText: EditText
     private lateinit var createWalletButton: Button
 
@@ -78,7 +80,9 @@ class ActivityWalletCreate : ActivityLogging() {
         advancedOptionsLayout = findViewById(R.id.more_options_layout)
         seedTypeDescTextView = findViewById(R.id.seed_type_desc_textview)
         walletSeedEditText = findViewById(R.id.wallet_seed_edittext)
+        walletHeightLabelTextView = findViewById(R.id.wallet_height_label_textview)
         walletRestoreHeightEditText = findViewById(R.id.wallet_restore_height_edittext)
+        walletSeedOffsetLabelTextView = findViewById(R.id.wallet_seed_offset_label_textview)
         walletSeedOffsetPassphraseEditText = findViewById(R.id.wallet_seed_offset_passphrase_edittext)
         createWalletButton = findViewById(R.id.create_wallet_button)
 
@@ -204,9 +208,11 @@ class ActivityWalletCreate : ActivityLogging() {
             seedTypeButton.text = seedType.toString()
             seedTypeDescTextView.text = getText(seedType.getDescriptionResourceId())
             if (seedType == SeedType.MONERO) {
+                walletHeightLabelTextView.visibility = View.VISIBLE
                 walletRestoreHeightEditText.visibility = View.VISIBLE
                 walletSeedEditText.hint = getString(R.string.recovery_phrase_optional_legacy)
             } else {
+                walletHeightLabelTextView.visibility = View.GONE
                 walletRestoreHeightEditText.visibility = View.GONE
                 walletSeedEditText.hint = getString(R.string.recovery_phrase_optional_polyseed)
             }
@@ -214,8 +220,10 @@ class ActivityWalletCreate : ActivityLogging() {
 
         viewModel.seedAndType.observe(this) { (seedType, seed) ->
             if (seed.isNotBlank() || seedType == SeedType.POLYSEED) {
+                walletSeedOffsetLabelTextView.visibility = View.VISIBLE
                 walletSeedOffsetPassphraseEditText.visibility = View.VISIBLE
             } else {
+                walletSeedOffsetLabelTextView.visibility = View.GONE
                 walletSeedOffsetPassphraseEditText.visibility = View.GONE
             }
         }
