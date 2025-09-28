@@ -154,6 +154,7 @@ class ActivityHome : ActivityMonero() {
 
             if (walletName != null) {
                 walletNameTextView.text = walletName
+                walletNameTextView.contentDescription = getString(R.string.activity_home_wallet_name_content_description, walletName)
             }
 
             if (walletConnected) {
@@ -163,6 +164,7 @@ class ActivityHome : ActivityMonero() {
                     walletService?.getWalletOrLog()?.let { wallet ->
                         val accountName = wallet.getAccountLabel(wallet.getAccountIndex())
                         accountNameTextView.text = accountName
+                        accountNameTextView.contentDescription = getString(R.string.activity_home_account_name_content_description, accountName)
                     }
                 } else {
                     accountNameTextView.visibility = View.INVISIBLE

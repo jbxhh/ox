@@ -396,6 +396,14 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="settings_behaviour_header">Behaviour</string>
     <string name="settings_security_header">Security</string>
 
+    <string name="activity_home_wallet_name_content_description">Wallet - <xliff:g>%1$s</xliff:g></string>
+    <string name="activity_home_account_name_content_description">Account - <xliff:g>%1$s</xliff:g></string>
+
+    <string name="recycler_view_item_wallet_edit_content_description">Edit wallet</string>
+    <string name="recycler_view_item_node_edit_content_description">Edit node</string>
+    <string name="recycler_view_item_account_edit_content_description">Edit account</string>
+    <string name="recycler_view_item_address_edit_content_description">Edit address</string>
+
     <string name="activity_node_add_node_name_label">Name</string>
     <string name="activity_node_add_node_name_placeholder">My Monero Node</string>
     <string name="activity_node_add_node_address_label">Address</string>

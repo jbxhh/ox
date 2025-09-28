@@ -76,7 +76,8 @@
         android:minWidth="40dp"
         android:minHeight="40dp"
         android:background="@color/transparent"
-        android:src="@drawable/edit" />
+        android:src="@drawable/edit"
+        android:contentDescription="@string/recycler_view_item_address_edit_content_description" />
 
     <TextView
         android:id="@+id/address_textview"
