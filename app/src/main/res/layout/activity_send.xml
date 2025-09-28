@@ -1,54 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/send_activity_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.monfluo.wallet.SendActivity">
+    android:padding="@dimen/padding_big"
+    tools:context="org.monfluo.wallet.ActivitySend">
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/status_bar_fragment"
-        android:name="org.monfluo.wallet.fragment.StatusBarFragment"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/header_layout_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout="@layout/fragment_status_bar" />
+        android:paddingBottom="@dimen/padding_big"
+        tools:ignore="UseCompoundDrawables">
 
-    <TextView
-        android:id="@+id/send_monero_textview"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
-        android:text="@string/send_monero"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/top_controls"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/status_bar_fragment" />
+        <ImageView
+            android:id="@+id/back_imageview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:minHeight="32dp"
+            android:minWidth="32dp"
+            android:src="@drawable/left"
+            android:contentDescription="@string/content_description_back" />
+
+        <TextView
+            android:id="@+id/header_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/back_imageview"
+            app:layout_constraintTop_toTopOf="@id/back_imageview"
+            app:layout_constraintBottom_toBottomOf="@id/back_imageview"
+            android:text="@string/send_header"
+            android:textSize="@dimen/text_bigger"
+            android:textStyle="bold"
+            android:textColor="?attr/colorOnPrimary" />
+
+        <ImageView
+            android:id="@+id/go_to_account_list_imageview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toStartOf="@id/network_status_fragment"
+            app:layout_constraintTop_toTopOf="@id/network_status_fragment"
+            app:layout_constraintBottom_toBottomOf="@id/network_status_fragment"
+            android:layout_marginHorizontal="@dimen/padding_small"
+            android:minHeight="32dp"
+            android:minWidth="32dp"
+            android:background="@drawable/account_background"
+            android:src="@drawable/account"
+            android:contentDescription="@string/content_description_account" />
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/network_status_fragment"
+            android:name="org.monfluo.wallet.fragment.FragmentNetworkStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:background="@color/transparent"
+            tools:layout="@layout/fragment_network_status" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_controls"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        app:layout_constraintBottom_toBottomOf="@id/send_monero_textview"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/send_monero_textview"
-        app:layout_constraintTop_toTopOf="@id/send_monero_textview">
-
-        <Button
-            android:id="@+id/send_max_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/button_bg"
-            android:text="@string/send_max"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/add_output_button"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="visible" />
+        app:layout_constraintTop_toBottomOf="@id/header_layout_view">
 
         <ImageButton
             android:id="@+id/add_output_button"
@@ -56,19 +81,24 @@
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:contentDescription="@string/add_recipient_to_transaction"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
             android:src="@android:drawable/ic_input_add"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/send_max_button"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/oled_textColorPrimary"
-            tools:ignore="SpeakableTextPresentCheck"
-            tools:visibility="visible" />
+            tools:ignore="SpeakableTextPresentCheck" />
+
+        <Button
+            android:id="@+id/send_max_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_background"
+            android:text="@string/send_max"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- CREATE LAYOUT -->
     <TextView
         android:id="@+id/selected_utxos_value_textview"
         android:layout_width="match_parent"
@@ -77,12 +107,12 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
         android:text="@string/selected_utxos_value"
-        android:textSize="14sp"
-        android:visibility="invisible"
+        android:textSize="16sp"
+        android:visibility="gone"
+        android:textColor="?attr/colorOnPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/send_monero_textview" />
-
+        app:layout_constraintTop_toBottomOf="@id/top_controls" />
 
     <TextView
         android:id="@+id/tx_fee_radiogroup_label_textview"
@@ -136,128 +166,30 @@
         android:id="@+id/create_tx_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="24dp"
-        android:background="@drawable/button_bg"
-        android:text="@string/create"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="visible" />
+        android:layout_marginTop="24dp"
+        android:background="@drawable/button_background"
+        android:text="@string/create" />
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:fillViewport="true"
-        android:fitsSystemWindows="true"
-        app:layout_constraintBottom_toTopOf="@id/tx_fee_radiogroup"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/selected_utxos_value_textview">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/selected_utxos_value_textview"
+        app:layout_constraintBottom_toTopOf="@id/tx_fee_radiogroup"
+        android:paddingTop="@dimen/padding_small">
 
         <LinearLayout
             android:id="@+id/transaction_destination_list"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="8dp"
+            android:paddingHorizontal="@dimen/padding_big"
             android:clickable="false"
             android:clipToPadding="false"
-            android:orientation="vertical"
-            android:paddingBottom="128dp">
+            android:orientation="vertical">
 
         </LinearLayout>
     </ScrollView>
-    <!-- SEND LAYOUT -->
-    <TextView
-        android:id="@+id/address_pending_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="24dp"
-        android:ellipsize="middle"
-        android:singleLine="true"
-        android:text="@string/tx_address_text"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/send_monero_textview"
-        tools:visibility="gone" />
-
-    <TextView
-        android:id="@+id/address_resolved_from_pending_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="24dp"
-        android:ellipsize="middle"
-        android:singleLine="true"
-        android:text="@string/tx_address_resolved_from_text"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/address_pending_textview"
-        tools:visibility="gone" />
-
-    <TextView
-        android:id="@+id/amount_pending_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="24dp"
-        android:text="@string/tx_amount_text"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/address_resolved_from_pending_textview"
-        tools:visibility="gone" />
-
-    <TextView
-        android:id="@+id/fee_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="24dp"
-        android:text="@string/tx_fee_text"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/amount_pending_textview"
-        tools:visibility="gone" />
-
-    <com.ncorti.slidetoact.SlideToActView
-        android:id="@+id/send_tx_slider"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="24dp"
-        android:contentDescription="@string/slide_to_send_transaction"
-        android:elevation="6dp"
-        android:focusable="true"
-        android:importantForAccessibility="yes"
-        android:visibility="gone"
-        app:area_margin="10dp"
-        app:border_radius="20dp"
-        app:inner_color="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:outer_color="@color/oled_colorSecondary"
-        app:slider_height="72dp"
-        app:slider_locked="false"
-        app:text="@string/slide_to_send"
-        app:text_size="18sp"
-        tools:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>

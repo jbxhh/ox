@@ -15,15 +15,15 @@
  */
 package org.monfluo.wallet.model
 
- import org.monfluo.wallet.data.Subaddress
- import timber.log.Timber
+import org.monfluo.wallet.data.Address
+import timber.log.Timber
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.name
 
 class Wallet(private val handle: Long, val info: WalletInfo, private var accountIndex: Int = 0) {
+
     private var listenerHandle: Long = 0
-    private var pendingTransaction: PendingTransaction? = null
     private var enotes: List<Enote>? = null
     private var balances: Map<Int, Balance>? = null
     private var history: Map<Int, List<TransactionInfo>>? = null
@@ -69,7 +69,7 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
         return balances!!
     }
 
-    fun getBalance(): Balance = getBalances()[accountIndex] ?: Balance(0, 0, 0, 0)
+    fun getBalance(accountIndex: Int? = null): Balance = getBalances()[accountIndex ?: this.accountIndex] ?: Balance(0, 0, 0, 0)
 
     fun refreshTransactionHistory() {
         val transactionInfos = mutableMapOf<Int, MutableList<TransactionInfo>>()
@@ -99,11 +99,11 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     fun getTransaction(txId: String): TransactionInfo? = getHistoriesByTxId()[accountIndex]?.get(txId)
 
     private fun calculateBalances(enotes: List<Enote>): Map<Int, Balance> {
-        return (0 until getNumAccounts()).associateWith { account ->
-            val totalBalance = getBalance(account)
-            val unlockedBalance = getUnlockedBalance(account)
+        return (0 until getNumAccounts()).associateWith { accountIndex ->
+            val totalBalance = getBalance(accountIndex)
+            val unlockedBalance = getUnlockedBalance(accountIndex)
             val pendingBalance = totalBalance - unlockedBalance
-            val addresses = (0 until getNumSubaddresses(account)).map { getSubaddress(it) }.toSet()
+            val addresses = (0 until getNumAddresses(accountIndex)).map { addressIndex -> getAddress(accountIndex, addressIndex) }.toSet()
             val frozenBalance = enotes.filter { it.isFrozen && it.address?.let { address -> addresses.contains(address) } ?: false }.sumOf { it.amount }
             Balance(totalBalance, unlockedBalance, frozenBalance, pendingBalance)
         }
@@ -119,49 +119,28 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     external fun getLegacySeed(offset: String?): String?
     external fun isPolyseedSupported(): Boolean
     external fun getPolyseedSeedAndPassphrase(): Pair<String, String>?
-
-    val status: Status
-        get() = statusWithErrorString()
-    val fullStatus: Status
-        get() {
-            val walletStatus = statusWithErrorString()
-            walletStatus.connectionStatus = connectionStatus
-            return walletStatus
-        }
-
-    private external fun statusWithErrorString(): Status
-
     fun getTransactionHistory(): TransactionHistory {
         return TransactionHistory(getHistoryJ())
     }
 
     @Synchronized
     external fun setPassword(password: String?): Boolean
-    val address: String
-        get() = getAddress(accountIndex)
 
-    fun getAddress(accountIndex: Int): String {
-        return getAddressJ(accountIndex, 0)
-    }
-
-    private fun getSubaddress(addressIndex: Int): String {
-        return getAddressJ(accountIndex, addressIndex)
-    }
-
-    fun getSubaddress(accountIndex: Int, addressIndex: Int): String {
+    fun getAddress(accountIndex: Int, addressIndex: Int): String {
         return getAddressJ(accountIndex, addressIndex)
     }
 
     private external fun getAddressJ(accountIndex: Int, addressIndex: Int): String
-    private fun getSubaddressObject(accountIndex: Int, subAddressIndex: Int): Subaddress {
-        return Subaddress(
-            accountIndex, subAddressIndex,
-            getSubaddress(subAddressIndex), getSubaddressLabel(subAddressIndex)
+
+    private fun getAddressObject(accountIndex: Int, addressIndex: Int): Address {
+        return Address(
+            accountIndex, addressIndex,
+            getAddress(accountIndex, addressIndex), getAddressLabel(accountIndex, addressIndex)
         )
     }
 
-    fun getSubaddressObject(subAddressIndex: Int): Subaddress {
-        val subaddress = getSubaddressObject(accountIndex, subAddressIndex)
+    fun getAddressObject(subAddressIndex: Int): Address {
+        val subaddress = getAddressObject(accountIndex, subAddressIndex)
         var used = false
         var totalBalance = 0L
         for (enote in getEnotes()) {
@@ -193,7 +172,6 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     @Synchronized
     external fun store(path: String?): Boolean
     fun close(): Boolean {
-        disposePendingTransaction()
         return WalletManager.instance.closeJ(this)
     }
 
@@ -254,81 +232,25 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     external fun refreshAsync()
     private external fun rescanBlockchainAsyncJ()
 
-    private fun disposePendingTransaction() {
-        if (pendingTransaction != null) {
-            disposeTransaction(pendingTransaction)
-            pendingTransaction = null
-        }
-    }
-
-    fun estimateTransactionFee(
-        destinations: List<Pair<String, Long>>,
-        priority: PendingTransaction.Priority
-    ): Long {
-        val _priority = priority.ordinal
-        return estimateTransactionFee(destinations, _priority)
-    }
-
     private external fun estimateTransactionFee(
         destinations: List<Pair<String, Long>>,
         priority: Int
     ): Long
 
-    fun createSweepTransaction(
-        transactionDestination: TransactionDestinationResolved,
-        priority: PendingTransaction.Priority,
-        keyImages: ArrayList<String>
-    ): PendingTransaction {
-        disposePendingTransaction()
-        val txHandle = createSweepTransaction(transactionDestination.address, "", 0, priority.ordinal, accountIndex, keyImages)
-        val pendingTransaction = PendingTransaction(txHandle)
-        this.pendingTransaction = pendingTransaction
-        return pendingTransaction
-    }
-
-    fun createTransactionMultDest(
-        outputs: List<TransactionDestinationWithAmountResolved>,
-        priority: PendingTransaction.Priority,
-        keyImages: ArrayList<String>
-    ): PendingTransaction {
-        disposePendingTransaction()
-        val _priority = priority.ordinal
-        val destinations = ArrayList<String>()
-        val amounts = LongArray(outputs.size)
-        for (i in outputs.indices) {
-            val output = outputs[i]
-            destinations.add(output.address)
-            amounts[i] = output.amount
-        }
-        val txHandle = createTransactionMultDestJ(
-            destinations, "", amounts, 0, _priority,
-            accountIndex, keyImages
-        )
-        val pendingTransaction = PendingTransaction(txHandle)
-        this.pendingTransaction = pendingTransaction
-        return pendingTransaction
-    }
-
-    private external fun createTransactionMultDestJ(
-        dstAddrs: ArrayList<String>, paymentId: String,
+    external fun createTransactionMultDestJ(
+        dstAddrs: List<String>, paymentId: String,
         amount: LongArray, mixinCount: Int,
-        priority: Int, accountIndex: Int, keyImages: ArrayList<String>
+        priority: Int, accountIndex: Int, keyImages: List<String>
     ): Long
 
-    private external fun createTransactionJ(
-        dstAddr: String, paymentId: String,
-        amount: Long, mixinCount: Int,
-        priority: Int, accountIndex: Int, keyImages: ArrayList<String>
-    ): Long
-
-    private external fun createSweepTransaction(
+     external fun createSweepTransaction(
         dstAddr: String, paymentId: String,
         mixinCount: Int,
-        priority: Int, accountIndex: Int, keyImages: ArrayList<String>
+        priority: Int, accountIndex: Int, keyImages: List<String>
     ): Long
 
     private external fun createSweepUnmixableTransactionJ(): Long
-    private external fun disposeTransaction(pendingTransaction: PendingTransaction?)
+    external fun disposeTransaction(pendingTransaction: PendingTransaction)
     private external fun getHistoryJ(): Long
 
     private external fun setListenerJ(listener: WalletListener?): Long
@@ -343,55 +265,38 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     external fun addAccount(label: String)
 
     fun getAccountLabel(accountIndex: Int): String {
-        val label = getSubaddressLabel(accountIndex, 0)
+        val label = getAddressLabel(accountIndex, 0)
         return label
     }
 
-    fun getSubaddressLabel(addressIndex: Int): String {
-        return getSubaddressLabel(accountIndex, addressIndex)
+    fun getAddressLabel(addressIndex: Int): String {
+        return getAddressLabel(accountIndex, addressIndex)
     }
 
-    private external fun getSubaddressLabel(accountIndex: Int, addressIndex: Int): String
+    external fun getAddressLabel(accountIndex: Int, addressIndex: Int): String
+    
     fun setAccountLabel(accountIndex: Int, label: String?) {
-        setSubaddressLabel(accountIndex, 0, label)
+        setAddressLabel(accountIndex, 0, label)
     }
 
-    fun setSubaddressLabel(addressIndex: Int, label: String?) {
-        setSubaddressLabel(accountIndex, addressIndex, label)
+    fun setAddressLabel(addressIndex: Int, label: String?) {
+        setAddressLabel(accountIndex, addressIndex, label)
     }
 
-    private external fun setSubaddressLabel(accountIndex: Int, addressIndex: Int, label: String?)
+    external fun setAddressLabel(accountIndex: Int, addressIndex: Int, label: String?)
+
     external fun getNumAccounts(): Int
-    val numSubaddresses: Int
-        get() = getNumSubaddresses(accountIndex)
+    val numAddresses: Int
+        get() = getNumAddresses(accountIndex)
 
-    private external fun getNumSubaddresses(accountIndex: Int): Int
+    private external fun getNumAddresses(accountIndex: Int): Int
 
-    external fun addSubaddress(accountIndex: Int, label: String?)
+    external fun addAddress(accountIndex: Int, label: String?)
 
-    enum class StatusEnum {
-        Status_Ok, Status_Error, Status_Critical
-    }
+    external fun getWalletStatusWithError(): WalletStatusWithError
 
     enum class ConnectionStatus {
         ConnectionStatus_Disconnected, ConnectionStatus_Connected, ConnectionStatus_WrongVersion
-    }
-
-    class Status internal constructor(status: Int, val errorString: String) {
-        val status: StatusEnum
-        var connectionStatus: ConnectionStatus? = null // optional
-
-        init {
-            this.status = StatusEnum.values()[status]
-        }
-
-        val isOk: Boolean
-            get() = (status == StatusEnum.Status_Ok
-                    && (connectionStatus == null || connectionStatus == ConnectionStatus.ConnectionStatus_Connected))
-
-        override fun toString(): String {
-            return "Wallet.Status: $status/$errorString/$connectionStatus"
-        }
     }
 
     companion object {

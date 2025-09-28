@@ -1,0 +1,26 @@
+package org.monfluo.wallet.util.component
+
+import android.os.Bundle
+import org.monfluo.wallet.service.wallet.WalletService
+import timber.log.Timber
+
+abstract class ActivityMonero : ActivityLogging(), ComponentMonero {
+
+    override val componentName: String = "activity"
+    override var walletService: WalletService? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        super.onComponentMoneroCreate(applicationContext)
+    }
+
+    override fun onWalletServiceNotFound() {
+        Timber.d("Finishing activity ${this@ActivityMonero.javaClass.simpleName} because wallet service is not found")
+        finish()
+    }
+
+    override fun onWalletServiceDisconnected() {
+        Timber.d("Finishing activity ${this@ActivityMonero.javaClass.simpleName} because wallet service disconnected")
+        finish()
+    }
+}

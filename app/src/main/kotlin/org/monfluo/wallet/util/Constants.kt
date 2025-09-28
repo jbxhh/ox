@@ -6,9 +6,8 @@ object Constants {
     const val FOREGROUND_SERVICE_NOTIFICATION_CHANNEL = "FOREGROUND_SERVICE_NOTIFICATION_CHANNEL"
     const val TRANSFERS_NOTIFICATION_CHANNEL = "TRANSFERS_NOTIFICATION_CHANNEL"
 
-    const val DEFAULT_WALLET_NAME = "xmr_wallet"
+    const val DEFAULT_WALLET_NAME = "Monero Wallet"
     const val MNEMONIC_LANGUAGE = "English"
-    const val STREET_MODE_BALANCE = "#.############"
 
     const val PREF_USE_PROXY = "pref_use_proxy"
     const val PREF_PROXY = "pref_proxy"
@@ -23,6 +22,8 @@ object Constants {
     const val PREF_SHOW_TRANSFER_NOTIFICATIONS = "pref_show_transfer_notifications"
     const val PREF_SHOW_ICON_ON_QR_CODES = "pref_show_icon_on_qr_codes"
     const val PREF_AUTO_ROTATE_ADDRESSES = "pref_auto_rotate_addresses"
+    const val PREF_ENABLE_ENOTE_MANAGEMENT = "pref_enable_enote_management"
+    const val PREF_BALANCE_TAP_TOGGLES_STREET_MODE = "pref_balance_tap_toggles_street_mode"
     const val PREF_POST_NOTIFICATIONS_PERMISSION_REQUESTED = "pref_post_notifications_permission_requested"
 
     const val URI_PREFIX = "monero:"
@@ -37,6 +38,23 @@ object Constants {
     const val EXTRA_SEND_MAX = "send_max"
     const val EXTRA_SEND_ENOTES = "send_enotes"
     const val EXTRA_TRANSACTION_ID = "transaction_id"
+    const val EXTRA_ACCOUNT_INDEX = "account_index"
+    const val EXTRA_ADDRESS_INDEX = "address_index"
+    const val EXTRA_DAEMON_ADDRESS = "daemon_address"
+    const val EXTRA_DAEMON_USERNAME = "daemon_username"
+    const val EXTRA_DAEMON_PASSWORD = "daemon_password"
+    const val EXTRA_DAEMON_TRUSTED = "daemon_trusted"
+    const val EXTRA_ADDRESS_LABEL = "address_label"
+    const val EXTRA_ACCOUNT_LABEL = "account_label"
+    const val EXTRA_TRANSACTION_DESTINATION = "transaction_destination"
+    const val EXTRA_TRANSACTION_DESTINATIONS = "transaction_destinations"
+    const val EXTRA_TRANSACTION_PRIORITY = "transaction_priority"
+    const val EXTRA_TRANSACTION_SELECTED_UTXOS = "transaction_selected_utxos"
+    const val EXTRA_PENDING_TRANSACTION = "pending_transaction"
+    const val EXTRA_PROXY = "proxy"
+    const val EXTRA_ENOTE = "enote"
+    const val EXTRA_ENOTES = "enotes"
+    const val EXTRA_NODE_NAME = "node_name"
 
     // Donation address is also specified in strings.xml, it is used as a tooltip in address fields
     const val DONATE_ADDRESS = "48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ"

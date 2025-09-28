@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_network_status"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/transparent"
+    tools:context="org.monfluo.wallet.fragment.FragmentNetworkStatus">
+
+    <ImageView
+        android:id="@+id/network_status_imageview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@color/transparent"
+        android:minWidth="32dp"
+        android:minHeight="32dp"
+        android:src="@drawable/synchronization_status_starting"
+        android:contentDescription="@string/content_description_network_status_icon_opening_wallet" />
+</androidx.constraintlayout.widget.ConstraintLayout>
