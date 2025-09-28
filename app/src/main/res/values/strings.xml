@@ -153,9 +153,9 @@
     <string name="recv_monero">Receive</string>
     <!-- Header (spoiler) for showing more options in onboarding activity -->
     <string name="more_options">More options</string>
-    <string name="recovery_phrase_optional_legacy">Recovery seed (legacy)</string>
-    <string name="recovery_phrase_optional_polyseed">Recovery seed (polyseed)</string>
-    <string name="restore_height_optional">Restore height (optional)</string>
+    <string name="recovery_phrase_optional_legacy">Recovery seed (legacy, optional)</string>
+    <string name="recovery_phrase_optional_polyseed">Recovery seed (polyseed, optional)</string>
+    <string name="restore_height_optional">Recovery height (optional)</string>
     <string name="wallet_password_hint">Wallet password (optional)</string>
     <string name="wallet_password_confirm_hint">Confirm wallet password</string>
     <string name="wallet_seed_offset_passphrase">Seed offset passphrase (optional)</string>
@@ -253,7 +253,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="copy_secrets_warning">Copying the secrets of your wallet to clipboard is dangerous because other apps on your device can view the clipboard and steal them</string>
     <string name="wallet_keys_label">Keys</string>
     <string name="wallet_viewkey_desc">Anyone with your private view-key can see all incoming transactions!</string>
-    <string name="wallet_restore_height_label">Restore height</string>
+    <string name="wallet_restore_height_label">Recovery height</string>
     <string name="wallet_address">Wallet address</string>
     <string name="use_password_as_seed_offset">Use passphrase as seed offset</string>
     <string name="trusted_daemon">Trusted daemon</string>
@@ -274,7 +274,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="copy_seed">Copy wallet\'s seed</string>
     <string name="copy_polyseed_offset_passphrase">Copy wallet\'s polyseed offset passphrase</string>
     <string name="add_recipient_to_transaction">Add recipient to transaction</string>
-    <string name="copy_restore_height">Copy wallet\'s restore height</string>
+    <string name="copy_restore_height">Copy wallet\'s recovery height</string>
     <string name="copy_wallet_s_address">Copy wallet\'s address</string>
     <string name="copy_wallet_s_private_view_key">Copy wallet\'s private view-key</string>
     <string name="copy_wallet_s_public_view_key">Copy wallet\'s public view-key</string>
@@ -395,6 +395,12 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="settings_features_header">Features</string>
     <string name="settings_behaviour_header">Behaviour</string>
     <string name="settings_security_header">Security</string>
+
+    <string name="activity_wallet_create_wallet_name_label">Name</string>
+    <string name="activity_wallet_create_wallet_password_label">Password</string>
+    <string name="activity_wallet_create_wallet_seed_label">Recovery seed</string>
+    <string name="activity_wallet_create_wallet_height_label">Recovery height</string>
+    <string name="activity_wallet_create_wallet_seed_offset_label">Seed offset passphrase</string>
 
     <string name="activity_home_wallet_name_content_description">Wallet - <xliff:g>%1$s</xliff:g></string>
     <string name="activity_home_account_name_content_description">Account - <xliff:g>%1$s</xliff:g></string>
