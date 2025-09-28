@@ -4,7 +4,7 @@
 
 * Bump `versionCode` & `versionName` in `build.gradle`
 * Build APKs: `./gradlew clean assembleRelease`
-  * The APKs will be in `app/build/outputs/apk/beta/release` directory
+  * The APKs will be in `app/build/outputs/apk/release` directory
 * Sign the APKs
 ```bash
 for f in ./*.apk; do

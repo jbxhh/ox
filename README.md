@@ -58,8 +58,6 @@ We are NOT responsible for lost or stolen funds.
 ![](doc/screenshots/Monfluo2.png)
 ![](doc/screenshots/Monfluo3.png)
 ![](doc/screenshots/Monfluo4.png)
-![](doc/screenshots/Monfluo5.png)
-![](doc/screenshots/Monfluo6.png)
 
 ## HOW TO BUILD
 
