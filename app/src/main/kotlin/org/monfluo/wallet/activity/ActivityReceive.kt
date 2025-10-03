@@ -117,6 +117,13 @@ class ActivityReceive : ActivityMonero() {
                 addressQrCodeIconImageView.visibility = View.GONE
             }
         }
+        viewModel.multiAccountMode.observe(this) { multiAccountMode ->
+            if (multiAccountMode) {
+                goToAccountListImageView.visibility = View.VISIBLE
+            } else {
+                goToAccountListImageView.visibility = View.GONE
+            }
+        }
 
         val subAdapterAddressListener = object : AdapterAddressListener {
             override fun onAddressSelected(subaddress: Address) {
@@ -155,8 +162,10 @@ class ActivityReceive : ActivityMonero() {
         super.onResume()
 
         val isShowIconOnQrCodes = PreferenceUtils.isShowIconOnQrCodes(this)
+        val isMultiAccountMode = PreferenceUtils.isMultiAccountMode(this)
 
         viewModel.setShowIconOnQrCodes(isShowIconOnQrCodes)
+        viewModel.multiAccountMode.postValue(isMultiAccountMode)
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
@@ -260,6 +269,8 @@ class ReceiveViewModel : ViewModel() {
 
     private val _showIconOnQrCodes = MutableLiveData(false)
     val showIconOnQrCodes: LiveData<Boolean> = _showIconOnQrCodes
+
+    val multiAccountMode = MutableLiveData(false)
 
     private val _selectedAddress = MutableLiveData<Address?>()
     val selectedAddress: LiveData<Address?> = _selectedAddress

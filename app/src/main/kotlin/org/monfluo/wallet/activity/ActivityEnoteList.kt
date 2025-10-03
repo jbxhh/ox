@@ -134,6 +134,13 @@ class ActivityEnoteList : ActivityMonero() {
     private fun bindObservers() {
         enotesRecyclerView.layoutManager = LinearLayoutManager(this)
         enotesRecyclerView.adapter = adapter
+        viewModel.multiAccountMode.observe(this) { multiAccountMode ->
+            if (multiAccountMode) {
+                goToAccountListImageView.visibility = View.VISIBLE
+            } else {
+                goToAccountListImageView.visibility = View.GONE
+            }
+        }
         viewModel.enotes.observe(this) { enotes: List<Enote> ->
             val filteredEnotes = enotes.filter { !it.isSpent }
             if (filteredEnotes.isEmpty()) {
@@ -145,6 +152,14 @@ class ActivityEnoteList : ActivityMonero() {
                 enotesRecyclerView.visibility = View.VISIBLE
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val isMultiAccountMode = PreferenceUtils.isMultiAccountMode(this)
+
+        viewModel.multiAccountMode.postValue(isMultiAccountMode)
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
@@ -172,6 +187,8 @@ class ActivityEnoteList : ActivityMonero() {
 internal class EnotesViewModel : ViewModel() {
     private val _enotes: MutableLiveData<List<Enote>> = MutableLiveData()
     val enotes: LiveData<List<Enote>> = _enotes
+
+    val multiAccountMode = MutableLiveData(false)
 
     fun updateEnotes(enotes: List<Enote>) {
         _enotes.postValue(enotes)

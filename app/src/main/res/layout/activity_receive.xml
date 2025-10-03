@@ -69,7 +69,8 @@
             android:minWidth="32dp"
             android:background="@drawable/account_background"
             android:src="@drawable/account"
-            android:contentDescription="@string/content_description_account" />
+            android:contentDescription="@string/content_description_account"
+            android:visibility="gone" />
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/network_status_fragment"
