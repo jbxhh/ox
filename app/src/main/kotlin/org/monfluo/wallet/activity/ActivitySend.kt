@@ -187,6 +187,13 @@ class ActivitySend : ActivityMonero() {
     }
 
     private fun bindObservers() {
+        viewModel.multiAccountMode.observe(this) { multiAccountMode ->
+            if (multiAccountMode) {
+                goToAccountListImageView.visibility = View.VISIBLE
+            } else {
+                goToAccountListImageView.visibility = View.GONE
+            }
+        }
         viewModel.sendingMax.observe(this) { sendingMax: Boolean? ->
             if (sendingMax == true) {
                 prepareOutputsForMaxSend()
@@ -211,6 +218,14 @@ class ActivitySend : ActivityMonero() {
         addOutput(true, address, amount)
         viewModel.setSendingMax(max)
         viewModel.setEnotes(enotes)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val isMultiAccountMode = PreferenceUtils.isMultiAccountMode(this)
+
+        viewModel.multiAccountMode.postValue(isMultiAccountMode)
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
@@ -513,6 +528,8 @@ class SendViewModel : ViewModel() {
     var sendingMax: LiveData<Boolean?> = _sendingMax
     var showAddOutputButton: LiveData<Boolean?> = _showAddOutputButton
     var enotes: LiveData<ArrayList<String>> = _enotes
+
+    val multiAccountMode = MutableLiveData(false)
 
     fun setPriority(priority: PendingTransaction.Priority) {
         _priority.value = priority
