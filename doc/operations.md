@@ -3,7 +3,7 @@
 ## Releasing
 
 * Bump `versionCode` & `versionName` in `build.gradle`
-* Build APKs: `./gradlew clean assembleRelease`
+* Build native libraries and APKs: `just clean build-native-all build-release`
   * The APKs will be in `app/build/outputs/apk/release` directory
 * Sign the APKs
 ```bash
