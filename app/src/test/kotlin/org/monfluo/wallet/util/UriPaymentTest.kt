@@ -121,6 +121,17 @@ class UriPaymentTest {
                 )
             ),
             Arguments.of(
+                "monero:48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ?message=%2410+dollars",
+                UriPayment(
+                    listOf(
+                        "48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ"
+                    ),
+                    emptyList(),
+                    emptyList(),
+                    "$10 dollars"
+                )
+            ),
+            Arguments.of(
                 "notmonero:48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ",
                 null
             ),
