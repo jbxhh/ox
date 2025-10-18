@@ -15,7 +15,7 @@ import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
-import org.monfluo.wallet.util.UriData
+import org.monfluo.wallet.util.UriPayment
 import org.monfluo.wallet.util.component.ActivityLogging
 import timber.log.Timber
 
@@ -42,7 +42,7 @@ class ActivityStart : ActivityLogging() {
         setVisible(false)
 
         if (intent?.data != null) {
-            viewModel.setUriData(UriData.parse(intent.data.toString()))
+            viewModel.uriPaymentRaw = intent.data.toString()
         }
 
         launch()
@@ -63,7 +63,7 @@ class ActivityStart : ActivityLogging() {
             val passwordDialog = org.monfluo.wallet.fragment.DialogFragmentPassword(walletPath, true, object : DialogFragmentPassword.Listener {
                 override fun onCorrectPasswordSubmitted(self: DialogFragmentPassword, password: String) {
                     self.dismiss()
-                    openWallet(walletPath, password, viewModel.takeUriData())
+                    openWallet(walletPath, password, viewModel.takeUriPayment())
                 }
             })
             passwordDialog.show(supportFragmentManager, "password_dialog")
@@ -75,10 +75,10 @@ class ActivityStart : ActivityLogging() {
         val walletPath = data?.getStringExtra(Constants.EXTRA_WALLET_PATH)
         val walletPassword = data?.getStringExtra(Constants.EXTRA_WALLET_PASSWORD)
         Timber.i("Opening wallet at path $walletPath")
-        openWallet(walletPath, walletPassword, viewModel.takeUriData())
+        openWallet(walletPath, walletPassword, viewModel.takeUriPayment())
     }
 
-    private fun openWallet(walletPath: String?, walletPassword: String?, uriData: UriData?) {
+    private fun openWallet(walletPath: String?, walletPassword: String?, uriPaymentRaw: String?) {
         val walletServiceIntent = Intent(applicationContext, WalletService::class.java)
         startForegroundService(walletServiceIntent)
         bindService(walletServiceIntent, object : ServiceConnection {
@@ -89,13 +89,13 @@ class ActivityStart : ActivityLogging() {
                 if (walletPath != null && walletPassword != null) {
                     walletService.openWallet(walletPath, walletPassword, node.address, node.username ?: "", node.password ?: "", node.trusted, PreferenceUtils.getProxyIfEnabled(applicationContext) ?: "")
                 } else {
-                    Timber.e("Walelt path or password are null, initializing wallet instead of opening it")
+                    Timber.e("Wallet path or password are null, initializing wallet instead of opening it")
                     walletService.initWallet(node.address, node.username ?: "", node.password ?: "", node.trusted, PreferenceUtils.getProxyIfEnabled(applicationContext) ?: "")
                 }
 
                 val activityHomeIntent = Intent(this@ActivityStart, ActivityHome::class.java)
 
-                if (uriData == null) {
+                if (uriPaymentRaw == null) {
                     // the app was NOT started with a monero uri payment data, proceed to the home activity
                     Timber.d("Uri payment data not present, launching home activity")
                     startActivityHome.launch(activityHomeIntent)
@@ -107,8 +107,7 @@ class ActivityStart : ActivityLogging() {
                     startActivityHome.launch(activityHomeIntent)
 
                     val sendIntent = Intent(this@ActivityStart, ActivitySend::class.java)
-                    sendIntent.putExtra(Constants.EXTRA_SEND_ADDRESS, uriData.address)
-                    sendIntent.putExtra(Constants.EXTRA_SEND_AMOUNT, uriData.amount)
+                    sendIntent.putExtra(Constants.EXTRA_PAYMENT_URI, uriPaymentRaw)
                     startActivity(sendIntent)
                 }
             }
@@ -122,15 +121,11 @@ class ActivityStart : ActivityLogging() {
 
 internal class StartActivityViewModel : ViewModel() {
 
-    private var uriData: UriData? = null
+    var uriPaymentRaw: String? = null
 
-    fun takeUriData(): UriData? {
-        val uriData = this.uriData
-        this.uriData = null
-        return uriData
-    }
-
-    fun setUriData(uriData: UriData?) {
-        this.uriData = uriData
+    fun takeUriPayment(): String? {
+        val uriPaymentRaw = this.uriPaymentRaw
+        this.uriPaymentRaw = null
+        return uriPaymentRaw
     }
 }

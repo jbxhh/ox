@@ -938,19 +938,18 @@ Java_org_monfluo_wallet_model_Wallet_getDisplayAmount(JNIEnv *env, jclass clazz,
     return env->NewStringUTF(Monero::Wallet::displayAmount(amount).c_str());
 }
 
-JNIEXPORT jlong JNICALL
+JNIEXPORT jobject JNICALL
 Java_org_monfluo_wallet_model_Wallet_getAmountFromString(JNIEnv *env, jclass clazz,
                                                         jstring amount) {
     const char *_amount = env->GetStringUTFChars(amount, nullptr);
-    uint64_t x = Monero::Wallet::amountFromString(_amount);
+    jobject jAmount = nullptr;
+    try {
+        jAmount = create_java_long(env, static_cast<jlong>(Monero::Wallet::amountFromString(_amount)));
+    } catch (...) {
+        // We do not care if parsing failed, just return null
+    }
     env->ReleaseStringUTFChars(amount, _amount);
-    return x;
-}
-
-JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_getAmountFromDouble(JNIEnv *env, jclass clazz,
-                                                        jdouble amount) {
-    return static_cast<jlong>(Monero::Wallet::amountFromDouble(amount));
+    return jAmount;
 }
 
 JNIEXPORT jstring JNICALL

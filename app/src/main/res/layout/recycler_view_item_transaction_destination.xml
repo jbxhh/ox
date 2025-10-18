@@ -9,39 +9,49 @@
     android:paddingBottom="@dimen/padding_big">
 
     <ImageButton
-        android:id="@+id/remove_output_imagebutton"
+        android:id="@+id/transaction_destination_remove_image_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:minWidth="48dp"
-        android:minHeight="48dp"
+        app:layout_constraintBottom_toBottomOf="@id/transaction_destination_amount_label_textview"
         android:background="@android:color/transparent"
         android:src="@android:drawable/ic_delete"
-        android:contentDescription="@string/remove_recipient_from_transaction"
-        tools:ignore="SpeakableTextPresentCheck" />
+        android:contentDescription="@string/recycler_view_item_transaction_destination_remove_content_description" />
 
     <TextView
         android:id="@+id/transaction_destination_amount_label_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/remove_output_imagebutton"
+        app:layout_constraintTop_toTopOf="parent"
         android:textSize="@dimen/text_medium"
         android:textColor="@color/text_subtler"
-        android:text="Amount" />
+        android:text="@string/recycler_view_item_transaction_destination_amount_label" />
 
     <EditText
         android:id="@+id/transaction_destination_amount_edittext"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/transaction_destination_amount_send_all_button"
         app:layout_constraintTop_toBottomOf="@id/transaction_destination_amount_label_textview"
         android:layout_marginTop="@dimen/padding_mini"
         android:background="@drawable/edittext_background"
         android:hint="@string/example_amount"
         android:inputType="numberDecimal" />
+
+    <Button
+        android:id="@+id/transaction_destination_amount_send_all_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@id/transaction_destination_amount_edittext"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/transaction_destination_amount_edittext"
+        app:layout_constraintBottom_toBottomOf="@id/transaction_destination_amount_edittext"
+        android:layout_marginStart="@dimen/padding_small"
+        android:background="@drawable/button_background"
+        android:text="@string/recycler_view_item_transaction_destination_send_all_label" />
 
     <TextView
         android:id="@+id/transaction_destination_address_label_textview"
@@ -52,14 +62,14 @@
         android:layout_marginTop="@dimen/padding_small"
         android:textSize="@dimen/text_medium"
         android:textColor="@color/text_subtler"
-        android:text="Address" />
+        android:text="@string/recycler_view_item_transaction_destination_address_label" />
 
     <EditText
         android:id="@+id/transaction_destination_address_edittext"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/scan_address_imagebutton"
+        app:layout_constraintEnd_toStartOf="@id/transaction_destination_scan_image_button"
         app:layout_constraintTop_toBottomOf="@id/transaction_destination_address_label_textview"
         android:layout_marginTop="@dimen/padding_mini"
         android:background="@drawable/edittext_background"
@@ -68,7 +78,7 @@
         android:singleLine="true" />
 
     <ImageButton
-        android:id="@+id/scan_address_imagebutton"
+        android:id="@+id/transaction_destination_scan_image_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toEndOf="@id/transaction_destination_address_edittext"
@@ -79,16 +89,15 @@
         android:minHeight="48dp"
         android:background="@color/transparent"
         android:src="@drawable/ic_scan"
-        android:contentDescription="@string/scan_qr_code_for_address_field"
-        tools:ignore="SpeakableTextPresentCheck" />
+        android:contentDescription="@string/recycler_view_item_transaction_destination_scan_content_description" />
 
     <TextView
-        android:id="@+id/donate_label"
+        android:id="@+id/transaction_destination_donate_label_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="@id/transaction_destination_address_edittext"
         app:layout_constraintTop_toBottomOf="@id/transaction_destination_address_edittext"
         android:layout_marginTop="@dimen/padding_mini"
-        android:text="@string/donate_label"
+        android:text="@string/recycler_view_item_transaction_destination_donate_label"
         android:textSize="@dimen/text_mini" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -22,6 +22,11 @@ import kotlin.math.max
 
 class ActivityTransactionPending : ActivityMonero() {
 
+    companion object {
+        const val RESULT_OK: Int = 1
+        const val RESULT_NO_PENDING_TRANSACTION: Int = 2
+    }
+
     private lateinit var layoutView: View
     private lateinit var backImageView: ImageView
 
@@ -116,7 +121,7 @@ class ActivityTransactionPending : ActivityMonero() {
             }
         } else {
             Timber.e("Pending transaction activity spawned without a pending transaction")
-            setResult(1)
+            setResult(RESULT_NO_PENDING_TRANSACTION)
             finish()
         }
     }
@@ -126,6 +131,7 @@ class ActivityTransactionPending : ActivityMonero() {
             if (success) {
                 Timber.i("Pending transaction sent successfully, finishing activity")
                 Toast.makeText(this, getString(R.string.sent_tx), Toast.LENGTH_SHORT).show()
+                setResult(RESULT_OK)
                 finish()
             } else {
                 Timber.i("Pending transaction was not sent")

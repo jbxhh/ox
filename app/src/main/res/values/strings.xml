@@ -97,10 +97,6 @@
     <string name="frozen_amount"><xliff:g>%1$s</xliff:g> frozen</string>
     <!-- Text showing total unconfirmed (pending) funds in home activity -->
     <string name="unconfirmed_amount"><xliff:g>%1$s</xliff:g> unconfirmed</string>
-    <!-- Button for sending all available funds -->
-    <string name="send_max">Max</string>
-    <!-- Button shown in place of send all button after it is clicked to toggle it back -->
-    <string name="undo">Undo</string>
     <!-- Toast shown when failing to send transaction -->
     <string name="toast_error_sending_tx">Error sending transaction</string>
     <!-- Toast shown when failing to create transaction -->
@@ -141,12 +137,8 @@
     <string name="example_address" translatable="false">48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ</string>
     <!-- Placeholder for amount field -->
     <string name="example_amount" translatable="false">0.00</string>
-    <!-- Label used when creating a send all transaction in place of amount -->
-    <string name="sending_all">SENDING ALL</string>
     <!-- Send button that takes user to send activity when pressed -->
     <string name="send">Send</string>
-    <!-- Button for creating a transaction -->
-    <string name="create">Create</string>
     <!-- Header for sending XMR -->
     <string name="send_monero">Send</string>
     <!-- Header for receiving XMR -->
@@ -173,12 +165,8 @@
     <string name="tx_amount_text">Amount: %1$s XMR</string>
     <string name="tx_fee_text">Fee: %1$s XMR</string>
     <string name="receive">Receive</string>
-    <string name="creating_tx">Creating transaction…</string>
-    <string name="creating_tx_failed_invalid_outputs">Invalid destination combination</string>
-    <string name="cannot_create_transaction_no_wallet">Cannot create transaction - wallet is not opened yet</string>
     <string name="sending_tx">Sending transaction…</string>
     <string name="sent_tx">Sent transaction!</string>
-    <string name="no_camera_permission">No camera permission</string>
     <string name="application_logo">Application logo</string>
     <string name="settings">Settings</string>
     <string name="wallet">Wallet</string>
@@ -224,18 +212,11 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="transaction_conf_1_desc2_confirmed">time, and was mined in block</string>
     <string name="transaction_on_date_label">on</string>
     <string name="node_selected">Using node: %1$s</string>
-    <string name="fee_priority">Fee:</string>
-    <string name="default_fee">Default</string>
-    <string name="medium_fee">Medium</string>
-    <string name="high_fee">High</string>
     <string name="view_enotes">View enotes</string>
     <string name="settings_save_proxy">Save &amp; update</string>
-    <string name="selected_utxos_value">Selected value: %1$s XMR</string>
-    <string name="selected_utxos_value_churning">Selected value: %1$s XMR\n\nThe anonymity benefits of churning are still being researched. Only proceed if you know what you are doing.</string>
     <string name="global_index_text">%1$s</string>
     <string name="outpoint_text">%1$s</string>
     <string name="create_wallet_failed">Create wallet failed: %1$s</string>
-    <string name="create_transaction_failed">Create transaction failed: %1$s</string>
     <string name="churn">Churn</string>
     <string name="freeze">Freeze</string>
     <string name="unfreeze">Unfreeze</string>
@@ -259,8 +240,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="trusted_daemon">Trusted daemon</string>
     <string name="subbaddress_info_subtitle" translatable="false">#%1$d: %2$s</string>
     <string name="all_addresses">All addresses</string>
-    <string name="donate_label">Donate to Monfluo</string>
-    <string name="donating_label">Donating to Monfluo. Thank you!</string>
     <string name="transactions">Transactions</string>
     <string name="auth">[ auth ]</string>
     <string name="trusted">[ trusted ]</string>
@@ -282,8 +261,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="copy_wallet_s_public_spend_key">Copy wallet\'s public spend-key</string>
     <string name="paste_clipboard_into_amount_field">Paste clipboard into amount field</string>
     <string name="paste_clipboard_into_address_field">Paste clipboard into address field</string>
-    <string name="remove_recipient_from_transaction">Remove recipient from transaction</string>
-    <string name="scan_qr_code_for_address_field">Scan QR code for address field</string>
     <string name="copy_transaction_hash">Copy transaction hash</string>
     <string name="copy_transaction_addr">Copy transaction address</string>
     <string name="seed_desc_polyseed">16 words instead of 25; just as secure, but not supported in as many wallets right now.</string>
@@ -409,6 +386,36 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="recycler_view_item_node_edit_content_description">Edit node</string>
     <string name="recycler_view_item_account_edit_content_description">Edit account</string>
     <string name="recycler_view_item_address_edit_content_description">Edit address</string>
+
+    <string name="activity_send_selected_enotes_value_text">Selected value: %1$s XMR</string>
+    <string name="activity_send_fee_label">Fee:</string>
+    <string name="activity_send_fee_default_label">Default</string>
+    <string name="activity_send_fee_medium_label">Medium</string>
+    <string name="activity_send_fee_high_label">High</string>
+    <!-- Button for creating a transaction -->
+    <string name="activity_send_transaction_create">Create</string>
+    <string name="activity_send_camera_permission_denied_toast">No camera permission</string>
+    <string name="activity_send_address_invalid_toast">Address #<xliff:g>%1$d</xliff:g> is invalid</string>
+    <string name="activity_send_amount_invalid_toast">Amount #<xliff:g>%1$d</xliff:g> is invalid</string>
+    <string name="activity_send_amount_invalid_uri_payment_toast">Not a valid payment uri</string>
+    <string name="activity_send_transaction_create_failed_no_wallet_toast">Cannot create transaction - wallet is not opened yet</string>
+    <string name="activity_send_transaction_create_failed">Creating transaction failed: %1$s</string>
+    <string name="activity_send_transaction_creating_toast">Creating transaction…</string>
+
+    <string name="recycler_view_item_transaction_destination_remove_content_description">Remove destination from transaction</string>
+    <string name="recycler_view_item_transaction_destination_amount_label">Amount</string>
+    <string name="recycler_view_item_transaction_destination_amount_with_position_label">Amount #<xliff:g>%1$d</xliff:g></string>
+    <string name="recycler_view_item_transaction_destination_address_label">Address</string>
+    <string name="recycler_view_item_transaction_destination_address_with_position_label">Address #<xliff:g>%1$d</xliff:g></string>
+    <!-- Button for sending all available funds -->
+    <string name="recycler_view_item_transaction_destination_send_all_label">Max</string>
+    <!-- Button shown in place of send all button after it is clicked to toggle it back -->
+    <string name="recycler_view_item_transaction_destination_send_all_undo_label">Undo</string>
+    <!-- Text used when creating a send all transaction in place of amount -->
+    <string name="recycler_view_item_transaction_destination_sending_all_text">SENDING ALL</string>
+    <string name="recycler_view_item_transaction_destination_donate_label">Donate to Monfluo</string>
+    <string name="recycler_view_item_transaction_destination_donating_label">Donating to Monfluo. Thank you!</string>
+    <string name="recycler_view_item_transaction_destination_scan_content_description">Scan destination from QR code</string>
 
     <string name="activity_node_add_node_name_label">Name</string>
     <string name="activity_node_add_node_name_placeholder">My Monero Node</string>

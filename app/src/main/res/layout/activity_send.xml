@@ -42,6 +42,17 @@
             android:textStyle="bold"
             android:textColor="?attr/colorOnPrimary" />
 
+        <ImageButton
+            android:id="@+id/add_output_imagebutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toStartOf="@id/go_to_account_list_imageview"
+            app:layout_constraintTop_toTopOf="@id/go_to_account_list_imageview"
+            app:layout_constraintBottom_toBottomOf="@id/go_to_account_list_imageview"
+            android:background="@color/transparent"
+            android:src="@android:drawable/ic_input_add"
+            android:contentDescription="@string/add_recipient_to_transaction" />
+
         <ImageView
             android:id="@+id/go_to_account_list_imageview"
             android:layout_width="wrap_content"
@@ -69,128 +80,84 @@
             tools:layout="@layout/fragment_network_status" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/top_controls"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/header_layout_view">
-
-        <ImageButton
-            android:id="@+id/add_output_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/add_recipient_to_transaction"
-            android:src="@android:drawable/ic_input_add"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/send_max_button"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/oled_textColorPrimary"
-            tools:ignore="SpeakableTextPresentCheck" />
-
-        <Button
-            android:id="@+id/send_max_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/button_background"
-            android:text="@string/send_max"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
     <TextView
-        android:id="@+id/selected_utxos_value_textview"
+        android:id="@+id/selected_enotes_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="24dp"
-        android:text="@string/selected_utxos_value"
-        android:textSize="16sp"
-        android:visibility="gone"
-        android:textColor="?attr/colorOnPrimary"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top_controls" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_layout_view"
+        android:text="@string/activity_send_selected_enotes_value_text"
+        android:textSize="@dimen/text_medium"
+        android:visibility="gone"
+        android:textColor="?attr/colorOnPrimary" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/transaction_destinations_recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/selected_enotes_textview"
+        app:layout_constraintBottom_toTopOf="@id/transaction_fee_radiogroup"
+        android:layout_marginTop="@dimen/padding_small"
+        tools:listitem="@layout/recycler_view_item_transaction"
+        tools:visibility="visible" />
 
     <TextView
-        android:id="@+id/tx_fee_radiogroup_label_textview"
+        android:id="@+id/transaction_fee_label_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:text="@string/fee_priority"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@id/tx_fee_radiogroup"
-        app:layout_constraintEnd_toStartOf="@id/tx_fee_radiogroup"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tx_fee_radiogroup" />
+        app:layout_constraintEnd_toStartOf="@id/transaction_fee_radiogroup"
+        app:layout_constraintTop_toTopOf="@id/transaction_fee_radiogroup"
+        app:layout_constraintBottom_toBottomOf="@id/transaction_fee_radiogroup"
+        android:layout_marginStart="@dimen/padding_big"
+        android:text="@string/activity_send_fee_label"
+        android:textSize="@dimen/text_medium" />
 
     <RadioGroup
-        android:id="@+id/tx_fee_radiogroup"
+        android:id="@+id/transaction_fee_radiogroup"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="24dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@id/create_tx_button"
+        app:layout_constraintStart_toEndOf="@id/transaction_fee_label_textview"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/tx_fee_radiogroup_label_textview">
+        app:layout_constraintBottom_toTopOf="@id/transaction_create_button"
+        android:layout_marginStart="@dimen/padding_small"
+        android:orientation="horizontal">
 
         <RadioButton
             android:id="@+id/default_fee_radiobutton"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:checked="true"
-            android:text="@string/default_fee"
-            android:textSize="16sp" />
+            android:text="@string/activity_send_fee_default_label"
+            android:textSize="@dimen/text_medium" />
 
         <RadioButton
             android:id="@+id/medium_fee_radiobutton"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:checked="false"
-            android:text="@string/medium_fee"
-            android:textSize="16sp" />
+            android:text="@string/activity_send_fee_medium_label"
+            android:textSize="@dimen/text_medium" />
 
         <RadioButton
             android:id="@+id/high_fee_radiobutton"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:checked="false"
-            android:text="@string/high_fee"
-            android:textSize="16sp" />
+            android:text="@string/activity_send_fee_high_label"
+            android:textSize="@dimen/text_medium" />
     </RadioGroup>
 
     <Button
-        android:id="@+id/create_tx_button"
+        android:id="@+id/transaction_create_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="@dimen/padding_big"
         android:background="@drawable/button_background"
-        android:text="@string/create" />
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/selected_utxos_value_textview"
-        app:layout_constraintBottom_toTopOf="@id/tx_fee_radiogroup"
-        android:paddingTop="@dimen/padding_small">
-
-        <LinearLayout
-            android:id="@+id/transaction_destination_list"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:paddingHorizontal="@dimen/padding_big"
-            android:clickable="false"
-            android:clipToPadding="false"
-            android:orientation="vertical">
-
-        </LinearLayout>
-    </ScrollView>
+        android:text="@string/activity_send_transaction_create" />
 </androidx.constraintlayout.widget.ConstraintLayout>
