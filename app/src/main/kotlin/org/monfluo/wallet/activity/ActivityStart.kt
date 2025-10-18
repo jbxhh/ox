@@ -41,9 +41,7 @@ class ActivityStart : ActivityLogging() {
         super.onCreate(savedInstanceState)
         setVisible(false)
 
-        if (intent?.data != null) {
-            viewModel.uriPaymentRaw = intent.data.toString()
-        }
+        viewModel.uriPaymentRaw = intent?.getDataString()
 
         launch()
     }
