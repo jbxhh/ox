@@ -12,7 +12,7 @@ import timber.log.Timber
 private const val URI_SCHEMA = "monero"
 private val URI_AMOUNT_KEYS = arrayOf("tx_amount", "amount")
 private const val URI_RECIPIENT_NAME_KEY = "recipient_name"
-private val URI_DESCRIPTION_KEYS = arrayOf("tx_description", "description")
+private val URI_DESCRIPTION_KEYS = arrayOf("tx_description", "description", "message")
 
 data class UriPayment(
     val addresses: List<String>,
