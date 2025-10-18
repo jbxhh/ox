@@ -253,25 +253,21 @@ class ActivitySend : ActivityMonero() {
     }
 
     private fun init(savedInstanceState: Bundle?) {
+        val intentData = intent?.getDataString()
         val intentExtras = intent?.extras
         if (savedInstanceState != null) {
             val sendAll = savedInstanceState.getBoolean(Constants.EXTRA_TRANSACTION_SEND_ALL, false)
             val transactionDestinations = savedInstanceState.getParcelableArrayList(Constants.EXTRA_TRANSACTION_DESTINATIONS, TransactionDestinationRaw::class.java) ?: listOf()
             adapterTransactionDestination.restore(transactionDestinations, sendAll)
+        } else if (intentData != null) {
+            if (WalletService.RUNNING.get()) {
+                handlePaymentUri(intentData)
+            }
         } else if (intentExtras != null) {
             val enotes = intent.getStringArrayListExtra(Constants.EXTRA_PAYMENT_ENOTES) ?: ArrayList()
             viewModel.enotes.value = enotes
-            val paymentUriRaw = intent.getStringExtra(Constants.EXTRA_PAYMENT_URI)
-            if (paymentUriRaw != null) {
-                val paymentUri = UriPayment.parse(paymentUriRaw)
-                if (paymentUri == null) {
-                    Timber.w("Parsed uri payment is null")
-                    Toast.makeText(this, getString(R.string.activity_send_amount_invalid_uri_payment_toast), Toast.LENGTH_SHORT).show()
-                } else {
-                    val transactionDestinations = paymentUri.toTransactionDestinationRawList()
-                    Timber.i("Inserting ${transactionDestinations.size} transaction destinations")
-                    adapterTransactionDestination.replaceElementWithList(transactionDestinations, 0)
-                }
+            intent.getStringExtra(Constants.EXTRA_PAYMENT_URI)?.let { paymentUriRaw ->
+                handlePaymentUri(paymentUriRaw)
             }
         }
     }
@@ -294,6 +290,19 @@ class ActivitySend : ActivityMonero() {
         outState.putParcelableArrayList(Constants.EXTRA_TRANSACTION_DESTINATIONS, ArrayList(transactionDestinations))
     }
 
+    override fun onWalletServiceNotFound() {
+        val intentData = intent?.data
+        if (intentData == null) {
+            super.onWalletServiceNotFound()
+        } else {
+            Timber.d("Wallet service is not found but intent data is present. Finishing activity and launching start activity and forwarting intent data there")
+            startActivity(Intent(this, ActivityStart::class.java).apply {
+                setData(intentData)
+            })
+            finish()
+        }
+    }
+
     override fun onWalletServiceConnected(walletService: WalletService) {
         walletService.getWalletOrLog()?.let { wallet ->
             updateEnotesLabel(wallet)
@@ -312,6 +321,18 @@ class ActivitySend : ActivityMonero() {
             } else {
                 Toast.makeText(this, getString(R.string.activity_send_transaction_create_failed, pendingTransaction.getErrorString() ?: ""), Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    private fun handlePaymentUri(paymentUriRaw: String) {
+        val paymentUri = UriPayment.parse(paymentUriRaw)
+        if (paymentUri == null) {
+            Timber.w("Parsed uri payment is null")
+            Toast.makeText(this, getString(R.string.activity_send_amount_invalid_uri_payment_toast), Toast.LENGTH_SHORT).show()
+        } else {
+            val transactionDestinations = paymentUri.toTransactionDestinationRawList()
+            Timber.i("Inserting ${transactionDestinations.size} transaction destinations")
+            adapterTransactionDestination.replaceElementWithList(transactionDestinations, 0)
         }
     }
 
