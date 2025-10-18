@@ -21,6 +21,9 @@ build-debug:
 build-release:
     ./gradlew assembleRelease
 
+test:
+    ./gradlew test -i
+
 install: install-debug
 
 install-release:

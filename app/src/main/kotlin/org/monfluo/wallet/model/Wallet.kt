@@ -274,7 +274,7 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     }
 
     external fun getAddressLabel(accountIndex: Int, addressIndex: Int): String
-    
+
     fun setAccountLabel(accountIndex: Int, label: String?) {
         setAddressLabel(accountIndex, 0, label)
     }
@@ -306,10 +306,7 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
         external fun getDisplayAmount(amount: Long): String
 
         @JvmStatic
-        external fun getAmountFromString(amount: String?): Long
-
-        @JvmStatic
-        external fun getAmountFromDouble(amount: Double): Long
+        external fun getAmountFromString(amount: String): Long?
 
         @JvmStatic
         external fun generatePaymentId(): String
@@ -327,10 +324,10 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
         }
 
         @JvmStatic
-        external fun isAddressValid(address: String?, networkType: Int): Boolean
+        external fun isAddressValid(address: String, networkType: Int): Boolean
 
         @JvmStatic
-        external fun getPaymentIdFromAddress(address: String?, networkType: Int): String?
+        external fun getPaymentIdFromAddress(address: String, networkType: Int): String?
 
         @JvmStatic
         external fun getMaximumAllowedAmount(): Long

@@ -36,9 +36,9 @@ class ActivityEnoteList : ActivityMonero() {
     private lateinit var headerTextView: TextView
     private lateinit var goToAccountListImageView: ImageView
 
-    private lateinit var freezeUtxosButton: Button
-    private lateinit var sendUtxosButton: Button
-    private lateinit var unfreezeUtxosButton: Button
+    private lateinit var freezeEnotesButton: Button
+    private lateinit var sendEnotesButton: Button
+    private lateinit var unfreezeEnotesButton: Button
     private lateinit var enotesRecyclerView: RecyclerView
     private lateinit var adapter: AdapterEnote
 
@@ -50,9 +50,9 @@ class ActivityEnoteList : ActivityMonero() {
         backImageView = findViewById(R.id.back_imageview)
         headerTextView = findViewById(R.id.header_textview)
         goToAccountListImageView = findViewById(R.id.go_to_account_list_imageview)
-        freezeUtxosButton = findViewById(R.id.freeze_enotes_button)
-        sendUtxosButton = findViewById(R.id.send_enotes_button)
-        unfreezeUtxosButton = findViewById(R.id.unfreeze_enotes_button)
+        freezeEnotesButton = findViewById(R.id.freeze_enotes_button)
+        sendEnotesButton = findViewById(R.id.send_enotes_button)
+        unfreezeEnotesButton = findViewById(R.id.unfreeze_enotes_button)
         enotesRecyclerView = findViewById(R.id.transaction_history_recyclerview)
 
         val streetMode = PreferenceUtils.isStreetMode(this)
@@ -66,21 +66,21 @@ class ActivityEnoteList : ActivityMonero() {
                 }
                 var frozenExists = false
                 var unfrozenExists = false
-                for (selectedUtxo in adapter.getSelectedEnotes().values) {
-                    if (selectedUtxo.isFrozen)
+                for (selectedEnote in adapter.getSelectedEnotes().values) {
+                    if (selectedEnote.isFrozen)
                         frozenExists = true
                     else {
                         unfrozenExists = true
                     }
                 }
                 if (adapter.getSelectedEnotes().isEmpty()) {
-                    sendUtxosButton.isEnabled = false
-                    freezeUtxosButton.isEnabled = false
-                    unfreezeUtxosButton.isEnabled = false
+                    sendEnotesButton.isEnabled = false
+                    freezeEnotesButton.isEnabled = false
+                    unfreezeEnotesButton.isEnabled = false
                 } else {
-                    sendUtxosButton.isEnabled = unfrozenExists
-                    freezeUtxosButton.isEnabled = unfrozenExists
-                    unfreezeUtxosButton.isEnabled = frozenExists
+                    sendEnotesButton.isEnabled = unfrozenExists
+                    freezeEnotesButton.isEnabled = unfrozenExists
+                    unfreezeEnotesButton.isEnabled = frozenExists
                 }
             }
         })
@@ -110,22 +110,22 @@ class ActivityEnoteList : ActivityMonero() {
         goToAccountListImageView.setOnClickListener {
             startActivity(Intent(this, ActivityAccountList::class.java))
         }
-        sendUtxosButton.setOnClickListener {
+        sendEnotesButton.setOnClickListener {
             val selectedKeyImages = ArrayList<String>()
             for (coinsInfo in adapter.getSelectedEnotes().values) {
                 coinsInfo.keyImage?.let { keyImage -> selectedKeyImages.add(keyImage) }
             }
             val intent = Intent(this, ActivitySend::class.java)
-            intent.putStringArrayListExtra(Constants.EXTRA_SEND_ENOTES, selectedKeyImages)
+            intent.putStringArrayListExtra(Constants.EXTRA_PAYMENT_ENOTES, selectedKeyImages)
             startActivity(intent)
         }
 
-        freezeUtxosButton.setOnClickListener {
+        freezeEnotesButton.setOnClickListener {
             Toast.makeText(this, getText(R.string.toast_freezing_enotes), Toast.LENGTH_SHORT).show()
             walletService?.freezeEnote(adapter.getSelectedEnotes().keys.toList())
         }
 
-        unfreezeUtxosButton.setOnClickListener {
+        unfreezeEnotesButton.setOnClickListener {
             Toast.makeText(this, getText(R.string.toast_thawing_enotes), Toast.LENGTH_SHORT).show()
             walletService?.thawEnote(adapter.getSelectedEnotes().keys.toList())
         }

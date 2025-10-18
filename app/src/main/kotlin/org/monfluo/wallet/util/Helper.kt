@@ -23,6 +23,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Typeface
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.text.Spannable
@@ -32,6 +33,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import org.monfluo.wallet.R
 import timber.log.Timber
 import java.io.File
@@ -129,5 +131,27 @@ object Helper {
         Timber.i("Requesting POST_NOTIFICATIONS permission")
         ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), REQUEST_CODE.getAndIncrement())
         PreferenceUtils.setPostNotificationsPermissionRequested(activity)
+    }
+
+    fun tintDrawable(context: Context, drawable: Drawable, enabled: Boolean): Drawable {
+        return if (enabled) {
+            tintDrawable(drawable, context.resources.getColor(R.color.text, null))
+        } else {
+            tintDrawable(drawable, context.resources.getColor(R.color.text_subtler, null))
+        }
+    }
+
+    fun tintDrawable(drawable: Drawable, color: Int): Drawable {
+        val wrappedDrawable = DrawableCompat.wrap(drawable);
+        DrawableCompat.setTint(wrappedDrawable, color);
+        return wrappedDrawable
+    }
+
+    fun <T> List<T>.replaceElementWithList(index: Int, other: List<T>): List<T> {
+        var newList = this.subList(0, index) + other
+        if (index + 1 < this.size) {
+            newList = newList + this.subList(index + 1, this.size)
+        }
+        return newList
     }
 }
