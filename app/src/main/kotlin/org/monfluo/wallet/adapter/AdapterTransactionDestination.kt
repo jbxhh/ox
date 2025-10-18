@@ -151,6 +151,7 @@ class AdapterTransactionDestination(
         private val transactionDestinationDonateLabelTextView: TextView = itemView.findViewById(R.id.transaction_destination_donate_label_text_view)
 
         private val transactionDestinationRemoveIcon: Drawable = AppCompatResources.getDrawable(itemView.context, android.R.drawable.ic_delete)!!
+        private val transactionDestinationScanIcon: Drawable = AppCompatResources.getDrawable(itemView.context, R.drawable.ic_scan)!!
         private val transactionDestinationAmountLabel: CharSequence = itemView.resources.getString(R.string.recycler_view_item_transaction_destination_amount_label)
         private val transactionDestinationAmountWithPositionLabel: (Int) -> CharSequence = { position: Int ->
             itemView.resources.getString(R.string.recycler_view_item_transaction_destination_amount_with_position_label, position)
@@ -249,15 +250,23 @@ class AdapterTransactionDestination(
                 }
             }
             if (enabled) {
+                transactionDestinationScanImageButton.setImageDrawable(getTintedScanTransactionDestinationDrawable(true))
                 transactionDestinationScanImageButton.setOnClickListener {
                     listener.onScanRequested()
                 }
+            } else {
+                transactionDestinationScanImageButton.setImageDrawable(getTintedScanTransactionDestinationDrawable(false))
+                transactionDestinationScanImageButton.setOnClickListener(null)
             }
             updateDonateLabel(isDonatingAddress(transactionDestinationAddressEditText.text.toString()))
         }
 
         private fun getTintedRemoveTransactionDestinationDrawable(enabled: Boolean): Drawable {
             return Helper.tintDrawable(itemView.context, transactionDestinationRemoveIcon, enabled)
+        }
+
+        private fun getTintedScanTransactionDestinationDrawable(enabled: Boolean): Drawable {
+            return Helper.tintDrawable(itemView.context, transactionDestinationScanIcon, enabled)
         }
 
         private fun isDonatingAddress(address: String): Boolean {

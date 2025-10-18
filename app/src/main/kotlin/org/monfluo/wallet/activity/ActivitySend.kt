@@ -217,6 +217,7 @@ class ActivitySend : ActivityMonero() {
     private fun bindObservers() {
         enabled.observe(this) { enabled ->
             createButton.isEnabled = enabled
+            adapterTransactionDestination.setEnabled(enabled)
         }
         val enableOutputAddImageButton = combineLiveDatas(adapterTransactionDestination.getSendAll(), enabled) { sendAll, globalEnabled ->
             return@combineLiveDatas globalEnabled!! && !sendAll!!
