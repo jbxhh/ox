@@ -109,33 +109,33 @@ class AdapterTransactionDestination(
         fun onScanRequested()
     }
 
-    inner class ViewHolderListenerImpl(val position: Int) : ViewHolderListener {
+    inner class ViewHolderListenerImpl(val index: Int) : ViewHolderListener {
 
         override fun onSendAllClicked() {
             if (this@AdapterTransactionDestination.sendAll.value!!) {
                 this@AdapterTransactionDestination.sendAll.value = false
             } else {
-                transactionDestinations = listOf(transactionDestinations.getOrNull(position) ?: TransactionDestinationRaw())
+                transactionDestinations = listOf(transactionDestinations.getOrNull(index) ?: TransactionDestinationRaw())
                 this@AdapterTransactionDestination.sendAll.value = true
             }
             notifyDataSetChanged()
         }
 
         override fun onRemoveClicked() {
-            transactionDestinations = transactionDestinations.filterIndexed { i, _ -> i != position }
+            transactionDestinations = transactionDestinations.filterIndexed { i, _ -> i != index }
             notifyDataSetChanged()
         }
 
         override fun onAmountChanged(amount: String) {
-            transactionDestinations.getOrNull(position)?.amount = amount
+            transactionDestinations.getOrNull(index)?.amount = amount
         }
 
         override fun onAddressChanged(address: String) {
-            transactionDestinations.getOrNull(position)?.value = address
+            transactionDestinations.getOrNull(index)?.value = address
         }
 
         override fun onScanRequested() {
-            this@AdapterTransactionDestination.listener.onScanRequested(position)
+            this@AdapterTransactionDestination.listener.onScanRequested(index)
         }
     }
 
@@ -173,6 +173,8 @@ class AdapterTransactionDestination(
             index: Int,
             listener: ViewHolderListener
         ) {
+            Helper.clearEditTextListeners(transactionDestinationAmountEditText)
+            Helper.clearEditTextListeners(transactionDestinationAddressEditText)
             val single = when (sendAll) {
                 SendAll.UNSELECTED -> true
                 SendAll.SELECTED -> true
