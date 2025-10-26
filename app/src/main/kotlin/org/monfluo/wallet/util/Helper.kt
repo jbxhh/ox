@@ -26,6 +26,7 @@ import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Build.VERSION_CODES
+import android.os.PersistableBundle
 import android.text.Spannable
 import android.text.style.StyleSpan
 import android.text.style.TypefaceSpan
@@ -86,17 +87,17 @@ object Helper {
         }
     }
 
-    fun clipBoardCopy(context: Context?, label: String?, text: String?) {
-        if (context != null) {
-            val clipboardManager =
-                context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clip = ClipData.newPlainText(label, text)
-            clipboardManager.setPrimaryClip(clip)
-            Toast.makeText(
-                context,
-                context.getText(R.string.copied_to_clipboard),
-                Toast.LENGTH_SHORT
-            ).show()
+    fun clipBoardCopy(context: Context, label: String, text: String, sensitive: Boolean = false) {
+        val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText(label, text)
+        if (sensitive) {
+            clip.description.extras = PersistableBundle().apply {
+                putBoolean("android.content.extra.IS_SENSITIVE", true)
+            }
+        }
+        clipboardManager.setPrimaryClip(clip)
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
+            Toast.makeText(context, context.getText(R.string.copied_to_clipboard), Toast.LENGTH_SHORT).show()
         }
     }
 
