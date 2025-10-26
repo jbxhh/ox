@@ -295,7 +295,7 @@ class ActivitySend : ActivityMonero() {
         if (intentData == null) {
             super.onWalletServiceNotFound()
         } else {
-            Timber.d("Wallet service is not found but intent data is present. Finishing activity and launching start activity and forwarting intent data there")
+            Timber.d("Wallet service is not found but intent data is present. Finishing activity and launching start activity and forwarding intent data there")
             startActivity(Intent(this, ActivityStart::class.java).apply {
                 setData(intentData)
             })
