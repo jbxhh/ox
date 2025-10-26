@@ -28,8 +28,10 @@ import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.os.PersistableBundle
 import android.text.Spannable
+import android.text.TextWatcher
 import android.text.style.StyleSpan
 import android.text.style.TypefaceSpan
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityCompat
@@ -38,6 +40,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import org.monfluo.wallet.R
 import timber.log.Timber
 import java.io.File
+import java.lang.reflect.Field
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.concurrent.atomic.AtomicInteger
@@ -154,5 +157,24 @@ object Helper {
             newList = newList + this.subList(index + 1, this.size)
         }
         return newList
+    }
+
+    fun clearEditTextListeners(editText: EditText) {
+        val field = findField("mListeners", editText::class.java)!!
+        field.setAccessible(true)
+        val list = field.get(editText) as java.util.List<TextWatcher>
+        list.clear()
+    }
+
+    private fun findField(name: String, clazz: Class<*>): Field? {
+        for (field in clazz.getDeclaredFields()) {
+            if (field.getName() == name) {
+                return field;
+            }
+        }
+        if (clazz.getSuperclass() != null) {
+            return findField(name, clazz.getSuperclass());
+        }
+        return null;
     }
 }
