@@ -124,7 +124,7 @@ class ActivityTransactionDetails : ActivityMonero() {
             val txInfo = viewModel.transactionInfo.value
             if (txInfo != null) {
                 val key = txKeyTextView.text.toString()
-                Helper.clipBoardCopy(this, "transaction_key", key)
+                Helper.clipBoardCopy(this, "transaction_key", key, sensitive = true)
             }
         }
         copyTxAddressImageButton.setOnClickListener {

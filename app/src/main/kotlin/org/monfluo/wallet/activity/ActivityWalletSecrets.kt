@@ -143,10 +143,10 @@ class ActivityWalletSecrets : ActivityMonero() {
             }
         }
         copySeedImageButton.setOnClickListener {
-            clipBoardCopy(this, "monero seed", viewModel.seed.value!!)
+            clipBoardCopy(this, "monero seed", viewModel.seed.value!!, sensitive = true)
         }
         copyPolyseedOffsetPassphraseImageButton.setOnClickListener {
-            clipBoardCopy(this, "monero polyseed offset passphrase", viewModel.polyseedOffsetPassphrase.value!!)
+            clipBoardCopy(this, "monero polyseed offset passphrase", viewModel.polyseedOffsetPassphrase.value!!, sensitive = true)
         }
         copyRestoreHeightImageButton.setOnClickListener {
             clipBoardCopy(this, "monero restore height", viewModel.restoreHeight.value!!.toString())
@@ -155,13 +155,13 @@ class ActivityWalletSecrets : ActivityMonero() {
             clipBoardCopy(this, "monero wallet address", viewModel.walletAddress.value!!)
         }
         copyWalletSecretViewKeyImageButton.setOnClickListener {
-            clipBoardCopy(this, "secret view-key", viewModel.secretViewKey.value!!)
+            clipBoardCopy(this, "secret view-key", viewModel.secretViewKey.value!!, sensitive = true)
         }
         copyWalletPublicViewKeyImageButton.setOnClickListener {
             clipBoardCopy(this, "public view-key", viewModel.publicViewKey.value!!)
         }
         copyWalletSecretSpendKeyImageButton.setOnClickListener {
-            clipBoardCopy(this, "secret spend-key", viewModel.secretSpendKey.value!!)
+            clipBoardCopy(this, "secret spend-key", viewModel.secretSpendKey.value!!, sensitive = true)
         }
         copyWalletPublicSpendKeyImageButton.setOnClickListener {
             clipBoardCopy(this, "public spend-key", viewModel.publicSpendKey.value!!)
