@@ -29,6 +29,7 @@ import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.TextHelper
 import org.monfluo.wallet.util.component.ActivityMonero
+import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.R
 import timber.log.Timber
 import kotlin.math.max
@@ -133,6 +134,24 @@ class ActivityHome : ActivityMonero() {
                 PreferenceUtils.setStreetMode(this, newStreetMode)
                 viewModel.streetMode.postValue(newStreetMode)
             }
+        }
+        unlockedBalanceTextView.setOnLongClickListener {
+            viewModel.balance.value?.let { balance ->
+                Helper.clipBoardCopy(this, "unlocked wallet balance", TextHelper.getDisplayAmount(balance.unlocked, MoneroUnit.MONERO, false))
+            }
+            return@setOnLongClickListener true
+        }
+        lockedBalanceTextView.setOnLongClickListener {
+            viewModel.balance.value?.let { balance ->
+                Helper.clipBoardCopy(this, "locked wallet balance", TextHelper.getDisplayAmount(balance.locked, MoneroUnit.MONERO, false))
+            }
+            return@setOnLongClickListener true
+        }
+        frozenBalanceTextView.setOnLongClickListener {
+            viewModel.balance.value?.let { balance ->
+                Helper.clipBoardCopy(this, "frozen wallet balance", TextHelper.getDisplayAmount(balance.frozen, MoneroUnit.MONERO, false))
+            }
+            return@setOnLongClickListener true
         }
         settingsImageView.setOnClickListener {
             startActivity(Intent(this, ActivityApplicationSettings::class.java))

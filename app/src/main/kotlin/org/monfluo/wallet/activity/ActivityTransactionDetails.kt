@@ -108,6 +108,12 @@ class ActivityTransactionDetails : ActivityMonero() {
             PreferenceUtils.setStreetMode(this, newStreetMode)
             viewModel.setStreetMode(newStreetMode)
         }
+        txAmountTextView.setOnLongClickListener {
+            viewModel.transactionInfo.value?.let { transactionInfo ->
+                Helper.clipBoardCopy(this, "transaction amount", TextHelper.getDisplayAmount(transactionInfo.amount, MoneroUnit.MONERO, false))
+            }
+            return@setOnLongClickListener true
+        }
         copyTxHashImageButton.setOnClickListener {
             val txInfo = viewModel.transactionInfo.value
             if (txInfo != null) {
