@@ -315,12 +315,12 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="coin_global_index">Global index</string>
     <!-- Address label -->
     <string name="address">Address</string>
-    <!-- Address resolved from label -->
-    <string name="address_resolved_from">Resolved from</string>
     <!-- Amount label -->
     <string name="amount">Amount</string>
     <!-- Fee label -->
     <string name="fee">Fee</string>
+    <!-- Dust label -->
+    <string name="dust">Dust</string>
     <!-- Total label -->
     <string name="total">Total</string>
     <!-- Text shown in place of an address when sending or displaying an outgoing transaction to multiple addresses -->
@@ -416,6 +416,15 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="recycler_view_item_transaction_destination_donate_label">Donate to Monfluo</string>
     <string name="recycler_view_item_transaction_destination_donating_label">Donating to Monfluo. Thank you!</string>
     <string name="recycler_view_item_transaction_destination_scan_content_description">Scan destination from QR code</string>
+
+    <string name="recycler_view_item_transaction_destination_pending_amount_label">Amount</string>
+    <string name="recycler_view_item_transaction_destination_pending_amount_with_position_label">Amount #<xliff:g>%1$d</xliff:g></string>
+    <string name="recycler_view_item_transaction_destination_pending_address_label">Address</string>
+    <string name="recycler_view_item_transaction_destination_pending_address_with_position_label">Address #<xliff:g>%1$d</xliff:g></string>
+    <string name="recycler_view_item_transaction_destination_pending_address_resolved_from_label">Resolved from</string>
+    <string name="recycler_view_item_transaction_destination_pending_summary_fee_label">Fee</string>
+    <string name="recycler_view_item_transaction_destination_pending_summary_dust_label">Dust</string>
+    <string name="recycler_view_item_transaction_destination_pending_summary_total_label">Total</string>
 
     <string name="activity_node_add_node_name_label">Name</string>
     <string name="activity_node_add_node_name_placeholder">My Monero Node</string>

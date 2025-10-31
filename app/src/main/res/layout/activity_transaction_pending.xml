@@ -54,117 +54,15 @@
             tools:layout="@layout/fragment_network_status" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <TextView
-        android:id="@+id/address_label_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/transaction_destinations_recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/header_layout_view"
-        android:layout_marginTop="@dimen/padding_small"
-        android:textSize="16sp"
-        android:textColor="@color/text_subtler"
-        android:text="@string/address" />
-
-    <TextView
-        android:id="@+id/address_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/address_label_textview"
-        android:layout_marginTop="@dimen/padding_mini"
-        android:text="@string/tx_address_text"
-        android:textSize="20sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/address_resolved_from_label_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/address_textview"
-        android:layout_marginTop="@dimen/padding_small"
-        android:textSize="16sp"
-        android:textColor="@color/text_subtler"
-        android:text="@string/address_resolved_from" />
-
-    <TextView
-        android:id="@+id/address_resolved_from_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/address_resolved_from_label_textview"
-        android:layout_marginTop="@dimen/padding_mini"
-        android:textSize="20sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/amount_label_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/address_resolved_from_textview"
-        android:layout_marginTop="@dimen/padding_small"
-        android:textSize="16sp"
-        android:textColor="@color/text_subtler"
-        android:text="@string/amount" />
-
-    <TextView
-        android:id="@+id/amount_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/amount_label_textview"
-        android:layout_marginTop="@dimen/padding_mini"
-        android:text="@string/tx_amount_text"
-        android:textSize="20sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/fee_label_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/amount_textview"
-        android:layout_marginTop="@dimen/padding_small"
-        android:textSize="16sp"
-        android:textColor="@color/text_subtler"
-        android:text="@string/fee" />
-
-    <TextView
-        android:id="@+id/fee_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fee_label_textview"
-        android:layout_marginTop="@dimen/padding_mini"
-        android:textSize="20sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/total_label_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fee_textview"
-        android:layout_marginTop="@dimen/padding_small"
-        android:textSize="16sp"
-        android:textColor="@color/text_subtler"
-        android:text="@string/total" />
-
-    <TextView
-        android:id="@+id/total_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/total_label_textview"
-        android:layout_marginTop="@dimen/padding_mini"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        app:layout_constraintBottom_toTopOf="@id/send_tx_slider"
+        tools:listitem="@layout/recycler_view_item_transaction_destination_pending" />
 
     <com.ncorti.slidetoact.SlideToActView
         android:id="@+id/send_tx_slider"

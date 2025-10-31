@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/recycler_view_item_destination_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="@dimen/padding_big">
+
+    <TextView
+        android:id="@+id/amount_label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="@dimen/padding_small"
+        android:text="@string/recycler_view_item_transaction_destination_pending_amount_label"
+        android:textSize="16sp"
+        android:textColor="@color/text_subtler" />
+
+    <TextView
+        android:id="@+id/amount_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/amount_label_textview"
+        android:layout_marginTop="@dimen/padding_mini"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/address_label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/amount_textview"
+        android:layout_marginTop="@dimen/padding_small"
+        android:text="@string/recycler_view_item_transaction_destination_pending_address_label"
+        android:textSize="16sp"
+        android:textColor="@color/text_subtler" />
+
+    <TextView
+        android:id="@+id/address_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/address_label_textview"
+        android:layout_marginTop="@dimen/padding_mini"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/address_resolved_from_label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/address_textview"
+        android:layout_marginTop="@dimen/padding_small"
+        android:text="@string/recycler_view_item_transaction_destination_pending_address_resolved_from_label"
+        android:textSize="16sp"
+        android:textColor="@color/text_subtler" />
+
+    <TextView
+        android:id="@+id/address_resolved_from_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/address_resolved_from_label_textview"
+        android:layout_marginTop="@dimen/padding_mini"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+</androidx.constraintlayout.widget.ConstraintLayout>
