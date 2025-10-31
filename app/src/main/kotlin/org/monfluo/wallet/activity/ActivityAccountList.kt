@@ -81,41 +81,51 @@ class ActivityAccountList : ActivityMonero() {
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
-        updateAdapterAccount()
+        walletService?.getWallet()?.let { wallet ->
+            updateAdapterAccount(wallet)
+        }
     }
 
     override fun onWalletUpdated(wallet: Wallet) {
-        runOnUiThread { updateAdapterAccount() }
+        runOnUiThread {
+            updateAdapterAccount(wallet)
+        }
     }
 
     override fun onAccountCreated() {
-        runOnUiThread {
-            updateAdapterAccount()
-            Toast.makeText(this, getText(R.string.toast_new_account_created), Toast.LENGTH_SHORT).show()
+        walletService?.getWallet()?.let { wallet ->
+            runOnUiThread {
+                updateAdapterAccount(wallet)
+                Toast.makeText(this, getText(R.string.toast_new_account_created), Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
     override fun onAccountSet(index: Int) {
-        runOnUiThread {
-            updateAdapterAccount()
-            Toast.makeText(this, getString(R.string.toast_account_selected, index), Toast.LENGTH_SHORT).show()
+        walletService?.getWallet()?.let { wallet ->
+            runOnUiThread {
+                updateAdapterAccount(wallet)
+                Toast.makeText(this, getString(R.string.toast_account_selected, index), Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
     override fun onAccountLabelChanged(index: Int, label: String) {
-        runOnUiThread { updateAdapterAccount() }
+        walletService?.getWallet()?.let { wallet ->
+            runOnUiThread {
+                updateAdapterAccount(wallet)
+            }
+        }
     }
 
-    private fun updateAdapterAccount() {
-        walletService?.getWallet()?.let { wallet ->
-            val accounts = (0 until wallet.getNumAccounts()).map {
-                val index = it
-                val label = wallet.getAccountLabel(index)
-                val balance = wallet.getBalance(index)
-                Account(index, label, balance)
-            }
-            adapterAccount.setAccounts(accounts)
-            adapterAccount.setSelectedAccount(accounts[wallet.getAccountIndex()])
+    private fun updateAdapterAccount(wallet: Wallet) {
+        val accounts = (0 until wallet.getNumAccounts()).map {
+            val index = it
+            val label = wallet.getAccountLabel(index)
+            val balance = wallet.getBalance(index)
+            Account(index, label, balance)
         }
+        adapterAccount.setAccounts(accounts)
+        adapterAccount.setSelectedAccount(accounts[wallet.getAccountIndex()])
     }
 }

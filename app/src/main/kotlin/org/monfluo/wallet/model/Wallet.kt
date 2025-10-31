@@ -155,7 +155,7 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     }
 
     external fun getPath(): String?
-    fun networkType(): MoneroNetworkType? = MoneroNetworkType.fromInteger(nettype())
+    fun networkType(): MoneroNetworkType = MoneroNetworkType.fromInteger(nettype())!!
 
     external fun nettype(): Int
 

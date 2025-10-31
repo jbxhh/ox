@@ -15,11 +15,13 @@
  */
 package org.monfluo.wallet.model
 
-enum class MoneroNetworkType(val value: Int, val string: String) {
+import org.monfluo.wallet.R
 
-    NetworkType_Mainnet(0, "mainnet"),
-    NetworkType_Testnet(1, "mainnet"),
-    NetworkType_Stagenet(2, "mainnet");
+enum class MoneroNetworkType(val value: Int, val string: String, val resourceId: Int) {
+
+    NetworkType_Mainnet(0, "mainnet", R.string.monero_network_mainnet),
+    NetworkType_Testnet(1, "testnet", R.string.monero_network_testnet),
+    NetworkType_Stagenet(2, "stagenet", R.string.monero_network_stagenet);
 
     companion object {
 
