@@ -212,6 +212,9 @@ class AdapterTransactionDestination(
                     transactionDestinationRemoveImageButton.setOnClickListener {
                         listener.onRemoveClicked()
                     }
+                } else {
+                    transactionDestinationRemoveImageButton.setImageDrawable(getTintedRemoveTransactionDestinationDrawable(false))
+                    transactionDestinationRemoveImageButton.setOnClickListener(null)
                 }
                 transactionDestinationAmountLabelTextView.setText(transactionDestinationAmountWithPositionLabel(index + 1))
                 transactionDestinationAddressLabelTextView.setText(transactionDestinationAddressWithPositionLabel(index + 1))
