@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
@@ -11,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
 import com.ncorti.slidetoact.SlideToActView
 import com.ncorti.slidetoact.SlideToActView.OnSlideCompleteListener
+import org.monfluo.wallet.adapter.AdapterTransactionDestinationPending
 import org.monfluo.wallet.model.PendingTransaction
 import org.monfluo.wallet.model.MoneroUnit
 import org.monfluo.wallet.service.wallet.WalletService
@@ -27,19 +30,15 @@ class ActivityTransactionPending : ActivityMonero() {
         const val RESULT_NO_PENDING_TRANSACTION: Int = 2
     }
 
+    private lateinit var pendingTransaction: PendingTransaction
+
     private lateinit var layoutView: View
     private lateinit var backImageView: ImageView
 
-    private lateinit var addressTextView: TextView
-    private lateinit var addressResolvedFromLabelTextView: TextView
-    private lateinit var addressResolvedFromTextView: TextView
-    private lateinit var amountTextView: TextView
-    private lateinit var feeTextView: TextView
-    private lateinit var totalTextView: TextView
-
+    private lateinit var transactionDestinationsRecyclerView: RecyclerView
     private lateinit var sendTransactionSlider: SlideToActView
 
-    private lateinit var pendingTransaction: PendingTransaction
+    private val adapterTransactionDestinationPending: AdapterTransactionDestinationPending = AdapterTransactionDestinationPending()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,13 +46,11 @@ class ActivityTransactionPending : ActivityMonero() {
 
         layoutView = findViewById(R.id.pending_transaction_activity_view)
         backImageView = findViewById(R.id.back_imageview)
-        addressTextView = findViewById(R.id.address_textview)
-        addressResolvedFromLabelTextView = findViewById(R.id.address_resolved_from_label_textview)
-        addressResolvedFromTextView = findViewById(R.id.address_resolved_from_textview)
-        amountTextView = findViewById(R.id.amount_textview)
-        feeTextView = findViewById(R.id.fee_textview)
+        transactionDestinationsRecyclerView = findViewById(R.id.transaction_destinations_recyclerview)
         sendTransactionSlider = findViewById(R.id.send_tx_slider)
-        totalTextView = findViewById(R.id.total_textview)
+
+        transactionDestinationsRecyclerView.layoutManager = LinearLayoutManager(this)
+        transactionDestinationsRecyclerView.adapter = adapterTransactionDestinationPending
 
         bindWindowInsetsListener()
         bindListeners()
@@ -83,14 +80,12 @@ class ActivityTransactionPending : ActivityMonero() {
             }
         }
 
-        sendTransactionSlider.let { slideToActView ->
-            ViewCompat.addAccessibilityAction(
-                slideToActView,
-                getString(R.string.approve_the_transaction)
-            ) { _, _ ->
-                sendTransaction()
-                return@addAccessibilityAction true
-            }
+        ViewCompat.addAccessibilityAction(
+            sendTransactionSlider,
+            getString(R.string.approve_the_transaction)
+        ) { _, _ ->
+            sendTransaction()
+            return@addAccessibilityAction true
         }
     }
 
@@ -98,27 +93,7 @@ class ActivityTransactionPending : ActivityMonero() {
         val pendingTransaction = walletService.getPendingTransaction()
         if (pendingTransaction != null) {
             this.pendingTransaction = pendingTransaction
-            amountTextView.setText(TextHelper.formatUnlockedBalance(this, pendingTransaction.getAmount(), MoneroUnit.MONERO, false, 0))
-            feeTextView.setText(TextHelper.formatUnlockedBalance(this, pendingTransaction.getFee(), MoneroUnit.MONERO, false, 0))
-            totalTextView.setText(TextHelper.formatUnlockedBalance(this, pendingTransaction.getAmount() + pendingTransaction.getFee(), MoneroUnit.MONERO, false, 0))
-            val resolvedDestinations = pendingTransaction.destination.getResolvedDestinations()
-            if (resolvedDestinations.size > 1) {
-                addressTextView.setText(getString(R.string.multiple_addresses))
-                addressResolvedFromLabelTextView.visibility = View.GONE
-                addressResolvedFromTextView.visibility = View.GONE
-            } else {
-                val resolvedDestination = resolvedDestinations.get(0)
-                addressTextView.setText(resolvedDestination.address)
-                val resolvedFrom = resolvedDestination.resolvedFrom
-                if (resolvedFrom != null) {
-                    addressResolvedFromTextView.setText(resolvedFrom.value)
-                addressResolvedFromLabelTextView.visibility = View.VISIBLE
-                    addressResolvedFromTextView.visibility = View.VISIBLE
-                } else {
-                addressResolvedFromLabelTextView.visibility = View.GONE
-                    addressResolvedFromTextView.visibility = View.GONE
-                }
-            }
+            adapterTransactionDestinationPending.setPendingTransaction(pendingTransaction)
         } else {
             Timber.e("Pending transaction activity spawned without a pending transaction")
             setResult(RESULT_NO_PENDING_TRANSACTION)
