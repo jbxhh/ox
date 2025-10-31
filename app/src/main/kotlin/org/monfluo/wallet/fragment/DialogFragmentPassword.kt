@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -27,7 +28,7 @@ class DialogFragmentPassword(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         return inflater.inflate(R.layout.dialog_fragment_password, container)
     }
 
@@ -36,6 +37,7 @@ class DialogFragmentPassword(
         unlockButton = view.findViewById(R.id.unlock_wallet_button)
 
         bindListeners()
+        showKeyboard()
 
         if (preventGoingBack) {
             dialog?.setOnDismissListener {
@@ -48,6 +50,11 @@ class DialogFragmentPassword(
         unlockButton.setOnClickListener {
             onUnlockClicked(passwordEditText.text.toString())
         }
+    }
+
+    private fun showKeyboard() {
+        passwordEditText.requestFocus()
+        getDialog()?.getWindow()?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE or WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
     private fun onUnlockClicked(walletPassword: String) {
