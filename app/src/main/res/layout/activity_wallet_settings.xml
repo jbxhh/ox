@@ -53,13 +53,77 @@
             tools:layout="@layout/fragment_network_status" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <TextView
+        android:id="@+id/wallet_name_label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_layout_view"
+        android:text="@string/activity_wallet_settings_wallet_name_label"
+        android:textSize="16sp"
+        android:textColor="@color/text_subtler" />
+
+    <TextView
+        android:id="@+id/wallet_name_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/wallet_name_label_textview"
+        android:layout_marginTop="@dimen/padding_mini"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/wallet_network_label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/wallet_name_textview"
+        android:text="@string/activity_wallet_settings_wallet_network_label"
+        android:textSize="16sp"
+        android:textColor="@color/text_subtler" />
+
+    <TextView
+        android:id="@+id/wallet_network_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/wallet_network_label_textview"
+        android:layout_marginTop="@dimen/padding_mini"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/total_balance_label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/wallet_network_textview"
+        android:text="@string/activity_wallet_settings_total_balance_label"
+        android:textSize="16sp"
+        android:textColor="@color/text_subtler" />
+
+    <TextView
+        android:id="@+id/total_balance_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/total_balance_label_textview"
+        android:layout_marginTop="@dimen/padding_mini"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
     <Button
         android:id="@+id/display_wallet_secrets_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/header_layout_view"
+        app:layout_constraintTop_toBottomOf="@id/total_balance_textview"
+        android:layout_marginTop="@dimen/padding_big"
         android:background="@drawable/button_background"
         android:text="@string/display_wallet_secrets" />
 

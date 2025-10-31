@@ -283,16 +283,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="accounts">Accounts</string>
     <!-- Header for wallets list -->
     <string name="wallets">Wallets</string>
-    <!-- Unit XMR -->
-    <string name="unit_xmr">XMR</string>
-    <!-- Unit milli XMR -->
-    <string name="unit_milli_xmr">mXMR</string>
-    <!-- Unit micro XMR -->
-    <string name="unit_micro_xmr">μXMR</string>
-    <!-- Unit nano XMR -->
-    <string name="unit_nano_xmr">nXMR</string>
-    <!-- Unit pico XMR -->
-    <string name="unit_pico_xmr">pXMR</string>
     <!-- New wallet button -->
     <string name="new_wallet">New wallet</string>
     <!-- Label for applying seed offset passphrase toggle in show secrets fragment -->
@@ -351,6 +341,23 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="content_description_enotes">Enotes</string>
     <string name="account_label">#<xliff:g>%1$d</xliff:g> <xliff:g>%2$s</xliff:g></string>
     <string name="address_label">#<xliff:g>%1$d</xliff:g> <xliff:g>%2$s</xliff:g></string>
+
+    <!-- Unit XMR -->
+    <string name="unit_xmr" translatable="false">XMR</string>
+    <!-- Unit milli XMR -->
+    <string name="unit_milli_xmr" translatable="false">mXMR</string>
+    <!-- Unit micro XMR -->
+    <string name="unit_micro_xmr" translatable="false">μXMR</string>
+    <!-- Unit nano XMR -->
+    <string name="unit_nano_xmr" translatable="false">nXMR</string>
+    <!-- Unit pico XMR -->
+    <string name="unit_pico_xmr" translatable="false">pXMR</string>
+    <!-- Monero network MAINNET -->
+    <string name="monero_network_mainnet" translatable="false">MAINNET</string>
+    <!-- Monero network STAGENET -->
+    <string name="monero_network_stagenet" translatable="false">STAGENET</string>
+    <!-- Monero network TESTNET -->
+    <string name="monero_network_testnet" translatable="false">TESTNET</string>
 
     <string name="network_header">Network</string>
     <string name="accounts_header">Accounts</string>
@@ -425,6 +432,10 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="recycler_view_item_transaction_destination_pending_summary_fee_label">Fee</string>
     <string name="recycler_view_item_transaction_destination_pending_summary_dust_label">Dust</string>
     <string name="recycler_view_item_transaction_destination_pending_summary_total_label">Total</string>
+
+    <string name="activity_wallet_settings_wallet_name_label">Name</string>
+    <string name="activity_wallet_settings_wallet_network_label">Network</string>
+    <string name="activity_wallet_settings_total_balance_label">Total balance</string>
 
     <string name="activity_node_add_node_name_label">Name</string>
     <string name="activity_node_add_node_name_placeholder">My Monero Node</string>

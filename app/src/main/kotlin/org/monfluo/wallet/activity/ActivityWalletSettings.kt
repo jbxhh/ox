@@ -5,13 +5,17 @@ import android.content.Intent
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
 import org.monfluo.wallet.fragment.DialogFragmentPassword
+import org.monfluo.wallet.model.MoneroUnit
+import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.util.component.ActivityMonero
+import org.monfluo.wallet.util.TextHelper
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.R
 import kotlin.math.max
@@ -21,6 +25,9 @@ class ActivityWalletSettings : ActivityMonero() {
     private lateinit var layoutView: View
     private lateinit var backImageView: ImageView
 
+    private lateinit var walletNameTextView: TextView
+    private lateinit var walletNetworkTextView: TextView
+    private lateinit var totalBalanceTextView: TextView
     private lateinit var displaySeedButton: Button
     private lateinit var closeWalletButton: Button
 
@@ -28,8 +35,11 @@ class ActivityWalletSettings : ActivityMonero() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wallet_settings)
 
+        walletNameTextView = findViewById(R.id.wallet_name_textview)
+        walletNetworkTextView = findViewById(R.id.wallet_network_textview)
         layoutView = findViewById(R.id.activity_wallet_settings_layout)
         backImageView = findViewById(R.id.back_imageview)
+        totalBalanceTextView = findViewById(R.id.total_balance_textview)
         displaySeedButton = findViewById(R.id.display_wallet_secrets_button)
         closeWalletButton = findViewById(R.id.close_wallet_button)
 
@@ -68,6 +78,27 @@ class ActivityWalletSettings : ActivityMonero() {
         closeWalletButton.setOnClickListener {
             stopService(Intent(this, WalletService::class.java))
         }
+    }
+
+    override fun onWalletServiceConnected(walletService: WalletService) {
+        walletService?.getWallet()?.let { wallet ->
+            update(wallet)
+        }
+    }
+
+    override fun onWalletUpdated(wallet: Wallet) {
+        runOnUiThread {
+            update(wallet)
+        }
+    }
+
+    private fun update(wallet: Wallet) {
+        val name = wallet.info.name
+        walletNameTextView.setText(name)
+        val network = getString(wallet.networkType().resourceId)
+        walletNetworkTextView.setText(network)
+        val totalBalance = wallet.getBalances().values.map { it.total }.sum()
+        totalBalanceTextView.setText(TextHelper.formatUnlockedBalance(this, totalBalance, MoneroUnit.MONERO, false, 0))
     }
 
     private fun displaySeedDialog() {
