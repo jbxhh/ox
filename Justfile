@@ -53,3 +53,6 @@ logcat-release:
 
 logcat-debug:
     adb shell run-as org.monfluo.wallet.beta.debug logcat
+
+create-changelog:
+    ./bin/create-changelog.sh

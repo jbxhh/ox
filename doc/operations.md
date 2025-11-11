@@ -3,6 +3,8 @@
 ## Releasing
 
 * Bump `versionCode` & `versionName` in `build.gradle`
+* Create changelog files `just create-changelog` and fill the main file (the one ending with 0)
+* Commit and push changes
 * Build native libraries and APKs: `just clean build-native-all build-release`
   * The APKs will be in `app/build/outputs/apk/release` directory
 * Sign the APKs
