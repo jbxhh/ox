@@ -45,6 +45,8 @@ class ActivityApplicationSettings : ActivityMonero() {
     private lateinit var autoRotateAddressesSwitch: SwitchCompat
     private lateinit var enoteManagementSwitch: SwitchCompat
     private lateinit var balanceTapTogglesStreetModeSwitch: SwitchCompat
+    private lateinit var maxBrightnessQrCodesSwitch: SwitchCompat
+    private lateinit var forceUriFormatQrCodesSwitch: SwitchCompat
     private lateinit var proxySwitch: SwitchCompat
     private lateinit var proxySettingsLayout: ConstraintLayout
     private lateinit var saveProxyButton: Button
@@ -70,6 +72,8 @@ class ActivityApplicationSettings : ActivityMonero() {
         autoRotateAddressesSwitch = findViewById(R.id.auto_rotate_addresses_switch)
         enoteManagementSwitch = findViewById(R.id.enable_enote_management_switch)
         balanceTapTogglesStreetModeSwitch = findViewById(R.id.balance_tap_toggles_street_mode_switch)
+        maxBrightnessQrCodesSwitch = findViewById(R.id.max_brightness_qr_codes_switch)
+        forceUriFormatQrCodesSwitch = findViewById(R.id.force_uri_format_qr_codes_switch)
         proxySwitch = findViewById(R.id.proxy_switch)
         proxySettingsLayout = findViewById(R.id.wallet_proxy_settings_layout)
         walletProxyAddressEditText = findViewById(R.id.wallet_proxy_address_edittext)
@@ -89,6 +93,8 @@ class ActivityApplicationSettings : ActivityMonero() {
         val isAutoRotateAddresses = PreferenceUtils.isAutoRotateAddresses(applicationContext)
         val isEnoteManagementEnabled = PreferenceUtils.isEnableEnoteManagement(applicationContext)
         val isBalanceTapTogglesStreetMode = PreferenceUtils.isBalanceTapTogglesStreetMode(applicationContext)
+        val isMaxBrightnessQrCodes = PreferenceUtils.isMaxBrightnessQrCodes(applicationContext)
+        val isForceUriFormatQrCodes = PreferenceUtils.isForceUriFormatQrCodes(applicationContext)
         val isUseProxy = PreferenceUtils.isUseProxy(applicationContext)
 
         multiWalletModeSwitch.isChecked = isMultiWalletMode
@@ -101,6 +107,8 @@ class ActivityApplicationSettings : ActivityMonero() {
         autoRotateAddressesSwitch.isChecked = isAutoRotateAddresses
         enoteManagementSwitch.isChecked = isEnoteManagementEnabled
         balanceTapTogglesStreetModeSwitch.isChecked = isBalanceTapTogglesStreetMode
+        maxBrightnessQrCodesSwitch.isChecked = isMaxBrightnessQrCodes
+        forceUriFormatQrCodesSwitch.isChecked = isForceUriFormatQrCodes
         proxySwitch.isChecked = isUseProxy
 
         walletProxyAddressEditText.setText(PreferenceUtils.getProxy(this) ?: "")
@@ -167,6 +175,12 @@ class ActivityApplicationSettings : ActivityMonero() {
         }
         balanceTapTogglesStreetModeSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
             PreferenceUtils.setBalanceTapTogglesStreetMode(applicationContext, b)
+        }
+        maxBrightnessQrCodesSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PreferenceUtils.setMaxBrightnessQrCodes(applicationContext, b)
+        }
+        forceUriFormatQrCodesSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PreferenceUtils.setForceUriFormatQrCodes(applicationContext, b)
         }
         proxySwitch.setOnCheckedChangeListener { _, b: Boolean ->
             PreferenceUtils.setUseProxy(applicationContext, b)

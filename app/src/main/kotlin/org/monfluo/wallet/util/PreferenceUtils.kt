@@ -85,6 +85,14 @@ object PreferenceUtils {
 
     fun setBalanceTapTogglesStreetMode(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_BALANCE_TAP_TOGGLES_STREET_MODE, value)
 
+    fun isMaxBrightnessQrCodes(context: Context): Boolean = getBoolean(context, Constants.PREF_MAX_BRIGHTNESS_QR_CODES, true)
+
+    fun setMaxBrightnessQrCodes(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_MAX_BRIGHTNESS_QR_CODES, value)
+
+    fun isForceUriFormatQrCodes(context: Context): Boolean = getBoolean(context, Constants.PREF_FORCE_URI_FORMAT_QR_CODES, true)
+
+    fun setForceUriFormatQrCodes(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_FORCE_URI_FORMAT_QR_CODES, value)
+
     fun getProxy(context: Context): String? = getString(context, Constants.PREF_PROXY)
 
     fun setProxy(context: Context, value: String) = setString(context, Constants.PREF_PROXY, value)
