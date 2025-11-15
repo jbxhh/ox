@@ -50,13 +50,8 @@ class ActivityReceive : ActivityMonero() {
     private lateinit var backImageView: ImageView
     private lateinit var goToAccountListImageView: ImageView
 
-    private lateinit var mainLayoutView: View
-    private lateinit var addressTextView: TextView
-    private lateinit var addressLabelTextView: TextView
-    private lateinit var addressQrCodeImageView: ImageView
-    private lateinit var addressQrCodeIconImageView: ImageView
-    private lateinit var copyAddressImageButton: ImageButton
     private lateinit var freshAddressImageView : ImageButton
+    private lateinit var createPaymentQrCodeImageView: ImageButton
     private lateinit var recyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,13 +61,8 @@ class ActivityReceive : ActivityMonero() {
         layoutView = findViewById(R.id.receive_activity_view)
         backImageView = findViewById(R.id.back_imageview)
         goToAccountListImageView = findViewById(R.id.go_to_account_list_imageview)
-        mainLayoutView = findViewById(R.id.activity_receive_main_view)
-        addressQrCodeImageView = findViewById(R.id.address_qrcode_imageview)
-        addressQrCodeIconImageView = findViewById(R.id.address_qrcode_icon_imageview)
-        addressTextView = findViewById(R.id.address_textview)
-        addressLabelTextView = findViewById(R.id.address_label_textview)
-        copyAddressImageButton = findViewById(R.id.copy_address_imagebutton)
         freshAddressImageView = findViewById(R.id.fresh_address_imageview)
+        createPaymentQrCodeImageView = findViewById(R.id.create_payment_qr_code_imageview)
         recyclerView = findViewById(R.id.address_list_recyclerview)
 
         bindWindowInsetsListener()
@@ -107,16 +97,16 @@ class ActivityReceive : ActivityMonero() {
                 }
             }
         }
+        createPaymentQrCodeImageView.setOnClickListener {
+            viewModel.selectedAddress.value?.let { selectedAddress ->
+                startActivity(Intent(this, ActivityPaymentRequest::class.java).apply {
+                    putExtra(Constants.EXTRA_ADDRESS_VALUE, selectedAddress.address)
+                })
+            }
+        }
     }
 
     private fun bindObservers() {
-        viewModel.showIconOnQrCodes.observe(this) { isShowIconOnQrCodes ->
-            if (isShowIconOnQrCodes) {
-                addressQrCodeIconImageView.visibility = View.VISIBLE
-            } else {
-                addressQrCodeIconImageView.visibility = View.GONE
-            }
-        }
         viewModel.multiAccountMode.observe(this) { multiAccountMode ->
             if (multiAccountMode) {
                 goToAccountListImageView.visibility = View.VISIBLE
@@ -125,34 +115,30 @@ class ActivityReceive : ActivityMonero() {
             }
         }
 
-        val subAdapterAddressListener = object : AdapterAddressListener {
-            override fun onAddressSelected(subaddress: Address) {
-                viewModel.selectAddress(subaddress, qrCodeBackgroundColor())
+        val adapterAddressListener = object : AdapterAddressListener {
+            override fun onAddressSelected(address: Address) {
+                viewModel.selectAddress(address)
             }
 
-            override fun onAddressEditLabel(subaddress: Address) {
-                editAddressLabel(subaddress)
+            override fun onAddressEditLabel(address: Address) {
+                editAddressLabel(address)
+            }
+
+            override fun onAddressCopy(address: Address) {
+                clipBoardCopy(this@ActivityReceive, "monero address", address.address)
             }
         }
+
         val streetMode = PreferenceUtils.isStreetMode(this)
-        val adapter = AdapterAddress(emptyList(), null, streetMode, subAdapterAddressListener)
+        val adapter = AdapterAddress(emptyList(), null, streetMode, adapterAddressListener)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
         viewModel.selectedAddress.observe(this) { address: Address? ->
             if (address != null) {
-                setAddress(address)
                 adapter.submitSelectedAddress(address)
             }
         }
-        viewModel.qrCode.observe(this) { bitmap: Bitmap? ->
-            if (bitmap == null) {
-                addressQrCodeImageView.visibility = View.INVISIBLE
-            } else {
-                addressQrCodeImageView.setImageBitmap(bitmap)
-                addressQrCodeImageView.visibility = View.VISIBLE
-            }
-        }
-        viewModel.subaddresses.observe(this) { addresses: List<Address> ->
+        viewModel.addresses.observe(this) { addresses: List<Address> ->
             // We want newer addresses to be shown first
             adapter.submitAddresses(addresses.reversed())
         }
@@ -161,17 +147,15 @@ class ActivityReceive : ActivityMonero() {
     override fun onResume() {
         super.onResume()
 
-        val isShowIconOnQrCodes = PreferenceUtils.isShowIconOnQrCodes(this)
         val isMultiAccountMode = PreferenceUtils.isMultiAccountMode(this)
 
-        viewModel.setShowIconOnQrCodes(isShowIconOnQrCodes)
         viewModel.multiAccountMode.postValue(isMultiAccountMode)
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
         walletService.getWallet()?.let { wallet ->
             showUi()
-            viewModel.refreshAddresses(wallet, qrCodeBackgroundColor())
+            viewModel.refreshAddresses(wallet)
             autoRotateAddresses()
         }
     }
@@ -179,7 +163,7 @@ class ActivityReceive : ActivityMonero() {
     override fun onWalletUpdated(wallet: Wallet) {
         runOnUiThread {
             showUi()
-            viewModel.refreshAddresses(wallet, qrCodeBackgroundColor())
+            viewModel.refreshAddresses(wallet)
             autoRotateAddresses()
         }
     }
@@ -188,7 +172,7 @@ class ActivityReceive : ActivityMonero() {
         runOnUiThread {
             walletService?.getWallet()?.let { wallet ->
                 showUi()
-                viewModel.refreshAddresses(wallet, qrCodeBackgroundColor(), true)
+                viewModel.refreshAddresses(wallet, true)
             }
         }
     }
@@ -197,7 +181,7 @@ class ActivityReceive : ActivityMonero() {
         runOnUiThread {
             walletService?.getWallet()?.let { wallet ->
                 showUi()
-                viewModel.refreshAddresses(wallet, qrCodeBackgroundColor(), false)
+                viewModel.refreshAddresses(wallet, false)
             }
         }
     }
@@ -206,17 +190,16 @@ class ActivityReceive : ActivityMonero() {
         runOnUiThread {
             walletService?.getWallet()?.let { wallet ->
                 showUi()
-                viewModel.refreshAddresses(wallet, qrCodeBackgroundColor())
+                viewModel.refreshAddresses(wallet)
             }
         }
     }
 
     private fun showUi() {
-        mainLayoutView.visibility = View.VISIBLE
+        recyclerView.visibility = View.VISIBLE
         freshAddressImageView.visibility = View.VISIBLE
+        createPaymentQrCodeImageView.visibility = View.VISIBLE
     }
-
-    private fun qrCodeBackgroundColor(): Int = ContextCompat.getColor(this, R.color.oled_colorBackground)
 
     private fun editAddressLabel(address: Address) {
         startActivity(Intent(this, ActivityAddressDetails::class.java).apply {
@@ -225,23 +208,9 @@ class ActivityReceive : ActivityMonero() {
         })
     }
 
-    private fun setAddress(address: Address) {
-        addressLabelTextView.text = getString(R.string.address_label, address.addressIndex, address.label)
-        addressTextView.text = address.address
-        if (address.used) {
-            addressTextView.setTextColor(getColor(R.color.text_subtle))
-        } else {
-            addressTextView.setTextColor(getColor(R.color.text))
-        }
-
-        copyAddressImageButton.setOnClickListener {
-            clipBoardCopy(this, "address", address.address)
-        }
-    }
-
     private fun autoRotateAddresses() {
         if (PreferenceUtils.isAutoRotateAddresses(this)) {
-            viewModel.subaddresses.value?.lastOrNull()?.let { lastAddress ->
+            viewModel.addresses.value?.lastOrNull()?.let { lastAddress ->
                 if (lastAddress.used) {
                     val lastAutoRotatedAddress = viewModel.lastAutoRotatedAddress.getAndSet(lastAddress.address)
                     if (lastAddress.address != lastAutoRotatedAddress) {
@@ -262,63 +231,31 @@ class ActivityReceive : ActivityMonero() {
 
 class ReceiveViewModel : ViewModel() {
 
-    private val qrCodeJob: AtomicReference<Job?> = AtomicReference(null)
     // we need to store this in order to avoid rotating a single address more than once
     // which might happen when we get second callback before new address has been generated
     val lastAutoRotatedAddress: AtomicReference<String?> = AtomicReference(null)
-
-    private val _showIconOnQrCodes = MutableLiveData(false)
-    val showIconOnQrCodes: LiveData<Boolean> = _showIconOnQrCodes
 
     val multiAccountMode = MutableLiveData(false)
 
     private val _selectedAddress = MutableLiveData<Address?>()
     val selectedAddress: LiveData<Address?> = _selectedAddress
 
-    private val _subaddresses = MutableLiveData<List<Address>>()
-    val subaddresses: LiveData<List<Address>> = _subaddresses
+    private val _addresses = MutableLiveData<List<Address>>()
+    val addresses: LiveData<List<Address>> = _addresses
 
-    private val _addressAndQrCode = MutableLiveData<Pair<String, Bitmap?>?>()
-    val qrCode: LiveData<Bitmap?> = _addressAndQrCode.map { it?.second }
-
-    fun setShowIconOnQrCodes(showIconOnQrCodes: Boolean) {
-        _showIconOnQrCodes.value = showIconOnQrCodes
-    }
-
-    fun refreshAddresses(wallet: Wallet, backgroundColor: Int, selectLatest: Boolean = false) {
+    fun refreshAddresses(wallet: Wallet, selectLatest: Boolean = false) {
         val newAddresses = (0 until wallet.numAddresses).map { wallet.getAddressObject(it) }
-        _subaddresses.value = newAddresses
+        _addresses.value = newAddresses
 
         val currentSelectedAddress = selectedAddress.value
         if (currentSelectedAddress == null || selectLatest) {
-            selectAddress(newAddresses.lastOrNull(), backgroundColor)
+            selectAddress(newAddresses.lastOrNull())
         } else {
-            selectAddress(newAddresses.getOrNull(currentSelectedAddress.addressIndex), backgroundColor)
+            selectAddress(newAddresses.getOrNull(currentSelectedAddress.addressIndex))
         }
     }
 
-    fun selectAddress(subaddress: Address?, backgroundColor: Int) {
+    fun selectAddress(subaddress: Address?) {
         _selectedAddress.value = subaddress
-        qrCodeJob.getAndUpdate { job ->
-            job?.cancel()
-            if (_addressAndQrCode.value?.first != subaddress?.address) {
-                _addressAndQrCode.value = null
-                subaddress?.let {
-                    viewModelScope.launch {
-                        withContext(Dispatchers.Default) {
-                            val (bitmap, time) = measureTimedValue {
-                                QrCodeHelper.generateQrCode(subaddress.address, 256, 256, backgroundColor)
-                            }
-                            Timber.d("Generated QR code bitmap in ${time.toInt(DurationUnit.MILLISECONDS)} milliseconds")
-                            if (isActive) {
-                                _addressAndQrCode.postValue(Pair(subaddress.address, bitmap))
-                            }
-                        }
-                    }
-                }
-            } else {
-                null
-            }
-        }
     }
 }

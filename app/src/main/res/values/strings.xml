@@ -127,6 +127,10 @@
     <string name="auto_rotate_addresses">Auto rotate addresses</string>
     <!-- Label for balance tap triggers street mode setting toggle -->
     <string name="balance_tap_toggles_street_mode">Tapping balance toggles street mode</string>
+    <!-- Label for setting brightness to max when viewing QR codes setting toggle -->
+    <string name="max_brightness_qr_codes">Max brightness when viewing QR codes</string>
+    <!-- Label for forcing URI format for QR codes setting toggle -->
+    <string name="force_uri_format_qr_codes">Force URI format for QR codes</string>
     <!-- Button for displaying wallet secrets (seed, private keys, etc.) -->
     <string name="display_wallet_secrets">Display wallet secrets</string>
     <!-- Button for creating new account -->
@@ -249,6 +253,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="slide_to_send">Slide to send</string>
     <string name="display_advanced_wallet_creation_options">Display advanced wallet creation options</string>
     <string name="generate_fresh_wallet_address">Generate fresh wallet address</string>
+    <string name="create_payment_qr_code">Create payment QR code</string>
     <string name="copy_selected_wallet_address">Copy selected wallet address</string>
     <string name="copy_seed">Copy wallet\'s seed</string>
     <string name="copy_polyseed_offset_passphrase">Copy wallet\'s polyseed offset passphrase</string>
@@ -370,6 +375,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="create_wallet_header">Create wallet</string>
     <string name="wallet_secrets_header">Wallet secrets</string>
     <string name="receive_header">Receive</string>
+    <string name="payment_request_header">Payment request</string>
     <string name="nodes_header">Nodes</string>
     <string name="add_node_header">Add node</string>
     <string name="node_details_header">Node details</string>
@@ -393,6 +399,14 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="recycler_view_item_node_edit_content_description">Edit node</string>
     <string name="recycler_view_item_account_edit_content_description">Edit account</string>
     <string name="recycler_view_item_address_edit_content_description">Edit address</string>
+
+    <string name="activity_payment_request_address_label">Address</string>
+    <string name="activity_payment_request_amount_requested_label">Requested amount</string>
+    <string name="activity_payment_request_amount_requested_hint" translatable="false">0.00</string>
+    <string name="activity_payment_request_recipient_name_label">Recipient name</string>
+    <string name="activity_payment_request_recipient_name_hint">Me</string>
+    <string name="activity_payment_request_transaction_description_label">Transaction description</string>
+    <string name="activity_payment_request_transaction_description_hint">Payment to Me</string>
 
     <string name="activity_send_selected_enotes_value_text">Selected value: %1$s XMR</string>
     <string name="activity_send_fee_label">Fee:</string>

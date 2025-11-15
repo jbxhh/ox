@@ -60,7 +60,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/header_layout_view"
         android:text="@string/activity_wallet_settings_wallet_name_label"
-        android:textSize="16sp"
+        android:textSize="@dimen/text_medium"
         android:textColor="@color/text_subtler" />
 
     <TextView
@@ -71,7 +71,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/wallet_name_label_textview"
         android:layout_marginTop="@dimen/padding_mini"
-        android:textSize="20sp"
+        android:textSize="@dimen/text_big"
         android:textStyle="bold" />
 
     <TextView
@@ -81,7 +81,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/wallet_name_textview"
         android:text="@string/activity_wallet_settings_wallet_network_label"
-        android:textSize="16sp"
+        android:layout_marginTop="@dimen/padding_small"
+        android:textSize="@dimen/text_medium"
         android:textColor="@color/text_subtler" />
 
     <TextView
@@ -92,7 +93,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/wallet_network_label_textview"
         android:layout_marginTop="@dimen/padding_mini"
-        android:textSize="20sp"
+        android:textSize="@dimen/text_big"
         android:textStyle="bold" />
 
     <TextView
@@ -101,8 +102,9 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/wallet_network_textview"
+        android:layout_marginTop="@dimen/padding_small"
         android:text="@string/activity_wallet_settings_total_balance_label"
-        android:textSize="16sp"
+        android:textSize="@dimen/text_medium"
         android:textColor="@color/text_subtler" />
 
     <TextView
@@ -113,7 +115,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/total_balance_label_textview"
         android:layout_marginTop="@dimen/padding_mini"
-        android:textSize="20sp"
+        android:textSize="@dimen/text_big"
         android:textStyle="bold" />
 
     <Button

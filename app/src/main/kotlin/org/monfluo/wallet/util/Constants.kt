@@ -24,6 +24,8 @@ object Constants {
     const val PREF_AUTO_ROTATE_ADDRESSES = "pref_auto_rotate_addresses"
     const val PREF_ENABLE_ENOTE_MANAGEMENT = "pref_enable_enote_management"
     const val PREF_BALANCE_TAP_TOGGLES_STREET_MODE = "pref_balance_tap_toggles_street_mode"
+    const val PREF_MAX_BRIGHTNESS_QR_CODES = "pref_max_brightness_qr_codes"
+    const val PREF_FORCE_URI_FORMAT_QR_CODES = "pref_force_uri_format_qr_codes"
     const val PREF_POST_NOTIFICATIONS_PERMISSION_REQUESTED = "pref_post_notifications_permission_requested"
 
     const val URI_ARG_AMOUNT = "tx_amount"
@@ -37,6 +39,7 @@ object Constants {
     const val EXTRA_TRANSACTION_ID = "transaction_id"
     const val EXTRA_ACCOUNT_INDEX = "account_index"
     const val EXTRA_ADDRESS_INDEX = "address_index"
+    const val EXTRA_ADDRESS_VALUE = "address_value"
     const val EXTRA_DAEMON_ADDRESS = "daemon_address"
     const val EXTRA_DAEMON_USERNAME = "daemon_username"
     const val EXTRA_DAEMON_PASSWORD = "daemon_password"

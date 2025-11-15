@@ -43,6 +43,21 @@
             android:textColor="?attr/colorOnPrimary" />
 
         <ImageButton
+            android:id="@+id/create_payment_qr_code_imageview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toStartOf="@id/fresh_address_imageview"
+            app:layout_constraintTop_toTopOf="@id/fresh_address_imageview"
+            app:layout_constraintBottom_toBottomOf="@id/fresh_address_imageview"
+            android:layout_marginHorizontal="@dimen/padding_small"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/create_payment_qr_code"
+            android:minWidth="32dp"
+            android:minHeight="32dp"
+            android:src="@drawable/qr_code"
+            android:visibility="invisible" />
+
+        <ImageButton
             android:id="@+id/fresh_address_imageview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -51,11 +66,11 @@
             app:layout_constraintBottom_toBottomOf="@id/go_to_account_list_imageview"
             android:layout_marginHorizontal="@dimen/padding_small"
             android:background="@android:color/transparent"
-            android:visibility="invisible"
             android:contentDescription="@string/generate_fresh_wallet_address"
             android:minWidth="32dp"
             android:minHeight="32dp"
-            android:src="@drawable/ic_refresh" />
+            android:src="@drawable/ic_refresh"
+            android:visibility="invisible" />
 
         <ImageView
             android:id="@+id/go_to_account_list_imageview"
@@ -84,91 +99,13 @@
             tools:layout="@layout/fragment_network_status" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/activity_receive_main_view"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/address_list_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/header_layout_view"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:visibility="invisible">
-
-        <ImageView
-            android:id="@+id/address_qrcode_imageview"
-            android:layout_width="256dp"
-            android:layout_height="256dp"
-            android:layout_marginTop="@dimen/padding_big"
-            android:src="@drawable/monfluo"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:background="@color/transparent" />
-
-        <ImageView
-            android:id="@+id/address_qrcode_icon_imageview"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_marginTop="16dp"
-            android:src="@drawable/monfluo"
-            app:layout_constraintStart_toStartOf="@id/address_qrcode_imageview"
-            app:layout_constraintEnd_toEndOf="@id/address_qrcode_imageview"
-            app:layout_constraintTop_toTopOf="@id/address_qrcode_imageview"
-            app:layout_constraintBottom_toBottomOf="@id/address_qrcode_imageview"
-            android:background="@color/transparent" />
-
-        <TextView
-            android:id="@+id/address_label_textview"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/copy_address_imagebutton"
-            app:layout_constraintTop_toBottomOf="@id/address_qrcode_imageview"
-            app:layout_constraintHorizontal_bias="0"
-            android:layout_marginTop="@dimen/padding_small"
-            android:layout_marginEnd="8dp"
-            android:textSize="@dimen/text_medium"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:textColor="?attr/colorOnPrimary"
-            tools:text="LABEL" />
-
-        <TextView
-            android:id="@+id/address_textview"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/copy_address_imagebutton"
-            app:layout_constraintTop_toBottomOf="@id/address_label_textview"
-            android:layout_marginTop="@dimen/padding_mini"
-            android:layout_marginEnd="8dp"
-            android:ellipsize="middle"
-            android:singleLine="true"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="?attr/colorOnPrimary"
-            tools:text="ADDRESS" />
-
-        <ImageButton
-            android:id="@+id/copy_address_imagebutton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/address_textview"
-            app:layout_constraintTop_toBottomOf="@id/address_qrcode_imageview"
-            android:layout_marginTop="16dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/copy_selected_wallet_address"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:src="@drawable/ic_content_copy_24dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/address_list_recyclerview"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/copy_address_imagebutton"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginTop="@dimen/padding_big" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:visibility="invisible" />
 </androidx.constraintlayout.widget.ConstraintLayout>

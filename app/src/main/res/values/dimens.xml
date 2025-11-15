@@ -11,4 +11,5 @@
     <dimen name="text_mini">12sp</dimen>
 
     <dimen name="activity_home_recycler_view_void_height">64dp</dimen>
+    <dimen name="qr_code_size">256dp</dimen>
 </resources>

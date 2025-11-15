@@ -8,15 +8,22 @@ import org.junit.jupiter.params.provider.MethodSource
 class UriPaymentTest {
 
     @ParameterizedTest
-    @MethodSource("paymentUris")
-    fun `should correctly parse payment uri`(paymentUriRaw: String, expected: UriPayment?) {
+    @MethodSource("paymentUriStrings")
+    fun `should parse payment uri`(paymentUriRaw: String, expected: UriPayment?) {
         assertEquals(expected, UriPayment.parse(paymentUriRaw))
+    }
+
+    @ParameterizedTest
+    @MethodSource("paymentUris")
+    fun `should convert payment uri into string`(paymentUri: UriPayment, expected: String) {
+        assertEquals(expected, paymentUri.toUriString())
+        assertEquals(paymentUri, UriPayment.parse(paymentUri.toUriString()))
     }
 
     companion object {
 
         @JvmStatic
-        fun paymentUris(): List<Arguments> = listOf(
+        fun paymentUriStrings(): List<Arguments> = listOf(
             Arguments.of(
                 "monero:48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ",
                 UriPayment(
@@ -134,6 +141,65 @@ class UriPaymentTest {
             Arguments.of(
                 "notmonero:48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ",
                 null
+            ),
+        )
+
+        @JvmStatic
+        fun paymentUris(): List<Arguments> = listOf(
+            Arguments.of(
+                UriPayment(
+                    listOf(
+                        "48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ"
+                    ),
+                    emptyList(),
+                    emptyList(),
+                    null
+                ),
+                "monero:48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ",
+            ),
+            Arguments.of(
+                UriPayment(
+                    listOf(
+                        "48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ"
+                    ),
+                    listOf("0.123456"),
+                    emptyList(),
+                    null
+                ),
+                "monero:48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ?tx_amount=0.123456",
+            ),
+            Arguments.of(
+                UriPayment(
+                    listOf(
+                        "48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ"
+                    ),
+                    emptyList(),
+                    listOf("Me, Myself & I"),
+                    null
+                ),
+                "monero:48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ?recipient_name=Me%2C+Myself+%26+I",
+            ),
+            Arguments.of(
+                UriPayment(
+                    listOf(
+                        "48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ"
+                    ),
+                    emptyList(),
+                    emptyList(),
+                    "Donation to Monfluo"
+                ),
+                "monero:48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ?tx_description=Donation+to+Monfluo",
+            ),
+            Arguments.of(
+                UriPayment(
+                    listOf(
+                        "48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ"
+                    ),
+                    listOf("0.123456"),
+                    listOf("Me, Myself & I"),
+                    "Donation to Monfluo"
+                ),
+                "monero:48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ?tx_amount=0.123456&recipient_name=Me%2C+Myself+%26+I&tx_description=Donation+to+Monfluo",
             ),
         )
     }

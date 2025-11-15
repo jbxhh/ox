@@ -20,6 +20,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.RadioButton
+import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.R
@@ -52,7 +53,7 @@ class AdapterAddress(
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val address = addresses[position]
-        viewHolder.bind(address, selectedAddress != null && address == selectedAddress)
+        viewHolder.bind(address, streetMode, selectedAddress != null && address == selectedAddress)
     }
 
     override fun getItemCount(): Int {
@@ -60,35 +61,30 @@ class AdapterAddress(
     }
 
     interface AdapterAddressListener {
-        fun onAddressSelected(subaddress: Address)
-        fun onAddressEditLabel(subaddress: Address)
+        fun onAddressSelected(address: Address)
+        fun onAddressEditLabel(address: Address)
+        fun onAddressCopy(address: Address)
     }
 
     class ViewHolder(val view: View, val listener: AdapterAddressListener) : RecyclerView.ViewHolder(view) {
 
-        private lateinit var addressWrapperLayout: View
-        private lateinit var addressRadioButton: RadioButton
-        private lateinit var addressIconImageView: ImageView
-        private lateinit var addressLabelTextView: TextView
-        private lateinit var addressBalanceTextView: TextView
-        private lateinit var addressTextView: TextView
-        private lateinit var editAddressImageView: ImageView
+        private val addressWrapperLayout: View = itemView.findViewById(R.id.address_wrapper_layout)
+        private val addressRadioButton: RadioButton = itemView.findViewById(R.id.address_radiobutton)
+        private val addressIconImageView: ImageView = itemView.findViewById(R.id.address_icon_imagebutton)
+        private val addressLabelTextView: TextView = itemView.findViewById(R.id.address_label_textview)
+        private val addressBalanceTextView: TextView = itemView.findViewById(R.id.address_balance_textview)
+        private val addressTextView: TextView = itemView.findViewById(R.id.address_textview)
+        private val editAddressImageView: ImageView = itemView.findViewById(R.id.edit_address_imagebutton)
+        private val copyAddressImageButton: ImageButton = itemView.findViewById(R.id.copy_address_imagebutton)
 
         fun bind(
             address: Address,
-            isSelected: Boolean
+            streetMode: Boolean,
+            isSelected: Boolean,
         ) {
-            addressWrapperLayout = itemView.findViewById(R.id.address_wrapper_layout)
-            addressRadioButton = itemView.findViewById(R.id.address_radiobutton)
-            addressIconImageView = itemView.findViewById(R.id.address_icon_imagebutton)
-            addressLabelTextView = itemView.findViewById(R.id.address_label_textview)
-            addressBalanceTextView = itemView.findViewById(R.id.address_balance_textview)
-            addressTextView = itemView.findViewById(R.id.address_textview)
-            editAddressImageView = itemView.findViewById(R.id.edit_address_imagebutton)
-
             addressRadioButton.setChecked(isSelected)
             addressLabelTextView.text = itemView.resources.getString(R.string.address_label, address.addressIndex, address.label)
-            addressBalanceTextView.text = TextHelper.formatUnlockedBalance(itemView.context, address.totalBalance, MoneroUnit.MONERO, false, 0)
+            addressBalanceTextView.text = TextHelper.formatUnlockedBalance(itemView.context, address.totalBalance, MoneroUnit.MONERO, streetMode, 0)
 
             addressTextView.text = address.address
             if (address.used) {
@@ -105,6 +101,9 @@ class AdapterAddress(
 
             editAddressImageView.setOnClickListener {
                 listener.onAddressEditLabel(address)
+            }
+            copyAddressImageButton.setOnClickListener {
+                listener.onAddressCopy(address)
             }
         }
     }

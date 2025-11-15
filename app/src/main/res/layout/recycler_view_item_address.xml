@@ -81,13 +81,27 @@
 
     <TextView
         android:id="@+id/address_textview"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/copy_address_imagebutton"
         app:layout_constraintTop_toBottomOf="@id/address_wrapper_layout"
         android:paddingTop="@dimen/padding_mini"
         android:background="@color/transparent"
         android:textColor="?attr/colorOnPrimary"
         tools:text="ADDRESS" />
+
+    <ImageButton
+        android:id="@+id/copy_address_imagebutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@id/address_textview"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/address_textview"
+        app:layout_constraintBottom_toBottomOf="@id/address_textview"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/copy_selected_wallet_address"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:src="@drawable/ic_content_copy_24dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>
