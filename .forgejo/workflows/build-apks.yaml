@@ -15,6 +15,9 @@ jobs:
           cd external-libs/monero
           git submodule update --init --force
       - run: |
+          set -euo pipefail
+          IFS=$'\n\t'
+
           export BASEDIR=$(pwd)
           export WORKDIR=/opt/android
           mkdir -p /opt/android
