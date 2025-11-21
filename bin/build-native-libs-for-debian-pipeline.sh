@@ -60,7 +60,7 @@ export NPROC=4
 cd $WORKDIR
 export ICONV_VERSION=1.16
 export ICONV_HASH=e6a1b1b589654277ee790cce3734f07876ac4ccfaecbee8afa0b649cf529cc04
-curl -O http://ftp.gnu.org/pub/gnu/libiconv/libiconv-${ICONV_VERSION}.tar.gz \
+curl -O https://mirrors.kernel.org/gnu/libiconv/libiconv-${ICONV_VERSION}.tar.gz \
     && echo "${ICONV_HASH}  libiconv-${ICONV_VERSION}.tar.gz" | sha256sum -c \
     && tar -xzf libiconv-${ICONV_VERSION}.tar.gz \
     && rm -f libiconv-${ICONV_VERSION}.tar.gz \
