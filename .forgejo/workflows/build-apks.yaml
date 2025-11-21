@@ -5,17 +5,22 @@ jobs:
     container:
       image: debian:bookworm
     steps:
-      - run: apt update && apt upgrade -y
-      - run: apt install -y unzip automake build-essential curl file pkg-config git python3 python-is-python3 libtool libtinfo5 yacc clang libc6-dev nodejs
-      - name: Checkout
+      - name: Update Debian repository, upgrade existing packages and install new required packages
+        run: |
+            apt update && apt upgrade -y
+            apt install -y unzip automake build-essential curl file pkg-config git python3 python-is-python3 libtool libtinfo5 yacc clang libc6-dev nodejs
+      - name: Checkout Monfluo
         uses: actions/checkout@v4
         with:
           submodules: true
-      - run: |
+      - name: Checkout Monero submodules
+        run: |
           cd external-libs/monero
           git submodule update --init --force
-      - run: ./bin/build-native-libs-for-debian-pipeline.sh
-      - uses: actions/upload-artifact@v3
+      - name: Build native libraries
+        run: ./bin/build-native-libs-for-debian-pipeline.sh
+      - name: Upload built native libraries
+        uses: actions/upload-artifact@v3
         with:
           name: native-build-artifacts-arm64-v8a
           path: /opt/output
@@ -24,21 +29,30 @@ jobs:
     container:
       image: docker.io/cimg/android:2025.04.1-ndk
     steps:
-      - run: sudo apt update && sudo apt upgrade -y
-      - run: curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh
-      - run: sudo bash nodesource_setup.sh
-      - run: sudo apt install -y nodejs
-      - run: mkdir -p "$HOME/.android"
-      - run: echo "${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}" | base64 -d > "$HOME/.android/debug.keystore"
-      - name: Checkout
+      - name: Update Debian repository and upgrade existing packages
+        run: sudo apt update && sudo apt upgrade -y
+      - name: Install node
+        run: |
+            curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh
+            sudo bash nodesource_setup.sh
+            sudo apt install -y nodejs
+      - name: Save debug keystore
+        run: |
+            mkdir -p "$HOME/.android"
+            echo "${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}" | base64 -d > "$HOME/.android/debug.keystore"
+      - name: Checkout Monfluo
         uses: actions/checkout@v4
-      - uses: actions/download-artifact@v3
+      - name: Download native libraries built in previous pipeline step
+        uses: actions/download-artifact@v3
         with:
           name: native-build-artifacts-arm64-v8a
           path: external-libs/
-      - run: ./gradlew test -i
-      - run: ./gradlew -PdbgBld assembleDebug
-      - uses: actions/upload-artifact@v3
+      - name: Run tests
+        run: ./gradlew test -i
+      - name: Built APKs
+        run: ./gradlew -PdbgBld assembleDebug
+      - name: Upload built APKs
+        uses: actions/upload-artifact@v3
         with:
           name: apks
           path: app/build/outputs/apk/debug/*.apk
