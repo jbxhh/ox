@@ -120,7 +120,7 @@ class AdapterTransactionDestinationPending(
                 addressLabelTextView.setText(transactionDestinationPendingAddressWithPositionLabel(index + 1))
             }
             amountTextView.setText(TextHelper.formatUnlockedBalance(itemView.context, amount, MoneroUnit.MONERO, false, 0))
-            addressTextView.setText(address)
+            addressTextView.setText(TextHelper.formatAddress(address))
             if (resolvedFrom != null) {
                 addressResolvedFromLabelTextView.visibility = View.VISIBLE
                 addressResolvedFromTextView.visibility = View.VISIBLE

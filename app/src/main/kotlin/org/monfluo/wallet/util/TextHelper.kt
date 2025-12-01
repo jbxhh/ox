@@ -14,6 +14,9 @@ import org.monfluo.wallet.model.MoneroUnit
 import java.math.BigDecimal
 import java.math.RoundingMode
 
+private const val ADDRESS_CHUNK_LENGTH = 6
+private val HIGHLIGHTED_ADDRESS_CHUNKS = setOf(0, 2, -1, -3)
+
 object TextHelper {
 
     private fun <S : Spannable> tryMonospaceize(spannable: S, start: Int = 0, end: Int = spannable.length, flags: Int = Spannable.SPAN_INCLUSIVE_EXCLUSIVE, style: Int = Typeface.NORMAL): S {
@@ -44,4 +47,21 @@ object TextHelper {
     fun formatFrozenBalance(context: Context, balance: Long, unit: MoneroUnit, streetMode: Boolean, style: Int): SpannableStringBuilder = formatUnlockedBalance(context, balance, unit, streetMode, style)
         .append(' ')
         .append(context.getString(R.string.balance_frozen))
+
+    fun formatAddress(address: String): SpannableStringBuilder {
+        val formattedAddress = SpannableStringBuilder()
+        val chunks = address.chunked(ADDRESS_CHUNK_LENGTH)
+        val chunksSize = chunks.size
+        chunks.forEachIndexed { index, chunk ->
+            val spannable = chunk.toSpannable()
+            if (HIGHLIGHTED_ADDRESS_CHUNKS.contains(index) || HIGHLIGHTED_ADDRESS_CHUNKS.contains(-chunksSize + index)) {
+                spannable.setSpan(StyleSpan(Typeface.BOLD), 0, spannable.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+            }
+            formattedAddress.append(spannable)
+            if (index != chunksSize - 1) {
+                formattedAddress.append(' ')
+            }
+        }
+        return formattedAddress
+    }
 }

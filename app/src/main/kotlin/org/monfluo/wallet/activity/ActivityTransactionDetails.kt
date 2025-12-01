@@ -189,7 +189,7 @@ class ActivityTransactionDetails : ActivityMonero() {
             txAmountTextView.text = balanceString
             when (transactionInfo.direction) {
                 TransactionInfo.Direction.In -> {
-                    addressTextView.text = wallet.getAddress(transactionInfo.accountIndex, transactionInfo.addressIndex)
+                    addressTextView.text = TextHelper.formatAddress(wallet.getAddress(transactionInfo.accountIndex, transactionInfo.addressIndex))
                     copyTxAddressImageButton.visibility = View.VISIBLE
                 }
                 TransactionInfo.Direction.Out -> {
@@ -197,7 +197,7 @@ class ActivityTransactionDetails : ActivityMonero() {
                         addressTextView.text = getString(R.string.unknown_recipient)
                         copyTxAddressImageButton.visibility = View.INVISIBLE
                     } else if (transactionInfo.transfers.size == 1) {
-                        addressTextView.text = transactionInfo.transfers[0].address
+                        addressTextView.text = TextHelper.formatAddress(transactionInfo.transfers[0].address)
                         copyTxAddressImageButton.visibility = View.VISIBLE
                     } else {
                         addressTextView.text = getString(R.string.multiple_addresses)
