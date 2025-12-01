@@ -42,6 +42,7 @@ import org.monfluo.wallet.R
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.fragment.DialogFragmentQrCode
 import org.monfluo.wallet.util.SimpleTextWatcher
+import org.monfluo.wallet.util.TextHelper
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.max
@@ -167,7 +168,7 @@ class ActivityPaymentRequest : ActivityLogging() {
     }
 
     private fun init() {
-        addressTextView.setText(viewModel.addressValue!!)
+        addressTextView.setText(TextHelper.formatAddress(viewModel.addressValue!!))
     }
 
     override fun onResume() {

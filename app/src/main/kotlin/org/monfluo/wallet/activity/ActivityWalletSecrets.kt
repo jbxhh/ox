@@ -23,6 +23,7 @@ import org.monfluo.wallet.livedata.combineLiveDatas
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Helper.clipBoardCopy
+import org.monfluo.wallet.util.TextHelper
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.component.ActivityMonero
 import java.text.NumberFormat
@@ -231,7 +232,7 @@ class ActivityWalletSecrets : ActivityMonero() {
             restoreHeightTextView.text = NumberFormat.getInstance().format(restoreHeight)
         }
         viewModel.walletAddress.observe(this) { walletAddress ->
-            walletAddressTextView.text = walletAddress
+            walletAddressTextView.text = TextHelper.formatAddress(walletAddress)
         }
         viewModel.secretViewKey.observe(this) { secretViewKey ->
             walletSecretViewKeyTextView.text = secretViewKey

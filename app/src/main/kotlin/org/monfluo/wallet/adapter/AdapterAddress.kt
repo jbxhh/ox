@@ -86,7 +86,7 @@ class AdapterAddress(
             addressLabelTextView.text = itemView.resources.getString(R.string.address_label, address.addressIndex, address.label)
             addressBalanceTextView.text = TextHelper.formatUnlockedBalance(itemView.context, address.totalBalance, MoneroUnit.MONERO, streetMode, 0)
 
-            addressTextView.text = address.address
+            addressTextView.text = TextHelper.formatAddress(address.address)
             if (address.used) {
                 addressTextView.setTextColor(view.resources.getColor(R.color.text_subtle))
             } else {

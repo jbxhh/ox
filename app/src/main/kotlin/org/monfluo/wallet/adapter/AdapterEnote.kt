@@ -113,10 +113,9 @@ class AdapterEnote(
             val globalIdxTextView = itemView.findViewById<TextView>(R.id.enote_global_index_textview)
             val outpointTextView = itemView.findViewById<TextView>(R.id.enote_coin_textview)
             val balanceString = TextHelper.getDisplayAmount(enote.amount, MoneroUnit.MONERO, streetMode)
-            amountTextView.text =
-                itemView.resources.getString(R.string.tx_amount_no_prefix, balanceString)
+            amountTextView.text = itemView.resources.getString(R.string.tx_amount_no_prefix, balanceString)
             pubKeyTextView.text = enote.pubKey
-            addressTextView.text = enote.address
+            addressTextView.text = TextHelper.formatAddress(enote.address!!)
             globalIdxTextView.text =
                 itemView.resources.getString(
                     R.string.global_index_text,
