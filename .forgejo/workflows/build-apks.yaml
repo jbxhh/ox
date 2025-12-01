@@ -49,7 +49,7 @@ jobs:
           path: external-libs/
       - name: Run tests
         run: ./gradlew test -i
-      - name: Built APKs
+      - name: Build APKs
         run: ./gradlew -PdbgBld assembleDebug
       - name: Upload built APKs
         uses: actions/upload-artifact@v3

@@ -131,8 +131,6 @@
     <string name="max_brightness_qr_codes">Max brightness when viewing QR codes</string>
     <!-- Label for forcing URI format for QR codes setting toggle -->
     <string name="force_uri_format_qr_codes">Force URI format for QR codes</string>
-    <!-- Button for displaying wallet secrets (seed, private keys, etc.) -->
-    <string name="display_wallet_secrets">Display wallet secrets</string>
     <!-- Button for creating new account -->
     <string name="add_account">Add account</string>
     <!-- Label for SOCKS proxy setting -->
@@ -338,6 +336,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="balance_locked">unconfirmed</string>
     <string name="balance_frozen">frozen</string>
     <string name="wallet_header">Wallet</string>
+    <string name="wallet_change_password_header">Change password</string>
     <string name="enotes_header">Enotes</string>
     <string name="enotes_with_amount_header">Enotes (<xliff:g>%1$d</xliff:g>)</string>
     <string name="content_description_back">Back</string>
@@ -450,6 +449,21 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="activity_wallet_settings_wallet_name_label">Name</string>
     <string name="activity_wallet_settings_wallet_network_label">Network</string>
     <string name="activity_wallet_settings_total_balance_label">Total balance</string>
+    <!-- Button for displaying wallet secrets (seed, private keys, etc.) -->
+    <string name="activity_wallet_settings_display_wallet_secrets">Display wallet secrets</string>
+    <string name="activity_wallet_settings_change_password">Change password</string>
+    <string name="activity_wallet_settings_close_wallet">Close wallet</string>
+
+    <string name="activity_wallet_change_password_current_password_label">Current password</string>
+    <string name="activity_wallet_change_password_current_password_hint">Current wallet password</string>
+    <string name="activity_wallet_change_password_new_password_label">New password</string>
+    <string name="activity_wallet_change_password_new_password_hint">New wallet password</string>
+    <string name="activity_wallet_change_password_new_password_confirm_hint">Confirm password</string>
+    <string name="activity_wallet_change_password_save">Save</string>
+    <string name="activity_wallet_change_password_incorrect_current_password_toast">Current password is incorrect</string>
+    <string name="activity_wallet_change_password_new_password_does_not_match_toast">Password confirmation does not match</string>
+    <string name="activity_wallet_change_password_changing_password_toast">Saving password…</string>
+    <string name="activity_wallet_change_password_password_changed_toast">Password changed</string>
 
     <string name="activity_node_add_node_name_label">Name</string>
     <string name="activity_node_add_node_name_placeholder">My Monero Node</string>

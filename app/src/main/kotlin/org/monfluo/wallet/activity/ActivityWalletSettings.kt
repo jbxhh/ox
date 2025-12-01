@@ -29,6 +29,7 @@ class ActivityWalletSettings : ActivityMonero() {
     private lateinit var walletNetworkTextView: TextView
     private lateinit var totalBalanceTextView: TextView
     private lateinit var displaySeedButton: Button
+    private lateinit var changeWalletPasswordButton: Button
     private lateinit var closeWalletButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +42,7 @@ class ActivityWalletSettings : ActivityMonero() {
         backImageView = findViewById(R.id.back_imageview)
         totalBalanceTextView = findViewById(R.id.total_balance_textview)
         displaySeedButton = findViewById(R.id.display_wallet_secrets_button)
+        changeWalletPasswordButton = findViewById(R.id.change_wallet_password_button)
         closeWalletButton = findViewById(R.id.close_wallet_button)
 
         bindWindowInsetsListener()
@@ -75,6 +77,9 @@ class ActivityWalletSettings : ActivityMonero() {
                 passwordDialog.show(supportFragmentManager, "password_dialog")
             }
         }
+        changeWalletPasswordButton.setOnClickListener {
+            startChangePasswordActivity()
+        }
         closeWalletButton.setOnClickListener {
             stopService(Intent(this, WalletService::class.java))
         }
@@ -99,6 +104,15 @@ class ActivityWalletSettings : ActivityMonero() {
         walletNetworkTextView.setText(network)
         val totalBalance = wallet.getBalances().values.map { it.total }.sum()
         totalBalanceTextView.setText(TextHelper.formatUnlockedBalance(this, totalBalance, MoneroUnit.MONERO, false, 0))
+    }
+
+    private fun startChangePasswordActivity() {
+        val wallet = walletService!!.getWallet()
+        if (wallet != null) {
+            startActivity(Intent(this, ActivityWalletChangePassword::class.java))
+        } else {
+            Toast.makeText(this, getText(R.string.toast_wallet_not_opened), Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun displaySeedDialog() {

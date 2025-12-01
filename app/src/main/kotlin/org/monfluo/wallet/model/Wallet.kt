@@ -123,8 +123,10 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
         return TransactionHistory(getHistoryJ())
     }
 
+    external fun getPassword(): String
+
     @Synchronized
-    external fun setPassword(password: String?): Boolean
+    external fun setPassword(password: String): Boolean
 
     fun getAddress(accountIndex: Int, addressIndex: Int): String {
         return getAddressJ(accountIndex, addressIndex)

@@ -35,6 +35,7 @@ object Constants {
     const val EXTRA_WALLET_PASSWORD = "wallet_password"
     const val EXTRA_PREVENT_GOING_BACK = "prevent_going_back"
     const val EXTRA_PAYMENT_URI = "payment_uri"
+    const val EXTRA_NEW_PASSWORD = "new_password"
     const val EXTRA_PAYMENT_ENOTES = "payment_enotes"
     const val EXTRA_TRANSACTION_ID = "transaction_id"
     const val EXTRA_ACCOUNT_INDEX = "account_index"

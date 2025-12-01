@@ -717,6 +717,13 @@ Java_org_monfluo_wallet_model_Wallet_getWalletStatusWithError(JNIEnv *env, jobje
     return newWalletStatusInstance(env, status, errorString);
 }
 
+JNIEXPORT jobject JNICALL
+Java_org_monfluo_wallet_model_Wallet_getPassword(JNIEnv *env, jobject instance) {
+    auto *wallet = getHandle<Monero::Wallet>(env, instance);
+    return env->NewStringUTF(wallet->getPassword().c_str());
+}
+
+
 JNIEXPORT jboolean JNICALL
 Java_org_monfluo_wallet_model_Wallet_setPassword(JNIEnv *env, jobject instance,
                                                 jstring password) {
