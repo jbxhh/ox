@@ -149,6 +149,10 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
                 WalletServiceCommand.FETCH_BLOCKCHAIN_AND_TARGET_HEIGHTS -> {
                     handleFetchBlockchainAndTargetHeights()
                 }
+                WalletServiceCommand.SET_PASSWORD -> {
+                    val newPassword = data.getString(Constants.EXTRA_NEW_PASSWORD)!!
+                    handleSetPassword(newPassword)
+                }
                 WalletServiceCommand.GENERATE_NEW_ADDRESS -> {
                     val subaddressLabel = data.getString(Constants.EXTRA_ADDRESS_LABEL)!!
                     handleGenerateNewAddress(subaddressLabel)
@@ -332,6 +336,15 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             }
             forEachObserver {
                 it.onBlockchainAndTargetHeightsFetched(newHeights.first, newHeights.second)
+            }
+        }
+
+        private fun handleSetPassword(newPassword: String) {
+            val wallet = getWalletOrThrow()
+            wallet.setPassword(newPassword)
+            wallet.store()
+            forEachObserver {
+                it.onWalletPasswordSet()
             }
         }
 
@@ -908,6 +921,13 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         handler.sendMessage(message)
     }
 
+    fun setPassword(newPassword: String) {
+        val message = handler.obtainMessage()
+        message.arg1 = WalletServiceCommand.SET_PASSWORD.value()
+        message.data.putString(Constants.EXTRA_NEW_PASSWORD, newPassword)
+        handler.sendMessage(message)
+    }
+
     fun generateNewAddress(accountIndex: Int, label: String) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.GENERATE_NEW_ADDRESS.value()
@@ -1003,6 +1023,7 @@ interface WalletServiceObserver : LifecycleOwner {
     fun onWalletUpdated(wallet: Wallet) {}
     fun onNewBlock(wallet: Wallet) {}
     fun onBlockchainAndTargetHeightsFetched(blockchainHeight: Long, targetHeight: Long) {}
+    fun onWalletPasswordSet() {}
     fun onAddressGenerated() {}
     fun onAddressLabelChanged(accountIndex: Int, addressIndex: Int, label: String) {}
     fun onTransactionCreated(pendingTransaction: PendingTransaction) {}
@@ -1027,6 +1048,7 @@ private enum class WalletServiceCommand {
     CLOSE_WALLET,
     SET_DAEMON_ADDRESS,
     FETCH_BLOCKCHAIN_AND_TARGET_HEIGHTS,
+    SET_PASSWORD,
     GENERATE_NEW_ADDRESS,
     SET_ADDRESS_LABEL,
     CREATE_SWEEP_TX,

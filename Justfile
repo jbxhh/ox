@@ -1,3 +1,8 @@
+clean-native: clean-native-all
+
+clean-native-all:
+    cd external-libs && make clean
+
 build-native: build-native-debug
 
 build-native-debug:
