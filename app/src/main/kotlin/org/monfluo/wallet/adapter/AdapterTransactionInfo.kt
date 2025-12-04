@@ -31,9 +31,9 @@ class AdapterTransactionInfo(
     private var streetMode: Boolean = false
     private var voidHeight: Int = 0
 
-    fun submitList(dataSet: List<TransactionInfo>) {
-         if (transactions != dataSet) {
-            transactions = dataSet
+    fun submitList(transactions: List<TransactionInfo>) {
+         if (this.transactions != transactions) {
+            this.transactions = transactions
             notifyDataSetChanged()
         }
     }
