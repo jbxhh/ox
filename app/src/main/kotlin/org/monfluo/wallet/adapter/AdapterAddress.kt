@@ -43,8 +43,10 @@ class AdapterAddress(
     }
 
     fun submitSelectedAddress(selectedAddress: Address?) {
-        this.selectedAddress = selectedAddress
-        notifyDataSetChanged()
+        if (this.selectedAddress != selectedAddress) {
+            this.selectedAddress = selectedAddress
+            notifyDataSetChanged()
+        }
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {

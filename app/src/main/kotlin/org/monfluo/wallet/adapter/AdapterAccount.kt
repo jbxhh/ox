@@ -27,8 +27,10 @@ class AdapterAccount(
     }
 
     fun setSelectedAccount(selectedAccount: Account?) {
-        this.selectedAccount = selectedAccount
-        notifyDataSetChanged()
+        if (this.selectedAccount != selectedAccount) {
+            this.selectedAccount = selectedAccount
+            notifyDataSetChanged()
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
