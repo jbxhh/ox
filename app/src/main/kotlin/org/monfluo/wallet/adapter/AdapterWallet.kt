@@ -17,8 +17,10 @@ class AdapterWallet(
     private var walletPaths: List<String> = listOf()
 
     fun setWalletPaths(walletPaths: List<String>) {
-        this.walletPaths = walletPaths
-        notifyDataSetChanged()
+        if (this.walletPaths != walletPaths) {
+            this.walletPaths = walletPaths
+            notifyDataSetChanged()
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

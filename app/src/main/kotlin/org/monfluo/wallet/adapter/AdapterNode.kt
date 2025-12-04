@@ -41,8 +41,10 @@ class AdapterNode(
 
     @SuppressLint("NotifyDataSetChanged")
     fun setNodes(nodes: List<Node>) {
-        this.nodes = nodes
-        notifyDataSetChanged()
+        if (this.nodes != nodes) {
+            this.nodes = nodes
+            notifyDataSetChanged()
+        }
     }
 
     fun setSelectedNode(selectedNode: Node?) {

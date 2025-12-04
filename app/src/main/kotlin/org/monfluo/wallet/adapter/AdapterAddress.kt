@@ -36,8 +36,10 @@ class AdapterAddress(
 ): RecyclerView.Adapter<AdapterAddress.ViewHolder>() {
 
     fun submitAddresses(addresses: List<Address>) {
-        this.addresses = addresses
-        notifyDataSetChanged()
+        if (this.addresses != addresses) {
+            this.addresses = addresses
+            notifyDataSetChanged()
+        }
     }
 
     fun submitSelectedAddress(selectedAddress: Address?) {

@@ -20,8 +20,10 @@ class AdapterAccount(
 ) : RecyclerView.Adapter<AdapterAccount.ViewHolder>() {
 
     fun setAccounts(accounts: List<Account>) {
-        this.accounts = accounts
-        notifyDataSetChanged()
+        if (this.accounts != accounts) {
+            this.accounts = accounts
+            notifyDataSetChanged()
+        }
     }
 
     fun setSelectedAccount(selectedAccount: Account?) {
