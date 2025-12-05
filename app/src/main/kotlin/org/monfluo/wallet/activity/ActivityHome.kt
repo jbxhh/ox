@@ -238,11 +238,7 @@ class ActivityHome : ActivityMonero() {
                 transactionHistoryRecyclerView.visibility = View.GONE
             } else {
                 val sortedHistory = transactions.sortedByDescending { it.timestamp }
-                if (sortedHistory.size > 100) {
-                    transactionInfoAdapter.submitList(sortedHistory.subList(0, 99))
-                } else {
-                    transactionInfoAdapter.submitList(sortedHistory)
-                }
+                transactionInfoAdapter.submitList(sortedHistory)
                 noTransactionsLayoutView.visibility = View.GONE
                 transactionHistoryRecyclerView.visibility = View.VISIBLE
             }
