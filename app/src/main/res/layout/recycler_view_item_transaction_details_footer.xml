@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/recycler_view_item_transaction_details_footer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/fee_label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="@dimen/padding_small"
+        android:text="@string/recycler_view_item_transaction_details_fee_label"
+        android:textSize="@dimen/text_medium"
+        android:textColor="@color/text_subtler" />
+
+    <TextView
+        android:id="@+id/fee_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/fee_label_textview"
+        android:layout_marginTop="@dimen/padding_mini"
+        android:textSize="@dimen/text_big" />
+
+    <TextView
+        android:id="@+id/transaction_hash_label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/fee_textview"
+        android:layout_marginTop="@dimen/padding_small"
+        android:text="@string/recycler_view_item_transaction_details_transaction_hash_label"
+        android:textSize="@dimen/text_medium"
+        android:textColor="@color/text_subtler" />
+
+    <TextView
+        android:id="@+id/transaction_hash_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/transaction_hash_label_textview"
+        android:layout_marginTop="@dimen/padding_mini"
+        android:textSize="@dimen/text_big" />
+
+    <TextView
+        android:id="@+id/transaction_key_label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/transaction_hash_textview"
+        android:layout_marginTop="@dimen/padding_small"
+        android:text="@string/recycler_view_item_transaction_details_transaction_key_label"
+        android:textSize="@dimen/text_medium"
+        android:textColor="@color/text_subtler" />
+
+    <TextView
+        android:id="@+id/transaction_key_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/transaction_key_label_textview"
+        android:layout_marginTop="@dimen/padding_mini"
+        android:textSize="@dimen/text_big" />
+
+    <TextView
+        android:id="@+id/date_label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/transaction_key_textview"
+        android:layout_marginTop="@dimen/padding_small"
+        android:text="@string/recycler_view_item_transaction_details_date_label"
+        android:textSize="@dimen/text_medium"
+        android:textColor="@color/text_subtler" />
+
+    <TextView
+        android:id="@+id/date_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/date_label_textview"
+        android:layout_marginTop="@dimen/padding_mini"
+        android:textSize="@dimen/text_big" />
+
+    <TextView
+        android:id="@+id/confirmations_label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/date_textview"
+        android:layout_marginTop="@dimen/padding_small"
+        android:text="@string/recycler_view_item_transaction_details_confirmations_label"
+        android:textSize="@dimen/text_medium"
+        android:textColor="@color/text_subtler" />
+
+    <TextView
+        android:id="@+id/confirmations_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/confirmations_label_textview"
+        android:layout_marginTop="@dimen/padding_mini"
+        android:textSize="@dimen/text_big" />
+
+    <TextView
+        android:id="@+id/block_label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/confirmations_textview"
+        android:layout_marginTop="@dimen/padding_small"
+        android:text="@string/recycler_view_item_transaction_details_block_label"
+        android:textSize="@dimen/text_medium"
+        android:textColor="@color/text_subtler" />
+
+    <TextView
+        android:id="@+id/block_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/block_label_textview"
+        android:layout_marginTop="@dimen/padding_mini"
+        android:textSize="@dimen/text_big" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -8,6 +8,7 @@ import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.StyleSpan
 import android.text.style.TypefaceSpan
+import android.text.style.ForegroundColorSpan
 import androidx.core.text.toSpannable
 import org.monfluo.wallet.R
 import org.monfluo.wallet.model.MoneroUnit
@@ -19,11 +20,14 @@ private val HIGHLIGHTED_ADDRESS_CHUNKS = setOf(0, 2, -1, -3)
 
 object TextHelper {
 
-    private fun <S : Spannable> tryMonospaceize(spannable: S, start: Int = 0, end: Int = spannable.length, flags: Int = Spannable.SPAN_INCLUSIVE_EXCLUSIVE, style: Int = Typeface.NORMAL): S {
+    private fun <S : Spannable> tryMonospaceize(spannable: S, start: Int = 0, end: Int = spannable.length, flags: Int = Spannable.SPAN_INCLUSIVE_EXCLUSIVE, style: Int = Typeface.NORMAL, color: Int? = null): S {
         if (Build.VERSION.SDK_INT >= VERSION_CODES.P) {
             spannable.setSpan(TypefaceSpan(Typeface.MONOSPACE), start, end, flags)
         }
         spannable.setSpan(StyleSpan(style), start, end, flags)
+        if (color != null) {
+            spannable.setSpan(ForegroundColorSpan(color), start, end, flags)
+        }
         return spannable
     }
 
@@ -35,8 +39,8 @@ object TextHelper {
         return BigDecimal(amount).scaleByPowerOfTen(-decimals)
     }
 
-    fun formatUnlockedBalance(context: Context, balance: Long, unit: MoneroUnit, streetMode: Boolean, style: Int): SpannableStringBuilder = SpannableStringBuilder()
-        .append(tryMonospaceize(getDisplayAmount(balance, unit, streetMode).toSpannable(), style = style))
+    fun formatUnlockedBalance(context: Context, balance: Long, unit: MoneroUnit, streetMode: Boolean, style: Int, color: Int? = null): SpannableStringBuilder = SpannableStringBuilder()
+        .append(tryMonospaceize(getDisplayAmount(balance, unit, streetMode).toSpannable(), style = style, color = color))
         .append(' ')
         .append(context.getString(unit.unitResourceId))
 

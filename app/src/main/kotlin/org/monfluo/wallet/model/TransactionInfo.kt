@@ -15,6 +15,8 @@
  */
 package org.monfluo.wallet.model
 
+import org.monfluo.wallet.util.Constants
+
 data class TransactionInfo(
     val direction: Direction,
     val isPending: Boolean,
@@ -28,8 +30,9 @@ data class TransactionInfo(
     val accountIndex: Int,
     val addressIndex: Int,
     val confirmations: Long,
-    val subaddressLabel: String,
     val transfers: List<Transfer>,
+    val addressValue: String? = null,
+    val key: String? = null,
 ) {
 
     constructor(
@@ -45,7 +48,6 @@ data class TransactionInfo(
         accountIndex: Int,
         addressIndex: Int,
         confirmations: Long,
-        subaddressLabel: String,
         transfers: List<Transfer>
     ) : this(
         Direction.fromInteger(direction),
@@ -60,12 +62,11 @@ data class TransactionInfo(
         accountIndex,
         addressIndex,
         confirmations,
-        subaddressLabel,
         transfers,
     )
 
     val isConfirmed: Boolean
-        get() = confirmations >= CONFIRMATION
+        get() = confirmations >= Constants.CONFIRMATIONS
 
     override fun toString(): String {
         return "$direction@$blockheight $amount"
@@ -84,9 +85,5 @@ data class TransactionInfo(
                 }
             }
         }
-    }
-
-    companion object {
-        const val CONFIRMATION = 10 // blocks
     }
 }

@@ -27,8 +27,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/fee_label_textview"
         android:layout_marginTop="@dimen/padding_mini"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/dust_label_textview"
@@ -49,8 +48,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/dust_label_textview"
         android:layout_marginTop="@dimen/padding_mini"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/total_label_textview"
@@ -71,6 +69,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/total_label_textview"
         android:layout_marginTop="@dimen/padding_mini"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:textSize="20sp" />
 </androidx.constraintlayout.widget.ConstraintLayout>
