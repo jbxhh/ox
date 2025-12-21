@@ -1338,11 +1338,10 @@ jobject newTransferList(JNIEnv *env, Monero::TransactionInfo *info) {
 }
 
 jobject newTransactionInfo(JNIEnv *env, Monero::TransactionInfo *info) {
-    jmethodID c = env->GetMethodID(class_TransactionInfo, "<init>", "(IZZJJJLjava/lang/String;JLjava/lang/String;IIJLjava/lang/String;Ljava/util/List;)V");
+    jmethodID c = env->GetMethodID(class_TransactionInfo, "<init>", "(IZZJJJLjava/lang/String;JLjava/lang/String;IIJLjava/util/List;)V");
     jobject transfers = newTransferList(env, info);
     jstring _hash = env->NewStringUTF(info->hash().c_str());
     jstring _paymentId = env->NewStringUTF(info->paymentId().c_str());
-    jstring _label = env->NewStringUTF(info->label().c_str());
     uint32_t subaddrIndex = 0;
     if (info->direction() == Monero::TransactionInfo::Direction_In)
         subaddrIndex = *(info->subaddrIndex().begin());
@@ -1359,7 +1358,6 @@ jobject newTransactionInfo(JNIEnv *env, Monero::TransactionInfo *info) {
                                     static_cast<jint> (info->subaddrAccount()),
                                     static_cast<jint> (subaddrIndex),
                                     static_cast<jlong> (info->confirmations()),
-                                    _label,
                                     transfers);
     env->DeleteLocalRef(transfers);
     env->DeleteLocalRef(_hash);

@@ -3,9 +3,12 @@ package org.monfluo.wallet.activity
 import android.icu.text.DateFormat
 import android.os.Bundle
 import android.view.View
+import android.graphics.Typeface
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -15,6 +18,7 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import org.monfluo.wallet.adapter.AdapterTransactionDetails
 import org.monfluo.wallet.livedata.combineLiveDatas
 import org.monfluo.wallet.model.MoneroUnit
 import org.monfluo.wallet.model.TransactionInfo
@@ -29,6 +33,7 @@ import org.monfluo.wallet.R
 import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Date
+import timber.log.Timber
 import kotlin.math.max
 
 class ActivityTransactionDetails : ActivityMonero() {
@@ -37,52 +42,44 @@ class ActivityTransactionDetails : ActivityMonero() {
 
     private lateinit var layoutView: View
     private lateinit var backImageView: ImageView
-    private lateinit var txActionTextView: TextView
-    private lateinit var confLabel2: TextView
-    private lateinit var txKeyLabelTextView: TextView
-    private lateinit var txHashTextView: TextView
-    private lateinit var txKeyTextView: TextView
-    private lateinit var txConfTextView: TextView
-    private lateinit var copyTxAddressImageButton: ImageButton
-    private lateinit var copyTxHashImageButton: ImageButton
-    private lateinit var copyTxKeyImageButton: ImageButton
-    private lateinit var txDateTextView: TextView
-    private lateinit var txAmountTextView: TextView
-    private lateinit var blockHeightTextView: TextView
-    private lateinit var addressTextView: TextView
+
+    private lateinit var transactionDetailsRecyclerView: RecyclerView
+
+    private val adapterTransactionDetails: AdapterTransactionDetails = AdapterTransactionDetails()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!preInit()) {
+            finish()
+            return
+        }
         setContentView(R.layout.activity_transaction)
 
         layoutView = findViewById(R.id.transaction_activity_view)
         backImageView = findViewById(R.id.back_imageview)
+        transactionDetailsRecyclerView = findViewById(R.id.transaction_details_recyclerview)
 
-        txActionTextView = findViewById(R.id.transaction_action_textview)
-        confLabel2 = findViewById(R.id.transaction_conf_label2_textview)
-        txKeyLabelTextView = findViewById(R.id.transaction_key_label_textview)
-        txHashTextView = findViewById(R.id.transaction_hash_textview)
-        txKeyTextView = findViewById(R.id.transaction_key_textview)
-        txConfTextView = findViewById(R.id.transaction_conf_textview)
-        copyTxAddressImageButton = findViewById(R.id.copy_txaddress_imagebutton)
-        copyTxHashImageButton = findViewById(R.id.copy_txhash_imagebutton)
-        copyTxKeyImageButton = findViewById(R.id.copy_key_imagebutton)
-        txDateTextView = findViewById(R.id.transaction_date_textview)
-        txAmountTextView = findViewById(R.id.transaction_amount_textview)
-        blockHeightTextView = findViewById(R.id.tx_block_height_textview)
-        addressTextView = findViewById(R.id.transaction_address_textview)
-
-        if (viewModel.txHash == null) {
-            viewModel.txHash = intent.extras?.getString(Constants.EXTRA_TRANSACTION_ID)
-        }
-
-        if (viewModel.txHash == null) {
-            finish()
-        }
+        transactionDetailsRecyclerView.layoutManager = LinearLayoutManager(this)
+        transactionDetailsRecyclerView.adapter = adapterTransactionDetails
 
         bindWindowInsetsListener()
         bindObservers()
         bindListeners()
+    }
+
+    private fun preInit(): Boolean {
+        if (viewModel.transactionHash == null) {
+            val extras = intent.extras
+            if (extras != null && extras.containsKey(Constants.EXTRA_TRANSACTION_ID)) {
+                viewModel.transactionHash = extras.getString(Constants.EXTRA_TRANSACTION_ID)!!
+                return true
+            } else {
+                Timber.e("Transaction hash is null in the view model and it was not present in extras")
+                return false
+            }
+        } else {
+            return true
+        }
     }
 
     private fun bindWindowInsetsListener() {
@@ -102,109 +99,12 @@ class ActivityTransactionDetails : ActivityMonero() {
         backImageView.setOnClickListener {
             finish()
         }
-        txAmountTextView.setOnClickListener {
-            val streetMode = viewModel.streetMode.value!!
-            val newStreetMode = !streetMode
-            PreferenceUtils.setStreetMode(this, newStreetMode)
-            viewModel.setStreetMode(newStreetMode)
-        }
-        txAmountTextView.setOnLongClickListener {
-            viewModel.transactionInfo.value?.let { transactionInfo ->
-                Helper.clipBoardCopy(this, "transaction amount", TextHelper.getDisplayAmount(transactionInfo.amount, MoneroUnit.MONERO, false))
-            }
-            return@setOnLongClickListener true
-        }
-        copyTxHashImageButton.setOnClickListener {
-            val txInfo = viewModel.transactionInfo.value
-            if (txInfo != null) {
-                Helper.clipBoardCopy(this, "transaction_hash", txInfo.hash)
-            }
-        }
-        copyTxKeyImageButton.setOnClickListener {
-            val txInfo = viewModel.transactionInfo.value
-            if (txInfo != null) {
-                val key = txKeyTextView.text.toString()
-                Helper.clipBoardCopy(this, "transaction_key", key, sensitive = true)
-            }
-        }
-        copyTxAddressImageButton.setOnClickListener {
-            val txInfo = viewModel.transactionInfo.value
-            if (txInfo != null) {
-                val destination = addressTextView.text.toString()
-                Helper.clipBoardCopy(this, "transaction_address", destination)
-            }
-        }
     }
 
     private fun bindObservers() {
         viewModel.streetModeAndTransactionInfo.observe(this) { (streetMode, transactionInfo) ->
-            if (transactionInfo == null) {
-                return@observe
-            }
-            val wallet = walletService?.getWalletOrLog() ?: return@observe
-            txHashTextView.text = transactionInfo.hash
-            val txKey = wallet.getTxKey(transactionInfo.hash)
-            if (txKey.isNotEmpty()) {
-                txKeyTextView.text = txKey
-                txKeyLabelTextView.visibility = View.VISIBLE
-                txKeyTextView.visibility = View.VISIBLE
-                copyTxKeyImageButton.visibility = View.VISIBLE
-            } else {
-                txKeyLabelTextView.visibility = View.GONE
-                txKeyTextView.visibility = View.GONE
-                copyTxKeyImageButton.visibility = View.GONE
-            }
-            txConfTextView.text = NumberFormat.getInstance().format(transactionInfo.confirmations)
-            txDateTextView.text = DateFormat.getInstance().format(Date(transactionInfo.timestamp * 1000))
-            if (transactionInfo.confirmations > 1) {
-                confLabel2.text = getString(R.string.transaction_conf_desc2_confirmed)
-                blockHeightTextView.text = NumberFormat.getInstance().format(transactionInfo.blockheight)
-                blockHeightTextView.visibility = View.VISIBLE
-            } else if (transactionInfo.confirmations == 1L) {
-                confLabel2.text = getString(R.string.transaction_conf_1_desc2_confirmed)
-                blockHeightTextView.text = NumberFormat.getInstance().format(transactionInfo.blockheight)
-                blockHeightTextView.visibility = View.VISIBLE
-            } else {
-                blockHeightTextView.visibility = View.GONE
-                confLabel2.text = getString(R.string.transaction_conf_desc2_unconfirmed)
-            }
-            val balanceString = TextHelper.getDisplayAmount(transactionInfo.amount, MoneroUnit.MONERO, streetMode)
-            if (transactionInfo.direction === TransactionInfo.Direction.In) {
-                txActionTextView.text = getString(R.string.transaction_action_recv)
-                txAmountTextView.setTextColor(
-                    ContextCompat.getColor(
-                        this,
-                        R.color.oled_positiveColor
-                    )
-                )
-            } else {
-                txActionTextView.text = getString(R.string.transaction_action_sent)
-                txAmountTextView.setTextColor(
-                    ContextCompat.getColor(
-                        this,
-                        R.color.oled_negativeColor
-                    )
-                )
-            }
-            txAmountTextView.text = balanceString
-            when (transactionInfo.direction) {
-                TransactionInfo.Direction.In -> {
-                    addressTextView.text = TextHelper.formatAddress(wallet.getAddress(transactionInfo.accountIndex, transactionInfo.addressIndex))
-                    copyTxAddressImageButton.visibility = View.VISIBLE
-                }
-                TransactionInfo.Direction.Out -> {
-                    if (transactionInfo.transfers.isEmpty()) {
-                        addressTextView.text = getString(R.string.unknown_recipient)
-                        copyTxAddressImageButton.visibility = View.INVISIBLE
-                    } else if (transactionInfo.transfers.size == 1) {
-                        addressTextView.text = TextHelper.formatAddress(transactionInfo.transfers[0].address)
-                        copyTxAddressImageButton.visibility = View.VISIBLE
-                    } else {
-                        addressTextView.text = getString(R.string.multiple_addresses)
-                        copyTxAddressImageButton.visibility = View.INVISIBLE
-                    }
-                }
-            }
+            adapterTransactionDetails.submitTransaction(transactionInfo)
+            adapterTransactionDetails.submitStreetMode(streetMode)
         }
     }
 
@@ -213,7 +113,7 @@ class ActivityTransactionDetails : ActivityMonero() {
 
         val isStreetModeMode = PreferenceUtils.isStreetMode(this)
 
-        viewModel.setStreetMode(isStreetModeMode)
+        viewModel.streetMode.value = isStreetModeMode
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
@@ -222,39 +122,32 @@ class ActivityTransactionDetails : ActivityMonero() {
         }
     }
 
-    private fun updateState(wallet: Wallet) {
-        val transactions = wallet.getHistory()
-        val newTransactionInfo = transactions.find { it.hash == viewModel.txHash }
-        viewModel.updateTransactionInfo(newTransactionInfo)
-    }
-
     override fun onWalletUpdated(wallet: Wallet) {
         updateState(wallet)
+    }
+
+    private fun updateState(wallet: Wallet) {
+        val transactions = wallet.getHistory()
+        val transactionInfo = transactions.find { it.hash == viewModel.transactionHash }?.let {
+            val key = wallet.getTxKey(it.hash)
+            val addressValue = wallet.getAddress(it.accountIndex, it.addressIndex)
+            it.copy(key = key, addressValue = addressValue)
+        }
+
+        viewModel.transactionInfo.postValue(transactionInfo)
     }
 }
 
 internal class TransactionActivityViewModel : ViewModel() {
-    var txHash: String? = null
+    var transactionHash: String? = null
 
-    private val _streetMode = MutableLiveData(false)
-    val streetMode: LiveData<Boolean> = _streetMode
-
-    private val _transactionInfo: MutableLiveData<TransactionInfo?> = MutableLiveData()
-    val transactionInfo: LiveData<TransactionInfo?> = _transactionInfo
+    val streetMode: MutableLiveData<Boolean> = MutableLiveData(false)
+    val transactionInfo: MutableLiveData<TransactionInfo?> = MutableLiveData()
 
     val streetModeAndTransactionInfo = combineLiveDatas(
-        _streetMode,
-        _transactionInfo,
+        streetMode,
+        transactionInfo,
     ) { streetMode, transactionInfo ->
         return@combineLiveDatas Pair(streetMode!!, transactionInfo)
-    }
-
-
-    fun setStreetMode(streetMode: Boolean) {
-        _streetMode.postValue(streetMode)
-    }
-
-    fun updateTransactionInfo(newTransactionInfo: TransactionInfo?) {
-        _transactionInfo.postValue(newTransactionInfo)
     }
 }
