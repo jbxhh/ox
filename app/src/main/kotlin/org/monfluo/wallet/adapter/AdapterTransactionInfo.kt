@@ -113,6 +113,7 @@ class AdapterTransactionInfo(
         private val receiveIconDrawable: Drawable = AppCompatResources.getDrawable(itemView.context, R.drawable.icon_receive)!!
         private val sendIconDrawable: Drawable = AppCompatResources.getDrawable(itemView.context, R.drawable.icon_send)!!
         private val transactionTypeReceivedText: CharSequence = itemView.resources.getText(R.string.transaction_type_received)
+        private val transactionTypeMinedText: CharSequence = itemView.resources.getText(R.string.transaction_type_mined)
         private val transactionTypeSentText: CharSequence = itemView.resources.getText(R.string.transaction_type_sent)
         private val receivedAmountColor: Int = itemView.resources.getColor(R.color.oled_positiveColor)
         private val sentAmountColor: Int = itemView.resources.getColor(R.color.oled_negativeColor)
@@ -124,7 +125,11 @@ class AdapterTransactionInfo(
             when (transactionInfo.direction) {
                 TransactionInfo.Direction.In -> {
                     sentOrReceivedIconImageView.setImageDrawable(receiveIconDrawable)
-                    sentOrReceivedLabelTextView.text = transactionTypeReceivedText
+                    if (transactionInfo.isCoinbase) {
+                        sentOrReceivedLabelTextView.text = transactionTypeMinedText
+                    } else {
+                        sentOrReceivedLabelTextView.text = transactionTypeReceivedText
+                    }
                     amountTextView.setTextColor(receivedAmountColor)
                 }
                 TransactionInfo.Direction.Out -> {

@@ -116,7 +116,13 @@ class AdapterTransactionDetails : RecyclerView.Adapter<AdapterTransactionDetails
 
         fun bind(transaction: TransactionInfo) {
             val transactionTypeString = when (transaction.direction) {
-                TransactionInfo.Direction.In -> itemView.resources.getString(R.string.recycler_view_item_transaction_details_transaction_type_incoming)
+                TransactionInfo.Direction.In -> {
+                    if (transaction.isCoinbase) {
+                        itemView.resources.getString(R.string.recycler_view_item_transaction_details_transaction_type_coinbase)
+                    } else {
+                        itemView.resources.getString(R.string.recycler_view_item_transaction_details_transaction_type_incoming)
+                    }
+                }
                 TransactionInfo.Direction.Out -> itemView.resources.getString(R.string.recycler_view_item_transaction_details_transaction_type_outgoing)
             }
             transactionTypeTextView.text = transactionTypeString
