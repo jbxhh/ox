@@ -443,9 +443,10 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="recycler_view_item_transaction_destination_pending_address_label">Address</string>
     <string name="recycler_view_item_transaction_destination_pending_address_with_position_label">Address #<xliff:g>%1$d</xliff:g></string>
     <string name="recycler_view_item_transaction_destination_pending_address_resolved_from_label">Resolved from</string>
+    <string name="recycler_view_item_transaction_destination_pending_summary_total_label">Total</string>
     <string name="recycler_view_item_transaction_destination_pending_summary_fee_label">Fee</string>
     <string name="recycler_view_item_transaction_destination_pending_summary_dust_label">Dust</string>
-    <string name="recycler_view_item_transaction_destination_pending_summary_total_label">Total</string>
+    <string name="recycler_view_item_transaction_destination_pending_summary_grand_total_label">Grand total</string>
 
     <string name="activity_wallet_settings_wallet_name_label">Name</string>
     <string name="activity_wallet_settings_wallet_network_label">Network</string>
@@ -531,7 +532,9 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="recycler_view_item_transaction_details_amount_with_position_label">Amount #<xliff:g>%1$d</xliff:g></string>
     <string name="recycler_view_item_transaction_details_address_label">Address</string>
     <string name="recycler_view_item_transaction_details_address_with_position_label">Address #<xliff:g>%1$d</xliff:g></string>
+    <string name="recycler_view_item_transaction_details_total_label">Total</string>
     <string name="recycler_view_item_transaction_details_fee_label">Fee</string>
+    <string name="recycler_view_item_transaction_details_grand_total_label">Grand total</string>
     <string name="recycler_view_item_transaction_details_address_unavailable">unavailable</string>
     <string name="recycler_view_item_transaction_details_transaction_hash_label">Hash</string>
     <string name="recycler_view_item_transaction_details_transaction_key_label">Key</string>

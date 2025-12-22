@@ -177,7 +177,10 @@ class AdapterTransactionDetails : RecyclerView.Adapter<AdapterTransactionDetails
 
     class FooterViewHolder(view: View) : ViewHolder(view) {
 
+        private val totalLabelTextView: TextView = itemView.findViewById(R.id.total_label_textview)
+        private val totalTextView: TextView = itemView.findViewById(R.id.total_textview)
         private val feeTextView: TextView = itemView.findViewById(R.id.fee_textview)
+        private val grandTotalTextView: TextView = itemView.findViewById(R.id.grand_total_textview)
         private val transactionHashTextView: TextView = itemView.findViewById(R.id.transaction_hash_textview)
         private val transactionKeyLabelTextView: TextView = itemView.findViewById(R.id.transaction_key_label_textview)
         private val transactionKeyTextView: TextView = itemView.findViewById(R.id.transaction_key_textview)
@@ -186,6 +189,7 @@ class AdapterTransactionDetails : RecyclerView.Adapter<AdapterTransactionDetails
         private val blockTextView: TextView = itemView.findViewById(R.id.block_textview)
 
         fun bind(transaction: TransactionInfo, streetMode: Boolean) {
+            val single = transaction.transfers.size <= 1
             when (transaction.direction) {
                 TransactionInfo.Direction.In -> {
                     transactionKeyLabelTextView.visibility = View.GONE
@@ -203,9 +207,38 @@ class AdapterTransactionDetails : RecyclerView.Adapter<AdapterTransactionDetails
                     }
                 }
             }
-            feeTextView.text = TextHelper.formatUnlockedBalance(itemView.context, transaction.fee, MoneroUnit.MONERO, streetMode, 0)
+            val positiveColor = ContextCompat.getColor(itemView.context, R.color.oled_positiveColor)
+            val negativeColor = ContextCompat.getColor(itemView.context, R.color.oled_negativeColor)
+            val (totalColor, feeColor, grandTotalColor) = when (transaction.direction) {
+                TransactionInfo.Direction.In -> {
+                    Triple(positiveColor, null, null)
+                }
+                TransactionInfo.Direction.Out -> {
+                    Triple(negativeColor, negativeColor, negativeColor)
+                }
+            }
+            if (single) {
+                totalLabelTextView.visibility = View.GONE
+                totalTextView.visibility = View.GONE
+                totalTextView.setOnLongClickListener(null)
+            } else {
+                totalLabelTextView.visibility = View.VISIBLE
+                totalTextView.visibility = View.VISIBLE
+                totalTextView.text = TextHelper.formatUnlockedBalance(itemView.context, transaction.amount, MoneroUnit.MONERO, streetMode, 0, totalColor)
+                totalTextView.setOnLongClickListener {
+                    Helper.clipBoardCopy(itemView.context, "transaction total amount", TextHelper.getDisplayAmount(transaction.amount, MoneroUnit.MONERO, false))
+                    return@setOnLongClickListener true
+                }
+            }
+            feeTextView.text = TextHelper.formatUnlockedBalance(itemView.context, transaction.fee, MoneroUnit.MONERO, streetMode, 0, feeColor)
             feeTextView.setOnLongClickListener {
                 Helper.clipBoardCopy(itemView.context, "transaction fee", TextHelper.getDisplayAmount(transaction.fee, MoneroUnit.MONERO, false))
+                return@setOnLongClickListener true
+            }
+            val grandTotal = transaction.amount + transaction.fee
+            grandTotalTextView.text = TextHelper.formatUnlockedBalance(itemView.context, grandTotal, MoneroUnit.MONERO, streetMode, 0, grandTotalColor)
+            grandTotalTextView.setOnLongClickListener {
+                Helper.clipBoardCopy(itemView.context, "transaction grand total amount", TextHelper.getDisplayAmount(grandTotal, MoneroUnit.MONERO, false))
                 return@setOnLongClickListener true
             }
             val transactionHash = transaction.hash
