@@ -1338,7 +1338,7 @@ jobject newTransferList(JNIEnv *env, Monero::TransactionInfo *info) {
 }
 
 jobject newTransactionInfo(JNIEnv *env, Monero::TransactionInfo *info) {
-    jmethodID c = env->GetMethodID(class_TransactionInfo, "<init>", "(IZZJJJLjava/lang/String;JLjava/lang/String;IIJLjava/util/List;)V");
+    jmethodID c = env->GetMethodID(class_TransactionInfo, "<init>", "(IZZZJJJLjava/lang/String;JLjava/lang/String;IIJLjava/util/List;)V");
     jobject transfers = newTransferList(env, info);
     jstring _hash = env->NewStringUTF(info->hash().c_str());
     jstring _paymentId = env->NewStringUTF(info->paymentId().c_str());
@@ -1349,6 +1349,7 @@ jobject newTransactionInfo(JNIEnv *env, Monero::TransactionInfo *info) {
                                     info->direction(),
                                     info->isPending(),
                                     info->isFailed(),
+                                    info->isCoinbase(),
                                     static_cast<jlong> (info->amount()),
                                     static_cast<jlong> (info->fee()),
                                     static_cast<jlong> (info->blockHeight()),

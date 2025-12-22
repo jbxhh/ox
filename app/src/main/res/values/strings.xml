@@ -321,6 +321,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <!-- Text shown in place of an address when displaying an outgoing transaction to more than one address -->
     <string name="unknown_recipient">unknown recipient</string>
     <string name="transaction_type_received">Received</string>
+    <string name="transaction_type_mined">Mined</string>
     <string name="transaction_type_sent">Sent</string>
     <string name="transaction_unconfirmed">unconfirmed</string>
     <string name="transaction_confirming"><xliff:g>%1$s</xliff:g> confirmations</string>
@@ -523,6 +524,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
 
     <string name="recycler_view_item_transaction_details_transaction_type_label">Type</string>
     <string name="recycler_view_item_transaction_details_transaction_type_incoming">Incoming</string>
+    <string name="recycler_view_item_transaction_details_transaction_type_coinbase">Coinbase</string>
     <string name="recycler_view_item_transaction_details_transaction_type_outgoing">Outgoing</string>
     <string name="recycler_view_item_transaction_details_transaction_note_label">Note</string>
     <string name="recycler_view_item_transaction_details_amount_label">Amount</string>
