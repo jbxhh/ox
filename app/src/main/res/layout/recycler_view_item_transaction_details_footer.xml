@@ -8,11 +8,32 @@
     android:layout_height="wrap_content">
 
     <TextView
-        android:id="@+id/fee_label_textview"
+        android:id="@+id/total_label_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="@dimen/padding_small"
+        android:text="@string/recycler_view_item_transaction_details_total_label"
+        android:textSize="@dimen/text_medium"
+        android:textColor="@color/text_subtler" />
+
+    <TextView
+        android:id="@+id/total_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/total_label_textview"
+        android:layout_marginTop="@dimen/padding_mini"
+        android:textSize="@dimen/text_big" />
+
+    <TextView
+        android:id="@+id/fee_label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/total_textview"
         android:layout_marginTop="@dimen/padding_small"
         android:text="@string/recycler_view_item_transaction_details_fee_label"
         android:textSize="@dimen/text_medium"
@@ -29,11 +50,32 @@
         android:textSize="@dimen/text_big" />
 
     <TextView
-        android:id="@+id/transaction_hash_label_textview"
+        android:id="@+id/grand_total_label_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/fee_textview"
+        android:layout_marginTop="@dimen/padding_small"
+        android:text="@string/recycler_view_item_transaction_details_grand_total_label"
+        android:textSize="@dimen/text_medium"
+        android:textColor="@color/text_subtler" />
+
+    <TextView
+        android:id="@+id/grand_total_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/grand_total_label_textview"
+        android:layout_marginTop="@dimen/padding_mini"
+        android:textSize="@dimen/text_big" />
+
+    <TextView
+        android:id="@+id/transaction_hash_label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/grand_total_textview"
         android:layout_marginTop="@dimen/padding_small"
         android:text="@string/recycler_view_item_transaction_details_transaction_hash_label"
         android:textSize="@dimen/text_medium"

@@ -75,7 +75,11 @@ class AdapterTransactionDestinationPending(
                 val amount = pendingTransaction.getAmount()
                 val fee = pendingTransaction.getFee()
                 val dust = pendingTransaction.getDust()
-                viewHolder.bind(fee, dust, amount + fee)
+                val single = when (val destination = pendingTransaction.destination) {
+                    is PendingTransactionDestination.Default -> destination.value.size == 1
+                    is PendingTransactionDestination.Sweep -> true
+                }
+                viewHolder.bind(amount, fee, dust, single)
             }
         }
     }
@@ -134,12 +138,22 @@ class AdapterTransactionDestinationPending(
 
     inner class ViewHolderTransactionDestails(view: View) : ViewHolder(view) {
 
+        private val totalLabelTextView: TextView = itemView.findViewById(R.id.total_label_textview)
+        private val totalTextView: TextView = itemView.findViewById(R.id.total_textview)
         private val feeTextView: TextView = itemView.findViewById(R.id.fee_textview)
         private val dustLabelTextView: TextView = itemView.findViewById(R.id.dust_label_textview)
         private val dustTextView: TextView = itemView.findViewById(R.id.dust_textview)
-        private val totalTextView: TextView = itemView.findViewById(R.id.total_textview)
+        private val grandTotalTextView: TextView = itemView.findViewById(R.id.grand_total_textview)
 
-        fun bind(feeAmount: Long, dustAmount: Long, totalAmount: Long) {
+        fun bind(totalAmount: Long, feeAmount: Long, dustAmount: Long, single: Boolean) {
+            if (single) {
+                totalLabelTextView.visibility = View.GONE
+                totalTextView.visibility = View.GONE
+            } else {
+                totalLabelTextView.visibility = View.VISIBLE
+                totalTextView.visibility = View.VISIBLE
+                totalTextView.setText(TextHelper.formatUnlockedBalance(itemView.context, totalAmount, MoneroUnit.MONERO, false, 0))
+            }
             feeTextView.setText(TextHelper.formatUnlockedBalance(itemView.context, feeAmount, MoneroUnit.MONERO, false, 0))
             if (dustAmount > 0) {
                 dustLabelTextView.visibility = View.VISIBLE
@@ -149,7 +163,7 @@ class AdapterTransactionDestinationPending(
                 dustLabelTextView.visibility = View.GONE
                 dustTextView.visibility = View.GONE
             }
-            totalTextView.setText(TextHelper.formatUnlockedBalance(itemView.context, totalAmount, MoneroUnit.MONERO, false, 0))
+            grandTotalTextView.setText(TextHelper.formatUnlockedBalance(itemView.context, totalAmount + feeAmount, MoneroUnit.MONERO, false, 0))
         }
     }
 }
