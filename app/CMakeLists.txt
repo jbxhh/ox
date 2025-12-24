@@ -5,7 +5,7 @@ add_library( monfluo
              SHARED
              src/main/cpp/monfluo.cpp )
 
-set(EXTERNAL_LIBS_DIR ${CMAKE_SOURCE_DIR}/../external-libs)
+set(EXTERNAL_LIBS_DIR ${CMAKE_SOURCE_DIR}/../external-libs/build)
 
 ############
 # libsodium
