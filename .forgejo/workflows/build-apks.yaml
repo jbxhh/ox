@@ -8,7 +8,7 @@ jobs:
       - name: Update Debian repository, upgrade existing packages and install new required packages
         run: |
             apt update && apt upgrade -y
-            apt install -y unzip automake build-essential curl file pkg-config git python3 python-is-python3 libtool libtinfo5 yacc clang libc6-dev nodejs
+            apt install -y unzip automake build-essential curl file pkg-config git python3 python-is-python3 libtool libtinfo5 yacc nodejs
       - name: Checkout Monfluo
         uses: actions/checkout@v4
         with:
@@ -17,14 +17,33 @@ jobs:
         run: |
           cd external-libs/monero
           git submodule update --init --force
+      - name: Download dependencies for native libraries
+        run: |
+          export MONFLUO_DEPENDENCIES_DIRECTORY=/opt/android/dependencies
+          . ./external-libs/bin/envs.sh
+          ./external-libs/bin/download-native-libs-dependencies.sh
       - name: Build native libraries
-        run: ./bin/build-native-libs-for-debian-pipeline.sh
+        run: |
+          export MONFLUO_DEPENDENCIES_DIRECTORY=/opt/android/dependencies
+          export MONFLUO_BUILD_DIRECTORY=/opt/android/monfluo-build-arm64
+          export MONFLUO_OUTPUT_DIRECTORY=/opt/android/monfluo-output-arm64
+          export NPROC=$(nproc)
+          . ./external-libs/bin/envs.sh
+          ./external-libs/bin/build-native-libs-arm64.sh
+      - name: Package native libraries
+        run: |
+          mkdir -p /opt/output/include
+          cp external-libs/monero/src/wallet/api/wallet2_api.h /opt/output/include/wallet2_api.h
+          mkdir -p /opt/output/arm64-v8a
+          cp -r /opt/android/monfluo-output-arm64/* /opt/output/arm64-v8a/
       - name: Upload built native libraries
         uses: actions/upload-artifact@v3
         with:
           name: native-build-artifacts-arm64-v8a
           path: /opt/output
   build-apk-arm64-v8a:
+    needs:
+      - build-native-libraries-arm64-v8a
     runs-on: docker
     container:
       image: docker.io/cimg/android:2025.04.1-ndk
@@ -46,7 +65,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: native-build-artifacts-arm64-v8a
-          path: external-libs/
+          path: external-libs/build/
       - name: Run tests
         run: ./gradlew test -i
       - name: Build APKs
