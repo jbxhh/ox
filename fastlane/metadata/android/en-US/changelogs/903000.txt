@@ -1,0 +1,12 @@
+* Rework receive screen, implement requesting payment
+* Implement changing wallet password
+* Split address into chunks
+* Fix unnecessary account refreshes
+* Remove 100 transactions limit from the home screen
+* Fix software keyboard covering elements in some screens
+* Fix icon size
+* Rework transaction activity, remove low contrast text
+* Remove low contrast text in enotes
+* Add mined/coinbase label for transactions
+* Show grand total for transactions
+* Improve accessibility in home screen
