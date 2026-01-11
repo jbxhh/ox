@@ -8,7 +8,7 @@ jobs:
       - name: Update Debian repository, upgrade existing packages and install new required packages
         run: |
             apt update && apt upgrade -y
-            apt install -y unzip automake build-essential curl file pkg-config git python3 python-is-python3 libtool libtinfo5 yacc nodejs
+            apt install -y unzip automake build-essential curl file pkg-config git python3 python-is-python3 libtool libtinfo5 yacc nodejs wget
       - name: Checkout Monfluo
         uses: actions/checkout@v4
         with:
@@ -69,7 +69,7 @@ jobs:
       - name: Run tests
         run: ./gradlew test -i
       - name: Build APKs
-        run: ./gradlew -PdbgBld assembleDebug
+        run: ./gradlew -P monfluo-arm64 assembleDebug
       - name: Upload built APKs
         uses: actions/upload-artifact@v3
         with:

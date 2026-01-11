@@ -39,18 +39,25 @@ android {
         }
     }
 
-    def dbgBld = project.hasProperty('dbgBld')
+    def buildAll = project.hasProperty('monfluo-all')
+    def buildArm32 = project.hasProperty('monfluo-arm32')
+    def buildArm64 = project.hasProperty('monfluo-arm64')
+    def buildX86_64 = project.hasProperty('monfluo-x86_64')
+    def buildUniversal = project.hasProperty('monfluo-universal')
 
     splits {
         abi {
             enable true
             reset()
-            if (dbgBld) {
-                include 'arm64-v8a'
-                universalApk false
-            } else {
+            universalApk buildUniversal
+            if (buildAll) {
                 include 'armeabi-v7a', 'arm64-v8a', 'x86_64'
-                universalApk true
+            } else if (buildArm32) {
+                include 'armeabi-v7a'
+            } else if (buildArm64) {
+                include 'arm64-v8a'
+            } else if (buildX86_64) {
+                include 'x86_64'
             }
         }
     }
