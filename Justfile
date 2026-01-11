@@ -21,10 +21,10 @@ clean:
 build: build-debug
 
 build-debug:
-    ./gradlew assembleDebug -P dbgBld
+    ./gradlew -P monfluo-arm64 assembleDebug
 
 build-release:
-    ./gradlew assembleRelease
+    ./gradlew -P monfluo-all -P monfluo-universal assembleRelease
 
 test:
     ./gradlew test -i

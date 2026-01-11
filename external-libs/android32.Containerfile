@@ -1,6 +1,6 @@
 FROM debian:bookworm
 
-RUN set -x && apt-get update && apt-get install -y unzip automake build-essential curl file pkg-config git python3 python-is-python3 libtool libtinfo5 yacc
+RUN set -x && apt-get update && apt-get install -y unzip automake build-essential curl file pkg-config git python3 python-is-python3 libtool libtinfo5 yacc wget
 
 COPY monero/ /src/external-libs/monero
 COPY bin/download-native-libs-dependencies.sh /src/external-libs/bin/
