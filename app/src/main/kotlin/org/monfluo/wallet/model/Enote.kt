@@ -17,6 +17,7 @@ package org.monfluo.wallet.model
 
 data class Enote(
     val idx: Long,
+    val height: Long,
     val globalOutputIndex: Long,
     val isSpent: Boolean,
     val keyImage: String?,

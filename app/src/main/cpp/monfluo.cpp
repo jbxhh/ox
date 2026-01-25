@@ -1113,13 +1113,14 @@ Java_org_monfluo_wallet_model_Wallet_disposeTransaction(JNIEnv *env, jobject ins
 
 jobject newCoinsInfo(JNIEnv *env, const Monero::Enote& info) {
 
-    jmethodID c = env->GetMethodID(class_CoinsInfo, "<init>", "(JJZLjava/lang/String;JLjava/lang/String;Ljava/lang/String;ZJZLjava/lang/String;)V");
+    jmethodID c = env->GetMethodID(class_CoinsInfo, "<init>", "(JJJZLjava/lang/String;JLjava/lang/String;Ljava/lang/String;ZJZLjava/lang/String;)V");
     jstring _key_image = env->NewStringUTF(info.keyImage.c_str());
     jstring _pub_key = env->NewStringUTF(info.pubKey.c_str());
     jstring _hash = env->NewStringUTF(info.hash.c_str());
     jstring _address = env->NewStringUTF(info.address.c_str());
     jobject result = env->NewObject(class_CoinsInfo, c,
                                     static_cast<jlong> (info.idx),
+                                    static_cast<jlong> (info.blockHeight),
                                     static_cast<jlong> (info.globalOutputIndex),
                                     info.spent,
                                     _key_image,

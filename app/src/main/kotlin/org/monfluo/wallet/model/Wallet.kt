@@ -187,6 +187,14 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     external fun getRestoreHeight(): Long
     external fun setRestoreHeight(height: Long)
 
+    fun getAdjustedRestoreHeight(): Long {
+        return getEnotes()
+            .filter { !it.isSpent }
+            .map { it.height }
+            .min()
+            ?: getRestoreHeight()
+    }
+
     val connectionStatus: ConnectionStatus
         get() {
             val s = getConnectionStatusJ()
