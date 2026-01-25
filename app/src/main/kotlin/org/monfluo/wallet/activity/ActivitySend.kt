@@ -257,7 +257,8 @@ class ActivitySend : ActivityMonero() {
         val intentExtras = intent?.extras
         if (savedInstanceState != null) {
             val sendAll = savedInstanceState.getBoolean(Constants.EXTRA_TRANSACTION_SEND_ALL, false)
-            val transactionDestinations = savedInstanceState.getParcelableArrayList(Constants.EXTRA_TRANSACTION_DESTINATIONS, TransactionDestinationRaw::class.java) ?: listOf()
+            val transactionDestinations = (savedInstanceState.getParcelableArray(Constants.EXTRA_TRANSACTION_DESTINATIONS) ?: emptyArray())
+                .map { it as TransactionDestinationRaw }
             adapterTransactionDestination.restore(transactionDestinations, sendAll)
         } else if (intentData != null) {
             if (WalletService.RUNNING.get()) {
@@ -283,11 +284,13 @@ class ActivitySend : ActivityMonero() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
         val sendAll = adapterTransactionDestination.getSendAll().value!!
         val transactionDestinations = adapterTransactionDestination.getTransactionDestinations()
 
         outState.putBoolean(Constants.EXTRA_TRANSACTION_SEND_ALL, sendAll)
-        outState.putParcelableArrayList(Constants.EXTRA_TRANSACTION_DESTINATIONS, ArrayList(transactionDestinations))
+        outState.putParcelableArray(Constants.EXTRA_TRANSACTION_DESTINATIONS, transactionDestinations.toTypedArray())
     }
 
     override fun onWalletServiceNotFound() {

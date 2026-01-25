@@ -21,38 +21,13 @@
 
     <!-- OLED -->
     <color name="oled_textColorPrimary">#000000</color>
-    <color name="oled_textColorSecondary">@color/oled_textColorPrimary</color>
-    <color name="oled_statusBarColor">@color/oled_gradientTopColor</color>
-    <color name="oled_gradientTopColor">@color/oled_colorBackground</color>
-    <color name="oled_gradientBottomColor">#eeeeee</color>
-    <color name="oled_streetColorA">@color/oled_gradientTopColor</color>
-    <color name="oled_streetColorB">@color/oled_colorBackground</color>
-    <color name="oled_toolbarTextColor">@color/oled_colorOnBackground</color>
     <color name="oled_favouriteColor">#f38854</color>
-    <color name="oled_softFavouriteColor">@color/oled_favouriteColor</color>
     <color name="oled_positiveColor">#13D855</color>
     <color name="oled_negativeColor">#f38854</color>
-    <color name="oled_neutralColor">#171717</color>
-    <color name="oled_noticeColor">#3DC2FF</color>
-    <color name="oled_navigationBarColor">#000000</color>
     <color name="oled_colorBackground">#ffffff</color>
-    <color name="oled_colorOnBackground">#A6A6A6</color>
-    <color name="oled_colorSurface">@color/oled_colorBackground</color>
-    <color name="oled_colorOnSurface">@color/oled_colorOnBackground</color>
-    <color name="oled_colorPrimary">#2E2E2E</color>
-    <color name="oled_colorPrimaryVariant">#6A6A6A</color>
-    <color name="oled_colorOnPrimary">#ffffff</color>
     <color name="oled_colorSecondary">@color/oled_negativeColor</color>
-    <color name="oled_colorSecondaryVariant">@color/oled_colorBackground</color>
-    <color name="oled_colorOnSecondary">@color/oled_colorOnBackground</color>
-    <color name="oled_colorError">@color/oled_negativeColor</color>
-    <color name="oled_colorOnError">@color/oled_colorBackground</color>
-    <color name="edittext_bg_color">#CCCCCC</color>
     <color name="button_disabled_bg_color">#454545</color>
-    <color name="edittext_bg_color_disabled">#CCCCCC</color>
     <color name="oled_locked_utxo">#B5895A</color>
-    <color name="oled_txBackgroundColor">#FBFBFB</color>
     <color name="oled_dialogBackgroundColor">#E8E8E8</color>
-    <color name="oled_addressListColor">#bbbbbb</color>
     <color name="oled_frozen_utxo">#437895</color>
 </resources>

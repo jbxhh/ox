@@ -72,5 +72,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintVertical_bias="1"
         android:background="@drawable/button_background"
-        android:text="Add account" />
+        android:text="@string/activity_account_list_create_button" />
 </androidx.constraintlayout.widget.ConstraintLayout>

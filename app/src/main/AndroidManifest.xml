@@ -155,7 +155,7 @@
 
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
-            android:screenOrientation="portrait"
+            android:screenOrientation="unspecified"
             android:stateNotNeeded="true"
             tools:replace="android:screenOrientation" />
 

@@ -1,12 +1,7 @@
 package org.monfluo.wallet.util
 
-import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
-import org.monfluo.wallet.model.MoneroNetworkType
-import org.monfluo.wallet.model.Wallet.Companion.getPaymentIdFromAddress
-import org.monfluo.wallet.model.Wallet.Companion.isAddressValid
 import org.monfluo.wallet.model.TransactionDestinationRaw
 import timber.log.Timber
 
@@ -30,8 +25,8 @@ data class UriPayment(
     companion object {
         fun parse(string: String): UriPayment? {
             val schemaSplit = string.split(SCHEMA_SEPARATOR, limit = 2)
-            if (schemaSplit.size == 2 && schemaSplit.get(0) != URI_SCHEMA) {
-                Timber.w("Unexpected URI schema: ${schemaSplit.get(0)}")
+            if (schemaSplit.size == 2 && schemaSplit[0] != URI_SCHEMA) {
+                Timber.w("Unexpected URI schema: ${schemaSplit[0]}")
                 return null
             }
             val withoutSchema = schemaSplit.last()
@@ -40,7 +35,7 @@ data class UriPayment(
                 Timber.w("Addresses and params are empty")
                 return null
             }
-            val addressesRaw = addressesAndParams.get(0)
+            val addressesRaw = addressesAndParams[0]
             val paramsRaw = addressesAndParams.getOrNull(1)
             val addresses = addressesRaw.split(VALUE_SEPARATOR)
             var amounts: List<String> = emptyList()
@@ -51,21 +46,21 @@ data class UriPayment(
                 for (paramRaw in paramsRawSplit) {
                     val keyAndValue = paramRaw.split(KEY_VALUE_SEPARATOR, limit = 2)
                     if (keyAndValue.size != 2) {
-                        Timber.w("Bad parameter: ${paramRaw}")
+                        Timber.w("Bad parameter: $paramRaw")
                         continue;
                     }
-                    val key = keyAndValue.get(0)
-                    val value = keyAndValue.get(1)
+                    val key = keyAndValue[0]
+                    val value = keyAndValue[1]
                     if (URI_AMOUNT_KEYS.contains(key)) {
                         amounts = value.split(VALUE_SEPARATOR)
                     } else if (URI_RECIPIENT_NAME_KEY == key) {
                         recipientNames = value.split(VALUE_SEPARATOR).map {
-                            URLDecoder.decode(it, StandardCharsets.UTF_8)
+                            URLDecoder.decode(it)
                         }
                     } else if (URI_DESCRIPTION_KEYS.contains(key)) {
-                        description = URLDecoder.decode(value, StandardCharsets.UTF_8)
+                        description = URLDecoder.decode(value)
                     } else {
-                        Timber.w("Unknown payment uri key: ${key}")
+                        Timber.w("Unknown payment uri key: $key")
                     }
                 }
             }
@@ -91,14 +86,14 @@ data class UriPayment(
         if (recipientNames.isNotEmpty()) {
             val key = URI_RECIPIENT_NAME_KEY
             val recipientNamesEncoded = recipientNames.joinToString(separator = VALUE_SEPARATOR.toString()) {
-                URLEncoder.encode(it, StandardCharsets.UTF_8)
+                URLEncoder.encode(it)
             }
             parameters.add("$key$KEY_VALUE_SEPARATOR$recipientNamesEncoded")
         }
 
         if (!description.isNullOrBlank()) {
             val key = URI_DESCRIPTION_KEYS[0]
-            val descriptionEncoded = URLEncoder.encode(description, StandardCharsets.UTF_8)
+            val descriptionEncoded = URLEncoder.encode(description)
             parameters.add("$key$KEY_VALUE_SEPARATOR$descriptionEncoded")
         }
 

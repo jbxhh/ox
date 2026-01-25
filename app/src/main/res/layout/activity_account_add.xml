@@ -50,7 +50,7 @@
         app:layout_constraintTop_toBottomOf="@id/header_layout_view"
         android:textSize="16sp"
         android:textColor="@color/text_subtler"
-        android:text="Name" />
+        android:text="@string/activity_account_add_name_label" />
 
     <EditText
         android:id="@+id/account_name_edittext"
@@ -61,7 +61,7 @@
         app:layout_constraintTop_toBottomOf="@id/account_name_label_textview"
         android:layout_marginTop="@dimen/padding_small"
         android:background="@drawable/edittext_background"
-        android:hint="@string/account_name"
+        android:hint="@string/activity_account_add_name_hint"
         android:inputType="text" />
 
     <Button
@@ -72,5 +72,5 @@
         app:layout_constraintTop_toBottomOf="@id/account_name_edittext"
         android:layout_marginTop="@dimen/padding_big"
         android:background="@drawable/button_background"
-        android:text="Add" />
+        android:text="@string/activity_account_add_create_button" />
 </androidx.constraintlayout.widget.ConstraintLayout>

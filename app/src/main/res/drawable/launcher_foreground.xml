@@ -6,7 +6,7 @@
   <group android:scaleX="0.6"
       android:scaleY="0.6"
       android:translateX="4.8"
-      android:translateY="4.8">>
+      android:translateY="4.8">
 
       <path android:fillColor="#4c4c4c" android:pathData="m22.583,17.595 l-2.857,0.642c-3.412,0.766 -1.439,-4.654 -3.248,-4.654 -1.809,0 -1.862,4.052 -4.477,3.498 -2.54,-0.538 -2.058,-4.028 -4.534,-3.498 -1.973,0.422 -0.626,4.653 -2.435,4.653 -1.801,0 -2.632,-1.313 -4.024,-1.461a12,12 135,0 0,10.994 7.225,12 12,135 0,0 10.583,-6.405z" android:strokeColor="#00000000" android:strokeLineCap="round" android:strokeLineJoin="round" android:strokeWidth="0.142" />
 

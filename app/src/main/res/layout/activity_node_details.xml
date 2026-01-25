@@ -139,6 +139,7 @@
         app:layout_constraintTop_toBottomOf="@id/node_password_label_textview"
         android:layout_marginTop="@dimen/padding_mini"
         android:background="@drawable/edittext_background"
+        android:inputType="textPassword"
         android:hint="@string/activity_node_details_node_password_placeholder" />
 
     <Button
