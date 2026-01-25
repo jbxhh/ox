@@ -51,8 +51,10 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
+            android:minHeight="32dp"
+            android:minWidth="32dp"
+            android:maxHeight="32dp"
+            android:maxWidth="32dp"
             android:background="@android:color/transparent"
             android:src="@drawable/sort"
             android:contentDescription="@string/sort_nodes" />

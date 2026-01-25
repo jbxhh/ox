@@ -155,7 +155,7 @@ class ActivityPaymentRequest : ActivityLogging() {
             if (bitmapAndStatus == null) {
                 addressQrCodeImageView.visibility = View.INVISIBLE
             } else {
-                val (bitmap, status) =  bitmapAndStatus
+                val (bitmap, status) = bitmapAndStatus
                 addressQrCodeImageView.setImageBitmap(bitmap)
                 addressQrCodeImageView.visibility = View.VISIBLE
                 val alpha = when (status) {
