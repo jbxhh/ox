@@ -107,7 +107,7 @@ class AdapterNode(
                 }
                 NodeNetworkType.I2P -> {
                     nodeIconImageView.setBackgroundColor(itemView.resources.getColor(R.color.transparent, null))
-                    nodeIconImageView.setImageDrawable(ResourcesCompat.getDrawable(itemView.resources, R.drawable.tor, null))
+                    nodeIconImageView.setImageDrawable(ResourcesCompat.getDrawable(itemView.resources, R.drawable.i2p, null))
                     nodeIconImageView.scaleType = ImageView.ScaleType.FIT_CENTER
                     nodeIconImageView.adjustViewBounds = true
                 }

@@ -134,8 +134,8 @@ class ActivityWalletCreate : ActivityLogging() {
 
         createWalletButton.setOnClickListener {
             createOrImportWallet(
-                walletSeedEditText.text.toString().trim { it <= ' ' },
-                walletRestoreHeightEditText.text.toString().trim { it <= ' ' }
+                walletSeedEditText.text.toString().trim(),
+                walletRestoreHeightEditText.text.toString().trim()
             )
         }
 

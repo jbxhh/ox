@@ -50,19 +50,19 @@
         app:layout_constraintTop_toBottomOf="@id/header_layout_view"
         android:textSize="16sp"
         android:textColor="@color/text_subtler"
-        android:text="Name" />
+        android:text="@string/activity_address_details_name_label" />
 
     <EditText
         android:id="@+id/address_name_edittext"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/padding_small"
-        android:background="@drawable/edittext_background"
-        android:hint="@string/address_name"
-        android:inputType="text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/address_name_label_textview" />
+        app:layout_constraintTop_toBottomOf="@id/address_name_label_textview"
+        android:layout_marginTop="@dimen/padding_small"
+        android:background="@drawable/edittext_background"
+        android:hint="@string/activity_address_details_name_hint"
+        android:inputType="text" />
 
     <Button
         android:id="@+id/save_address_button"
@@ -72,5 +72,5 @@
         app:layout_constraintTop_toBottomOf="@id/address_name_edittext"
         android:layout_marginTop="@dimen/padding_big"
         android:background="@drawable/button_background"
-        android:text="Save" />
+        android:text="@string/activity_address_details_save_button" />
 </androidx.constraintlayout.widget.ConstraintLayout>

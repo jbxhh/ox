@@ -24,8 +24,8 @@
 
     <ImageView
         android:id="@+id/monfluo_icon_imageview"
-        android:layout_width="256dp"
-        android:layout_height="256dp"
+        android:layout_width="@dimen/qr_code_size"
+        android:layout_height="@dimen/qr_code_size"
         android:layout_marginTop="32dp"
         android:src="@drawable/monfluo"
         android:contentDescription="@string/application_logo"
