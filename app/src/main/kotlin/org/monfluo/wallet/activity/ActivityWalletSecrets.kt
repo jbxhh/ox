@@ -50,6 +50,8 @@ class ActivityWalletSecrets : ActivityMonero() {
     private lateinit var copyPolyseedOffsetPassphraseImageButton: ImageButton
     private lateinit var restoreHeightTextView: TextView
     private lateinit var copyRestoreHeightImageButton: ImageButton
+    private lateinit var adjustedRestoreHeightTextView: TextView
+    private lateinit var copyAdjustedRestoreHeightImageButton: ImageButton
     private lateinit var walletAddressTextView: TextView
     private lateinit var copyWalletAddressImageButton: ImageButton
     private lateinit var walletSecretViewKeyTextView: TextView
@@ -81,6 +83,8 @@ class ActivityWalletSecrets : ActivityMonero() {
         copyPolyseedOffsetPassphraseImageButton = findViewById(R.id.copy_polyseed_offset_passphrase_imagebutton)
         restoreHeightTextView = findViewById(R.id.restore_height_textview)
         copyRestoreHeightImageButton = findViewById(R.id.copy_restore_height_imagebutton)
+        adjustedRestoreHeightTextView = findViewById(R.id.adjusted_restore_height_textview)
+        copyAdjustedRestoreHeightImageButton = findViewById(R.id.copy_adjusted_restore_height_imagebutton)
         walletAddressTextView = findViewById(R.id.wallet_address_textview)
         copyWalletAddressImageButton = findViewById(R.id.copy_wallet_address_imagebutton)
         walletSecretViewKeyTextView = findViewById(R.id.wallet_secret_view_key_textview)
@@ -231,6 +235,9 @@ class ActivityWalletSecrets : ActivityMonero() {
         viewModel.restoreHeight.observe(this) { restoreHeight ->
             restoreHeightTextView.text = NumberFormat.getInstance().format(restoreHeight)
         }
+        viewModel.adjustedRestoreHeight.observe(this) { adjustedRestoreHeight ->
+            adjustedRestoreHeightTextView.text = NumberFormat.getInstance().format(adjustedRestoreHeight)
+        }
         viewModel.walletAddress.observe(this) { walletAddress ->
             walletAddressTextView.text = TextHelper.formatAddress(walletAddress)
         }
@@ -272,6 +279,7 @@ internal class ActivityWalletSecretsViewModel : ViewModel() {
             _seedType.value = SeedType.MONERO
         }
         restoreHeight.value = wallet.getRestoreHeight()
+        adjustedRestoreHeight.value = wallet.getAdjustedRestoreHeight()
         walletAddress.value = wallet.getAddress(0, 0)
         secretViewKey.value = wallet.getSecretViewKey()
         publicViewKey.value = wallet.getPublicViewKey()
@@ -289,6 +297,7 @@ internal class ActivityWalletSecretsViewModel : ViewModel() {
     val seed = MutableLiveData("")
     val polyseedOffsetPassphrase = MutableLiveData("")
     val restoreHeight = MutableLiveData(0L)
+    val adjustedRestoreHeight = MutableLiveData(0L)
     val walletAddress = MutableLiveData("")
     val secretViewKey = MutableLiveData("")
     val publicViewKey = MutableLiveData("")

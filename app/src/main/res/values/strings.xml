@@ -168,6 +168,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="copy_secrets_warning">Copying the secrets of your wallet to clipboard is dangerous because other apps on your device can view the clipboard and steal them</string>
     <string name="wallet_keys_label">Keys</string>
     <string name="wallet_restore_height_label">Recovery height</string>
+    <string name="wallet_adjusted_restore_height_label">Adjusted recovery height</string>
     <string name="wallet_address">Wallet address</string>
     <string name="slide_to_send">Slide to send</string>
     <string name="display_advanced_wallet_creation_options">Display advanced wallet creation options</string>
