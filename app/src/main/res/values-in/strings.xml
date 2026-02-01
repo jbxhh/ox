@@ -52,7 +52,7 @@
     <string name="toast_error_sending_tx">Terjadi kesalahan saat mengirim transaksi</string>
     <string name="error_creating_tx">Kesalahan saat membuat transaksi: <xliff:g>%1$s</xliff:g></string>
     <string name="invalid_mnemonic_code">Mnemonic tidak valid</string>
-    <string name="invalid_confirmed_password">Passphrase tidak cocok</string>
+    <string name="invalid_confirmed_password">Kata sandi tidak cocok</string>
     <string name="copied_to_clipboard">Disalin ke papan klip</string>
     <string name="street_mode">Mode jalanan (sembunyikan saldo)</string>
     <string name="option_allow_fee_override">Pemilihan biaya manual</string>
@@ -221,4 +221,6 @@
     <string name="address">Alamat</string>
     <string name="amount">Jumlah</string>
     <string name="multiple_addresses">beberapa</string>
+    <string name="option_enable_enote_management">Aktifkan manajemen enote</string>
+    <string name="show_icon_on_qr_codes">Tampilkan ikon pada kode QR</string>
 </resources>
