@@ -92,13 +92,36 @@
         android:visibility="gone"
         android:textColor="?attr/colorOnPrimary" />
 
+    <TextView
+        android:id="@+id/transaction_description_label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/selected_enotes_textview"
+        android:textSize="@dimen/text_medium"
+        android:textColor="@color/text_subtler"
+        android:text="@string/activity_send_description_label" />
+
+    <EditText
+        android:id="@+id/transaction_description_edittext"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/transaction_description_label_textview"
+        android:layout_marginTop="@dimen/padding_mini"
+        android:background="@drawable/edittext_background"
+        android:hint="@string/activity_send_description_hint"
+        android:inputType="textMultiLine"
+        android:maxLines="3" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/transaction_destinations_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/selected_enotes_textview"
+        app:layout_constraintTop_toBottomOf="@id/transaction_description_edittext"
         app:layout_constraintBottom_toTopOf="@id/transaction_fee_radiogroup"
         android:layout_marginTop="@dimen/padding_small"
         tools:listitem="@layout/recycler_view_item_transaction"

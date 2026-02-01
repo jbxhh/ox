@@ -88,6 +88,9 @@ class ActivitySend : ActivityMonero() {
         val transactionDestinations = uriPayment.toTransactionDestinationRawList()
         Timber.i("Inserting ${transactionDestinations.size} transaction destinations at position ${scanIndex}")
         adapterTransactionDestination.replaceElementWithList(transactionDestinations, scanIndex)
+        if (uriPayment.description != null) {
+            transactionDescriptionEditText.setText(uriPayment.description)
+        }
     }
 
     private val viewModel: SendViewModel by viewModels()
@@ -103,6 +106,7 @@ class ActivitySend : ActivityMonero() {
     private lateinit var transactionFeeRadioGroup: RadioGroup
     private lateinit var transactionFeeRadioGroupLabelTextView: TextView
     private lateinit var selectedEnotesTextView: TextView
+    private lateinit var transactionDescriptionEditText: EditText
 
     private lateinit var transactionDestinationsRecyclerView: RecyclerView
 
@@ -121,6 +125,7 @@ class ActivitySend : ActivityMonero() {
         transactionFeeRadioGroupLabelTextView = findViewById(R.id.transaction_fee_label_textview)
         selectedEnotesTextView = findViewById(R.id.selected_enotes_textview)
         transactionDestinationsRecyclerView = findViewById(R.id.transaction_destinations_recyclerview)
+        transactionDescriptionEditText = findViewById(R.id.transaction_description_edittext)
 
         adapterTransactionDestination = AdapterTransactionDestination(object : AdapterTransactionDestination.Listener {
 
@@ -192,12 +197,13 @@ class ActivitySend : ActivityMonero() {
             val feePriority = viewModel.priority.value!!
             val enotes = viewModel.enotes.value
             val nettype = wallet.nettype()
+            val description = transactionDescriptionEditText.getText().toString().takeIf { !it.isBlank() }
 
             if (sendAll) {
                 val address = parseTransactionDestinationAddressOrWarn(adapterTransactionDestination.getTransactionDestinations()[0].value, 1, nettype) ?: return@setOnClickListener
                 enabled.value = false
                 Toast.makeText(this, getString(R.string.activity_send_transaction_creating_toast), Toast.LENGTH_SHORT).show()
-                walletService.createSweepTransaction(address, feePriority, enotes)
+                walletService.createSweepTransaction(address, feePriority, enotes, description)
             } else {
                 val transactionDestinations = mutableListOf<TransactionDestinationWithAmount>()
                 for (indexed in adapterTransactionDestination.getTransactionDestinations().withIndex()) {
@@ -209,7 +215,7 @@ class ActivitySend : ActivityMonero() {
                 }
                 enabled.value = false
                 Toast.makeText(this, getString(R.string.activity_send_transaction_creating_toast), Toast.LENGTH_SHORT).show()
-                walletService.createTransaction(transactionDestinations, feePriority, enotes)
+                walletService.createTransaction(transactionDestinations, feePriority, enotes, description)
             }
         }
     }
@@ -336,6 +342,9 @@ class ActivitySend : ActivityMonero() {
             val transactionDestinations = paymentUri.toTransactionDestinationRawList()
             Timber.i("Inserting ${transactionDestinations.size} transaction destinations")
             adapterTransactionDestination.replaceElementWithList(transactionDestinations, 0)
+            if (paymentUri.description != null) {
+                transactionDescriptionEditText.setText(paymentUri.description)
+            }
         }
     }
 

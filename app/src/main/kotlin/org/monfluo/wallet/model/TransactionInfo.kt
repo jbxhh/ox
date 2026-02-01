@@ -34,6 +34,7 @@ data class TransactionInfo(
     val transfers: List<Transfer>,
     val addressValue: String? = null,
     val key: String? = null,
+    val description: String? = null,
 ) {
 
     constructor(

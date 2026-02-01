@@ -113,6 +113,8 @@ class AdapterTransactionDetails : RecyclerView.Adapter<AdapterTransactionDetails
     class HeaderViewHolder(view: View) : ViewHolder(view) {
 
         private val transactionTypeTextView: TextView = itemView.findViewById(R.id.transaction_type_textview)
+        private val transactionDescriptionLabelTextView: TextView = itemView.findViewById(R.id.transaction_description_label_textview)
+        private val transactionDescriptionTextView: TextView = itemView.findViewById(R.id.transaction_description_textview)
 
         fun bind(transaction: TransactionInfo) {
             val transactionTypeString = when (transaction.direction) {
@@ -129,6 +131,15 @@ class AdapterTransactionDetails : RecyclerView.Adapter<AdapterTransactionDetails
             transactionTypeTextView.setOnLongClickListener {
                 Helper.clipBoardCopy(itemView.context, "transaction type", transactionTypeString)
                 return@setOnLongClickListener true
+            }
+            val description = transaction.description
+            if (description == null) {
+                transactionDescriptionLabelTextView.visibility = View.GONE
+                transactionDescriptionTextView.visibility = View.GONE
+            } else {
+                transactionDescriptionLabelTextView.visibility = View.VISIBLE
+                transactionDescriptionTextView.visibility = View.VISIBLE
+                transactionDescriptionTextView.setText(description)
             }
         }
     }

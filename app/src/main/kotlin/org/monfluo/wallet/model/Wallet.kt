@@ -268,8 +268,8 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
         listenerHandle = setListenerJ(listener)
     }
 
-    external fun setUserNote(txid: String?, note: String?): Boolean
-    external fun getUserNote(txid: String?): String?
+    external fun setUserNote(txid: String, note: String): Boolean
+    external fun getUserNote(txid: String): String
     external fun getTxKey(txid: String): String
 
     external fun addAccount(label: String)

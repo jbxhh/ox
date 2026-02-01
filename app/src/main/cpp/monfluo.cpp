@@ -1367,14 +1367,25 @@ jobject newTransactionInfo(JNIEnv *env, Monero::TransactionInfo *info) {
     return result;
 }
 
+jobject stringVecToJavaList(JNIEnv *env, const std::vector<std::string> &vector) {
+    jmethodID java_util_ArrayList_ = env->GetMethodID(class_ArrayList, "<init>", "(I)V");
+    jmethodID java_util_ArrayList_add = env->GetMethodID(class_ArrayList, "add", "(Ljava/lang/Object;)Z");
+
+    jobject arrayList = env->NewObject(class_ArrayList, java_util_ArrayList_, static_cast<jint> (vector.size()));
+    for (std::string s : vector) {
+        jstring javaTxid = env->NewStringUTF(s.c_str());
+        env->CallBooleanMethod(arrayList, java_util_ArrayList_add, javaTxid);
+        env->DeleteLocalRef(javaTxid);
+    }
+    return arrayList;
+}
+
 jobject cpp2java(JNIEnv *env, const std::vector<Monero::TransactionInfo *> &vector) {
 
     jmethodID java_util_ArrayList_ = env->GetMethodID(class_ArrayList, "<init>", "(I)V");
-    jmethodID java_util_ArrayList_add = env->GetMethodID(class_ArrayList, "add",
-                                                         "(Ljava/lang/Object;)Z");
+    jmethodID java_util_ArrayList_add = env->GetMethodID(class_ArrayList, "add", "(Ljava/lang/Object;)Z");
 
-    jobject arrayList = env->NewObject(class_ArrayList, java_util_ArrayList_,
-                                       static_cast<jint> (vector.size()));
+    jobject arrayList = env->NewObject(class_ArrayList, java_util_ArrayList_, static_cast<jint> (vector.size()));
     for (Monero::TransactionInfo *s: vector) {
         jobject info = newTransactionInfo(env, s);
         env->CallBooleanMethod(arrayList, java_util_ArrayList_add, info);
@@ -1408,6 +1419,13 @@ JNIEXPORT jstring JNICALL
 Java_org_monfluo_wallet_model_PendingTransaction_getErrorString(JNIEnv *env, jobject instance) {
     auto *tx = getHandle<Monero::PendingTransaction>(env, instance);
     return env->NewStringUTF(tx->errorString().c_str());
+}
+
+JNIEXPORT jobject JNICALL
+Java_org_monfluo_wallet_model_PendingTransaction_txid(JNIEnv *env, jobject instance) {
+    auto *tx = getHandle<Monero::PendingTransaction>(env, instance);
+    std::vector<std::string> txids = tx->txid();
+    return stringVecToJavaList(env, txids);
 }
 
 // commit transaction or save to file if filename is provided.

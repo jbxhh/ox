@@ -3,91 +3,70 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/recycler_view_item_destination_layout"
+    android:id="@+id/recycler_view_item_transaction_pending_transfer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <TextView
-        android:id="@+id/total_label_textview"
+        android:id="@+id/amount_label_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="@dimen/padding_small"
-        android:text="@string/recycler_view_item_transaction_destination_pending_summary_total_label"
+        android:text="@string/recycler_view_item_transaction_pending_amount_label"
         android:textSize="@dimen/text_medium"
         android:textColor="@color/text_subtler" />
 
     <TextView
-        android:id="@+id/total_textview"
+        android:id="@+id/amount_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/total_label_textview"
+        app:layout_constraintTop_toBottomOf="@id/amount_label_textview"
         android:layout_marginTop="@dimen/padding_mini"
         android:textSize="@dimen/text_big" />
 
     <TextView
-        android:id="@+id/fee_label_textview"
+        android:id="@+id/address_label_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/total_textview"
+        app:layout_constraintTop_toBottomOf="@id/amount_textview"
         android:layout_marginTop="@dimen/padding_small"
-        android:text="@string/recycler_view_item_transaction_destination_pending_summary_fee_label"
+        android:text="@string/recycler_view_item_transaction_pending_address_label"
         android:textSize="@dimen/text_medium"
         android:textColor="@color/text_subtler" />
 
     <TextView
-        android:id="@+id/fee_textview"
+        android:id="@+id/address_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fee_label_textview"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/address_label_textview"
         android:layout_marginTop="@dimen/padding_mini"
         android:textSize="@dimen/text_big" />
 
     <TextView
-        android:id="@+id/dust_label_textview"
+        android:id="@+id/address_resolved_from_label_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fee_textview"
+        app:layout_constraintTop_toBottomOf="@id/address_textview"
         android:layout_marginTop="@dimen/padding_small"
-        android:text="@string/recycler_view_item_transaction_destination_pending_summary_dust_label"
+        android:text="@string/recycler_view_item_transaction_pending_address_resolved_from_label"
         android:textSize="@dimen/text_medium"
         android:textColor="@color/text_subtler" />
 
     <TextView
-        android:id="@+id/dust_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dust_label_textview"
-        android:layout_marginTop="@dimen/padding_mini"
-        android:textSize="@dimen/text_big" />
-
-    <TextView
-        android:id="@+id/grand_total_label_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dust_textview"
-        android:layout_marginTop="@dimen/padding_small"
-        android:text="@string/recycler_view_item_transaction_destination_pending_summary_grand_total_label"
-        android:textSize="@dimen/text_medium"
-        android:textColor="@color/text_subtler" />
-
-    <TextView
-        android:id="@+id/grand_total_textview"
+        android:id="@+id/address_resolved_from_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/grand_total_label_textview"
+        app:layout_constraintTop_toBottomOf="@id/address_resolved_from_label_textview"
         android:layout_marginTop="@dimen/padding_mini"
         android:textSize="@dimen/text_big" />
 </androidx.constraintlayout.widget.ConstraintLayout>
