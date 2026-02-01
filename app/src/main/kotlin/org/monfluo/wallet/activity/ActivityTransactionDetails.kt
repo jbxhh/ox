@@ -131,7 +131,8 @@ class ActivityTransactionDetails : ActivityMonero() {
         val transactionInfo = transactions.find { it.hash == viewModel.transactionHash }?.let {
             val key = wallet.getTxKey(it.hash)
             val addressValue = wallet.getAddress(it.accountIndex, it.addressIndex)
-            it.copy(key = key, addressValue = addressValue)
+            val description = wallet.getUserNote(it.hash).takeIf { !it.isBlank() }
+            it.copy(key = key, addressValue = addressValue, description = description)
         }
 
         viewModel.transactionInfo.postValue(transactionInfo)

@@ -62,7 +62,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/header_layout_view"
         app:layout_constraintBottom_toTopOf="@id/send_tx_slider"
-        tools:listitem="@layout/recycler_view_item_transaction_destination_pending" />
+        tools:listitem="@layout/recycler_view_item_transaction_pending_transfer" />
 
     <com.ncorti.slidetoact.SlideToActView
         android:id="@+id/send_tx_slider"

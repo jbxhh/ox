@@ -51,6 +51,7 @@ object Constants {
     const val EXTRA_TRANSACTION_DESTINATIONS = "transaction_destinations"
     const val EXTRA_TRANSACTION_PRIORITY = "transaction_priority"
     const val EXTRA_TRANSACTION_SELECTED_ENOTES = "transaction_selected_enotes"
+    const val EXTRA_TRANSACTION_DESCRIPTION = "transaction_description"
     const val EXTRA_TRANSACTION_SEND_ALL = "transaction_send_all"
     const val EXTRA_PENDING_TRANSACTION = "pending_transaction"
     const val EXTRA_PROXY = "proxy"

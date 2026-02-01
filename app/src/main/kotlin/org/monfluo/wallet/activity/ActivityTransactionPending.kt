@@ -13,7 +13,7 @@ import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
 import com.ncorti.slidetoact.SlideToActView
 import com.ncorti.slidetoact.SlideToActView.OnSlideCompleteListener
-import org.monfluo.wallet.adapter.AdapterTransactionDestinationPending
+import org.monfluo.wallet.adapter.AdapterTransactionPending
 import org.monfluo.wallet.model.PendingTransaction
 import org.monfluo.wallet.model.MoneroUnit
 import org.monfluo.wallet.service.wallet.WalletService
@@ -38,7 +38,7 @@ class ActivityTransactionPending : ActivityMonero() {
     private lateinit var transactionDestinationsRecyclerView: RecyclerView
     private lateinit var sendTransactionSlider: SlideToActView
 
-    private val adapterTransactionDestinationPending: AdapterTransactionDestinationPending = AdapterTransactionDestinationPending()
+    private val adapterTransactionPending: AdapterTransactionPending = AdapterTransactionPending()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,7 +50,7 @@ class ActivityTransactionPending : ActivityMonero() {
         sendTransactionSlider = findViewById(R.id.send_tx_slider)
 
         transactionDestinationsRecyclerView.layoutManager = LinearLayoutManager(this)
-        transactionDestinationsRecyclerView.adapter = adapterTransactionDestinationPending
+        transactionDestinationsRecyclerView.adapter = adapterTransactionPending
 
         bindWindowInsetsListener()
         bindListeners()
@@ -93,7 +93,7 @@ class ActivityTransactionPending : ActivityMonero() {
         val pendingTransaction = walletService.getPendingTransaction()
         if (pendingTransaction != null) {
             this.pendingTransaction = pendingTransaction
-            adapterTransactionDestinationPending.setPendingTransaction(pendingTransaction)
+            adapterTransactionPending.setPendingTransaction(pendingTransaction)
         } else {
             Timber.e("Pending transaction activity spawned without a pending transaction")
             setResult(RESULT_NO_PENDING_TRANSACTION)

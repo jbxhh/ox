@@ -15,12 +15,14 @@
  */
 package org.monfluo.wallet.model
 
-class PendingTransaction internal constructor(val handle: Long, val destination: PendingTransactionDestination) {
+class PendingTransaction internal constructor(val handle: Long, val destination: PendingTransactionDestination, val description: String?) {
     val status: Status
         get() = Status.entries[getStatusJ()]
 
     external fun getStatusJ(): Int
-    external fun getErrorString(): String?
+    external fun getErrorString(): String
+
+    external fun txid(): List<String>
 
     // commit transaction or save to file if filename is provided.
     external fun commit(filename: String?, overwrite: Boolean): Boolean

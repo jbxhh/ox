@@ -172,7 +172,8 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
                     val selectedEnotes = message.data.getStringArrayList(
                         Constants.EXTRA_TRANSACTION_SELECTED_ENOTES
                     )
-                    handleCreateSweepTransaction(transactionDestination, transactionPriority, selectedEnotes)
+                    val transactionDescription = data.getString(Constants.EXTRA_TRANSACTION_DESCRIPTION)
+                    handleCreateSweepTransaction(transactionDestination, transactionPriority, selectedEnotes, transactionDescription)
                 }
                 WalletServiceCommand.CREATE_TX -> {
                     Timber.d("Received message to create a transaction")
@@ -185,7 +186,8 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
                     val selectedEnotes = message.data.getStringArrayList(
                         Constants.EXTRA_TRANSACTION_SELECTED_ENOTES
                     )
-                    handleCreateTransaction(transactionDestinations, transactionPriority, selectedEnotes)
+                    val transactionDescription = data.getString(Constants.EXTRA_TRANSACTION_DESCRIPTION)
+                    handleCreateTransaction(transactionDestinations, transactionPriority, selectedEnotes, transactionDescription)
                 }
                 WalletServiceCommand.SEND_TX -> {
                     val pendingTransaction = this@WalletService.pendingTransactionRef.getAndSet(null)
@@ -385,12 +387,13 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         private fun handleCreateSweepTransaction(
             destination: String,
             priority: PendingTransaction.Priority,
-            selectedEnotes: ArrayList<String>?
+            selectedEnotes: ArrayList<String>?,
+            transactionDescription: String?,
         ) {
             val wallet = getWalletOrThrow()
             val destinationResolved = resolveDestination(TransactionDestination(destination))
             val pendingTransactionHandle = wallet.createSweepTransaction(destinationResolved.address, "", 0, priority.ordinal, wallet.getAccountIndex(), selectedEnotes ?: ArrayList())
-            val pendingTransaction = PendingTransaction(pendingTransactionHandle, PendingTransactionDestination.Sweep(destinationResolved))
+            val pendingTransaction = PendingTransaction(pendingTransactionHandle, PendingTransactionDestination.Sweep(destinationResolved), transactionDescription)
             disposePendingTransaction(newPendingTransaction = pendingTransaction)
             forEachObserver {
                 it.onTransactionCreated(pendingTransaction)
@@ -400,7 +403,8 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         private fun handleCreateTransaction(
             destinationAndAmounts: List<TransactionDestinationWithAmount>,
             priority: PendingTransaction.Priority,
-            selectedEnotes: ArrayList<String>?
+            selectedEnotes: ArrayList<String>?,
+            transactionDescription: String?,
         ) {
             val wallet = getWalletOrThrow()
             val destinationsResolved = destinationAndAmounts.map { resolveDestination(it.withoutAmount()).withAmount(it.amount) }
@@ -410,7 +414,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
                 destinations, "", amounts, 0, priority.ordinal,
                 wallet.getAccountIndex(), selectedEnotes ?: ArrayList()
             )
-            val pendingTransaction = PendingTransaction(pendingTransactionHandle, PendingTransactionDestination.Default(destinationsResolved))
+            val pendingTransaction = PendingTransaction(pendingTransactionHandle, PendingTransactionDestination.Default(destinationsResolved), transactionDescription)
             disposePendingTransaction(newPendingTransaction = pendingTransaction)
             forEachObserver {
                 it.onTransactionCreated(pendingTransaction)
@@ -418,11 +422,19 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         }
 
         private fun handleSendPendingTransaction(pendingTransaction: PendingTransaction) {
+            val txid = pendingTransaction.txid().getOrNull(0)
+            val description = pendingTransaction.description
             val success = pendingTransaction.commit("", false)
             if (!success) {
                 Timber.e("Failed to send transaction: ${pendingTransaction.getErrorString()}")
             }
-            getWalletOrLog()?.store()
+            getWalletOrLog()?.let { wallet ->
+                if (txid != null && description != null) {
+                    wallet.setUserNote(txid, description)
+                    Timber.i("Set note for txid $txid to $description")
+                }
+                wallet.store()
+            }
             forEachObserver {
                 it.onTransactionSent(pendingTransaction, success)
             }
@@ -951,7 +963,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         handler.sendMessage(message)
     }
 
-    fun createSweepTransaction(destination: String, priority: PendingTransaction.Priority, selectedEnotes: List<String>?) {
+    fun createSweepTransaction(destination: String, priority: PendingTransaction.Priority, selectedEnotes: List<String>?, description: String?) {
         Timber.d("Sending message to create a sweep transaction")
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.CREATE_SWEEP_TX.value()
@@ -960,10 +972,13 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         selectedEnotes?.let {
             message.data.putStringArrayList(Constants.EXTRA_TRANSACTION_SELECTED_ENOTES, ArrayList(it))
         }
+        description?.let {
+            message.data.putString(Constants.EXTRA_TRANSACTION_DESCRIPTION, description)
+        }
         handler.sendMessage(message)
     }
 
-    fun createTransaction(destinations: List<TransactionDestinationWithAmount>, priority: PendingTransaction.Priority, selectedEnotes: List<String>?) {
+    fun createTransaction(destinations: List<TransactionDestinationWithAmount>, priority: PendingTransaction.Priority, selectedEnotes: List<String>?, description: String?) {
         Timber.d("Sending message to create a transaction")
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.CREATE_TX.value()
@@ -971,6 +986,9 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         message.data.putInt(Constants.EXTRA_TRANSACTION_PRIORITY, priority.value)
         selectedEnotes?.let {
             message.data.putStringArrayList(Constants.EXTRA_TRANSACTION_SELECTED_ENOTES, ArrayList(it))
+        }
+        description?.let {
+            message.data.putString(Constants.EXTRA_TRANSACTION_DESCRIPTION, description)
         }
         handler.sendMessage(message)
     }

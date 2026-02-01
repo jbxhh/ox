@@ -12,23 +12,28 @@ import org.monfluo.wallet.model.PendingTransactionDestination
 import org.monfluo.wallet.model.TransactionDestinationResolvedFrom
 import org.monfluo.wallet.util.TextHelper
 
-private const val VIEW_TYPE_TRANSACTION_DESTINATION: Int = 0
-private const val VIEW_TYPE_TRANSACTION_SUMMARY: Int = 1
+private const val VIEW_TYPE_HEADER: Int = 0
+private const val VIEW_TYPE_TRANSFER: Int = 1
+private const val VIEW_TYPE_FOOTER: Int = 2
 
-class AdapterTransactionDestinationPending(
+class AdapterTransactionPending(
     private var pendingTransaction: PendingTransaction? = null
-) : RecyclerView.Adapter<AdapterTransactionDestinationPending.ViewHolder>() {
+) : RecyclerView.Adapter<AdapterTransactionPending.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {
-            VIEW_TYPE_TRANSACTION_DESTINATION -> {
-                val view = inflater.inflate(R.layout.recycler_view_item_transaction_destination_pending, parent, false)
-                ViewHolderTransactionDestination(view)
+            VIEW_TYPE_HEADER -> {
+                val view = inflater.inflate(R.layout.recycler_view_item_transaction_pending_header, parent, false)
+                HeaderViewHolder(view)
             }
-            VIEW_TYPE_TRANSACTION_SUMMARY -> {
-                val view = inflater.inflate(R.layout.recycler_view_item_transaction_destination_pending_summary, parent, false)
-                ViewHolderTransactionDestails(view)
+            VIEW_TYPE_TRANSFER -> {
+                val view = inflater.inflate(R.layout.recycler_view_item_transaction_pending_transfer, parent, false)
+                TransferViewHolder(view)
+            }
+            VIEW_TYPE_FOOTER -> {
+                val view = inflater.inflate(R.layout.recycler_view_item_transaction_pending_footer, parent, false)
+                FooterViewHolder(view)
             }
             else -> {
                 throw RuntimeException("Unknown view type")
@@ -37,41 +42,47 @@ class AdapterTransactionDestinationPending(
     }
 
     override fun getItemViewType(position: Int): Int {
-        val transactionDestinations = when (val destination = pendingTransaction!!.destination) {
-            is PendingTransactionDestination.Default -> destination.value.size
-            is PendingTransactionDestination.Sweep -> 1
-        }
-        return if (position < transactionDestinations) {
-            VIEW_TYPE_TRANSACTION_DESTINATION
+        val transactionHasDescription = pendingTransaction?.description != null
+        val itemCount = getItemCount()
+        return if (transactionHasDescription && position == 0) {
+            VIEW_TYPE_HEADER
+        } else if (position == itemCount - 1) {
+            VIEW_TYPE_FOOTER
         } else {
-            VIEW_TYPE_TRANSACTION_SUMMARY
+            VIEW_TYPE_TRANSFER
         }
     }
 
     override fun getItemCount(): Int {
+        val transactionDescriptionCount = if (pendingTransaction?.description != null) 1 else 0
         return when (val destination = pendingTransaction?.destination) {
             null -> 0
-            is PendingTransactionDestination.Default -> destination.value.size + 1
-            is PendingTransactionDestination.Sweep -> 2
+            is PendingTransactionDestination.Default -> destination.value.size + 1 + transactionDescriptionCount
+            is PendingTransactionDestination.Sweep -> 2 + transactionDescriptionCount
         }
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val pendingTransaction = pendingTransaction!!
+        val transactionDescriptionCount = if (pendingTransaction.description != null) 1 else 0
         when (viewHolder) {
-            is ViewHolderTransactionDestination -> {
+            is HeaderViewHolder -> {
+                viewHolder.bind(pendingTransaction.description!!)
+            }
+            is TransferViewHolder -> {
+                val adjustedPosition = position - transactionDescriptionCount
                 when (val destination = pendingTransaction.destination) {
                     is PendingTransactionDestination.Default -> {
-                        val value = destination.value[position]
+                        val value = destination.value[adjustedPosition]
                         val single = destination.value.size == 1
-                        viewHolder.bind(value.amount, value.address, value.resolvedFrom, position, single)
+                        viewHolder.bind(value.amount, value.address, value.resolvedFrom, adjustedPosition, single)
                     }
                     is PendingTransactionDestination.Sweep -> {
-                        viewHolder.bind(pendingTransaction.getAmount(), destination.value.address, destination.value.resolvedFrom, position, true)
+                        viewHolder.bind(pendingTransaction.getAmount(), destination.value.address, destination.value.resolvedFrom, adjustedPosition, true)
                     }
                 }
             }
-            is ViewHolderTransactionDestails -> {
+            is FooterViewHolder -> {
                 val amount = pendingTransaction.getAmount()
                 val fee = pendingTransaction.getFee()
                 val dust = pendingTransaction.getDust()
@@ -91,7 +102,16 @@ class AdapterTransactionDestinationPending(
 
     sealed class ViewHolder(view: View) : RecyclerView.ViewHolder(view)
 
-    inner class ViewHolderTransactionDestination(view: View) : ViewHolder(view) {
+    inner class HeaderViewHolder(view: View) : ViewHolder(view) {
+
+        private val transactionDescriptionTextView: TextView = itemView.findViewById(R.id.transaction_description_textview)
+
+        fun bind(description: String) {
+            transactionDescriptionTextView.setText(description)
+        }
+    }
+
+    inner class TransferViewHolder(view: View) : ViewHolder(view) {
 
         private val amountLabelTextView: TextView = itemView.findViewById(R.id.amount_label_textview)
         private val amountTextView: TextView = itemView.findViewById(R.id.amount_textview)
@@ -100,13 +120,13 @@ class AdapterTransactionDestinationPending(
         private val addressResolvedFromLabelTextView: TextView = itemView.findViewById(R.id.address_resolved_from_label_textview)
         private val addressResolvedFromTextView: TextView = itemView.findViewById(R.id.address_resolved_from_textview)
 
-        private val transactionDestinationPendingAmountLabel: CharSequence = itemView.resources.getString(R.string.recycler_view_item_transaction_destination_pending_amount_label)
+        private val transactionDestinationPendingAmountLabel: CharSequence = itemView.resources.getString(R.string.recycler_view_item_transaction_pending_amount_label)
         private val transactionDestinationPendingAmountWithPositionLabel: (Int) -> CharSequence = { position: Int ->
-            itemView.resources.getString(R.string.recycler_view_item_transaction_destination_pending_amount_with_position_label, position)
+            itemView.resources.getString(R.string.recycler_view_item_transaction_pending_amount_with_position_label, position)
         }
-        private val transactionDestinationPendingAddressLabel: CharSequence = itemView.resources.getString(R.string.recycler_view_item_transaction_destination_pending_address_label)
+        private val transactionDestinationPendingAddressLabel: CharSequence = itemView.resources.getString(R.string.recycler_view_item_transaction_pending_address_label)
         private val transactionDestinationPendingAddressWithPositionLabel: (Int) -> CharSequence = { position: Int ->
-            itemView.resources.getString(R.string.recycler_view_item_transaction_destination_pending_address_with_position_label, position)
+            itemView.resources.getString(R.string.recycler_view_item_transaction_pending_address_with_position_label, position)
         }
 
         fun bind(
@@ -136,7 +156,7 @@ class AdapterTransactionDestinationPending(
         }
     }
 
-    inner class ViewHolderTransactionDestails(view: View) : ViewHolder(view) {
+    inner class FooterViewHolder(view: View) : ViewHolder(view) {
 
         private val totalLabelTextView: TextView = itemView.findViewById(R.id.total_label_textview)
         private val totalTextView: TextView = itemView.findViewById(R.id.total_textview)
