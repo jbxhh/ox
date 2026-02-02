@@ -428,4 +428,17 @@
     <string name="recycler_view_item_transaction_details_transaction_type_incoming">Pemasukan</string>
     <string name="recycler_view_item_transaction_details_transaction_type_coinbase">Basis koin</string>
     <string name="recycler_view_item_transaction_details_transaction_type_outgoing">Pengeluaran</string>
+    <string name="activity_send_description_label">Deskripsi</string>
+    <string name="activity_send_description_hint">Deskripsi transaksi (opsional)</string>
+    <string name="recycler_view_item_transaction_pending_description_label">Deskripsi</string>
+    <string name="recycler_view_item_transaction_pending_amount_label">Jumlah</string>
+    <string name="recycler_view_item_transaction_pending_amount_with_position_label">Jumlah #<xliff:g>%1$d</xliff:g></string>
+    <string name="recycler_view_item_transaction_pending_address_label">Alamat</string>
+    <string name="recycler_view_item_transaction_pending_address_with_position_label">Alamat #<xliff:g>%1$d</xliff:g></string>
+    <string name="recycler_view_item_transaction_pending_address_resolved_from_label">Diselesaikan dari</string>
+    <string name="recycler_view_item_transaction_pending_summary_total_label">Total</string>
+    <string name="recycler_view_item_transaction_pending_summary_fee_label">Biaya</string>
+    <string name="recycler_view_item_transaction_pending_summary_dust_label">Debu</string>
+    <string name="recycler_view_item_transaction_pending_summary_grand_total_label">Total semua</string>
+    <string name="recycler_view_item_transaction_details_transaction_description_label">Deskripsi</string>
 </resources>
