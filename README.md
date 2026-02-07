@@ -80,7 +80,7 @@ XMR address: `48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU
 
 #### Expenses (excluding developer time)
 
-- Build server for CI/CD: 10 EUR / month
+- Build server for CI/CD: 16 EUR / month
 - F-Droid servers: 8 EUR / month
 - Domain (monfluo.org): 15 EUR / year
 
