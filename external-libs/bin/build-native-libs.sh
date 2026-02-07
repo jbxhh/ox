@@ -96,6 +96,7 @@ export PATH=$PRE_OPENSSL_PATH
     && make install)
 
 (cd $BASEDIR/external-libs/monero \
+    && yes | make clean-all || true \
     && CMAKE_INCLUDE_PATH="${PREFIX}/include" CMAKE_LIBRARY_PATH="${PREFIX}/lib" ANDROID_STANDALONE_TOOLCHAIN_PATH=${TOOLCHAIN_DIR} USE_SINGLE_BUILDDIR=1 PATH=${HOST_PATH} make ${MONERO_TARGET} -j${NPROC})
 
 (cd $BASEDIR/external-libs/monero/build/release \

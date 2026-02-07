@@ -1,6 +1,6 @@
 on: [push]
 jobs:
-  build-native-libraries-arm64-v8a:
+  build-native-libraries:
     runs-on: docker
     container:
       image: debian:bookworm
@@ -22,7 +22,23 @@ jobs:
           export MONFLUO_DEPENDENCIES_DIRECTORY=/opt/android/dependencies
           . ./external-libs/bin/envs.sh
           ./external-libs/bin/download-native-libs-dependencies.sh
-      - name: Build native libraries
+# <ARM32>
+      - name: Build native libraries (ARM32)
+        run: |
+          export MONFLUO_DEPENDENCIES_DIRECTORY=/opt/android/dependencies
+          export MONFLUO_BUILD_DIRECTORY=/opt/android/monfluo-build-arm32
+          export MONFLUO_OUTPUT_DIRECTORY=/opt/android/monfluo-output-arm32
+          export NPROC=$(nproc)
+          . ./external-libs/bin/envs.sh
+          ./external-libs/bin/build-native-libs-arm32.sh
+      - name: Upload built native libraries (ARM32)
+        uses: actions/upload-artifact@v3
+        with:
+          name: native-libs-armeabi-v7a
+          path: /opt/android/monfluo-output-arm32
+# </ARM32>
+# <ARM64>
+      - name: Build native libraries (ARM64)
         run: |
           export MONFLUO_DEPENDENCIES_DIRECTORY=/opt/android/dependencies
           export MONFLUO_BUILD_DIRECTORY=/opt/android/monfluo-build-arm64
@@ -30,20 +46,30 @@ jobs:
           export NPROC=$(nproc)
           . ./external-libs/bin/envs.sh
           ./external-libs/bin/build-native-libs-arm64.sh
-      - name: Package native libraries
-        run: |
-          mkdir -p /opt/output/include
-          cp external-libs/monero/src/wallet/api/wallet2_api.h /opt/output/include/wallet2_api.h
-          mkdir -p /opt/output/arm64-v8a
-          cp -r /opt/android/monfluo-output-arm64/* /opt/output/arm64-v8a/
-      - name: Upload built native libraries
+      - name: Upload built native libraries (ARM64)
         uses: actions/upload-artifact@v3
         with:
-          name: native-build-artifacts-arm64-v8a
-          path: /opt/output
-  build-apk-arm64-v8a:
+          name: native-libs-arm64-v8a
+          path: /opt/android/monfluo-output-arm64
+# </ARM64>
+# <X86_64>
+      - name: Build native libraries (X86_64)
+        run: |
+          export MONFLUO_DEPENDENCIES_DIRECTORY=/opt/android/dependencies
+          export MONFLUO_BUILD_DIRECTORY=/opt/android/monfluo-build-x86_64
+          export MONFLUO_OUTPUT_DIRECTORY=/opt/android/monfluo-output-x86_64
+          export NPROC=$(nproc)
+          . ./external-libs/bin/envs.sh
+          ./external-libs/bin/build-native-libs-x86_64.sh
+      - name: Upload built native libraries (X86_64)
+        uses: actions/upload-artifact@v3
+        with:
+          name: native-libs-x86_64
+          path: /opt/android/monfluo-output-x86_64
+# </X86_64>
+  build-apks:
     needs:
-      - build-native-libraries-arm64-v8a
+      - build-native-libraries
     runs-on: docker
     container:
       image: docker.io/cimg/android:2025.04.1-ndk
@@ -61,15 +87,37 @@ jobs:
             echo "${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}" | base64 -d > "$HOME/.android/debug.keystore"
       - name: Checkout Monfluo
         uses: actions/checkout@v4
-      - name: Download native libraries built in previous pipeline step
+        with:
+          submodules: true
+      - name: Copy headers
+        run: |
+          mkdir -p external-libs/build/include
+          cp external-libs/monero/src/wallet/api/wallet2_api.h external-libs/build/include/wallet2_api.h
+# <ARM32>
+      - name: Download built native libs (ARM32)
         uses: actions/download-artifact@v3
         with:
-          name: native-build-artifacts-arm64-v8a
-          path: external-libs/build/
+          name: native-libs-armeabi-v7a
+          path: external-libs/build/armeabi-v7a
+# </ARM32>
+# <ARM64>
+      - name: Download built native libs (ARM64)
+        uses: actions/download-artifact@v3
+        with:
+          name: native-libs-arm64-v8a
+          path: external-libs/build/arm64-v8a
+# </ARM64>
+# <X86_64>
+      - name: Download built native libs (X86_64)
+        uses: actions/download-artifact@v3
+        with:
+          name: native-libs-x86_64
+          path: external-libs/build/x86_64
+# </X86_64>
       - name: Run tests
         run: ./gradlew test -i
       - name: Build APKs
-        run: ./gradlew -P monfluo-arm64 assembleDebug
+        run: ./gradlew -P monfluo-all -P monfluo-universal assembleDebug
       - name: Upload built APKs
         uses: actions/upload-artifact@v3
         with:
