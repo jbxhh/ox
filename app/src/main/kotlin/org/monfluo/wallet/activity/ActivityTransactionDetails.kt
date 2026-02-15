@@ -45,7 +45,14 @@ class ActivityTransactionDetails : ActivityMonero() {
 
     private lateinit var transactionDetailsRecyclerView: RecyclerView
 
-    private val adapterTransactionDetails: AdapterTransactionDetails = AdapterTransactionDetails()
+    private val adapterTransactionDetails: AdapterTransactionDetails = AdapterTransactionDetails(object : AdapterTransactionDetails.Listener {
+
+        override fun onTransactionDescriptionUpdated(transactionInfo: TransactionInfo, description: String) {
+            val wallet = walletService!!.getWalletOrThrow()
+            wallet.setUserNote(transactionInfo.hash, description)
+            updateState(wallet)
+        }
+    })
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

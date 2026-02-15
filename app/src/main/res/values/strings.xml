@@ -450,6 +450,8 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="recycler_view_item_transaction_details_transaction_type_coinbase">Coinbase</string>
     <string name="recycler_view_item_transaction_details_transaction_type_outgoing">Outgoing</string>
     <string name="recycler_view_item_transaction_details_transaction_description_label">Description</string>
+    <string name="recycler_view_item_transaction_details_transaction_description_hint">Transaction description (optional)</string>
+    <string name="recycler_view_item_transaction_details_transaction_description_none">none</string>
     <string name="recycler_view_item_transaction_details_amount_label">Amount</string>
     <string name="recycler_view_item_transaction_details_amount_with_position_label">Amount #<xliff:g>%1$d</xliff:g></string>
     <string name="recycler_view_item_transaction_details_address_label">Address</string>

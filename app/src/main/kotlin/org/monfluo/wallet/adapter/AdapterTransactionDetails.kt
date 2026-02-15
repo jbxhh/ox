@@ -7,8 +7,11 @@ import androidx.core.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
+import android.widget.EditText
 import android.widget.TextView
+import android.text.Editable
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -18,6 +21,7 @@ import org.monfluo.wallet.model.TransactionInfo
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.TextHelper
 import org.monfluo.wallet.util.Constants
+import org.monfluo.wallet.util.SimpleTextWatcher
 import java.util.Date
 import java.text.NumberFormat
 import kotlin.math.max
@@ -28,14 +32,20 @@ private const val VIEW_TYPE_HEADER: Int = 0
 private const val VIEW_TYPE_TRANSFER: Int = 1
 private const val VIEW_TYPE_FOOTER: Int = 2
 
-class AdapterTransactionDetails : RecyclerView.Adapter<AdapterTransactionDetails.ViewHolder>() {
+class AdapterTransactionDetails(
+    private val listener: Listener,
+) : RecyclerView.Adapter<AdapterTransactionDetails.ViewHolder>() {
 
     private var transaction: TransactionInfo? = null
     private var streetMode: Boolean = false
+    private var transactionDescriptionText: String = ""
+    private var editingTransactionDescription: Boolean = false
 
     fun submitTransaction(transaction: TransactionInfo?) {
          if (this.transaction != transaction) {
              this.transaction = transaction
+             this.transactionDescriptionText = transaction?.description ?: ""
+             this.editingTransactionDescription = false
              notifyDataSetChanged()
         }
     }
@@ -84,7 +94,7 @@ class AdapterTransactionDetails : RecyclerView.Adapter<AdapterTransactionDetails
         val transfersAmount = max(1, transaction.transfers.size)
         when (viewHolder) {
             is HeaderViewHolder -> {
-                viewHolder.bind(transaction)
+                viewHolder.bind(transaction, transactionDescriptionText, editingTransactionDescription)
             }
             is TransferViewHolder -> {
                 val transferIndex = position - VIEW_TYPE_TRANSFER
@@ -108,15 +118,31 @@ class AdapterTransactionDetails : RecyclerView.Adapter<AdapterTransactionDetails
         }
     }
 
+    fun editTransactionDescription() {
+        this.editingTransactionDescription = true
+        notifyItemChanged(0)
+    }
+
+    fun finishEditingTransactionDescription() {
+        this.editingTransactionDescription = false
+        notifyItemChanged(0)
+        listener.onTransactionDescriptionUpdated(transaction!!, transactionDescriptionText)
+    }
+
+    interface Listener {
+        fun onTransactionDescriptionUpdated(transactionInfo: TransactionInfo, description: String)
+    }
+
     sealed class ViewHolder(view: View) : RecyclerView.ViewHolder(view)
 
-    class HeaderViewHolder(view: View) : ViewHolder(view) {
+    inner class HeaderViewHolder(view: View) : ViewHolder(view) {
 
         private val transactionTypeTextView: TextView = itemView.findViewById(R.id.transaction_type_textview)
         private val transactionDescriptionLabelTextView: TextView = itemView.findViewById(R.id.transaction_description_label_textview)
         private val transactionDescriptionTextView: TextView = itemView.findViewById(R.id.transaction_description_textview)
+        private val transactionDescriptionEditText: EditText = itemView.findViewById(R.id.transaction_description_edittext)
 
-        fun bind(transaction: TransactionInfo) {
+        fun bind(transaction: TransactionInfo, transactionDescriptionText: String, editingTransactionDescription: Boolean) {
             val transactionTypeString = when (transaction.direction) {
                 TransactionInfo.Direction.In -> {
                     if (transaction.isCoinbase) {
@@ -132,19 +158,45 @@ class AdapterTransactionDetails : RecyclerView.Adapter<AdapterTransactionDetails
                 Helper.clipBoardCopy(itemView.context, "transaction type", transactionTypeString)
                 return@setOnLongClickListener true
             }
-            val description = transaction.description
-            if (description == null) {
-                transactionDescriptionLabelTextView.visibility = View.GONE
+            if (editingTransactionDescription) {
                 transactionDescriptionTextView.visibility = View.GONE
+                transactionDescriptionEditText.visibility = View.VISIBLE
             } else {
-                transactionDescriptionLabelTextView.visibility = View.VISIBLE
                 transactionDescriptionTextView.visibility = View.VISIBLE
-                transactionDescriptionTextView.setText(description)
+                transactionDescriptionEditText.visibility = View.GONE
+            }
+            val description = transaction.description.takeIf { !it.isNullOrBlank() }
+            val descriptionText = transaction.description ?: itemView.resources.getString(R.string.recycler_view_item_transaction_details_transaction_description_none)
+            transactionDescriptionTextView.setText(descriptionText)
+            transactionDescriptionTextView.setOnLongClickListener {
+                Helper.clipBoardCopy(itemView.context, "transaction description", descriptionText)
+                return@setOnLongClickListener true
+            }
+            if (description != null) {
+                transactionDescriptionTextView.setTypeface(null, Typeface.NORMAL)
+            } else {
+                transactionDescriptionTextView.setTypeface(null, Typeface.ITALIC)
+            }
+            transactionDescriptionTextView.setOnClickListener {
+                editTransactionDescription()
+            }
+            transactionDescriptionEditText.setText(transactionDescriptionText)
+            transactionDescriptionEditText.addTextChangedListener(object : SimpleTextWatcher() {
+                override fun afterTextChanged(s: Editable) {
+                    this@AdapterTransactionDetails.transactionDescriptionText = s.toString()
+                }
+            })
+            transactionDescriptionEditText.setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    finishEditingTransactionDescription()
+                    return@setOnEditorActionListener true
+                }
+                return@setOnEditorActionListener false
             }
         }
     }
 
-    class TransferViewHolder(view: View) : ViewHolder(view) {
+    inner class TransferViewHolder(view: View) : ViewHolder(view) {
 
         private val amountLabelTextView: TextView = itemView.findViewById(R.id.amount_label_textview)
         private val amountTextView: TextView = itemView.findViewById(R.id.amount_textview)
@@ -186,7 +238,7 @@ class AdapterTransactionDetails : RecyclerView.Adapter<AdapterTransactionDetails
         }
     }
 
-    class FooterViewHolder(view: View) : ViewHolder(view) {
+    inner class FooterViewHolder(view: View) : ViewHolder(view) {
 
         private val totalLabelTextView: TextView = itemView.findViewById(R.id.total_label_textview)
         private val totalTextView: TextView = itemView.findViewById(R.id.total_textview)
