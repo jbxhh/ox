@@ -441,4 +441,6 @@
     <string name="recycler_view_item_transaction_pending_summary_dust_label">Debu</string>
     <string name="recycler_view_item_transaction_pending_summary_grand_total_label">Total semua</string>
     <string name="recycler_view_item_transaction_details_transaction_description_label">Deskripsi</string>
+    <string name="recycler_view_item_transaction_details_transaction_description_none">tidak ada</string>
+    <string name="recycler_view_item_transaction_details_transaction_description_hint">Deskripsi transaksi (opsional)</string>
 </resources>
