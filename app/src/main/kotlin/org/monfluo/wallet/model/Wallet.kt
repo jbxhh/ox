@@ -191,7 +191,7 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
         return getEnotes()
             .filter { !it.isSpent }
             .map { it.height }
-            .min()
+            .minOrNull()
             ?: getRestoreHeight()
     }
 
