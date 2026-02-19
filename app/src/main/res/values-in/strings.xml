@@ -354,7 +354,7 @@
     <string name="activity_wallet_settings_total_balance_label">Saldo total</string>
     <string name="activity_wallet_settings_display_wallet_secrets">Ungkapkan rahasia dompet Anda</string>
     <string name="activity_wallet_settings_change_password">Ganti kata sandi</string>
-    <string name="activity_wallet_settings_close_wallet">Turup dompet</string>
+    <string name="activity_wallet_settings_close_wallet">Tutup dompet</string>
     <string name="activity_wallet_change_password_current_password_label">Kata sandi saat ini</string>
     <string name="activity_wallet_change_password_current_password_hint">Kata sandi dompet saat ini</string>
     <string name="activity_wallet_change_password_new_password_label">Kata sandi baru</string>
