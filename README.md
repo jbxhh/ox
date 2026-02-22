@@ -9,7 +9,7 @@ Mysu was a fork of Monerujo developed by m2049r.
 
 ### Codeberg
 
-You can download the latest APK from the [releases tab](https://codeberg.org/acx/monfluo/releases).
+You can download the latest APK from the [releases tab](https://codeberg.org/Monfluo/monfluo-android/releases).
 There are several APKs for different architectures, you probably want the one with "arm64" in the name, but if you are not sure you can just grab the universal one.
 
 ### F-Droid
@@ -31,7 +31,7 @@ You can use those builds if you want to help with testing.
 Be aware though, those builds have a higher chance of having bugs.
 Release builds and experimental builds can be installed on the same device without interfering with each other.
 
-- Download the latest CI build [here](https://codeberg.org/acx/monfluo/actions)
+- Download the latest CI build [here](https://codeberg.org/Monfluo/monfluo-android/actions)
     - Click on the newest action that is successful (has a green tick to the left).
     - Look for `apks` artifact and click on it (this will start the download of a zip file).
     - Unzip the archive, find the app (it has .apk extension) and install it on your device.
