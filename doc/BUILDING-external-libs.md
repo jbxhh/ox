@@ -10,6 +10,6 @@
 
 ## Building:
 
-1. Clone Monfluo repo including submodules: `git clone --recurse-submodules https://codeberg.org/anoncontributorxmr/monfluo.git`
+1. Clone Monfluo repo including submodules: `git clone --recurse-submodules https://codeberg.org/Monfluo/monfluo-android.git`
 
 2. Run `make` in `external-libs` directory
