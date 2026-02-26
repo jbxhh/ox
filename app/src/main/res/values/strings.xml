@@ -184,8 +184,8 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="copy_wallet_s_public_view_key">Copy wallet\'s public view-key</string>
     <string name="copy_wallet_s_private_spend_key">Copy wallet\'s private spend-key</string>
     <string name="copy_wallet_s_public_spend_key">Copy wallet\'s public spend-key</string>
-    <string name="seed_desc_polyseed">16 words instead of 25; just as secure, but not supported in as many wallets right now.</string>
-    <string name="seed_desc_legacy">Older, 25 word seed; supported in all Monero wallets.</string>
+    <string name="seed_desc_polyseed">16 words instead of 25; just as secure, but not currently as widely supported.</string>
+    <string name="seed_desc_legacy">Older 25-word seed; supported in all Monero wallets.</string>
     <string name="approve_the_transaction">Send transaction</string>
     <string name="sort_nodes">Sort nodes</string>
     <string name="slide_to_send_transaction">Slide to send transaction</string>

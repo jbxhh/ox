@@ -17,18 +17,18 @@ package org.monfluo.wallet.data
 
 enum class DefaultNode(val value: Node) {
 
-    MONERUJO(Node("monerujo", "nodex.monerujo.io:18081", null, null)),
-    SETHFORPRIVACY(Node("sethforprivacy (https)", "https://node.sethforprivacy.com:443", null, null)),
+    MONERUJO(Node("Monerujo", "nodex.monerujo.io:18081", null, null)),
+    SETHFORPRIVACY(Node("Seth For Privacy (HTTPS)", "https://node.sethforprivacy.com:443", null, null)),
     RUCKNIUM(Node("Rucknium", "rucknium.me:18081", null, null)),
-    STACKWALLET(Node("StackWallet (https)", "https://monero.stackwallet.com:18081", null, null)),
-    CAKEWALLET(Node("CakeWallet", "xmr-node.cakewallet.com:18081", null, null)),
-    HASHVAULT(Node("Hashvault", "nodes.hashvault.pro:18081", null, null)),
-    MONERUJO_ONION(Node("monerujo.onion", "monerujods7mbghwe6cobdr6ujih6c22zu5rl7zshmizz2udf7v7fsad.onion:18081", null, null)),
-    SETHFORPRIVACY_ONION(Node("sethforprivacy.onion", "sfprpc5klzs5vyitq2mrooicgk2wcs5ho2nm3niqduvzn5o6ylaslaqd.onion:18089", null, null)),
-    RUCKNIUM_ONION(Node("rucknium.onion", "rucknium757bokwv3ss35ftgc3gzb7hgbvvglbg3hisp7tsj2fkd2nyd.onion:18081", null, null)),
-    PLOWSOF_ONION1(Node("plowsof.onion.1", "plowsofe6cleftfmk2raiw5h2x66atrik3nja4bfd3zrfa2hdlgworad.onion:18089", null, null)),
-    PLOWSOF_ONION2(Node("plowsof.onion.2", "plowsoffjexmxalw73tkjmf422gq6575fc7vicuu4javzn2ynnte6tyd.onion:18089", null, null)),
-    BOLDSUCK(Node("boldsuck.onion", "6dsdenp6vjkvqzy4wzsnzn6wixkdzihx3khiumyzieauxuxslmcaeiad.onion:18081", null, null));
+    STACKWALLET(Node("Stack Wallet (HTTPS)", "https://monero.stackwallet.com:18081", null, null)),
+    CAKEWALLET(Node("Cake Wallet", "xmr-node.cakewallet.com:18081", null, null)),
+    HASHVAULT(Node("HashVault", "nodes.hashvault.pro:18081", null, null)),
+    MONERUJO_ONION(Node("Monerujo (Tor)", "monerujods7mbghwe6cobdr6ujih6c22zu5rl7zshmizz2udf7v7fsad.onion:18081", null, null)),
+    SETHFORPRIVACY_ONION(Node("Seth For Privacy (Tor)", "sfprpc5klzs5vyitq2mrooicgk2wcs5ho2nm3niqduvzn5o6ylaslaqd.onion:18089", null, null)),
+    RUCKNIUM_ONION(Node("Rucknium (Tor)", "rucknium757bokwv3ss35ftgc3gzb7hgbvvglbg3hisp7tsj2fkd2nyd.onion:18081", null, null)),
+    PLOWSOF_ONION1(Node("plowsof #1 (Tor)", "plowsofe6cleftfmk2raiw5h2x66atrik3nja4bfd3zrfa2hdlgworad.onion:18089", null, null)),
+    PLOWSOF_ONION2(Node("plowsof #2 (Tor)", "plowsoffjexmxalw73tkjmf422gq6575fc7vicuu4javzn2ynnte6tyd.onion:18089", null, null)),
+    BOLDSUCK(Node("boldsuck (Tor)", "6dsdenp6vjkvqzy4wzsnzn6wixkdzihx3khiumyzieauxuxslmcaeiad.onion:18081", null, null));
 
     companion object {
 
