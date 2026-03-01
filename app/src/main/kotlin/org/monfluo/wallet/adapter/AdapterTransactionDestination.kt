@@ -18,6 +18,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.LiveData
 import org.monfluo.wallet.R
+import org.monfluo.wallet.model.Contact
 import org.monfluo.wallet.model.MoneroUnit
 import org.monfluo.wallet.model.TransactionDestinationRaw
 import org.monfluo.wallet.model.PendingTransactionDestination
@@ -34,6 +35,7 @@ class AdapterTransactionDestination(
 ) : RecyclerView.Adapter<AdapterTransactionDestination.ViewHolder>() {
 
     private var transactionDestinations: List<TransactionDestinationRaw> = listOf(TransactionDestinationRaw())
+    private var addressBookEnabled: Boolean = true
     private var sendAll: MutableLiveData<Boolean> = MutableLiveData(false)
     private var enabled: Boolean = true
 
@@ -46,7 +48,7 @@ class AdapterTransactionDestination(
         val transactionDestination = transactionDestinations[position]
         val sendAll = if (this.sendAll.value!!) SendAll.SELECTED else if (transactionDestinations.size > 1) SendAll.UNAVAILABLE else SendAll.UNSELECTED
         val listener = ViewHolderListenerImpl(position)
-        viewHolder.bind(transactionDestination, enabled, sendAll, position, listener)
+        viewHolder.bind(transactionDestination, enabled, sendAll, position, addressBookEnabled, listener)
     }
 
     override fun getItemCount(): Int {
@@ -56,6 +58,13 @@ class AdapterTransactionDestination(
     fun setEnabled(enabled: Boolean) {
         if (this.enabled != enabled) {
             this.enabled = enabled
+            notifyDataSetChanged()
+        }
+    }
+
+    fun setAddressBookEnabled(enabled: Boolean) {
+        if (this.addressBookEnabled != enabled) {
+            this.addressBookEnabled = enabled
             notifyDataSetChanged()
         }
     }
@@ -76,7 +85,7 @@ class AdapterTransactionDestination(
             return
         }
         if (index > this.transactionDestinations.size) {
-            Timber.w("Attempted to fill at index ${index} but the length of existing transaction destination is ${this.transactionDestinations.size}")
+            Timber.w("Attempted to fill at index $index but the length of existing transaction destinations is ${this.transactionDestinations.size}")
             return
         }
         this.transactionDestinations = this.transactionDestinations.replaceElementWithList(index, transactionDestinations)
@@ -95,9 +104,21 @@ class AdapterTransactionDestination(
         notifyDataSetChanged()
     }
 
+    fun insertContact(contact: Contact, index: Int) {
+        if (index > this.transactionDestinations.size) {
+            Timber.w("Attempted to insert contact at index $index but the length of transaction destinations is ${this.transactionDestinations.size}")
+            return
+        }
+        val transactionDestinations = this.transactionDestinations.toMutableList()
+        transactionDestinations[index] = transactionDestinations[index].copy(value = contact.address, recipientName = contact.name)
+        this.transactionDestinations = transactionDestinations
+        notifyItemChanged(index)
+    }
+
     interface Listener {
 
         fun onScanRequested(position: Int)
+        fun onAddressBookRequested(position: Int)
     }
 
     interface ViewHolderListener {
@@ -105,8 +126,10 @@ class AdapterTransactionDestination(
         fun onSendAllClicked()
         fun onRemoveClicked()
         fun onAmountChanged(amount: String)
+        fun onRecipientNameChanged(recipientName: String)
         fun onAddressChanged(address: String)
         fun onScanRequested()
+        fun onAddressBookRequested()
     }
 
     inner class ViewHolderListenerImpl(val index: Int) : ViewHolderListener {
@@ -130,6 +153,10 @@ class AdapterTransactionDestination(
             transactionDestinations.getOrNull(index)?.amount = amount
         }
 
+        override fun onRecipientNameChanged(recipientName: String) {
+            transactionDestinations.getOrNull(index)?.recipientName = recipientName
+        }
+
         override fun onAddressChanged(address: String) {
             transactionDestinations.getOrNull(index)?.value = address
         }
@@ -137,15 +164,22 @@ class AdapterTransactionDestination(
         override fun onScanRequested() {
             this@AdapterTransactionDestination.listener.onScanRequested(index)
         }
+
+        override fun onAddressBookRequested() {
+            this@AdapterTransactionDestination.listener.onAddressBookRequested(index)
+        }
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
         private val transactionDestinationRemoveImageButton: ImageButton = itemView.findViewById(R.id.transaction_destination_remove_image_button)
         private val transactionDestinationScanImageButton: ImageButton = itemView.findViewById(R.id.transaction_destination_scan_image_button)
-        private val transactionDestinationAmountLabelTextView: TextView = itemView.findViewById(R.id.transaction_destination_amount_label_textview);
+        private val transactionDestinationAddressBookImageButton: ImageButton = itemView.findViewById(R.id.transaction_destination_address_book_button)
+        private val transactionDestinationAmountLabelTextView: TextView = itemView.findViewById(R.id.transaction_destination_amount_label_textview)
         private val transactionDestinationAmountEditText: EditText = itemView.findViewById(R.id.transaction_destination_amount_edittext)
-        private val transactionDestinationAddressLabelTextView: TextView = itemView.findViewById(R.id.transaction_destination_address_label_textview);
+        private val transactionDestinationAddressLabelTextView: TextView = itemView.findViewById(R.id.transaction_destination_address_label_textview)
+        private val transactionDestinationRecipientNameLabelTextView: TextView = itemView.findViewById(R.id.transaction_destination_recipient_name_label_textview)
+        private val transactionDestinationRecipientNameEditText: EditText = itemView.findViewById(R.id.transaction_destination_recipient_name_edittext)
         private val transactionDestinationAddressEditText: EditText = itemView.findViewById(R.id.transaction_destination_address_edittext)
         private val transactionDestinationAmountSendAllButton: Button = itemView.findViewById(R.id.transaction_destination_amount_send_all_button)
         private val transactionDestinationDonateLabelTextView: TextView = itemView.findViewById(R.id.transaction_destination_donate_label_text_view)
@@ -171,10 +205,21 @@ class AdapterTransactionDestination(
             enabled: Boolean,
             sendAll: SendAll,
             index: Int,
-            listener: ViewHolderListener
+            addressBookEnabled: Boolean,
+            listener: ViewHolderListener,
         ) {
             Helper.clearEditTextListeners(transactionDestinationAmountEditText)
             Helper.clearEditTextListeners(transactionDestinationAddressEditText)
+            Helper.clearEditTextListeners(transactionDestinationRecipientNameEditText)
+            if (addressBookEnabled) {
+                transactionDestinationRecipientNameLabelTextView.visibility = View.VISIBLE
+                transactionDestinationRecipientNameEditText.visibility = View.VISIBLE
+                transactionDestinationAddressBookImageButton.visibility = View.VISIBLE
+            } else {
+                transactionDestinationRecipientNameLabelTextView.visibility = View.GONE
+                transactionDestinationRecipientNameEditText.visibility = View.GONE
+                transactionDestinationAddressBookImageButton.visibility = View.GONE
+            }
             val single = when (sendAll) {
                 SendAll.UNSELECTED -> true
                 SendAll.SELECTED -> true
@@ -242,6 +287,13 @@ class AdapterTransactionDestination(
                     updateDonateLabel(isDonatingAddress(s.toString()))
                 }
             })
+            transactionDestinationRecipientNameEditText.setText(transactionDestination.recipientName)
+            transactionDestinationRecipientNameEditText.setFocusableInTouchMode(enabled)
+            transactionDestinationRecipientNameEditText.addTextChangedListener(object : SimpleTextWatcher() {
+                override fun afterTextChanged(s: Editable) {
+                    listener.onRecipientNameChanged(s.toString())
+                }
+            })
             if (enabled) {
                 transactionDestinationDonateLabelTextView.setOnClickListener {
                     val isDonatingAddress = isDonatingAddress(transactionDestinationAddressEditText.text.toString())
@@ -259,9 +311,13 @@ class AdapterTransactionDestination(
                 transactionDestinationScanImageButton.setOnClickListener {
                     listener.onScanRequested()
                 }
+                transactionDestinationAddressBookImageButton.setOnClickListener {
+                    listener.onAddressBookRequested()
+                }
             } else {
                 transactionDestinationScanImageButton.setImageDrawable(getTintedScanTransactionDestinationDrawable(false))
                 transactionDestinationScanImageButton.setOnClickListener(null)
+                transactionDestinationAddressBookImageButton.setOnClickListener(null)
             }
             updateDonateLabel(isDonatingAddress(transactionDestinationAddressEditText.text.toString()))
         }

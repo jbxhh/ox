@@ -37,6 +37,7 @@ import org.monfluo.wallet.model.PendingTransaction
 import org.monfluo.wallet.model.TransactionDestinationWithAmount
 import org.monfluo.wallet.model.TransactionDestinationRaw
 import org.monfluo.wallet.model.Wallet
+import org.monfluo.wallet.model.Contact
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
@@ -71,8 +72,20 @@ class ActivitySend : ActivityMonero() {
         }
     }
 
+    private val startActivityToSelectContact = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        Timber.d("Select contact callback received")
+        val contact = result.data?.extras?.getParcelable<Contact>(Constants.EXTRA_CONTACT)
+        if (contact == null) {
+            Timber.i("Activity started to send select contact returned no contact")
+        } else {
+            val contactIndex = viewModel.contactIndex
+            Timber.i("Inserting contact at position $contactIndex")
+            adapterTransactionDestination.insertContact(contact, contactIndex)
+        }
+    }
+
     private val startActivityToScanTransactionDestination = registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
-        Timber.d("Scan transaction detination callback received")
+        Timber.d("Scan transaction destination callback received")
         val contents = result.contents
         if (contents.isNullOrEmpty()) {
             Timber.d("Contents received from scan transaction destination callback is null or empty")
@@ -86,7 +99,7 @@ class ActivitySend : ActivityMonero() {
         }
         val scanIndex = viewModel.scanIndex
         val transactionDestinations = uriPayment.toTransactionDestinationRawList()
-        Timber.i("Inserting ${transactionDestinations.size} transaction destinations at position ${scanIndex}")
+        Timber.i("Inserting ${transactionDestinations.size} transaction destinations at position $scanIndex")
         adapterTransactionDestination.replaceElementWithList(transactionDestinations, scanIndex)
         if (uriPayment.description != null) {
             transactionDescriptionEditText.setText(uriPayment.description)
@@ -132,6 +145,11 @@ class ActivitySend : ActivityMonero() {
             override fun onScanRequested(position: Int) {
                 viewModel.scanIndex = position
                 scanTransactionDestination()
+            }
+
+            override fun onAddressBookRequested(position: Int) {
+                viewModel.contactIndex = position
+                startActivityToSelectContact.launch(Intent(this@ActivitySend, ActivityContactList::class.java))
             }
         })
 
@@ -191,6 +209,31 @@ class ActivitySend : ActivityMonero() {
             if (wallet == null) {
                 Toast.makeText(this, getString(R.string.activity_send_transaction_create_failed_no_wallet_toast), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
+            }
+
+            if (viewModel.enableAddressBook.value!!) {
+                var recipientSaved = false
+                for (transactionDestination in adapterTransactionDestination.getTransactionDestinations()) {
+                    val recipientName = transactionDestination.recipientName.takeIf { !it.isBlank() }
+                    val address = transactionDestination.value
+                    if (recipientName != null) {
+                        if (wallet.getContacts().any { it.address == address }) {
+                            Timber.i("Skipping saving recipient $recipientName because address $address is already in address book")
+                        } else {
+                            if (wallet.addContact(Contact(recipientName, address))) {
+                                Timber.i("Saved recipient $recipientName with address $address")
+                                recipientSaved = true
+                            } else {
+                                Timber.w("Failed to save recipient $recipientName with address $address")
+                            }
+                        }
+                    }
+                }
+                if (recipientSaved) {
+                    Timber.i("Storing and updating wallet after saving recipient(s)")
+                    wallet.store()
+                    wallet.update()
+                }
             }
 
             val sendAll = adapterTransactionDestination.getSendAll().value!!
@@ -284,9 +327,13 @@ class ActivitySend : ActivityMonero() {
 
         val isMultiAccountMode = PreferenceUtils.isMultiAccountMode(this)
         val isAllowFeeOverride = PreferenceUtils.isAllowFeeOverride(this)
+        val isAddressBookEnabled = PreferenceUtils.isEnableAddressBook(this)
 
         viewModel.multiAccountMode.value = isMultiAccountMode
         viewModel.allowFeeOverride.value = isAllowFeeOverride
+        viewModel.enableAddressBook.value = isAddressBookEnabled
+
+        adapterTransactionDestination.setAddressBookEnabled(isAddressBookEnabled)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -399,10 +446,12 @@ class ActivitySend : ActivityMonero() {
 class SendViewModel : ViewModel() {
 
     var scanIndex: Int = 0
+    var contactIndex: Int = 0
 
     val enotes = MutableLiveData<List<String>?>(null)
     val enotesValue = MutableLiveData<Long?>(null)
     var priority = MutableLiveData(PendingTransaction.Priority.Priority_Default)
     val multiAccountMode = MutableLiveData(false)
     val allowFeeOverride = MutableLiveData(false)
+    val enableAddressBook = MutableLiveData(false)
 }

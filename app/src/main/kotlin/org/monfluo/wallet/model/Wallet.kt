@@ -28,10 +28,12 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     private var balances: Map<Int, Balance>? = null
     private var history: Map<Int, List<TransactionInfo>>? = null
     private var historyByTxId: Map<Int, Map<String, TransactionInfo>>? = null
+    private var contacts: List<Contact>? = null
 
     fun update() {
         refreshEnotes()
         refreshTransactionHistory()
+        refreshAddressBook()
     }
 
     fun getAccountIndex(): Int {
@@ -80,6 +82,10 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
         this.historyByTxId = transactionInfos.mapValues { it.value.associateBy { it.hash ?: "" } }
     }
 
+    fun refreshAddressBook() {
+        this.contacts = getAddressBook().getContacts()
+    }
+
     fun getHistories(): Map<Int, List<TransactionInfo>> {
         if (history == null) {
             refreshTransactionHistory()
@@ -119,8 +125,43 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     external fun getLegacySeed(offset: String?): String?
     external fun isPolyseedSupported(): Boolean
     external fun getPolyseedSeedAndPassphrase(): Pair<String, String>?
+
     fun getTransactionHistory(): TransactionHistory {
         return TransactionHistory(getHistoryJ())
+    }
+
+    private external fun getAddressBookJ(): Long
+
+    private fun getAddressBook(): AddressBook {
+        return AddressBook(getAddressBookJ())
+    }
+
+    fun getContacts(): List<Contact> {
+        if (contacts == null) {
+            refreshAddressBook()
+        }
+        return contacts!!
+    }
+
+    fun addContact(contact: Contact): Boolean {
+        val result = getAddressBook().addContact(contact)
+        store()
+        refreshAddressBook()
+        return result
+    }
+
+    fun renameContact(contact: Contact): Boolean {
+        val result = getAddressBook().setName(contact.index, contact.name)
+        store()
+        refreshAddressBook()
+        return result
+    }
+
+    fun deleteContact(contact: Contact): Boolean {
+        val result = getAddressBook().delete(contact.index)
+        store()
+        refreshAddressBook()
+        return result
     }
 
     external fun getPassword(): String
