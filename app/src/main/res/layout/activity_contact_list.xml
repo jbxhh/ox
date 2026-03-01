@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/contacts_activity_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/padding_big"
+    tools:context="org.monfluo.wallet.activity.ActivityContactList">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/header_layout_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:paddingBottom="@dimen/padding_big"
+        tools:ignore="UseCompoundDrawables">
+
+        <ImageView
+            android:id="@+id/back_imageview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:minHeight="32dp"
+            android:minWidth="32dp"
+            android:src="@drawable/left"
+            android:contentDescription="@string/content_description_back" />
+
+        <TextView
+            android:id="@+id/header_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/back_imageview"
+            app:layout_constraintTop_toTopOf="@id/back_imageview"
+            app:layout_constraintBottom_toBottomOf="@id/back_imageview"
+            android:text="@string/contacts_header"
+            android:textSize="@dimen/text_bigger"
+            android:textStyle="bold"
+            android:textColor="?attr/colorOnPrimary" />
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/network_status_fragment"
+            android:name="org.monfluo.wallet.fragment.FragmentNetworkStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:background="@color/transparent"
+            tools:layout="@layout/fragment_network_status" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/contacts_recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_layout_view"
+        app:layout_constraintBottom_toTopOf="@id/add_contact_button"
+        tools:listitem="@layout/recycler_view_item_contact" />
+
+    <Button
+        android:id="@+id/add_contact_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="1"
+        android:background="@drawable/button_background"
+        android:text="@string/activity_contact_list_create_button" />
+</androidx.constraintlayout.widget.ConstraintLayout>

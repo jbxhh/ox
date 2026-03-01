@@ -33,6 +33,7 @@ static jclass class_TransactionInfo;
 static jclass class_Transfer;
 static jclass class_WalletStatusWithError;
 static jclass class_CoinsInfo;
+static jclass class_Contact;
 static jclass class_Pair;
 
 std::mutex _listenerMutex;
@@ -56,6 +57,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
     class_WalletListener = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/model/WalletListener")));
     class_WalletStatusWithError = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/model/WalletStatusWithError")));
     class_CoinsInfo = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/model/Enote")));
+    class_Contact = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/model/Contact")));
     return JNI_VERSION_1_6;
 }
 #ifdef __cplusplus
@@ -1139,6 +1141,17 @@ jobject newCoinsInfo(JNIEnv *env, const Monero::Enote& info) {
     return result;
 }
 
+jobject newContact(JNIEnv *env, const Monero::AddressBookRow& contact) {
+    jmethodID c = env->GetMethodID(class_Contact, "<init>", "(ILjava/lang/String;Ljava/lang/String;)V");
+    jstring _name = env->NewStringUTF(contact.getDescription().c_str());
+    jstring _address = env->NewStringUTF(contact.getAddress().c_str());
+    jobject result = env->NewObject(class_Contact, c, static_cast<jint>(contact.getRowId()), _name, _address);
+
+    env->DeleteLocalRef(_name);
+    env->DeleteLocalRef(_address);
+    return result;
+}
+
 jobject coins_cpp2java(JNIEnv *env, const std::vector<Monero::Enote>& vector) {
 
     jmethodID java_util_ArrayList_ = env->GetMethodID(class_ArrayList, "<init>", "(I)V");
@@ -1178,6 +1191,12 @@ JNIEXPORT jlong JNICALL
 Java_org_monfluo_wallet_model_Wallet_getHistoryJ(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return reinterpret_cast<jlong>(wallet->history());
+}
+
+JNIEXPORT jlong JNICALL
+Java_org_monfluo_wallet_model_Wallet_getAddressBookJ(JNIEnv *env, jobject instance) {
+    auto *wallet = getHandle<Monero::Wallet>(env, instance);
+    return reinterpret_cast<jlong>(wallet->addressBook());
 }
 
 JNIEXPORT jlong JNICALL
@@ -1407,7 +1426,66 @@ Java_org_monfluo_wallet_model_TransactionHistory_getAllJ(JNIEnv *env, jobject in
     return cpp2java(env, history->getAll());
 }
 
-// TransactionInfo is implemented in Java - no need here
+JNIEXPORT jobject JNICALL
+Java_org_monfluo_wallet_model_AddressBook_getContacts(JNIEnv *env, jobject instance) {
+    auto *addressBook = getHandle<Monero::AddressBook>(env, instance);
+
+    std::vector<Monero::AddressBookRow*> all = addressBook->getAll();
+
+    jmethodID java_util_ArrayList_ = env->GetMethodID(class_ArrayList, "<init>", "(I)V");
+    jmethodID java_util_ArrayList_add = env->GetMethodID(class_ArrayList, "add", "(Ljava/lang/Object;)Z");
+
+    jobject arrayList = env->NewObject(class_ArrayList, java_util_ArrayList_, static_cast<jint>(all.size()));
+    for (const Monero::AddressBookRow* row : all) {
+        jobject contact = newContact(env, *row);
+        env->CallBooleanMethod(arrayList, java_util_ArrayList_add, contact);
+        env->DeleteLocalRef(contact);
+    }
+
+    return arrayList;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_monfluo_wallet_model_AddressBook_addContact(JNIEnv *env, jobject instance, jobject contact) {
+    auto *addressBook = getHandle<Monero::AddressBook>(env, instance);
+
+    jmethodID monfluo_Contact_name = env->GetMethodID(class_Contact, "getName", "()Ljava/lang/String;");
+    jmethodID monfluo_Contact_address = env->GetMethodID(class_Contact, "getAddress", "()Ljava/lang/String;");
+
+    jstring java_name = (jstring) env->CallObjectMethod(contact, monfluo_Contact_name);
+    const char* _name = env->GetStringUTFChars(java_name, nullptr);
+    jstring java_address = (jstring) env->CallObjectMethod(contact, monfluo_Contact_address);
+    const char* _address = env->GetStringUTFChars(java_address, nullptr);
+
+    bool result = addressBook->addRow(std::string(_address), std::string(), std::string(_name));
+
+    env->ReleaseStringUTFChars(java_name, _name);
+    env->ReleaseStringUTFChars(java_address, _address);
+
+    return static_cast<jboolean>(result);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_monfluo_wallet_model_AddressBook_setName(JNIEnv *env, jobject instance, jint index, jstring name) {
+    auto *addressBook = getHandle<Monero::AddressBook>(env, instance);
+
+    const char* _name = env->GetStringUTFChars(name, nullptr);
+
+    bool result = addressBook->setDescription(static_cast<std::size_t>(index), std::string(_name));
+
+    env->ReleaseStringUTFChars(name, _name);
+
+    return static_cast<jboolean>(result);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_monfluo_wallet_model_AddressBook_delete(JNIEnv *env, jobject instance, jint index) {
+    auto *addressBook = getHandle<Monero::AddressBook>(env, instance);
+
+    bool result = addressBook->deleteRow(static_cast<std::size_t>(index));
+
+    return static_cast<jboolean>(result);
+}
 
 JNIEXPORT jint JNICALL
 Java_org_monfluo_wallet_model_PendingTransaction_getStatusJ(JNIEnv *env, jobject instance) {

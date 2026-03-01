@@ -93,6 +93,10 @@ object PreferenceUtils {
 
     fun setForceUriFormatQrCodes(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_FORCE_URI_FORMAT_QR_CODES, value)
 
+    fun isEnableAddressBook(context: Context): Boolean = getBoolean(context, Constants.PREF_ENABLE_ADDRESS_BOOK, false)
+
+    fun setEnableAddressBook(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_ENABLE_ADDRESS_BOOK, value)
+
     fun getProxy(context: Context): String? = getString(context, Constants.PREF_PROXY)
 
     fun setProxy(context: Context, value: String) = setString(context, Constants.PREF_PROXY, value)

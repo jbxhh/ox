@@ -27,6 +27,7 @@ object Constants {
     const val PREF_MAX_BRIGHTNESS_QR_CODES = "pref_max_brightness_qr_codes"
     const val PREF_FORCE_URI_FORMAT_QR_CODES = "pref_force_uri_format_qr_codes"
     const val PREF_POST_NOTIFICATIONS_PERMISSION_REQUESTED = "pref_post_notifications_permission_requested"
+    const val PREF_ENABLE_ADDRESS_BOOK = "pref_enable_address_book"
 
     const val URI_ARG_AMOUNT = "tx_amount"
     const val URI_ARG_AMOUNT2 = "amount"
@@ -58,6 +59,7 @@ object Constants {
     const val EXTRA_ENOTE = "enote"
     const val EXTRA_ENOTES = "enotes"
     const val EXTRA_NODE_NAME = "node_name"
+    const val EXTRA_CONTACT = "contact"
 
     // Donation address is also specified in strings.xml, it is used as a tooltip in address fields
     const val DONATE_ADDRESS = "48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ"

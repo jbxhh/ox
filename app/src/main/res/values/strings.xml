@@ -101,6 +101,8 @@
     <string name="allow_copying_secrets_to_clipboard">Allow copying secrets to clipboard</string>
     <!-- Label for showing transfer notifications setting toggle -->
     <string name="show_transfer_notifications">Show transfer notifications</string>
+    <!-- Label for showing transfer notifications setting toggle -->
+    <string name="enable_address_book">Enable address book</string>
     <!-- Label for showing icon on QR codes setting toggle -->
     <string name="show_icon_on_qr_codes">Show icon on QR codes</string>
     <!-- Label for auto rotating addresses setting toggle -->
@@ -286,6 +288,9 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="settings_features_header">Features</string>
     <string name="settings_behaviour_header">Behaviour</string>
     <string name="settings_security_header">Security</string>
+    <string name="contacts_header">Contacts</string>
+    <string name="add_contact_header">Add contact</string>
+    <string name="contact_details_header">Contact details</string>
 
     <string name="activity_wallet_create_wallet_name_label">Name</string>
     <string name="activity_wallet_create_wallet_password_label">Password</string>
@@ -333,6 +338,9 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="recycler_view_item_transaction_destination_amount_with_position_label">Amount #<xliff:g>%1$d</xliff:g></string>
     <string name="recycler_view_item_transaction_destination_address_label">Address</string>
     <string name="recycler_view_item_transaction_destination_address_with_position_label">Address #<xliff:g>%1$d</xliff:g></string>
+    <string name="recycler_view_item_transaction_destination_recipient_name_label">Recipient name</string>
+    <string name="recycler_view_item_transaction_destination_recipient_name_with_position_label">Recipient name #<xliff:g>%1$d</xliff:g></string>
+    <string name="recycler_view_item_transaction_destination_recipient_name_hint">Recipient name (optional)</string>
     <!-- Button for sending all available funds -->
     <string name="recycler_view_item_transaction_destination_send_all_label">Max</string>
     <!-- Button shown in place of send all button after it is clicked to toggle it back -->
@@ -341,6 +349,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="recycler_view_item_transaction_destination_sending_all_text">SENDING ALL</string>
     <string name="recycler_view_item_transaction_destination_donate_label">Donate to Monfluo</string>
     <string name="recycler_view_item_transaction_destination_donating_label">Donating to Monfluo. Thank you!</string>
+    <string name="recycler_view_item_transaction_destination_address_book_description">Choose contact from address book</string>
     <string name="recycler_view_item_transaction_destination_scan_content_description">Scan destination from QR code</string>
 
     <string name="recycler_view_item_transaction_pending_description_label">Description</string>
@@ -386,6 +395,26 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="activity_address_details_name_label">Name</string>
     <string name="activity_address_details_name_hint">My Address</string>
     <string name="activity_address_details_save_button">Save</string>
+
+    <string name="activity_contact_list_create_button">Add contact</string>
+
+    <string name="activity_contact_add_name_label">Name</string>
+    <string name="activity_contact_add_name_hint">Contact name</string>
+    <string name="activity_contact_add_address_label">Address</string>
+    <string name="activity_contact_add_address_hint">Contact address</string>
+    <string name="activity_contact_add_create_button">Add</string>
+    <string name="activity_contact_add_toast_contact_created">Contact created</string>
+    <string name="activity_contact_add_toast_failed_to_create_contact">Failed to create contact</string>
+
+    <string name="activity_contact_details_name_label">Name</string>
+    <string name="activity_contact_details_name_hint">Contact name</string>
+    <string name="activity_contact_details_address_label">Address</string>
+    <string name="activity_contact_details_delete_button">Delete</string>
+    <string name="activity_contact_details_save_button">Save</string>
+    <string name="activity_contact_details_toast_contact_deleted">Contact deleted</string>
+    <string name="activity_contact_details_toast_failed_to_delete_contact">Failed to delete contact</string>
+    <string name="activity_contact_details_toast_contact_saved">Contact saved</string>
+    <string name="activity_contact_details_toast_failed_to_save_contact">Failed to save contact</string>
 
     <string name="activity_node_add_node_name_label">Name</string>
     <string name="activity_node_add_node_name_placeholder">My Monero Node</string>

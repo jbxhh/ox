@@ -54,6 +54,7 @@ class ActivityApplicationSettings : ActivityMonero() {
     private lateinit var buildApplicationIdTextView: TextView
     private lateinit var buildApplicationVersionTextView: TextView
     private lateinit var buildMoneroVersionTextView: TextView
+    private lateinit var enableAddressBookSwitch: SwitchCompat
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,6 +83,7 @@ class ActivityApplicationSettings : ActivityMonero() {
         buildApplicationIdTextView = findViewById(R.id.monfluo_build_application_id_textview)
         buildApplicationVersionTextView = findViewById(R.id.monfluo_build_application_version_textview)
         buildMoneroVersionTextView = findViewById(R.id.monfluo_build_monero_version_textview)
+        enableAddressBookSwitch = findViewById(R.id.enable_address_book_switch)
 
         val isMultiWalletMode = PreferenceUtils.isMultiWalletMode(applicationContext)
         val isMultiAccountMode = PreferenceUtils.isMultiAccountMode(applicationContext)
@@ -95,6 +97,7 @@ class ActivityApplicationSettings : ActivityMonero() {
         val isBalanceTapTogglesStreetMode = PreferenceUtils.isBalanceTapTogglesStreetMode(applicationContext)
         val isMaxBrightnessQrCodes = PreferenceUtils.isMaxBrightnessQrCodes(applicationContext)
         val isForceUriFormatQrCodes = PreferenceUtils.isForceUriFormatQrCodes(applicationContext)
+        val isAddressBookEnabled = PreferenceUtils.isEnableAddressBook(applicationContext)
         val isUseProxy = PreferenceUtils.isUseProxy(applicationContext)
 
         multiWalletModeSwitch.isChecked = isMultiWalletMode
@@ -109,6 +112,7 @@ class ActivityApplicationSettings : ActivityMonero() {
         balanceTapTogglesStreetModeSwitch.isChecked = isBalanceTapTogglesStreetMode
         maxBrightnessQrCodesSwitch.isChecked = isMaxBrightnessQrCodes
         forceUriFormatQrCodesSwitch.isChecked = isForceUriFormatQrCodes
+        enableAddressBookSwitch.isChecked = isAddressBookEnabled
         proxySwitch.isChecked = isUseProxy
 
         walletProxyAddressEditText.setText(PreferenceUtils.getProxy(this) ?: "")
@@ -184,6 +188,9 @@ class ActivityApplicationSettings : ActivityMonero() {
         }
         proxySwitch.setOnCheckedChangeListener { _, b: Boolean ->
             PreferenceUtils.setUseProxy(applicationContext, b)
+        }
+        enableAddressBookSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PreferenceUtils.setEnableAddressBook(applicationContext, b)
         }
 
         selectNodeButton.setOnClickListener {
