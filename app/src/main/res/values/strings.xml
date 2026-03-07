@@ -156,6 +156,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="proxy_address_hint">127.0.0.1:9050</string>
     <string name="node_button_text">Node: %1$s</string>
     <string name="settings_save_proxy">Save &amp; update</string>
+    <string name="settings_build_version" translatable="false"><xliff:g>%1$s</xliff:g> (<xliff:g>%2$d</xliff:g>)</string>
     <string name="global_index_text">%1$s</string>
     <string name="outpoint_text">%1$s</string>
     <string name="create_wallet_failed">Create wallet failed: %1$s</string>
