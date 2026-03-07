@@ -27,15 +27,15 @@ build-release:
     ./gradlew -P monfluo-all -P monfluo-universal assembleRelease
 
 test:
-    ./gradlew test -i
+    ./gradlew test
 
 install: install-debug
 
 install-release:
-    adb install app/build/outputs/apk/release/monfluo-*-arm64-v8a.apk
+    adb install app/build/outputs/apk/release/monfluo-arm64-v8a-release.apk
 
 install-debug:
-    adb install app/build/outputs/apk/debug/monfluo-*-arm64-v8a.apk
+    adb install app/build/outputs/apk/debug/monfluo-arm64-v8a-debug.apk
 
 kill-release:
     adb shell am force-stop org.monfluo.wallet.beta
