@@ -114,9 +114,11 @@ jobs:
           name: native-libs-x86_64
           path: external-libs/build/x86_64
 # </X86_64>
-      - name: Run tests
-        run: ./gradlew test -i
-      - name: Build APKs
+      - name: Run tests and make sure release build succeeds
+        run: |
+          ./gradlew test -i
+          ./gradlew -P monfluo-all -P monfluo-universal assembleRelease
+      - name: Build debug APKs
         run: ./gradlew -P monfluo-all -P monfluo-universal assembleDebug
       - name: Upload built APKs
         uses: actions/upload-artifact@v3

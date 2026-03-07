@@ -123,7 +123,8 @@ class ActivityApplicationSettings : ActivityMonero() {
         aboutMonfluoTextView.movementMethod = LinkMovementMethod.getInstance()
 
         buildApplicationIdTextView.text = BuildConfig.APPLICATION_ID
-        buildApplicationVersionTextView.text = BuildConfig.VERSION_NAME
+        buildApplicationVersionTextView.text = getString(R.string.settings_build_version, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)
+
         buildMoneroVersionTextView.text = WalletManager.moneroVersion()
 
         bindWindowInsetsListener()
