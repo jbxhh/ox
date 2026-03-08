@@ -105,12 +105,6 @@
     <string name="copy_wallet_s_public_view_key">Salin kunci tampilan publik dompet</string>
     <string name="copy_wallet_s_private_spend_key">Salin kunci pengeluaran pribadi dompet</string>
     <string name="copy_wallet_s_public_spend_key">Salin kunci pengeluaran publik dompet</string>
-    <string name="paste_clipboard_into_amount_field">Tempel isi clipboard ke kolom jumlah</string>
-    <string name="paste_clipboard_into_address_field">Tempel isi clipboard ke kolom alamat</string>
-    <string name="remove_recipient_from_transaction">Hapus penerima dari transaksi</string>
-    <string name="scan_qr_code_for_address_field">Pindai kode QR untuk kolom alamat</string>
-    <string name="copy_transaction_hash">Salin hash transaksi</string>
-    <string name="copy_transaction_addr">Salin alamat transaksi</string>
     <string name="seed_desc_polyseed">16 kata, bukan 25; sama amannya, tetapi saat ini belum didukung secara luas.</string>
     <string name="seed_desc_legacy">Seed lama berisi 25 kata; didukung di semua dompet Monero.</string>
     <string name="approve_the_transaction">Kirim transaksi</string>
