@@ -887,6 +887,18 @@ std::vector<std::pair<std::string, std::string>> Wallet::getPolyseedLanguages()
     return languages;
 }
 
+bool Wallet::isEncryptedPolyseed(const std::string &polyseed)
+{
+    try {
+        polyseed::data decoded(POLYSEED_COIN);
+        decoded.decode(polyseed.c_str());
+        return decoded.encrypted();
+    }
+    catch (const std::exception &) {
+        return false;
+    }
+}
+
 bool Wallet::createPolyseed(std::string &seed_words, std::string &err, const std::string &language)
 {
     epee::wipeable_string seed_words_epee(seed_words.c_str(), seed_words.size());
