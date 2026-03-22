@@ -21,8 +21,11 @@ import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.name
 
-class Wallet(private val handle: Long, val info: WalletInfo, private var accountIndex: Int = 0) {
-
+class Wallet(
+    private val handle: Long,
+    val info: WalletInfo,
+    private var accountIndex: Int = 0,
+) {
     private var listenerHandle: Long = 0
     private var enotes: List<Enote>? = null
     private var balances: Map<Int, Balance>? = null
@@ -36,9 +39,7 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
         refreshAddressBook()
     }
 
-    fun getAccountIndex(): Int {
-        return accountIndex
-    }
+    fun getAccountIndex(): Int = accountIndex
 
     fun setAccountIndex(accountIndex: Int) {
         Timber.d("Account changed to index $accountIndex")
@@ -104,8 +105,8 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
 
     fun getTransaction(txId: String): TransactionInfo? = getHistoriesByTxId()[accountIndex]?.get(txId)
 
-    private fun calculateBalances(enotes: List<Enote>): Map<Int, Balance> {
-        return (0 until getNumAccounts()).associateWith { accountIndex ->
+    private fun calculateBalances(enotes: List<Enote>): Map<Int, Balance> =
+        (0 until getNumAccounts()).associateWith { accountIndex ->
             val totalBalance = getBalance(accountIndex)
             val unlockedBalance = getUnlockedBalance(accountIndex)
             val pendingBalance = totalBalance - unlockedBalance
@@ -113,28 +114,26 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
             val frozenBalance = enotes.filter { it.isFrozen && it.address?.let { address -> addresses.contains(address) } ?: false }.sumOf { it.amount }
             Balance(totalBalance, unlockedBalance, frozenBalance, pendingBalance)
         }
-    }
-
 
     external fun freeze(idx: Long)
+
     external fun thaw(idx: Long)
 
     fun name(): String = getPath()?.let { Path(it).name }.toString()
 
     external fun getSeed(offset: String): String
+
     external fun getLegacySeed(offset: String?): String?
+
     external fun isPolyseedSupported(): Boolean
+
     external fun getPolyseedSeedAndPassphrase(): Pair<String, String>?
 
-    fun getTransactionHistory(): TransactionHistory {
-        return TransactionHistory(getHistoryJ())
-    }
+    fun getTransactionHistory(): TransactionHistory = TransactionHistory(getHistoryJ())
 
     private external fun getAddressBookJ(): Long
 
-    private fun getAddressBook(): AddressBook {
-        return AddressBook(getAddressBookJ())
-    }
+    private fun getAddressBook(): AddressBook = AddressBook(getAddressBookJ())
 
     fun getContacts(): List<Contact> {
         if (contacts == null) {
@@ -169,18 +168,26 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     @Synchronized
     external fun setPassword(password: String): Boolean
 
-    fun getAddress(accountIndex: Int, addressIndex: Int): String {
-        return getAddressJ(accountIndex, addressIndex)
-    }
+    fun getAddress(
+        accountIndex: Int,
+        addressIndex: Int,
+    ): String = getAddressJ(accountIndex, addressIndex)
 
-    private external fun getAddressJ(accountIndex: Int, addressIndex: Int): String
+    private external fun getAddressJ(
+        accountIndex: Int,
+        addressIndex: Int,
+    ): String
 
-    private fun getAddressObject(accountIndex: Int, addressIndex: Int): Address {
-        return Address(
-            accountIndex, addressIndex,
-            getAddress(accountIndex, addressIndex), getAddressLabel(accountIndex, addressIndex)
+    private fun getAddressObject(
+        accountIndex: Int,
+        addressIndex: Int,
+    ): Address =
+        Address(
+            accountIndex,
+            addressIndex,
+            getAddress(accountIndex, addressIndex),
+            getAddressLabel(accountIndex, addressIndex),
         )
-    }
 
     fun getAddressObject(subAddressIndex: Int): Address {
         val subaddress = getAddressObject(accountIndex, subAddressIndex)
@@ -198,43 +205,48 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     }
 
     external fun getPath(): String?
+
     fun networkType(): MoneroNetworkType = MoneroNetworkType.fromInteger(nettype())!!
 
     external fun nettype(): Int
 
     external fun getIntegratedAddress(paymentId: String?): String?
+
     external fun getSecretViewKey(): String
+
     external fun getPublicViewKey(): String
+
     external fun getSecretSpendKey(): String
+
     external fun getPublicSpendKey(): String
 
-    fun store(): Boolean {
-        return store("")
-    }
+    fun store(): Boolean = store("")
 
     @Synchronized
     external fun store(path: String?): Boolean
-    fun close(): Boolean {
-        return WalletManager.instance.closeJ(this)
-    }
+
+    fun close(): Boolean = WalletManager.instance.closeJ(this)
 
     external fun getFilename(): String
 
     external fun initJ(
-        daemonAddress: String, upperTransactionSizeLimit: Long,
-        daemonUsername: String, daemonPassword: String, proxyAddress: String
+        daemonAddress: String,
+        upperTransactionSizeLimit: Long,
+        daemonUsername: String,
+        daemonPassword: String,
+        proxyAddress: String,
     ): Boolean
 
     external fun getRestoreHeight(): Long
+
     external fun setRestoreHeight(height: Long)
 
-    fun getAdjustedRestoreHeight(): Long {
-        return getEnotes()
+    fun getAdjustedRestoreHeight(): Long =
+        getEnotes()
             .filter { !it.isSpent }
             .map { it.height }
             .minOrNull()
             ?: getRestoreHeight()
-    }
 
     val connectionStatus: ConnectionStatus
         get() {
@@ -243,6 +255,7 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
         }
 
     private external fun getConnectionStatusJ(): Int
+
     fun setTrustedDaemon(trusted: Boolean) {
         setTrustedDaemonJ(trusted)
     }
@@ -251,26 +264,29 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
 
     private external fun isTrustedDaemonJ(): Boolean
 
-    fun setProxy(address: String?): Boolean {
-        return setProxyJ(address)
-    }
+    fun setProxy(address: String?): Boolean = setProxyJ(address)
 
     private external fun setProxyJ(address: String?): Boolean
 
     private external fun getBalance(accountIndex: Int): Long
+
     external fun getBalanceAll(): Long
+
     val unlockedBalance: Long
         get() = getUnlockedBalance(accountIndex)
 
     external fun getUnlockedBalanceAll(): Long
 
     external fun getUnlockedBalance(accountIndex: Int): Long
+
     external fun isWatchOnly(): Boolean
 
     external fun getBlockChainHeightJ(): Long
+
     external fun getApproximateBlockChainHeight(): Long
 
     external fun getDaemonBlockChainHeightJ(): Long
+
     external fun getDaemonBlockChainTargetHeight(): Long
 
     fun startRefresh() {
@@ -278,39 +294,58 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
     }
 
     private external fun startRefreshJ()
+
     external fun pauseRefresh()
+
     external fun refresh(): Boolean
+
     external fun refreshAsync()
+
     private external fun rescanBlockchainAsyncJ()
 
     private external fun estimateTransactionFee(
         destinations: List<Pair<String, Long>>,
-        priority: Int
+        priority: Int,
     ): Long
 
     external fun createTransactionMultDestJ(
-        dstAddrs: List<String>, paymentId: String,
-        amount: LongArray, mixinCount: Int,
-        priority: Int, accountIndex: Int, keyImages: List<String>
+        dstAddrs: List<String>,
+        paymentId: String,
+        amount: LongArray,
+        mixinCount: Int,
+        priority: Int,
+        accountIndex: Int,
+        keyImages: List<String>,
     ): Long
 
-     external fun createSweepTransaction(
-        dstAddr: String, paymentId: String,
+    external fun createSweepTransaction(
+        dstAddr: String,
+        paymentId: String,
         mixinCount: Int,
-        priority: Int, accountIndex: Int, keyImages: List<String>
+        priority: Int,
+        accountIndex: Int,
+        keyImages: List<String>,
     ): Long
 
     private external fun createSweepUnmixableTransactionJ(): Long
+
     external fun disposeTransaction(pendingTransaction: PendingTransaction)
+
     private external fun getHistoryJ(): Long
 
     private external fun setListenerJ(listener: WalletListener?): Long
+
     fun setListener(listener: WalletListener?) {
         listenerHandle = setListenerJ(listener)
     }
 
-    external fun setUserNote(txid: String, note: String): Boolean
+    external fun setUserNote(
+        txid: String,
+        note: String,
+    ): Boolean
+
     external fun getUserNote(txid: String): String
+
     external fun getTxKey(txid: String): String
 
     external fun addAccount(label: String)
@@ -320,34 +355,52 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
         return label
     }
 
-    fun getAddressLabel(addressIndex: Int): String {
-        return getAddressLabel(accountIndex, addressIndex)
-    }
+    fun getAddressLabel(addressIndex: Int): String = getAddressLabel(accountIndex, addressIndex)
 
-    external fun getAddressLabel(accountIndex: Int, addressIndex: Int): String
+    external fun getAddressLabel(
+        accountIndex: Int,
+        addressIndex: Int,
+    ): String
 
-    fun setAccountLabel(accountIndex: Int, label: String?) {
+    fun setAccountLabel(
+        accountIndex: Int,
+        label: String?,
+    ) {
         setAddressLabel(accountIndex, 0, label)
     }
 
-    fun setAddressLabel(addressIndex: Int, label: String?) {
+    fun setAddressLabel(
+        addressIndex: Int,
+        label: String?,
+    ) {
         setAddressLabel(accountIndex, addressIndex, label)
     }
 
-    external fun setAddressLabel(accountIndex: Int, addressIndex: Int, label: String?)
+    external fun setAddressLabel(
+        accountIndex: Int,
+        addressIndex: Int,
+        label: String?,
+    )
 
     external fun getNumAccounts(): Int
+
     val numAddresses: Int
         get() = getNumAddresses(accountIndex)
 
     private external fun getNumAddresses(accountIndex: Int): Int
 
-    external fun addAddress(accountIndex: Int, label: String?)
+    external fun addAddress(
+        accountIndex: Int,
+        label: String?,
+    )
 
     external fun getWalletStatusWithError(): WalletStatusWithError
 
+    @Suppress("ktlint:standard:enum-entry-name-case")
     enum class ConnectionStatus {
-        ConnectionStatus_Disconnected, ConnectionStatus_Connected, ConnectionStatus_WrongVersion
+        ConnectionStatus_Disconnected,
+        ConnectionStatus_Connected,
+        ConnectionStatus_WrongVersion,
     }
 
     companion object {
@@ -365,24 +418,36 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
         @JvmStatic
         external fun isPaymentIdValid(payment_id: String): Boolean
 
-        fun isAddressValid(address: String, networkType: MoneroNetworkType): Boolean {
-            return isAddressValid(
+        fun isAddressValid(
+            address: String,
+            networkType: MoneroNetworkType,
+        ): Boolean =
+            isAddressValid(
                 address,
-                networkType.value
+                networkType.value,
             )
-        }
 
         @JvmStatic
-        external fun isAddressValid(address: String, networkType: Int): Boolean
+        external fun isAddressValid(
+            address: String,
+            networkType: Int,
+        ): Boolean
 
         @JvmStatic
-        external fun getPaymentIdFromAddress(address: String, networkType: Int): String?
+        external fun getPaymentIdFromAddress(
+            address: String,
+            networkType: Int,
+        ): String?
 
         @JvmStatic
         external fun getMaximumAllowedAmount(): Long
     }
 }
 
-data class WalletInfo(val path: String, val name: String, val password: String) {
+data class WalletInfo(
+    val path: String,
+    val name: String,
+    val password: String,
+) {
     constructor(file: File, password: String) : this(file.absolutePath, file.name, password)
 }

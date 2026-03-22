@@ -1,110 +1,106 @@
 package org.monfluo.wallet.activity
 
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
-import android.graphics.Typeface
-import android.graphics.drawable.Drawable
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.appcompat.content.res.AppCompatResources
+import androidx.recyclerview.widget.RecyclerView
 import com.google.zxing.client.android.Intents
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanIntentResult
 import com.journeyapps.barcodescanner.ScanOptions
+import org.monfluo.wallet.R
+import org.monfluo.wallet.activity.ActivityTransactionPending
+import org.monfluo.wallet.adapter.AdapterTransactionDestination
 import org.monfluo.wallet.livedata.combineLiveDatas
-import org.monfluo.wallet.model.PendingTransaction
-import org.monfluo.wallet.model.TransactionDestinationWithAmount
-import org.monfluo.wallet.model.TransactionDestinationRaw
-import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.model.Contact
+import org.monfluo.wallet.model.PendingTransaction
+import org.monfluo.wallet.model.TransactionDestinationRaw
+import org.monfluo.wallet.model.TransactionDestinationWithAmount
+import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.UriPayment
 import org.monfluo.wallet.util.component.ActivityMonero
-import org.monfluo.wallet.R
-import org.monfluo.wallet.adapter.AdapterTransactionDestination
-import org.monfluo.wallet.activity.ActivityTransactionPending
 import timber.log.Timber
 import kotlin.math.max
-import kotlin.comparisons.maxOf
 
 class ActivitySend : ActivityMonero() {
+    private val startActivityToSendPendingTransaction =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == 0) {
+                Timber.i("Activity started to send pending transaction returned result code 0, doing nothing")
+            } else if (result.resultCode == ActivityTransactionPending.RESULT_OK) {
+                Timber.i("Activity started to send pending transaction returned RESULT_OK, finishing current activity")
+                finish()
+            } else {
+                Timber.e("Activity started to send pending transaction returned non-successful exit code: ${result.resultCode}")
+            }
+        }
 
-    private val startActivityToSendPendingTransaction = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == 0) {
-            Timber.i("Activity started to send pending transaction returned result code 0, doing nothing")
-        } else if (result.resultCode == ActivityTransactionPending.RESULT_OK) {
-            Timber.i("Activity started to send pending transaction returned RESULT_OK, finishing current activity")
-            finish()
-        } else {
-            Timber.e("Activity started to send pending transaction returned non-successful exit code: ${result.resultCode}")
+    private val startActivityToRequestCameraPermissions =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted: Boolean ->
+            if (granted) {
+                scanTransactionDestination()
+            } else {
+                Toast.makeText(this, getString(R.string.activity_send_camera_permission_denied_toast), Toast.LENGTH_SHORT).show()
+            }
         }
-    }
 
-    private val startActivityToRequestCameraPermissions = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted: Boolean ->
-        if (granted) {
-            scanTransactionDestination()
-        } else {
-            Toast.makeText(this, getString(R.string.activity_send_camera_permission_denied_toast), Toast.LENGTH_SHORT).show()
+    private val startActivityToSelectContact =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            Timber.d("Select contact callback received")
+            val contact = result.data?.extras?.getParcelable<Contact>(Constants.EXTRA_CONTACT)
+            if (contact == null) {
+                Timber.i("Activity started to send select contact returned no contact")
+            } else {
+                val contactIndex = viewModel.contactIndex
+                Timber.i("Inserting contact at position $contactIndex")
+                adapterTransactionDestination.insertContact(contact, contactIndex)
+            }
         }
-    }
 
-    private val startActivityToSelectContact = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        Timber.d("Select contact callback received")
-        val contact = result.data?.extras?.getParcelable<Contact>(Constants.EXTRA_CONTACT)
-        if (contact == null) {
-            Timber.i("Activity started to send select contact returned no contact")
-        } else {
-            val contactIndex = viewModel.contactIndex
-            Timber.i("Inserting contact at position $contactIndex")
-            adapterTransactionDestination.insertContact(contact, contactIndex)
+    private val startActivityToScanTransactionDestination =
+        registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
+            Timber.d("Scan transaction destination callback received")
+            val contents = result.contents
+            if (contents.isNullOrEmpty()) {
+                Timber.d("Contents received from scan transaction destination callback is null or empty")
+                return@registerForActivityResult
+            }
+            val uriPayment = UriPayment.parse(result.contents)
+            if (uriPayment == null) {
+                Timber.w("Parsed uri payment from scan transaction destination callback contents is null")
+                Toast.makeText(this, getString(R.string.activity_send_amount_invalid_uri_payment_toast), Toast.LENGTH_SHORT).show()
+                return@registerForActivityResult
+            }
+            val scanIndex = viewModel.scanIndex
+            val transactionDestinations = uriPayment.toTransactionDestinationRawList()
+            Timber.i("Inserting ${transactionDestinations.size} transaction destinations at position $scanIndex")
+            adapterTransactionDestination.replaceElementWithList(transactionDestinations, scanIndex)
+            if (uriPayment.description != null) {
+                transactionDescriptionEditText.setText(uriPayment.description)
+            }
         }
-    }
-
-    private val startActivityToScanTransactionDestination = registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
-        Timber.d("Scan transaction destination callback received")
-        val contents = result.contents
-        if (contents.isNullOrEmpty()) {
-            Timber.d("Contents received from scan transaction destination callback is null or empty")
-            return@registerForActivityResult
-        }
-        val uriPayment = UriPayment.parse(result.contents)
-        if (uriPayment == null) {
-            Timber.w("Parsed uri payment from scan transaction destination callback contents is null")
-            Toast.makeText(this, getString(R.string.activity_send_amount_invalid_uri_payment_toast), Toast.LENGTH_SHORT).show()
-            return@registerForActivityResult
-        }
-        val scanIndex = viewModel.scanIndex
-        val transactionDestinations = uriPayment.toTransactionDestinationRawList()
-        Timber.i("Inserting ${transactionDestinations.size} transaction destinations at position $scanIndex")
-        adapterTransactionDestination.replaceElementWithList(transactionDestinations, scanIndex)
-        if (uriPayment.description != null) {
-            transactionDescriptionEditText.setText(uriPayment.description)
-        }
-    }
 
     private val viewModel: SendViewModel by viewModels()
 
@@ -140,18 +136,20 @@ class ActivitySend : ActivityMonero() {
         transactionDestinationsRecyclerView = findViewById(R.id.transaction_destinations_recyclerview)
         transactionDescriptionEditText = findViewById(R.id.transaction_description_edittext)
 
-        adapterTransactionDestination = AdapterTransactionDestination(object : AdapterTransactionDestination.Listener {
+        adapterTransactionDestination =
+            AdapterTransactionDestination(
+                object : AdapterTransactionDestination.Listener {
+                    override fun onScanRequested(position: Int) {
+                        viewModel.scanIndex = position
+                        scanTransactionDestination()
+                    }
 
-            override fun onScanRequested(position: Int) {
-                viewModel.scanIndex = position
-                scanTransactionDestination()
-            }
-
-            override fun onAddressBookRequested(position: Int) {
-                viewModel.contactIndex = position
-                startActivityToSelectContact.launch(Intent(this@ActivitySend, ActivityContactList::class.java))
-            }
-        })
+                    override fun onAddressBookRequested(position: Int) {
+                        viewModel.contactIndex = position
+                        startActivityToSelectContact.launch(Intent(this@ActivitySend, ActivityContactList::class.java))
+                    }
+                },
+            )
 
         transactionDestinationsRecyclerView.layoutManager = LinearLayoutManager(this)
         transactionDestinationsRecyclerView.adapter = adapterTransactionDestination
@@ -169,7 +167,7 @@ class ActivitySend : ActivityMonero() {
                 left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
                 top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
                 right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom),
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -185,12 +183,13 @@ class ActivitySend : ActivityMonero() {
         addOutputImageButton.setOnClickListener {
             adapterTransactionDestination.addTransactionDestination()
         }
-        val selectedRadioButtonId = when (viewModel.priority.value!!) {
-            PendingTransaction.Priority.Priority_Default -> R.id.default_fee_radiobutton
-            PendingTransaction.Priority.Priority_Medium -> R.id.default_fee_radiobutton
-            PendingTransaction.Priority.Priority_High -> R.id.default_fee_radiobutton
-            else -> R.id.default_fee_radiobutton
-        }
+        val selectedRadioButtonId =
+            when (viewModel.priority.value!!) {
+                PendingTransaction.Priority.Priority_Default -> R.id.default_fee_radiobutton
+                PendingTransaction.Priority.Priority_Medium -> R.id.default_fee_radiobutton
+                PendingTransaction.Priority.Priority_High -> R.id.default_fee_radiobutton
+                else -> R.id.default_fee_radiobutton
+            }
         transactionFeeRadioGroup.check(selectedRadioButtonId)
         transactionFeeRadioGroup.setOnCheckedChangeListener { _: RadioGroup?, i: Int ->
             when (i) {
@@ -268,9 +267,10 @@ class ActivitySend : ActivityMonero() {
             createButton.isEnabled = enabled
             adapterTransactionDestination.setEnabled(enabled)
         }
-        val enableOutputAddImageButton = combineLiveDatas(adapterTransactionDestination.getSendAll(), enabled) { sendAll, globalEnabled ->
-            return@combineLiveDatas globalEnabled!! && !sendAll!!
-        }
+        val enableOutputAddImageButton =
+            combineLiveDatas(adapterTransactionDestination.getSendAll(), enabled) { sendAll, globalEnabled ->
+                return@combineLiveDatas globalEnabled!! && !sendAll!!
+            }
         enableOutputAddImageButton.observe(this) { enabled ->
             addOutputImageButton.setImageDrawable(getTintedAddTransactionDestinationDrawable(enabled))
             addOutputImageButton.setEnabled(enabled)
@@ -306,8 +306,9 @@ class ActivitySend : ActivityMonero() {
         val intentExtras = intent?.extras
         if (savedInstanceState != null) {
             val sendAll = savedInstanceState.getBoolean(Constants.EXTRA_TRANSACTION_SEND_ALL, false)
-            val transactionDestinations = (savedInstanceState.getParcelableArray(Constants.EXTRA_TRANSACTION_DESTINATIONS) ?: emptyArray())
-                .map { it as TransactionDestinationRaw }
+            val transactionDestinations =
+                (savedInstanceState.getParcelableArray(Constants.EXTRA_TRANSACTION_DESTINATIONS) ?: emptyArray())
+                    .map { it as TransactionDestinationRaw }
             adapterTransactionDestination.restore(transactionDestinations, sendAll)
         } else if (intentData != null) {
             if (WalletService.RUNNING.get()) {
@@ -352,9 +353,11 @@ class ActivitySend : ActivityMonero() {
             super.onWalletServiceNotFound()
         } else {
             Timber.d("Wallet service is not found but intent data is present. Finishing activity and launching start activity and forwarding intent data there")
-            startActivity(Intent(this, ActivityStart::class.java).apply {
-                setData(intentData)
-            })
+            startActivity(
+                Intent(this, ActivityStart::class.java).apply {
+                    setData(intentData)
+                },
+            )
             finish()
         }
     }
@@ -420,7 +423,11 @@ class ActivitySend : ActivityMonero() {
         }
     }
 
-    private fun parseTransactionDestinationAddressOrWarn(address: String, position: Int, nettype: Int): String? {
+    private fun parseTransactionDestinationAddressOrWarn(
+        address: String,
+        position: Int,
+        nettype: Int,
+    ): String? {
         if (!Helper.isOpenaliasLike(address) && !Wallet.isAddressValid(address, nettype)) {
             Toast.makeText(this, getString(R.string.activity_send_address_invalid_toast, position), Toast.LENGTH_SHORT).show()
             return null
@@ -428,7 +435,10 @@ class ActivitySend : ActivityMonero() {
         return address
     }
 
-    private fun parseTransactionDestinationAmountOrWarn(amountRaw: String, position: Int): Long? {
+    private fun parseTransactionDestinationAmountOrWarn(
+        amountRaw: String,
+        position: Int,
+    ): Long? {
         val amount = Wallet.getAmountFromString(amountRaw)
         if (amount == null || amount == 0L) {
             Toast.makeText(this, getString(R.string.activity_send_amount_invalid_toast, position), Toast.LENGTH_SHORT).show()
@@ -444,7 +454,6 @@ class ActivitySend : ActivityMonero() {
 }
 
 class SendViewModel : ViewModel() {
-
     var scanIndex: Int = 0
     var contactIndex: Int = 0
 

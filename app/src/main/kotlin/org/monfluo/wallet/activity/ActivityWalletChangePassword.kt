@@ -1,30 +1,22 @@
 package org.monfluo.wallet.activity
 
 import android.os.Bundle
-import android.content.Intent
+import android.text.Editable
 import android.view.View
 import android.widget.Button
-import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import android.text.Editable
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
-import org.monfluo.wallet.fragment.DialogFragmentPassword
-import org.monfluo.wallet.model.MoneroUnit
-import org.monfluo.wallet.model.Wallet
-import org.monfluo.wallet.util.component.ActivityMonero
-import org.monfluo.wallet.util.TextHelper
-import org.monfluo.wallet.util.SimpleTextWatcher
-import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.R
+import org.monfluo.wallet.util.SimpleTextWatcher
+import org.monfluo.wallet.util.component.ActivityMonero
 import kotlin.math.max
 
 class ActivityWalletChangePassword : ActivityMonero() {
-
     private lateinit var layoutView: View
     private lateinit var backImageView: ImageView
 
@@ -55,7 +47,7 @@ class ActivityWalletChangePassword : ActivityMonero() {
                 left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
                 top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
                 right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom),
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -65,15 +57,17 @@ class ActivityWalletChangePassword : ActivityMonero() {
         backImageView.setOnClickListener {
             finish()
         }
-        newPasswordEditText.addTextChangedListener(object : SimpleTextWatcher() {
-            override fun afterTextChanged(s: Editable) {
-                if (s.toString().isEmpty()) {
-                    newPasswordConfirmEditText.visibility = View.GONE
-                } else {
-                    newPasswordConfirmEditText.visibility = View.VISIBLE
+        newPasswordEditText.addTextChangedListener(
+            object : SimpleTextWatcher() {
+                override fun afterTextChanged(s: Editable) {
+                    if (s.toString().isEmpty()) {
+                        newPasswordConfirmEditText.visibility = View.GONE
+                    } else {
+                        newPasswordConfirmEditText.visibility = View.VISIBLE
+                    }
                 }
-            }
-        })
+            },
+        )
         saveButton.setOnClickListener {
             val walletService = walletService!!
             val wallet = walletService.getWalletOrThrow()

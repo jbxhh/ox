@@ -1,13 +1,12 @@
 package org.monfluo.wallet.adapter
 
-import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.RadioButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import android.widget.RadioButton
-import android.widget.ImageView
 import org.monfluo.wallet.R
 import org.monfluo.wallet.model.Account
 import org.monfluo.wallet.model.MoneroUnit
@@ -16,9 +15,8 @@ import org.monfluo.wallet.util.TextHelper
 class AdapterAccount(
     private var accounts: List<Account>,
     private var selectedAccount: Account?,
-    private val listener: Listener
+    private val listener: Listener,
 ) : RecyclerView.Adapter<AdapterAccount.ViewHolder>() {
-
     fun setAccounts(accounts: List<Account>) {
         if (this.accounts != accounts) {
             this.accounts = accounts
@@ -33,26 +31,39 @@ class AdapterAccount(
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.recycler_view_item_account, parent, false)
         return ViewHolder(listener, view)
     }
 
-    override fun getItemCount(): Int {
-        return accounts.size
-    }
+    override fun getItemCount(): Int = accounts.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: ViewHolder,
+        position: Int,
+    ) {
         holder.bind(accounts[position], accounts[position] == selectedAccount)
     }
 
     interface Listener {
-        fun onAccountSelected(self: AdapterAccount, account: Account)
-        fun onAccountEditClicked(self: AdapterAccount, account: Account)
+        fun onAccountSelected(
+            self: AdapterAccount,
+            account: Account,
+        )
+
+        fun onAccountEditClicked(
+            self: AdapterAccount,
+            account: Account,
+        )
     }
 
-    inner class ViewHolder(private val listener: Listener, view: View) : RecyclerView.ViewHolder(view) {
-
+    inner class ViewHolder(
+        private val listener: Listener,
+        view: View,
+    ) : RecyclerView.ViewHolder(view) {
         private val accountWrapperLayout: View = itemView.findViewById(R.id.account_wrapper_layout)
         private val accountRadioButton: RadioButton = itemView.findViewById(R.id.account_radiobutton)
         private val accountIconImageView: ImageView = itemView.findViewById(R.id.account_icon_imagebutton)
@@ -62,7 +73,7 @@ class AdapterAccount(
 
         fun bind(
             account: Account,
-            isSelected: Boolean
+            isSelected: Boolean,
         ) {
             accountRadioButton.setChecked(isSelected)
             accountLabelTextView.text = itemView.resources.getString(R.string.account_label, account.index, account.label)

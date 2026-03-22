@@ -27,5 +27,5 @@ data class Enote(
     val isUnlocked: Boolean,
     val localOutputIndex: Long,
     val isFrozen: Boolean,
-    val address: String?
+    val address: String?,
 )

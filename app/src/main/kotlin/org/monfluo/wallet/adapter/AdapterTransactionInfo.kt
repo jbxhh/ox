@@ -14,25 +14,23 @@ import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.R
 import org.monfluo.wallet.model.MoneroUnit
 import org.monfluo.wallet.model.TransactionInfo
-import org.monfluo.wallet.util.Constants
-import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.TextHelper
 import java.util.Date
 
 private const val VIEW_TYPE_ITEM: Int = 0
+
 // empty view at the end
 private const val VIEW_TYPE_VOID: Int = 2
 
 class AdapterTransactionInfo(
     private val listener: Listener,
 ) : RecyclerView.Adapter<AdapterTransactionInfo.ViewHolder>() {
-
     private var transactions: List<TransactionInfo> = emptyList()
     private var streetMode: Boolean = false
     private var voidHeight: Int = 0
 
     fun submitList(transactions: List<TransactionInfo>) {
-         if (this.transactions != transactions) {
+        if (this.transactions != transactions) {
             this.transactions = transactions
             notifyDataSetChanged()
         }
@@ -50,7 +48,10 @@ class AdapterTransactionInfo(
         notifyItemChanged(transactions.size)
     }
 
-    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(
+        viewGroup: ViewGroup,
+        viewType: Int,
+    ): ViewHolder {
         val inflater = LayoutInflater.from(viewGroup.context)
         return when (viewType) {
             VIEW_TYPE_ITEM -> {
@@ -68,25 +69,28 @@ class AdapterTransactionInfo(
         }
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return if (position < transactions.size) {
+    override fun getItemViewType(position: Int): Int =
+        if (position < transactions.size) {
             VIEW_TYPE_ITEM
         } else {
             VIEW_TYPE_VOID
         }
-    }
 
-    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        viewHolder: ViewHolder,
+        position: Int,
+    ) {
         when (viewHolder) {
             is ItemViewHolder -> {
                 val transaction = transactions[position]
                 viewHolder.bind(transaction, streetMode)
             }
             is VoidViewHolder -> {
-                viewHolder.itemView.layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    voidHeight
-                )
+                viewHolder.itemView.layoutParams =
+                    ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        voidHeight,
+                    )
             }
         }
     }
@@ -100,10 +104,14 @@ class AdapterTransactionInfo(
         fun onClickTransaction(transactionInfo: TransactionInfo)
     }
 
-    sealed class ViewHolder(view: View) : RecyclerView.ViewHolder(view)
+    sealed class ViewHolder(
+        view: View,
+    ) : RecyclerView.ViewHolder(view)
 
-    class ItemViewHolder(val listener: Listener, view: View) : ViewHolder(view) {
-
+    class ItemViewHolder(
+        val listener: Listener,
+        view: View,
+    ) : ViewHolder(view) {
         private val sentOrReceivedIconImageView: ImageView = itemView.findViewById(R.id.send_or_receive_icon_image_view)
         private val sentOrReceivedLabelTextView: TextView = itemView.findViewById(R.id.sent_or_received_label_text_view)
         private val amountTextView: TextView = itemView.findViewById(R.id.transaction_amount_text_view)
@@ -121,7 +129,10 @@ class AdapterTransactionInfo(
         private val transactionStatusUnconfirmedText: CharSequence = itemView.resources.getText(R.string.transaction_unconfirmed)
         private val transactionStatusConfirmedText: CharSequence = itemView.resources.getText(R.string.transaction_confirmed)
 
-        fun bind(transactionInfo: TransactionInfo, streetMode: Boolean) {
+        fun bind(
+            transactionInfo: TransactionInfo,
+            streetMode: Boolean,
+        ) {
             when (transactionInfo.direction) {
                 TransactionInfo.Direction.In -> {
                     sentOrReceivedIconImageView.setImageDrawable(receiveIconDrawable)
@@ -160,5 +171,7 @@ class AdapterTransactionInfo(
         }
     }
 
-    class VoidViewHolder(view: View) : ViewHolder(view)
+    class VoidViewHolder(
+        view: View,
+    ) : ViewHolder(view)
 }

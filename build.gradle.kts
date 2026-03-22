@@ -1,3 +1,7 @@
+plugins {
+    id("org.jlleitschuh.gradle.ktlint") version "14.2.0" apply false
+}
+
 buildscript {
     repositories {
         mavenCentral()
@@ -15,6 +19,10 @@ allprojects {
         mavenCentral()
         google()
     }
+}
+
+subprojects {
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
 }
 
 tasks.register<Delete>("clean") {

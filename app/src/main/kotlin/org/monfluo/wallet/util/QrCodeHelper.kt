@@ -11,8 +11,12 @@ import java.nio.charset.StandardCharsets
 import java.util.EnumMap
 
 object QrCodeHelper {
-
-    fun generateQrCode(text: String, width: Int, height: Int, backgroundColor: Int): Bitmap? {
+    fun generateQrCode(
+        text: String,
+        width: Int,
+        height: Int,
+        backgroundColor: Int,
+    ): Bitmap? {
         if (width <= 0 || height <= 0) return null
         val hints: MutableMap<EncodeHintType, Any?> = EnumMap(com.google.zxing.EncodeHintType::class.java)
         hints[EncodeHintType.CHARACTER_SET] = StandardCharsets.UTF_8

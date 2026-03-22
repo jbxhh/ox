@@ -4,8 +4,9 @@ import android.os.Bundle
 import org.monfluo.wallet.service.wallet.WalletService
 import timber.log.Timber
 
-abstract class ActivityMonero : ActivityLogging(), ComponentMonero {
-
+abstract class ActivityMonero :
+    ActivityLogging(),
+    ComponentMonero {
     override val componentName: String = "activity"
     override var walletService: WalletService? = null
 

@@ -1,22 +1,21 @@
 package org.monfluo.wallet.activity
 
-import org.monfluo.wallet.model.Contact
-import org.monfluo.wallet.util.component.ActivityMonero
-import org.monfluo.wallet.R
-import android.view.View
-import android.widget.ImageView
-import android.widget.EditText
-import android.widget.Button
-import android.widget.Toast
 import android.os.Bundle
+import android.view.View
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
+import org.monfluo.wallet.R
+import org.monfluo.wallet.model.Contact
+import org.monfluo.wallet.util.component.ActivityMonero
 import kotlin.math.max
 
 class ActivityContactAdd : ActivityMonero() {
-
     private lateinit var layoutView: View
     private lateinit var backImageView: ImageView
 
@@ -45,7 +44,7 @@ class ActivityContactAdd : ActivityMonero() {
                 left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
                 top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
                 right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom),
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }

@@ -25,17 +25,14 @@ import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.R
 import org.monfluo.wallet.model.Enote
 import org.monfluo.wallet.model.MoneroUnit
-import org.monfluo.wallet.model.Wallet
-import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.TextHelper
 import java.text.NumberFormat
 
 class AdapterEnote(
     private var enotes: List<Enote>,
     private val streetMode: Boolean,
-    private val listener: AdapterEnoteListener
+    private val listener: AdapterEnoteListener,
 ) : RecyclerView.Adapter<AdapterEnote.ViewHolder>() {
-
     private val selectedEnotes: MutableMap<Long, Enote> = HashMap()
     private var editing = false
 
@@ -62,24 +59,28 @@ class AdapterEnote(
         notifyDataSetChanged()
     }
 
-    operator fun contains(enote: Enote): Boolean {
-        return selectedEnotes.containsKey(enote.idx)
-    }
+    operator fun contains(enote: Enote): Boolean = selectedEnotes.containsKey(enote.idx)
 
-    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.recycler_view_item_enote, viewGroup, false)
+    override fun onCreateViewHolder(
+        viewGroup: ViewGroup,
+        viewType: Int,
+    ): ViewHolder {
+        val view =
+            LayoutInflater
+                .from(viewGroup.context)
+                .inflate(R.layout.recycler_view_item_enote, viewGroup, false)
         return ViewHolder(listener, view, streetMode)
     }
 
-    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        viewHolder: ViewHolder,
+        position: Int,
+    ) {
         val tx = enotes[position]
         viewHolder.bind(editing, tx, selectedEnotes)
     }
 
-    override fun getItemCount(): Int {
-        return enotes.size
-    }
+    override fun getItemCount(): Int = enotes.size
 
     interface AdapterEnoteListener {
         fun onEnoteSelected(enote: Enote)
@@ -88,9 +89,10 @@ class AdapterEnote(
     class ViewHolder(
         private val listener: AdapterEnoteListener,
         view: View,
-        private val streetMode: Boolean
-    ) : RecyclerView.ViewHolder(view), View.OnClickListener, OnLongClickListener {
-
+        private val streetMode: Boolean,
+    ) : RecyclerView.ViewHolder(view),
+        View.OnClickListener,
+        OnLongClickListener {
         private var enote: Enote? = null
         private var editing = false
 
@@ -102,7 +104,7 @@ class AdapterEnote(
         fun bind(
             editing: Boolean,
             enote: Enote,
-            selectedEnotes: Map<Long, Enote>
+            selectedEnotes: Map<Long, Enote>,
         ) {
             this.editing = editing
             this.enote = enote
@@ -119,12 +121,13 @@ class AdapterEnote(
             globalIdxTextView.text =
                 itemView.resources.getString(
                     R.string.global_index_text,
-                    NumberFormat.getInstance().format(enote.globalOutputIndex)
+                    NumberFormat.getInstance().format(enote.globalOutputIndex),
                 )
-            outpointTextView.text = itemView.resources.getString(
-                R.string.outpoint_text,
-                enote.hash + ":" + enote.localOutputIndex
-            )
+            outpointTextView.text =
+                itemView.resources.getString(
+                    R.string.outpoint_text,
+                    enote.hash + ":" + enote.localOutputIndex,
+                )
             if (selected) {
                 itemView.backgroundTintList =
                     ContextCompat.getColorStateList(itemView.context, R.color.oled_colorSecondary)
@@ -138,7 +141,7 @@ class AdapterEnote(
                 itemView.backgroundTintList =
                     ContextCompat.getColorStateList(
                         itemView.context,
-                        R.color.oled_dialogBackgroundColor
+                        R.color.oled_dialogBackgroundColor,
                     )
             }
         }

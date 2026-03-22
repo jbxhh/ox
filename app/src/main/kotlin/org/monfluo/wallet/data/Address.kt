@@ -15,8 +15,6 @@
  */
 package org.monfluo.wallet.data
 
-import java.util.regex.Pattern
-
 data class Address(
     val accountIndex: Int,
     val addressIndex: Int,

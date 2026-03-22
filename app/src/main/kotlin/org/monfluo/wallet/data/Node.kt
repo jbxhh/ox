@@ -15,8 +15,8 @@
  */
 package org.monfluo.wallet.data
 
-import org.monfluo.wallet.model.MoneroNetworkType
 import org.json.JSONObject
+import org.monfluo.wallet.model.MoneroNetworkType
 
 data class Node(
     val name: String,
@@ -26,20 +26,19 @@ data class Node(
     val networkType: MoneroNetworkType = MoneroNetworkType.NetworkType_Mainnet,
     val trusted: Boolean = false,
 ) {
-
-    fun toJson(): Result<JSONObject> = runCatching {
-        val jsonObject = JSONObject()
-        jsonObject.put(NAME, name)
-        jsonObject.put(ADDRESS, address)
-        jsonObject.put(USERNAME, username)
-        jsonObject.put(PASSWORD, password)
-        jsonObject.put(NETWORK_TYPE, networkType.string)
-        jsonObject.put(TRUSTED, trusted)
-        return Result.success(jsonObject)
-    }
+    fun toJson(): Result<JSONObject> =
+        runCatching {
+            val jsonObject = JSONObject()
+            jsonObject.put(NAME, name)
+            jsonObject.put(ADDRESS, address)
+            jsonObject.put(USERNAME, username)
+            jsonObject.put(PASSWORD, password)
+            jsonObject.put(NETWORK_TYPE, networkType.string)
+            jsonObject.put(TRUSTED, trusted)
+            return Result.success(jsonObject)
+        }
 
     companion object {
-
         private const val NAME = "name"
         private const val ADDRESS = "address"
         private const val USERNAME = "username"
@@ -47,14 +46,15 @@ data class Node(
         private const val NETWORK_TYPE = "networkType"
         private const val TRUSTED = "trusted"
 
-        fun fromJson(jsonObject: JSONObject): Result<Node> = runCatching {
-            val name = jsonObject.getString(NAME)
-            val address = jsonObject.getString(ADDRESS)
-            val username = if (jsonObject.has(USERNAME)) jsonObject.getString(USERNAME) else null
-            val password = if (jsonObject.has(PASSWORD)) jsonObject.getString(PASSWORD) else null
-            val networkType = MoneroNetworkType.fromString(jsonObject.getString(NETWORK_TYPE))!!
-            val trusted = jsonObject.getBoolean(TRUSTED)
-            return Result.success(Node(name, address, username, password, networkType, trusted))
-        }
+        fun fromJson(jsonObject: JSONObject): Result<Node> =
+            runCatching {
+                val name = jsonObject.getString(NAME)
+                val address = jsonObject.getString(ADDRESS)
+                val username = if (jsonObject.has(USERNAME)) jsonObject.getString(USERNAME) else null
+                val password = if (jsonObject.has(PASSWORD)) jsonObject.getString(PASSWORD) else null
+                val networkType = MoneroNetworkType.fromString(jsonObject.getString(NETWORK_TYPE))!!
+                val trusted = jsonObject.getBoolean(TRUSTED)
+                return Result.success(Node(name, address, username, password, networkType, trusted))
+            }
     }
 }

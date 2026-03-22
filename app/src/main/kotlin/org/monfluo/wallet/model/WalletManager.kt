@@ -19,12 +19,18 @@ import timber.log.Timber
 import java.io.File
 
 class WalletManager {
-    fun createWallet(aFile: File, password: String, language: String, networkType: MoneroNetworkType): Wallet {
+    fun createWallet(
+        aFile: File,
+        password: String,
+        language: String,
+        networkType: MoneroNetworkType,
+    ): Wallet {
         val walletHandle = createWalletJ(aFile.absolutePath, password, language, networkType.value)
-        val wallet = Wallet(
-            walletHandle,
-            WalletInfo(aFile, password)
-        )
+        val wallet =
+            Wallet(
+                walletHandle,
+                WalletInfo(aFile, password),
+            )
         return wallet
     }
 
@@ -32,7 +38,7 @@ class WalletManager {
         path: String,
         password: String,
         language: String,
-        networkType: Int
+        networkType: Int,
     ): Long
 
     fun createWalletPolyseed(
@@ -40,22 +46,26 @@ class WalletManager {
         password: String,
         passphrase: String,
         language: String,
-        networkType: MoneroNetworkType
+        networkType: MoneroNetworkType,
     ): Wallet {
-        val walletHandle = createWalletPolyseedJ(
-            aFile.absolutePath,
-            password,
-            passphrase,
-            language,
-            networkType.value
-        )
-        val wallet = Wallet(
-            walletHandle,
-            WalletInfo(aFile, password)
-        )
+        val walletHandle =
+            createWalletPolyseedJ(
+                aFile.absolutePath,
+                password,
+                passphrase,
+                language,
+                networkType.value,
+            )
+        val wallet =
+            Wallet(
+                walletHandle,
+                WalletInfo(aFile, password),
+            )
         if (wallet.getWalletStatusWithError().status == WalletStatus.Ok) {
             wallet.setPassword(password) // this rewrites the keys file (which contains the restore height)
-        } else Timber.e("Failed to create polyseed wallet: ${wallet.getWalletStatusWithError().status}")
+        } else {
+            Timber.e("Failed to create polyseed wallet: ${wallet.getWalletStatusWithError().status}")
+        }
         return wallet
     }
 
@@ -64,112 +74,158 @@ class WalletManager {
         password: String,
         passphrase: String,
         language: String,
-        networkType: Int
+        networkType: Int,
     ): Long
 
-    fun openWallet(path: String, password: String, networkType: MoneroNetworkType): Wallet {
+    fun openWallet(
+        path: String,
+        password: String,
+        networkType: MoneroNetworkType,
+    ): Wallet {
         val walletHandle = openWalletJ(path, password, networkType.value)
-        val wallet = Wallet(
-            walletHandle,
-            WalletInfo(File(path), password)
-        )
+        val wallet =
+            Wallet(
+                walletHandle,
+                WalletInfo(File(path), password),
+            )
         return wallet
     }
 
-    private external fun openWalletJ(path: String, password: String, networkType: Int): Long
+    private external fun openWalletJ(
+        path: String,
+        password: String,
+        networkType: Int,
+    ): Long
+
     fun recoveryWallet(
-        aFile: File, password: String,
-        mnemonic: String, offset: String,
+        aFile: File,
+        password: String,
+        mnemonic: String,
+        offset: String,
         restoreHeight: Long,
-        networkType: MoneroNetworkType
+        networkType: MoneroNetworkType,
     ): Wallet {
-        val walletHandle = recoveryWalletJ(
-            aFile.absolutePath, password,
-            mnemonic, offset,
-            networkType.value, restoreHeight
-        )
-        val wallet = Wallet(
-            walletHandle,
-            WalletInfo(aFile, password)
-        )
+        val walletHandle =
+            recoveryWalletJ(
+                aFile.absolutePath,
+                password,
+                mnemonic,
+                offset,
+                networkType.value,
+                restoreHeight,
+            )
+        val wallet =
+            Wallet(
+                walletHandle,
+                WalletInfo(aFile, password),
+            )
         return wallet
     }
 
     private external fun recoveryWalletJ(
-        path: String, password: String,
-        mnemonic: String, offset: String,
-        networkType: Int, restoreHeight: Long
+        path: String,
+        password: String,
+        mnemonic: String,
+        offset: String,
+        networkType: Int,
+        restoreHeight: Long,
     ): Long
 
     fun recoveryWalletPolyseed(
-        aFile: File, password: String,
-        mnemonic: String, offset: String,
-        networkType: MoneroNetworkType
+        aFile: File,
+        password: String,
+        mnemonic: String,
+        offset: String,
+        networkType: MoneroNetworkType,
     ): Wallet {
-        val walletHandle = recoveryWalletPolyseedJ(
-            aFile.absolutePath, password,
-            mnemonic, offset,
-            networkType.value
-        )
-        val wallet = Wallet(
-            walletHandle,
-            WalletInfo(aFile, password)
-        )
+        val walletHandle =
+            recoveryWalletPolyseedJ(
+                aFile.absolutePath,
+                password,
+                mnemonic,
+                offset,
+                networkType.value,
+            )
+        val wallet =
+            Wallet(
+                walletHandle,
+                WalletInfo(aFile, password),
+            )
         return wallet
     }
 
     private external fun recoveryWalletPolyseedJ(
-        path: String, password: String,
-        mnemonic: String, offset: String,
-        networkType: Int
+        path: String,
+        password: String,
+        mnemonic: String,
+        offset: String,
+        networkType: Int,
     ): Long
 
     fun createWalletWithKeys(
-        aFile: File, password: String, language: String, restoreHeight: Long,
-        addressString: String, viewKeyString: String, spendKeyString: String,
-        networkType: MoneroNetworkType
+        aFile: File,
+        password: String,
+        language: String,
+        restoreHeight: Long,
+        addressString: String,
+        viewKeyString: String,
+        spendKeyString: String,
+        networkType: MoneroNetworkType,
     ): Wallet {
-        val walletHandle = createWalletFromKeysJ(
-            aFile.absolutePath, password,
-            language, networkType.value, restoreHeight,
-            addressString, viewKeyString, spendKeyString
-        )
-        val wallet = Wallet(
-            walletHandle,
-            WalletInfo(aFile, password)
-        )
+        val walletHandle =
+            createWalletFromKeysJ(
+                aFile.absolutePath,
+                password,
+                language,
+                networkType.value,
+                restoreHeight,
+                addressString,
+                viewKeyString,
+                spendKeyString,
+            )
+        val wallet =
+            Wallet(
+                walletHandle,
+                WalletInfo(aFile, password),
+            )
         return wallet
     }
 
     private external fun createWalletFromKeysJ(
-        path: String, password: String,
+        path: String,
+        password: String,
         language: String,
         networkType: Int,
         restoreHeight: Long,
         addressString: String,
         viewKeyString: String,
-        spendKeyString: String
+        spendKeyString: String,
     ): Long
 
     external fun closeJ(wallet: Wallet?): Boolean
 
-    fun walletExists(aFile: File): Boolean {
-        return walletExists(aFile.absolutePath)
-    }
+    fun walletExists(aFile: File): Boolean = walletExists(aFile.absolutePath)
 
     private external fun walletExists(path: String?): Boolean
+
     external fun verifyWalletPassword(
         keysFileName: String?,
         password: String?,
-        noSpendKey: Boolean
+        noSpendKey: Boolean,
     ): Boolean
 
     external fun setDaemonAddressJ(address: String)
+
     external fun getDaemonVersion(): Int
+
     external fun getBlockchainHeight(): Long
+
     external fun getBlockchainTargetHeight(): Long
+
     external fun getBlockchainAndTargetHeight(): Pair<Long, Long>
+
     external fun getNetworkDifficulty(): Long
+
     external fun getBlockTarget(): Long
 
     external fun resolveOpenAlias(address: String): Pair<String, Boolean>
@@ -177,22 +233,24 @@ class WalletManager {
     external fun setProxyJ(address: String?): Boolean
 
     companion object {
-
         val instance: WalletManager
-            get() = synchronized(WalletManager::class.java) {
-                return@synchronized WalletManager()
-            }
+            get() =
+                synchronized(WalletManager::class.java) {
+                    return@synchronized WalletManager()
+                }
 
-        fun addressPrefix(networkType: MoneroNetworkType): String {
-            return when (networkType) {
+        fun addressPrefix(networkType: MoneroNetworkType): String =
+            when (networkType) {
                 MoneroNetworkType.NetworkType_Testnet -> "9A-"
                 MoneroNetworkType.NetworkType_Mainnet -> "4-"
                 MoneroNetworkType.NetworkType_Stagenet -> "5-"
             }
-        }
 
         @JvmStatic
-        external fun initLogger(argv0: String?, defaultLogBaseName: String?)
+        external fun initLogger(
+            argv0: String?,
+            defaultLogBaseName: String?,
+        )
 
         @JvmStatic
         external fun setLogLevel(level: Int)

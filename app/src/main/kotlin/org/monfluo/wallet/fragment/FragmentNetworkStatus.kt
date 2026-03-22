@@ -10,8 +10,8 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import org.monfluo.wallet.activity.ActivityNetwork
 import org.monfluo.wallet.R
+import org.monfluo.wallet.activity.ActivityNetwork
 import org.monfluo.wallet.data.SynchronizationStatus
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.service.wallet.State
@@ -19,7 +19,6 @@ import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.component.FragmentMonero
 
 class FragmentNetworkStatus : FragmentMonero() {
-
     private val viewModel: FragmentNetworkStatusViewModel by viewModels()
 
     private lateinit var networkStatusImageView: ImageView
@@ -27,12 +26,13 @@ class FragmentNetworkStatus : FragmentMonero() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return inflater.inflate(R.layout.fragment_network_status, container, false)
-    }
+        savedInstanceState: Bundle?,
+    ): View = inflater.inflate(R.layout.fragment_network_status, container, false)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         networkStatusImageView = view.findViewById(R.id.network_status_imageview)
@@ -50,14 +50,15 @@ class FragmentNetworkStatus : FragmentMonero() {
     private fun bindObservers() {
         viewModel.state.observe(viewLifecycleOwner) { state ->
             val synchronizationStatus = SynchronizationStatus.from(state)
-            val (drawable, contentDescriptionResource) = when (synchronizationStatus) {
-                SynchronizationStatus.OpeningWallet -> Pair(R.drawable.synchronization_status_starting, R.string.content_description_network_status_icon_opening_wallet)
-                SynchronizationStatus.StartingSynchronization -> Pair(R.drawable.synchronization_status_warning, R.string.content_description_network_status_icon_starting_synchronization)
-                is SynchronizationStatus.NodeSynchronization -> Pair(R.drawable.synchronization_status_in_progress, R.string.content_description_network_status_icon_synchronizing_node)
-                is SynchronizationStatus.WalletSynchronization -> Pair(R.drawable.synchronization_status_in_progress, R.string.content_description_network_status_icon_synchronizing_wallet)
-                is SynchronizationStatus.Synchronized -> Pair(R.drawable.synchronization_status_synced, R.string.content_description_network_status_icon_synchronized)
-                is SynchronizationStatus.WalletError -> Pair(R.drawable.synchronization_status_error, R.string.content_description_network_status_icon_wallet_error)
-            }
+            val (drawable, contentDescriptionResource) =
+                when (synchronizationStatus) {
+                    SynchronizationStatus.OpeningWallet -> Pair(R.drawable.synchronization_status_starting, R.string.content_description_network_status_icon_opening_wallet)
+                    SynchronizationStatus.StartingSynchronization -> Pair(R.drawable.synchronization_status_warning, R.string.content_description_network_status_icon_starting_synchronization)
+                    is SynchronizationStatus.NodeSynchronization -> Pair(R.drawable.synchronization_status_in_progress, R.string.content_description_network_status_icon_synchronizing_node)
+                    is SynchronizationStatus.WalletSynchronization -> Pair(R.drawable.synchronization_status_in_progress, R.string.content_description_network_status_icon_synchronizing_wallet)
+                    is SynchronizationStatus.Synchronized -> Pair(R.drawable.synchronization_status_synced, R.string.content_description_network_status_icon_synchronized)
+                    is SynchronizationStatus.WalletError -> Pair(R.drawable.synchronization_status_error, R.string.content_description_network_status_icon_wallet_error)
+                }
             val context = requireContext()
             networkStatusImageView.setImageDrawable(AppCompatResources.getDrawable(context, drawable))
             networkStatusImageView.setContentDescription(context.getString(contentDescriptionResource))
@@ -74,7 +75,10 @@ class FragmentNetworkStatus : FragmentMonero() {
         }
     }
 
-    override fun onBlockchainAndTargetHeightsFetched(blockchainHeight: Long, targetHeight: Long) {
+    override fun onBlockchainAndTargetHeightsFetched(
+        blockchainHeight: Long,
+        targetHeight: Long,
+    ) {
         walletService?.let { walletService ->
             updateState(walletService)
         }
@@ -86,6 +90,5 @@ class FragmentNetworkStatus : FragmentMonero() {
 }
 
 internal class FragmentNetworkStatusViewModel : ViewModel() {
-
     val state: MutableLiveData<State> = MutableLiveData()
 }

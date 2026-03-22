@@ -1,33 +1,32 @@
 package org.monfluo.wallet.activity
 
+import android.app.AlertDialog
+import android.os.Bundle
 import android.view.View
-import android.widget.ImageView
-import android.widget.EditText
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
-import android.os.Bundle
-import android.app.AlertDialog
 import androidx.activity.viewModels
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.MutableLiveData
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
-import org.monfluo.wallet.util.component.ActivityLogging
-import org.monfluo.wallet.util.Constants
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import org.monfluo.wallet.R
-import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.data.DefaultNode
 import org.monfluo.wallet.data.Node
 import org.monfluo.wallet.model.MoneroNetworkType
-import kotlin.math.max
+import org.monfluo.wallet.util.Constants
+import org.monfluo.wallet.util.PreferenceUtils
+import org.monfluo.wallet.util.component.ActivityLogging
 import timber.log.Timber
-import android.widget.TextView
+import kotlin.math.max
 
-class ActivityNodeDetails() : ActivityLogging() {
-
+class ActivityNodeDetails : ActivityLogging() {
     private val viewModel: ActivityNodeDetailsViewModel by viewModels()
 
     private lateinit var layoutView: View
@@ -107,7 +106,7 @@ class ActivityNodeDetails() : ActivityLogging() {
                 left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
                 top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
                 right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom),
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -127,7 +126,8 @@ class ActivityNodeDetails() : ActivityLogging() {
         nodeDeleteButton.setOnClickListener {
             val nodeName = viewModel.nodeName!!
 
-            AlertDialog.Builder(this)
+            AlertDialog
+                .Builder(this)
                 .setTitle(getString(R.string.dialog_delete_node_title))
                 .setMessage(getString(R.string.dialog_delete_node_message))
                 .setPositiveButton(getString(R.string.dialog_delete_node_action_yes)) { _, _ ->
@@ -143,10 +143,9 @@ class ActivityNodeDetails() : ActivityLogging() {
                         {
                             Timber.e(it, "Failed to delete node")
                             Toast.makeText(this, getText(R.string.toast_failed_to_delete_node), Toast.LENGTH_SHORT).show()
-                        }
+                        },
                     )
-                }
-                .setNegativeButton(getString(R.string.dialog_delete_node_action_no), null)
+                }.setNegativeButton(getString(R.string.dialog_delete_node_action_no), null)
                 .create()
                 .show()
         }
@@ -190,7 +189,7 @@ class ActivityNodeDetails() : ActivityLogging() {
                 {
                     Timber.e(it, "Failed to save node")
                     Toast.makeText(this, getText(R.string.toast_failed_to_save_node), Toast.LENGTH_SHORT).show()
-                }
+                },
             )
         }
     }
@@ -229,7 +228,6 @@ class ActivityNodeDetails() : ActivityLogging() {
 }
 
 internal class ActivityNodeDetailsViewModel : ViewModel() {
-
     var nodeName: String? = null
     var nodeDaemonTrusedClicked: Boolean = false
     var nodeNetworkTypeClicked: Boolean = false

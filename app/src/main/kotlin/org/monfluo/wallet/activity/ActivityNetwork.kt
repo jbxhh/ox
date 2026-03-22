@@ -13,19 +13,18 @@ import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import org.monfluo.wallet.R
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.model.WalletStatus
 import org.monfluo.wallet.service.wallet.State
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.component.ActivityMonero
-import org.monfluo.wallet.R
 import java.text.NumberFormat
 import java.util.Date
 import kotlin.getValue
 import kotlin.math.max
 
 class ActivityNetwork : ActivityMonero() {
-
     private val viewModel: NetworkActivityViewModel by viewModels()
 
     private lateinit var layoutView: View
@@ -66,7 +65,7 @@ class ActivityNetwork : ActivityMonero() {
                 left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
                 top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
                 right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom),
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -127,22 +126,24 @@ class ActivityNetwork : ActivityMonero() {
                         nodeStatusProgressBar.isIndeterminate = false
                         nodeStatusProgressBar.max = heights.blockchainTargetHeight.toInt()
                         nodeStatusProgressBar.progress = heights.blockchainHeight.toInt()
-                        nodeStatusDescriptionTextView.text = getString(
-                            R.string.activity_network_node_status_description_node_is_synchronizing,
-                            blockchainDisplayHeight,
-                            targetDisplayHeight,
-                            nodeDiffDisplay,
-                        )
+                        nodeStatusDescriptionTextView.text =
+                            getString(
+                                R.string.activity_network_node_status_description_node_is_synchronizing,
+                                blockchainDisplayHeight,
+                                targetDisplayHeight,
+                                nodeDiffDisplay,
+                            )
                         nodeStatusDescriptionTextView.visibility = View.VISIBLE
                     } else {
                         nodeStatusHeaderTextView.text = getString(R.string.activity_network_node_status_header_node_is_synchronized)
                         nodeStatusProgressBar.isIndeterminate = false
                         nodeStatusProgressBar.max = heights.blockchainTargetHeight.toInt()
                         nodeStatusProgressBar.progress = heights.blockchainHeight.toInt()
-                        nodeStatusDescriptionTextView.text = getString(
-                            R.string.activity_network_node_status_description_node_is_synchronized,
-                            blockchainDisplayHeight,
-                        )
+                        nodeStatusDescriptionTextView.text =
+                            getString(
+                                R.string.activity_network_node_status_description_node_is_synchronized,
+                                blockchainDisplayHeight,
+                            )
                         nodeStatusDescriptionTextView.visibility = View.VISIBLE
                     }
 
@@ -157,10 +158,11 @@ class ActivityNetwork : ActivityMonero() {
                         walletStatusProgressBar.min = 0
                         walletStatusProgressBar.max = 100
                         walletStatusProgressBar.progress = 100
-                        walletStatusDescriptionTextView.text = getString(
-                            R.string.activity_network_wallet_status_description_wallet_is_synchronized,
-                            walletDisplayHeight,
-                        )
+                        walletStatusDescriptionTextView.text =
+                            getString(
+                                R.string.activity_network_wallet_status_description_wallet_is_synchronized,
+                                walletDisplayHeight,
+                            )
                         walletStatusDescriptionTextView.visibility = View.VISIBLE
                     } else if (heights.walletHeight > heights.walletBeginSyncHeight) {
                         walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_wallet_is_synchronizing)
@@ -168,12 +170,13 @@ class ActivityNetwork : ActivityMonero() {
                         walletStatusProgressBar.max = heights.blockchainHeight.toInt()
                         walletStatusProgressBar.min = heights.walletBeginSyncHeight.toInt()
                         walletStatusProgressBar.progress = heights.walletHeight.toInt()
-                        walletStatusDescriptionTextView.text = getString(
-                            R.string.activity_network_wallet_status_description_wallet_is_synchronizing,
-                            walletDisplayHeight,
-                            blockchainDisplayHeight,
-                            walletDiffDisplay,
-                        )
+                        walletStatusDescriptionTextView.text =
+                            getString(
+                                R.string.activity_network_wallet_status_description_wallet_is_synchronizing,
+                                walletDisplayHeight,
+                                blockchainDisplayHeight,
+                                walletDiffDisplay,
+                            )
                         walletStatusDescriptionTextView.visibility = View.VISIBLE
                     } else {
                         walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_starting_synchronization)
@@ -201,7 +204,10 @@ class ActivityNetwork : ActivityMonero() {
         }
     }
 
-    override fun onBlockchainAndTargetHeightsFetched(blockchainHeight: Long, targetHeight: Long) {
+    override fun onBlockchainAndTargetHeightsFetched(
+        blockchainHeight: Long,
+        targetHeight: Long,
+    ) {
         walletService?.let { walletService ->
             viewModel.state.postValue(walletService.getState())
         }
@@ -209,6 +215,5 @@ class ActivityNetwork : ActivityMonero() {
 }
 
 internal class NetworkActivityViewModel : ViewModel() {
-
     val state: MutableLiveData<State> = MutableLiveData(null)
 }

@@ -5,14 +5,12 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlin.math.max
 import org.monfluo.wallet.R
 import org.monfluo.wallet.adapter.AdapterContact
 import org.monfluo.wallet.model.Contact
@@ -21,9 +19,9 @@ import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.component.ActivityMonero
 import timber.log.Timber
+import kotlin.math.max
 
 class ActivityContactList : ActivityMonero() {
-
     companion object {
         const val RESULT_OK: Int = 1
     }
@@ -35,22 +33,36 @@ class ActivityContactList : ActivityMonero() {
 
     private lateinit var adapterRecyclerView: RecyclerView
 
-    private val adapterContact: AdapterContact = AdapterContact(listOf(), object : AdapterContact.Listener {
+    private val adapterContact: AdapterContact =
+        AdapterContact(
+            listOf(),
+            object : AdapterContact.Listener {
+                override fun onContactSelected(
+                    self: AdapterContact,
+                    contact: Contact,
+                ) {
+                    Timber.i("Contact selected, setting result and finishing activity")
+                    setResult(
+                        RESULT_OK,
+                        Intent().apply {
+                            putExtra(Constants.EXTRA_CONTACT, contact)
+                        },
+                    )
+                    finish()
+                }
 
-        override fun onContactSelected(self: AdapterContact, contact: Contact) {
-            Timber.i("Contact selected, setting result and finishing activity")
-            setResult(RESULT_OK, Intent().apply {
-                putExtra(Constants.EXTRA_CONTACT, contact)
-            })
-            finish()
-        }
-
-        override fun onContactEditClicked(self: AdapterContact, contact: Contact) {
-            startActivity(Intent(this@ActivityContactList, ActivityContactDetails::class.java).apply {
-                putExtra(Constants.EXTRA_CONTACT, contact)
-            })
-        }
-    })
+                override fun onContactEditClicked(
+                    self: AdapterContact,
+                    contact: Contact,
+                ) {
+                    startActivity(
+                        Intent(this@ActivityContactList, ActivityContactDetails::class.java).apply {
+                            putExtra(Constants.EXTRA_CONTACT, contact)
+                        },
+                    )
+                }
+            },
+        )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,7 +94,7 @@ class ActivityContactList : ActivityMonero() {
                 left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
                 top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
                 right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom),
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }

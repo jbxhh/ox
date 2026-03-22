@@ -17,24 +17,27 @@ package org.monfluo.wallet.model
 
 import org.monfluo.wallet.R
 
-enum class MoneroNetworkType(val value: Int, val string: String, val resourceId: Int) {
-
+@Suppress("ktlint:standard:enum-entry-name-case")
+enum class MoneroNetworkType(
+    val value: Int,
+    val string: String,
+    val resourceId: Int,
+) {
     NetworkType_Mainnet(0, "mainnet", R.string.monero_network_mainnet),
     NetworkType_Testnet(1, "testnet", R.string.monero_network_testnet),
-    NetworkType_Stagenet(2, "stagenet", R.string.monero_network_stagenet);
+    NetworkType_Stagenet(2, "stagenet", R.string.monero_network_stagenet),
+    ;
 
     companion object {
-
         fun fromInteger(n: Int): MoneroNetworkType? = entries.find { it.value == n }
 
         fun fromString(s: String): MoneroNetworkType? = entries.find { it.string == s }
     }
 
-    fun next(): MoneroNetworkType {
-        return when (this) {
+    fun next(): MoneroNetworkType =
+        when (this) {
             MoneroNetworkType.NetworkType_Mainnet -> MoneroNetworkType.NetworkType_Stagenet
             MoneroNetworkType.NetworkType_Stagenet -> MoneroNetworkType.NetworkType_Testnet
             MoneroNetworkType.NetworkType_Testnet -> MoneroNetworkType.NetworkType_Mainnet
         }
-    }
 }

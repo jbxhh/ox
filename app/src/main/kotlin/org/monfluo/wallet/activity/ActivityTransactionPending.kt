@@ -3,28 +3,24 @@ package org.monfluo.wallet.activity
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
-import android.widget.TextView
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ncorti.slidetoact.SlideToActView
 import com.ncorti.slidetoact.SlideToActView.OnSlideCompleteListener
+import org.monfluo.wallet.R
 import org.monfluo.wallet.adapter.AdapterTransactionPending
 import org.monfluo.wallet.model.PendingTransaction
-import org.monfluo.wallet.model.MoneroUnit
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.component.ActivityMonero
-import org.monfluo.wallet.util.TextHelper
-import org.monfluo.wallet.R
 import timber.log.Timber
 import kotlin.math.max
 
 class ActivityTransactionPending : ActivityMonero() {
-
     companion object {
         const val RESULT_OK: Int = 1
         const val RESULT_NO_PENDING_TRANSACTION: Int = 2
@@ -63,7 +59,7 @@ class ActivityTransactionPending : ActivityMonero() {
                 left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
                 top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
                 right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom),
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -74,15 +70,16 @@ class ActivityTransactionPending : ActivityMonero() {
             finish()
         }
 
-        sendTransactionSlider.onSlideCompleteListener = object : OnSlideCompleteListener {
-            override fun onSlideComplete(view: SlideToActView) {
-                sendTransaction()
+        sendTransactionSlider.onSlideCompleteListener =
+            object : OnSlideCompleteListener {
+                override fun onSlideComplete(view: SlideToActView) {
+                    sendTransaction()
+                }
             }
-        }
 
         ViewCompat.addAccessibilityAction(
             sendTransactionSlider,
-            getString(R.string.approve_the_transaction)
+            getString(R.string.approve_the_transaction),
         ) { _, _ ->
             sendTransaction()
             return@addAccessibilityAction true
@@ -101,7 +98,10 @@ class ActivityTransactionPending : ActivityMonero() {
         }
     }
 
-    override fun onTransactionSent(pendingTransaction: PendingTransaction, success: Boolean) {
+    override fun onTransactionSent(
+        pendingTransaction: PendingTransaction,
+        success: Boolean,
+    ) {
         runOnUiThread {
             if (success) {
                 Timber.i("Pending transaction sent successfully, finishing activity")

@@ -3,17 +3,16 @@ package org.monfluo.wallet.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.ImageButton
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.R
 import kotlin.io.path.Path
 import kotlin.io.path.name
 
 class AdapterWallet(
-    private val listener: AdapterWalletListener
+    private val listener: AdapterWalletListener,
 ) : RecyclerView.Adapter<AdapterWallet.ViewHolder>() {
-
     private var walletPaths: List<String> = listOf()
 
     fun setWalletPaths(walletPaths: List<String>) {
@@ -23,26 +22,39 @@ class AdapterWallet(
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.recycler_view_item_wallet, parent, false)
         return ViewHolder(listener, view)
     }
 
-    override fun getItemCount(): Int {
-        return walletPaths.size
-    }
+    override fun getItemCount(): Int = walletPaths.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: ViewHolder,
+        position: Int,
+    ) {
         holder.bind(walletPaths[position])
     }
 
     interface AdapterWalletListener {
-        fun onWalletSelected(self: AdapterWallet, walletPath: String)
-        fun onWalletEdit(self: AdapterWallet, walletPath: String)
+        fun onWalletSelected(
+            self: AdapterWallet,
+            walletPath: String,
+        )
+
+        fun onWalletEdit(
+            self: AdapterWallet,
+            walletPath: String,
+        )
     }
 
-    inner class ViewHolder(private val listener: AdapterWalletListener, view: View) : RecyclerView.ViewHolder(view) {
-
+    inner class ViewHolder(
+        private val listener: AdapterWalletListener,
+        view: View,
+    ) : RecyclerView.ViewHolder(view) {
         private lateinit var walletIconImageButton: ImageButton
         private lateinit var walletNameTextView: TextView
         private lateinit var editWalletImageButton: ImageButton

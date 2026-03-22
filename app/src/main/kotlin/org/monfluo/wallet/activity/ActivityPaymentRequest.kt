@@ -1,48 +1,35 @@
 package org.monfluo.wallet.activity
 
-import android.content.Intent
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.content.res.Resources
+import android.text.Editable
 import android.view.View
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.LinearLayout
-import android.text.Editable
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.monfluo.wallet.adapter.AdapterAddress
-import org.monfluo.wallet.adapter.AdapterAddress.AdapterAddressListener
-import org.monfluo.wallet.data.Address
-import org.monfluo.wallet.model.Wallet
-import org.monfluo.wallet.service.wallet.WalletService
-import org.monfluo.wallet.util.Helper.clipBoardCopy
+import org.monfluo.wallet.R
+import org.monfluo.wallet.fragment.DialogFragmentQrCode
+import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.QrCodeHelper
-import org.monfluo.wallet.util.UriPayment
-import org.monfluo.wallet.util.component.ActivityLogging
-import org.monfluo.wallet.R
-import org.monfluo.wallet.util.Constants
-import org.monfluo.wallet.fragment.DialogFragmentQrCode
 import org.monfluo.wallet.util.SimpleTextWatcher
 import org.monfluo.wallet.util.TextHelper
+import org.monfluo.wallet.util.UriPayment
+import org.monfluo.wallet.util.component.ActivityLogging
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.max
@@ -54,7 +41,6 @@ private const val ALPHA_OPAQUE: Int = 255
 private const val ALPHA_HALF_TRANSPARENT: Int = 128
 
 class ActivityPaymentRequest : ActivityLogging() {
-
     private val viewModel: ActivityUriPaymentViewModel by viewModels()
 
     private lateinit var layoutView: View
@@ -112,7 +98,7 @@ class ActivityPaymentRequest : ActivityLogging() {
                 left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
                 top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
                 right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom),
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -130,11 +116,12 @@ class ActivityPaymentRequest : ActivityLogging() {
                 }
             }
         }
-        val generateQrCodeTextWarcher = object : SimpleTextWatcher() {
-            override fun afterTextChanged(s: Editable) {
-                generateQrCode()
+        val generateQrCodeTextWarcher =
+            object : SimpleTextWatcher() {
+                override fun afterTextChanged(s: Editable) {
+                    generateQrCode()
+                }
             }
-        }
         amountTextView.addTextChangedListener(generateQrCodeTextWarcher)
         recipientNameTextView.addTextChangedListener(generateQrCodeTextWarcher)
         descriptionTextView.addTextChangedListener(generateQrCodeTextWarcher)
@@ -158,10 +145,11 @@ class ActivityPaymentRequest : ActivityLogging() {
                 val (bitmap, status) = bitmapAndStatus
                 addressQrCodeImageView.setImageBitmap(bitmap)
                 addressQrCodeImageView.visibility = View.VISIBLE
-                val alpha = when (status) {
-                    QrCodeStatus.CURRENT -> ALPHA_OPAQUE
-                    QrCodeStatus.ABSOLETE -> ALPHA_HALF_TRANSPARENT
-                }
+                val alpha =
+                    when (status) {
+                        QrCodeStatus.CURRENT -> ALPHA_OPAQUE
+                        QrCodeStatus.ABSOLETE -> ALPHA_HALF_TRANSPARENT
+                    }
                 addressQrCodeImageView.setAlpha(alpha)
             }
         }
@@ -200,7 +188,6 @@ class ActivityPaymentRequest : ActivityLogging() {
 }
 
 class ActivityUriPaymentViewModel : ViewModel() {
-
     var addressValue: String? = null
 
     val qrCodeJob: AtomicReference<Job?> = AtomicReference(null)
@@ -211,26 +198,38 @@ class ActivityUriPaymentViewModel : ViewModel() {
 
     val qrCode: MutableLiveData<Pair<Bitmap, QrCodeStatus>?> = MutableLiveData()
 
-    fun generateQrCode(amount: String, recipientName: String, description: String, forceUriFormat: Boolean, size: Int, backgroundColor: Int) {
+    fun generateQrCode(
+        amount: String,
+        recipientName: String,
+        description: String,
+        forceUriFormat: Boolean,
+        size: Int,
+        backgroundColor: Int,
+    ) {
         qrCodeJob.getAndUpdate { job ->
             job?.cancel()
-            qrCode.value = qrCode.value?.first?.let {
-                Pair(it, QrCodeStatus.ABSOLETE)
-            }
+            qrCode.value =
+                qrCode.value?.first?.let {
+                    Pair(it, QrCodeStatus.ABSOLETE)
+                }
             viewModelScope.launch {
                 withContext(Dispatchers.Default) {
-                    val qrCodeValue = if (forceUriFormat || !amount.isBlank() || !recipientName.isBlank() || !description.isBlank()) {
-                        val uriPaymentAddresses = listOf(addressValue!!)
-                        val uriPaymentAmounts = if (amount.isBlank()) emptyList() else listOf(amount)
-                        val uriPaymentRecipientNames = if (recipientName.isBlank()) emptyList() else listOf(recipientName)
-                        val uriPaymentDescription = if (description.isBlank()) null else description
-                        val uriPayment = UriPayment(uriPaymentAddresses, uriPaymentAmounts, uriPaymentRecipientNames, uriPaymentDescription)
-                        val uriPaymentString = uriPayment.toUriString()
-                        uriPaymentString
-                    } else addressValue!!
-                    val (bitmap, time) = measureTimedValue {
-                        QrCodeHelper.generateQrCode(qrCodeValue, size, size, backgroundColor)
-                    }
+                    val qrCodeValue =
+                        if (forceUriFormat || !amount.isBlank() || !recipientName.isBlank() || !description.isBlank()) {
+                            val uriPaymentAddresses = listOf(addressValue!!)
+                            val uriPaymentAmounts = if (amount.isBlank()) emptyList() else listOf(amount)
+                            val uriPaymentRecipientNames = if (recipientName.isBlank()) emptyList() else listOf(recipientName)
+                            val uriPaymentDescription = if (description.isBlank()) null else description
+                            val uriPayment = UriPayment(uriPaymentAddresses, uriPaymentAmounts, uriPaymentRecipientNames, uriPaymentDescription)
+                            val uriPaymentString = uriPayment.toUriString()
+                            uriPaymentString
+                        } else {
+                            addressValue!!
+                        }
+                    val (bitmap, time) =
+                        measureTimedValue {
+                            QrCodeHelper.generateQrCode(qrCodeValue, size, size, backgroundColor)
+                        }
                     Timber.d("Generated QR code bitmap in ${time.toInt(DurationUnit.MILLISECONDS)} milliseconds")
                     if (isActive) {
                         qrCode.postValue(Pair(bitmap!!, QrCodeStatus.CURRENT))

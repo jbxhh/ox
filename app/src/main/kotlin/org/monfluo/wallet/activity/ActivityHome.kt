@@ -17,6 +17,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.monfluo.wallet.R
 import org.monfluo.wallet.adapter.AdapterTransactionInfo
 import org.monfluo.wallet.livedata.combineLiveDatas
 import org.monfluo.wallet.model.Balance
@@ -26,16 +27,14 @@ import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.service.wallet.State
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
+import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.TextHelper
 import org.monfluo.wallet.util.component.ActivityMonero
-import org.monfluo.wallet.util.Helper
-import org.monfluo.wallet.R
 import timber.log.Timber
 import kotlin.math.max
 
 class ActivityHome : ActivityMonero() {
-
     private val viewModel: ActivityHomeViewModel by viewModels()
 
     private lateinit var layoutView: View
@@ -59,13 +58,16 @@ class ActivityHome : ActivityMonero() {
 
     private lateinit var transactionHistoryRecyclerView: RecyclerView
 
-    private val transactionInfoAdapter: AdapterTransactionInfo = AdapterTransactionInfo(object : AdapterTransactionInfo.Listener {
-        override fun onClickTransaction(transactionInfo: TransactionInfo) {
-            val intent = Intent(this@ActivityHome, ActivityTransactionDetails::class.java)
-            intent.putExtra(Constants.EXTRA_TRANSACTION_ID, transactionInfo.hash)
-            startActivity(intent)
-        }
-    })
+    private val transactionInfoAdapter: AdapterTransactionInfo =
+        AdapterTransactionInfo(
+            object : AdapterTransactionInfo.Listener {
+                override fun onClickTransaction(transactionInfo: TransactionInfo) {
+                    val intent = Intent(this@ActivityHome, ActivityTransactionDetails::class.java)
+                    intent.putExtra(Constants.EXTRA_TRANSACTION_ID, transactionInfo.hash)
+                    startActivity(intent)
+                }
+            },
+        )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,7 +83,7 @@ class ActivityHome : ActivityMonero() {
         settingsImageView = findViewById(R.id.settings_imageview)
         enotesImageView = findViewById(R.id.enotes_imageview)
         noTransactionsLayoutView = findViewById(R.id.no_transactions_layout)
-        noTransactionsHeaderTextView  = findViewById(R.id.no_transactions_header_text_view)
+        noTransactionsHeaderTextView = findViewById(R.id.no_transactions_header_text_view)
         receiveSendButtonsLayoutView = findViewById(R.id.receive_send_buttons_layout)
         sendButton = findViewById(R.id.send_button)
         receiveButton = findViewById(R.id.receive_button)
@@ -111,13 +113,16 @@ class ActivityHome : ActivityMonero() {
     }
 
     private fun bindBackPressedCallback() {
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                Timber.d("Back pressed")
-                stopService(Intent(this@ActivityHome, WalletService::class.java))
-                stop()
-            }
-        })
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    Timber.d("Back pressed")
+                    stopService(Intent(this@ActivityHome, WalletService::class.java))
+                    stop()
+                }
+            },
+        )
     }
 
     private fun bindListeners() {
@@ -304,7 +309,10 @@ class ActivityHome : ActivityMonero() {
         }
     }
 
-    override fun onBlockchainAndTargetHeightsFetched(blockchainHeight: Long, targetHeight: Long) {
+    override fun onBlockchainAndTargetHeightsFetched(
+        blockchainHeight: Long,
+        targetHeight: Long,
+    ) {
         walletService?.let { walletService ->
             viewModel.state.postValue(walletService.getState())
         }
@@ -317,7 +325,6 @@ class ActivityHome : ActivityMonero() {
 }
 
 internal class ActivityHomeViewModel : ViewModel() {
-
     val state: MutableLiveData<State> = MutableLiveData(null)
 
     val multiAccountMode: MutableLiveData<Boolean> = MutableLiveData(false)
@@ -328,27 +335,30 @@ internal class ActivityHomeViewModel : ViewModel() {
     val balance: MutableLiveData<Balance?> = MutableLiveData(null)
     val transactions = MutableLiveData<List<TransactionInfo>?>(null)
 
-    val walletCardInfo = combineLiveDatas(
-        state,
-        balance,
-        streetMode,
-        multiAccountMode,
-        enoteManagement,
-    ) { state, balance, streetMode, multiAccountMode, enableEnoteManagement ->
-        val walletConnected = state != null && state.heights.walletHeight > 0L
-        val isSynchronized = state != null && state.heights.walletHeight > 0L
-                && state.heights.blockchainHeight > 0L
-                && state.heights.blockchainHeight - state.heights.walletHeight == 0L
+    val walletCardInfo =
+        combineLiveDatas(
+            state,
+            balance,
+            streetMode,
+            multiAccountMode,
+            enoteManagement,
+        ) { state, balance, streetMode, multiAccountMode, enableEnoteManagement ->
+            val walletConnected = state != null && state.heights.walletHeight > 0L
+            val isSynchronized =
+                state != null &&
+                    state.heights.walletHeight > 0L &&
+                    state.heights.blockchainHeight > 0L &&
+                    state.heights.blockchainHeight - state.heights.walletHeight == 0L
 
-        WalletCardState(
-            walletConnected = walletConnected,
-            isSynchronized = isSynchronized,
-            streetMode = streetMode!!,
-            multiAccountMode = multiAccountMode!!,
-            enableEnoteManagement = enableEnoteManagement!!,
-            balance = balance
-        )
-    }
+            WalletCardState(
+                walletConnected = walletConnected,
+                isSynchronized = isSynchronized,
+                streetMode = streetMode!!,
+                multiAccountMode = multiAccountMode!!,
+                enableEnoteManagement = enableEnoteManagement!!,
+                balance = balance,
+            )
+        }
 }
 
 internal data class WalletCardState(

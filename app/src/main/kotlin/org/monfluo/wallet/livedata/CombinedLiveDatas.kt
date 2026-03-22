@@ -6,7 +6,7 @@ import androidx.lifecycle.MediatorLiveData
 fun <T1, T2, S> combineLiveDatas(
     source1: LiveData<T1>,
     source2: LiveData<T2>,
-    func: (T1?, T2?) -> S?
+    func: (T1?, T2?) -> S?,
 ): LiveData<S> {
     val result = MediatorLiveData<S>()
     result.addSource(source1) {
@@ -30,7 +30,7 @@ fun <T1, T2, T3, S> combineLiveDatas(
     source1: LiveData<T1>,
     source2: LiveData<T2>,
     source3: LiveData<T3>,
-    func: (T1?, T2?, T3?) -> S?
+    func: (T1?, T2?, T3?) -> S?,
 ): LiveData<S> {
     val result = MediatorLiveData<S>()
     result.addSource(source1) {
@@ -60,14 +60,12 @@ fun <T1, T2, T3, S> combineLiveDatas(
     return result
 }
 
-
-
 fun <T1, T2, T3, T4, S> combineLiveDatas(
     source1: LiveData<T1>,
     source2: LiveData<T2>,
     source3: LiveData<T3>,
     source4: LiveData<T4>,
-    func: (T1?, T2?, T3?, T4?) -> S?
+    func: (T1?, T2?, T3?, T4?) -> S?,
 ): LiveData<S> {
     val result = MediatorLiveData<S>()
     result.addSource(source1) {
@@ -109,14 +107,13 @@ fun <T1, T2, T3, T4, S> combineLiveDatas(
     return result
 }
 
-
 fun <T1, T2, T3, T4, T5, S> combineLiveDatas(
     source1: LiveData<T1>,
     source2: LiveData<T2>,
     source3: LiveData<T3>,
     source4: LiveData<T4>,
     source5: LiveData<T5>,
-    func: (T1?, T2?, T3?, T4?, T5?) -> S?
+    func: (T1?, T2?, T3?, T4?, T5?) -> S?,
 ): LiveData<S> {
     val result = MediatorLiveData<S>()
     result.addSource(source1) {
@@ -178,7 +175,7 @@ fun <T1, T2, T3, T4, T5, T6, S> combineLiveDatas(
     source4: LiveData<T4>,
     source5: LiveData<T5>,
     source6: LiveData<T6>,
-    func: (T1?, T2?, T3?, T4?, T5?, T6?) -> S?
+    func: (T1?, T2?, T3?, T4?, T5?, T6?) -> S?,
 ): LiveData<S> {
     val result = MediatorLiveData<S>()
     result.addSource(source1) {

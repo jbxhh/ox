@@ -36,7 +36,6 @@ data class TransactionInfo(
     val key: String? = null,
     val description: String? = null,
 ) {
-
     constructor(
         direction: Int,
         isPending: Boolean,
@@ -51,7 +50,7 @@ data class TransactionInfo(
         accountIndex: Int,
         addressIndex: Int,
         confirmations: Long,
-        transfers: List<Transfer>
+        transfers: List<Transfer>,
     ) : this(
         Direction.fromInteger(direction),
         isPending,
@@ -72,22 +71,21 @@ data class TransactionInfo(
     val isConfirmed: Boolean
         get() = confirmations >= Constants.CONFIRMATIONS
 
-    override fun toString(): String {
-        return "$direction@$blockheight $amount"
-    }
+    override fun toString(): String = "$direction@$blockheight $amount"
 
-    enum class Direction(val value: Int) {
-
+    enum class Direction(
+        val value: Int,
+    ) {
         In(0),
-        Out(1);
+        Out(1),
+        ;
 
         companion object {
-            fun fromInteger(n: Int): Direction {
-                return when (n) {
+            fun fromInteger(n: Int): Direction =
+                when (n) {
                     0 -> In
                     else -> Out
                 }
-            }
         }
     }
 }

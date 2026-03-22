@@ -15,8 +15,9 @@
  */
 package org.monfluo.wallet.data
 
-enum class DefaultNode(val value: Node) {
-
+enum class DefaultNode(
+    val value: Node,
+) {
     MONERUJO(Node("Monerujo", "nodex.monerujo.io:18081", null, null)),
     SETHFORPRIVACY(Node("Seth For Privacy (HTTPS)", "https://node.sethforprivacy.com:443", null, null)),
     RUCKNIUM(Node("Rucknium", "rucknium.me:18081", null, null)),
@@ -28,10 +29,10 @@ enum class DefaultNode(val value: Node) {
     RUCKNIUM_ONION(Node("Rucknium (Tor)", "rucknium757bokwv3ss35ftgc3gzb7hgbvvglbg3hisp7tsj2fkd2nyd.onion:18081", null, null)),
     PLOWSOF_ONION1(Node("plowsof #1 (Tor)", "plowsofe6cleftfmk2raiw5h2x66atrik3nja4bfd3zrfa2hdlgworad.onion:18089", null, null)),
     PLOWSOF_ONION2(Node("plowsof #2 (Tor)", "plowsoffjexmxalw73tkjmf422gq6575fc7vicuu4javzn2ynnte6tyd.onion:18089", null, null)),
-    BOLDSUCK(Node("boldsuck (Tor)", "6dsdenp6vjkvqzy4wzsnzn6wixkdzihx3khiumyzieauxuxslmcaeiad.onion:18081", null, null));
+    BOLDSUCK(Node("boldsuck (Tor)", "6dsdenp6vjkvqzy4wzsnzn6wixkdzihx3khiumyzieauxuxslmcaeiad.onion:18081", null, null)),
+    ;
 
     companion object {
-
         fun defaultNodes(): List<Node> = entries.map { it.value }
 
         fun defaultNode(): Node = MONERUJO.value

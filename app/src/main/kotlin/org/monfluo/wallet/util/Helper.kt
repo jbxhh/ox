@@ -22,15 +22,11 @@ import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.os.PersistableBundle
-import android.text.Spannable
 import android.text.TextWatcher
-import android.text.style.StyleSpan
-import android.text.style.TypefaceSpan
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -41,28 +37,26 @@ import org.monfluo.wallet.R
 import timber.log.Timber
 import java.io.File
 import java.lang.reflect.Field
-import java.math.BigDecimal
-import java.math.RoundingMode
 import java.util.concurrent.atomic.AtomicInteger
 
 object Helper {
-
     private const val WALLET_DIR = "wallets"
     private val DOMAIN_REGEX = Regex("([a-z0-9][a-z0-9-]*[a-z0-9])(\\.([a-z0-9][a-z0-9-]*[a-z0-9]))+")
     private val REQUEST_CODE = AtomicInteger(1)
 
-    fun getWalletRoot(context: Context): File {
-        return getStorage(context, WALLET_DIR)
-    }
+    fun getWalletRoot(context: Context): File = getStorage(context, WALLET_DIR)
 
-    fun findWallets(file: File): List<String> {
-        return file.listFiles()
+    fun findWallets(file: File): List<String> =
+        file
+            .listFiles()
             ?.filter { it.isFile && it.path.endsWith(".keys") }
             ?.map { it.path.removeSuffix(".keys") }
             ?: emptyList()
-    }
 
-    private fun getStorage(context: Context, folderName: String): File {
+    private fun getStorage(
+        context: Context,
+        folderName: String,
+    ): File {
         val dir = File(context.filesDir, folderName)
         if (!dir.exists()) {
             Timber.i("Creating ${dir.absolutePath}")
@@ -76,27 +70,33 @@ object Helper {
         return dir
     }
 
-    fun isOpenaliasLike(string: String): Boolean {
-        return string.lowercase().replace('@', '.').matches(DOMAIN_REGEX)
-    }
+    fun isOpenaliasLike(string: String): Boolean = string.lowercase().replace('@', '.').matches(DOMAIN_REGEX)
 
-    fun getCameraPermission(context: Activity, launcher: ActivityResultLauncher<String?>): Boolean {
-        return if (context.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
+    fun getCameraPermission(
+        context: Activity,
+        launcher: ActivityResultLauncher<String?>,
+    ): Boolean =
+        if (context.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
             Timber.w("Permission denied for CAMERA - requesting it")
             launcher.launch(Manifest.permission.CAMERA)
             false
         } else {
             true
         }
-    }
 
-    fun clipBoardCopy(context: Context, label: String, text: String, sensitive: Boolean = false) {
+    fun clipBoardCopy(
+        context: Context,
+        label: String,
+        text: String,
+        sensitive: Boolean = false,
+    ) {
         val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip = ClipData.newPlainText(label, text)
         if (sensitive) {
-            clip.description.extras = PersistableBundle().apply {
-                putBoolean("android.content.extra.IS_SENSITIVE", true)
-            }
+            clip.description.extras =
+                PersistableBundle().apply {
+                    putBoolean("android.content.extra.IS_SENSITIVE", true)
+                }
         }
         clipboardManager.setPrimaryClip(clip)
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
@@ -112,14 +112,21 @@ object Helper {
             // some apps for some reason store clipboard text as html
             if (description.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN) || description.hasMimeType(ClipDescription.MIMETYPE_TEXT_HTML)) {
                 // getItemAt may throw IndexOutOfBoundsException and there is no safe version of it
-                kotlin.runCatching { it.getItemAt(0) }.getOrNull()?.text?.toString()
+                kotlin
+                    .runCatching { it.getItemAt(0) }
+                    .getOrNull()
+                    ?.text
+                    ?.toString()
             } else {
                 null
             }
         }
     }
 
-    fun requestPostNotificationsPermission(activity: Activity, force: Boolean = false) {
+    fun requestPostNotificationsPermission(
+        activity: Activity,
+        force: Boolean = false,
+    ) {
         if (!force && PreferenceUtils.isPostNotificationsPermissionRequested(activity)) {
             Timber.d("POST_NOTIFICATIONS permission has already been requested")
             return
@@ -137,21 +144,30 @@ object Helper {
         PreferenceUtils.setPostNotificationsPermissionRequested(activity)
     }
 
-    fun tintDrawable(context: Context, drawable: Drawable, enabled: Boolean): Drawable {
-        return if (enabled) {
+    fun tintDrawable(
+        context: Context,
+        drawable: Drawable,
+        enabled: Boolean,
+    ): Drawable =
+        if (enabled) {
             tintDrawable(drawable, context.resources.getColor(R.color.text, null))
         } else {
             tintDrawable(drawable, context.resources.getColor(R.color.text_subtler, null))
         }
-    }
 
-    fun tintDrawable(drawable: Drawable, color: Int): Drawable {
-        val wrappedDrawable = DrawableCompat.wrap(drawable);
-        DrawableCompat.setTint(wrappedDrawable, color);
+    fun tintDrawable(
+        drawable: Drawable,
+        color: Int,
+    ): Drawable {
+        val wrappedDrawable = DrawableCompat.wrap(drawable)
+        DrawableCompat.setTint(wrappedDrawable, color)
         return wrappedDrawable
     }
 
-    fun <T> List<T>.replaceElementWithList(index: Int, other: List<T>): List<T> {
+    fun <T> List<T>.replaceElementWithList(
+        index: Int,
+        other: List<T>,
+    ): List<T> {
         var newList = this.subList(0, index) + other
         if (index + 1 < this.size) {
             newList = newList + this.subList(index + 1, this.size)
@@ -166,15 +182,18 @@ object Helper {
         list.clear()
     }
 
-    private fun findField(name: String, clazz: Class<*>): Field? {
+    private fun findField(
+        name: String,
+        clazz: Class<*>,
+    ): Field? {
         for (field in clazz.getDeclaredFields()) {
             if (field.getName() == name) {
-                return field;
+                return field
             }
         }
         if (clazz.getSuperclass() != null) {
-            return findField(name, clazz.getSuperclass());
+            return findField(name, clazz.getSuperclass())
         }
-        return null;
+        return null
     }
 }
