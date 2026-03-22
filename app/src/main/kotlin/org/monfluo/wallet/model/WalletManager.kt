@@ -257,5 +257,8 @@ class WalletManager {
 
         @JvmStatic
         external fun moneroVersion(): String
+
+        @JvmStatic
+        external fun isEncryptedPolyseed(polyseed: String): Boolean
     }
 }

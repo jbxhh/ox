@@ -682,6 +682,17 @@ Java_org_monfluo_wallet_model_Wallet_isPolyseedSupported(JNIEnv *env, jobject in
     return isPolyseed;
 }
 
+JNIEXPORT jboolean JNICALL
+Java_org_monfluo_wallet_model_WalletManager_isEncryptedPolyseed(JNIEnv *env, jclass clazz, jstring polyseed) {
+    const char *_polyseed = env->GetStringUTFChars(polyseed, nullptr);
+
+    bool isEncrypted = Monero::Wallet::isEncryptedPolyseed(std::string(_polyseed));
+
+    env->ReleaseStringUTFChars(polyseed, _polyseed);
+
+    return isEncrypted;
+}
+
 JNIEXPORT jobject JNICALL
 Java_org_monfluo_wallet_model_Wallet_getPolyseedSeedAndPassphrase(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);

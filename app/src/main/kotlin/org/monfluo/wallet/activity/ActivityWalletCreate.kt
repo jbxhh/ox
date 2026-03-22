@@ -422,6 +422,19 @@ internal class CreateWalletViewModel : ViewModel() {
         val walletFile = File(Helper.getWalletRoot(activity), walletName)
         val seedTypeValue = seedType.value ?: return
 
+        if (seedTypeValue == SeedType.POLYSEED && WalletManager.isEncryptedPolyseed(walletSeed)) {
+            creatingWallet.postValue(false)
+            activity.runOnUiThread {
+                Toast
+                    .makeText(
+                        activity,
+                        application.getString(R.string.activity_wallet_create_wallet_encrypted_polyseed_toast),
+                        Toast.LENGTH_SHORT,
+                    ).show()
+            }
+            return
+        }
+
         val wallet: Wallet =
             if (walletSeed.isEmpty()) {
                 when (seedTypeValue) {
