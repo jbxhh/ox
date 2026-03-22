@@ -28,6 +28,9 @@ import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.data.DefaultNode
 import org.monfluo.wallet.livedata.combineLiveDatas
+import org.monfluo.wallet.model.MoneroNetworkType
+import org.monfluo.wallet.model.Wallet
+import org.monfluo.wallet.service.wallet.WalletService
 import timber.log.Timber
 import kotlin.math.max
 
@@ -121,6 +124,10 @@ class ActivityNodeList() : ActivityMonero() {
         viewModel.sortedNodes.observe(this) { sortedNodes ->
             adapter.setNodes(sortedNodes)
         }
+        viewModel.walletNetworkType.observe(this) { networkType ->
+            val node = PreferenceUtils.getDefaultNode(this, networkType)
+            viewModel.selectedNode.value = node
+        }
         viewModel.selectedNode.observe(this) { selectedNode ->
             adapter.setSelectedNode(selectedNode)
         }
@@ -130,11 +137,9 @@ class ActivityNodeList() : ActivityMonero() {
         super.onResume()
 
         val nodes = PreferenceUtils.getOrSetDefaultNodes(this, DefaultNode.defaultNodes())
-        val node = PreferenceUtils.getOrSetDefaultNode(this, DefaultNode.defaultNode())
         val sortOrder = SortOrder.fromBoolean(PreferenceUtils.isSortNodesAscending(this))
 
         viewModel.nodes.value = nodes
-        viewModel.selectedNode.value = node
         viewModel.sortOrder.value = sortOrder
     }
 
@@ -147,6 +152,16 @@ class ActivityNodeList() : ActivityMonero() {
     override fun onWalletServiceDisconnected() {
         Timber.d("Wallet Service disconnected")
     }
+
+    override fun onWalletServiceConnected(walletService: WalletService) {
+        walletService.getWallet()?.let { wallet ->
+            viewModel.walletNetworkType.value = wallet.networkType()
+        }
+    }
+
+    override fun onWalletUpdated(wallet: Wallet) {
+        viewModel.walletNetworkType.postValue(wallet.networkType())
+    }
 }
 
 class ActivityNodeListViewModel : ViewModel() {
@@ -154,6 +169,7 @@ class ActivityNodeListViewModel : ViewModel() {
     val nodes: MutableLiveData<List<Node>> = MutableLiveData(emptyList())
     val selectedNode: MutableLiveData<Node?> = MutableLiveData(null)
     val sortOrder: MutableLiveData<SortOrder> = MutableLiveData(SortOrder.ASCENDING)
+    val walletNetworkType: MutableLiveData<MoneroNetworkType> = MutableLiveData(MoneroNetworkType.NetworkType_Mainnet)
 
     val sortedNodes = combineLiveDatas(nodes, sortOrder) { nodes, sortOrder ->
         return@combineLiveDatas when (sortOrder!!) {

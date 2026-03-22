@@ -28,12 +28,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.monfluo.wallet.data.SeedType
 import org.monfluo.wallet.livedata.combineLiveDatas
+import org.monfluo.wallet.model.MoneroNetworkType
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.model.WalletManager
 import org.monfluo.wallet.model.WalletStatus
+import android.content.Context
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
+import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.component.ActivityLogging
 import org.monfluo.wallet.R
 import org.monfluo.wallet.MoneroApplication
@@ -57,6 +60,8 @@ class ActivityWalletCreate : ActivityLogging() {
     private lateinit var moreOptionsChevronImageView: ImageView
     private lateinit var advancedOptionsLayout: ConstraintLayout
     private lateinit var seedTypeDescTextView: TextView
+    private lateinit var networkTypeButton: Button
+    private lateinit var networkTypeLabelTextView: TextView
     private lateinit var walletSeedEditText: EditText
     private lateinit var walletHeightLabelTextView: TextView
     private lateinit var walletRestoreHeightEditText: EditText
@@ -79,6 +84,8 @@ class ActivityWalletCreate : ActivityLogging() {
         moreOptionsChevronImageView = findViewById(R.id.advanced_settings_chevron_imageview)
         advancedOptionsLayout = findViewById(R.id.more_options_layout)
         seedTypeDescTextView = findViewById(R.id.seed_type_desc_textview)
+        networkTypeButton = findViewById(R.id.network_type_button)
+        networkTypeLabelTextView = findViewById(R.id.network_type_label_textview)
         walletSeedEditText = findViewById(R.id.wallet_seed_edittext)
         walletHeightLabelTextView = findViewById(R.id.wallet_height_label_textview)
         walletRestoreHeightEditText = findViewById(R.id.wallet_restore_height_edittext)
@@ -94,6 +101,13 @@ class ActivityWalletCreate : ActivityLogging() {
         bindObservers()
 
         Helper.requestPostNotificationsPermission(this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val isDeveloperModeEnabled = PreferenceUtils.isDeveloperModeEnabled(applicationContext)
+        viewModel.developerModeEnabled.value = isDeveloperModeEnabled
     }
 
     private fun bindWindowInsetsListener() {
@@ -178,6 +192,7 @@ class ActivityWalletCreate : ActivityLogging() {
         })
 
         seedTypeButton.setOnClickListener { toggleSeedType() }
+        networkTypeButton.setOnClickListener { toggleNetworkType() }
     }
 
     private fun bindObservers() {
@@ -227,6 +242,20 @@ class ActivityWalletCreate : ActivityLogging() {
                 walletSeedOffsetPassphraseEditText.visibility = View.GONE
             }
         }
+
+        viewModel.networkType.observe(this) { networkType ->
+            networkTypeButton.text = getString(networkType.resourceId)
+        }
+
+        viewModel.developerModeEnabled.observe(this) { isDeveloperModeEnabled ->
+            if (isDeveloperModeEnabled) {
+                networkTypeButton.visibility = View.VISIBLE
+                networkTypeLabelTextView.visibility = View.VISIBLE
+            } else {
+                networkTypeButton.visibility = View.GONE
+                networkTypeLabelTextView.visibility = View.GONE
+            }
+        }
     }
 
     private fun toggleSeedType() {
@@ -237,6 +266,10 @@ class ActivityWalletCreate : ActivityLogging() {
             SeedType.POLYSEED
         }
         viewModel.seedType.value = newSeedType
+    }
+
+    fun toggleNetworkType() {
+        viewModel.networkType.value = viewModel.networkType.value!!.next()
     }
 
     private fun createOrImportWallet(
@@ -273,6 +306,8 @@ internal class CreateWalletViewModel : ViewModel() {
 
     val seedType = MutableLiveData(SeedType.MONERO)
     val showMoreOptions = MutableLiveData(false)
+    val developerModeEnabled = MutableLiveData(false)
+    val networkType = MutableLiveData(MoneroNetworkType.NetworkType_Mainnet)
     private val _password = MutableLiveData("")
     val password: LiveData<String> = _password
     private val _confirmedPassphrase = MutableLiveData("")
@@ -335,7 +370,8 @@ internal class CreateWalletViewModel : ViewModel() {
                     WalletManager.instance.createWallet(
                         walletFile,
                         password,
-                        "English"
+                        "English",
+                        networkType.value!!
                     )
                 }
                 SeedType.POLYSEED -> {
@@ -343,7 +379,8 @@ internal class CreateWalletViewModel : ViewModel() {
                         walletFile,
                         password,
                         offset,
-                        Constants.MNEMONIC_LANGUAGE
+                        Constants.MNEMONIC_LANGUAGE,
+                        networkType.value!!
                     )
                 }
             }
@@ -368,7 +405,8 @@ internal class CreateWalletViewModel : ViewModel() {
                         password,
                         walletSeed,
                         offset,
-                        restoreHeight
+                        restoreHeight,
+                        networkType.value!!
                     )
                 }
                 SeedType.POLYSEED -> {
@@ -376,7 +414,8 @@ internal class CreateWalletViewModel : ViewModel() {
                         walletFile,
                         password,
                         walletSeed,
-                        offset
+                        offset,
+                        networkType.value!!
                     )
                 }
             }
@@ -384,6 +423,11 @@ internal class CreateWalletViewModel : ViewModel() {
         val walletStatus = wallet.getWalletStatusWithError()
         val ok = walletStatus.status == WalletStatus.Ok
         if (ok) {
+            PreferenceUtils.setWalletNetworkType(
+                activity,
+                walletName,
+                networkType.value!!
+            )
             val walletServiceIntent = Intent(activity.applicationContext, WalletService::class.java)
             activity.startForegroundService(walletServiceIntent)
             activity.bindService(walletServiceIntent, object : ServiceConnection {

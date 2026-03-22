@@ -1,5 +1,6 @@
 package org.monfluo.wallet.activity
 
+import org.monfluo.wallet.model.MoneroNetworkType
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
@@ -9,6 +10,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.lifecycle.ViewModel
+import android.widget.Toast
 import org.monfluo.wallet.data.DefaultNode
 import org.monfluo.wallet.fragment.DialogFragmentPassword
 import org.monfluo.wallet.service.wallet.WalletService
@@ -17,7 +19,10 @@ import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.UriPayment
 import org.monfluo.wallet.util.component.ActivityLogging
+import org.monfluo.wallet.R
 import timber.log.Timber
+import kotlin.io.path.Path
+import kotlin.io.path.name
 
 class ActivityStart : ActivityLogging() {
 
@@ -83,12 +88,38 @@ class ActivityStart : ActivityLogging() {
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 Timber.d("Wallet Service connected")
                 val walletService = (service as WalletService.WalletServiceBinder).service
-                val node = PreferenceUtils.getOrSetDefaultNode(this@ActivityStart, DefaultNode.defaultNode())
                 if (walletPath != null && walletPassword != null) {
-                    walletService.openWallet(walletPath, walletPassword, node.address, node.username ?: "", node.password ?: "", node.trusted, PreferenceUtils.getProxyIfEnabled(applicationContext) ?: "")
+                    val networkType = MoneroNetworkType.fromInteger(PreferenceUtils.getWalletNetworkType(this@ActivityStart, Path(walletPath!!).name)) ?: MoneroNetworkType.NetworkType_Mainnet
+                    val node = PreferenceUtils.getOrSetDefaultOrAnyNode(this@ActivityStart, networkType, DefaultNode.defaultNodes())
+                    if (node != null) {
+                        walletService.openWallet(walletPath, walletPassword, node.address, node.username ?: "", node.password ?: "", node.trusted, PreferenceUtils.getProxyIfEnabled(applicationContext) ?: "", networkType)
+                    } else {
+                        Timber.e("No node found for network $networkType, not starting wallet")
+                        Toast.makeText(this@ActivityStart, this@ActivityStart.getString(R.string.toast_no_node_for_network, this@ActivityStart.getString(networkType.resourceId)), Toast.LENGTH_SHORT).show()
+                        walletService.closeWallet()
+                        this@ActivityStart.recreate()
+                        return
+                    }
                 } else {
-                    Timber.e("Wallet path or password are null, initializing wallet instead of opening it")
-                    walletService.initWallet(node.address, node.username ?: "", node.password ?: "", node.trusted, PreferenceUtils.getProxyIfEnabled(applicationContext) ?: "")
+                    Timber.i("Wallet path or password are null, initializing wallet instead of opening it")
+                    val uninitWallet = walletService.getUninitWallet()
+                    if (uninitWallet == null) {
+                        Timber.e("No uninit wallet found!")
+                        walletService.closeWallet()
+                        this@ActivityStart.recreate()
+                        return
+                    }
+                    val networkType = uninitWallet.networkType()
+                    val node = PreferenceUtils.getOrSetDefaultOrAnyNode(this@ActivityStart, networkType, DefaultNode.defaultNodes())
+                    if (node != null) {
+                        walletService.initWallet(node.address, node.username ?: "", node.password ?: "", node.trusted, PreferenceUtils.getProxyIfEnabled(applicationContext) ?: "")
+                    } else {
+                        Timber.e("No node found for network $networkType, not starting wallet")
+                        Toast.makeText(this@ActivityStart, this@ActivityStart.getString(R.string.toast_no_node_for_network, this@ActivityStart.getString(networkType.resourceId)), Toast.LENGTH_SHORT).show()
+                        walletService.closeWallet()
+                        this@ActivityStart.recreate()
+                        return
+                    }
                 }
 
                 val activityHomeIntent = Intent(this@ActivityStart, ActivityHome::class.java)

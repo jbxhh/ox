@@ -3,10 +3,13 @@ package org.monfluo.wallet.util
 import android.content.Context
 import android.content.SharedPreferences
 import org.monfluo.wallet.data.Node
+import org.monfluo.wallet.model.MoneroNetworkType
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
 import androidx.core.content.edit
+
+private const val WALLET_NETWORK_PREFIX = "wallet_network_"
 
 object PreferenceUtils {
 
@@ -28,6 +31,15 @@ object PreferenceUtils {
 
     fun setString(context: Context, key: String, value: String) = getSharedPreferences(context).edit {
         putString(
+            key,
+            value
+        )
+    }
+
+    fun getInt(context: Context, key: String, default: Int): Int? = getSharedPreferences(context).getInt(key, default)
+
+    fun setInt(context: Context, key: String, value: Int) = getSharedPreferences(context).edit {
+        putInt(
             key,
             value
         )
@@ -96,6 +108,10 @@ object PreferenceUtils {
     fun isEnableAddressBook(context: Context): Boolean = getBoolean(context, Constants.PREF_ENABLE_ADDRESS_BOOK, false)
 
     fun setEnableAddressBook(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_ENABLE_ADDRESS_BOOK, value)
+
+    fun isDeveloperModeEnabled(context: Context): Boolean = getBoolean(context, Constants.PREF_ENABLE_DEVELOPER_MODE, false)
+
+    fun setDeveloperModeEnabled(context: Context, value: Boolean) = setBoolean(context, Constants.PREF_ENABLE_DEVELOPER_MODE, value)
 
     fun getProxy(context: Context): String? = getString(context, Constants.PREF_PROXY)
 
@@ -173,11 +189,19 @@ object PreferenceUtils {
     }
 
     fun setNode(context: Context, node: Node): Result<Unit> = node.toJson().map { nodeJson ->
-        setString(context, Constants.PREF_NODE, nodeJson.toString())
+        setString(context, getNodePreferenceKeyFromNetworkType(node.networkType), nodeJson.toString())
     }
 
-    private fun getNode(context: Context): Result<Node?> {
-        val nodeJsonString = getString(context, Constants.PREF_NODE) ?: return Result.success(null)
+    private fun getNodePreferenceKeyFromNetworkType(networkType: MoneroNetworkType): String {
+        return when (networkType) {
+            MoneroNetworkType.NetworkType_Mainnet -> Constants.PREF_NODE
+            MoneroNetworkType.NetworkType_Testnet -> Constants.PREF_NODE_TESTNET
+            MoneroNetworkType.NetworkType_Stagenet -> Constants.PREF_NODE_STAGENET
+        }
+    }
+
+    private fun getNode(context: Context, networkType: MoneroNetworkType): Result<Node?> {
+        val nodeJsonString = getString(context, getNodePreferenceKeyFromNetworkType(networkType)) ?: return Result.success(null)
         val nodeJson = kotlin.runCatching { JSONObject(nodeJsonString) }
         return nodeJson.fold(
             {
@@ -189,28 +213,60 @@ object PreferenceUtils {
         )
     }
 
-    private fun setDefaultNodeAndLogError(context: Context, defaultNode: Node) {
-        setNode(context, defaultNode).exceptionOrNull()?.let { setNodesException ->
-            Timber.e(setNodesException, "Failed to set default node")
-        }
-    }
-
-    fun getOrSetDefaultNode(context: Context, defaultNode: Node): Node {
-        return getNode(context).fold(
+    fun getDefaultNode(context: Context, networkType: MoneroNetworkType): Node? {
+        return getNode(context, networkType).fold(
             { node ->
                 if (node == null) {
-                    Timber.i("No node found, saving default node")
-                    setDefaultNodeAndLogError(context, defaultNode)
-                    return@fold defaultNode
+                    Timber.i("No node found for network $networkType")
+                    return@fold null
                 } else {
                     return@fold node
                 }
             },
             { getNodeException ->
-                Timber.e(getNodeException, "Failed to get node, saving default node")
-                setDefaultNodeAndLogError(context, defaultNode)
-                return@fold defaultNode
+                Timber.e(getNodeException, "Failed to get node")
+                return@fold null
             }
         )
+    }
+
+    fun getOrSetDefaultOrAnyNode(context: Context, networkType: MoneroNetworkType, defaultNodes: List<Node>): Node? {
+        val node = getDefaultNode(context, networkType) ?: getOrSetDefaultNodes(context, defaultNodes).firstOrNull { it.networkType == networkType }
+        if (node != null) {
+            setNode(context, node)
+        }
+        return node
+    }
+
+    fun getWalletNetworkType(context: Context, walletName: String): Int {
+        val key = "$WALLET_NETWORK_PREFIX$walletName"
+        return PreferenceUtils.getSharedPreferences(context).getInt(key, MoneroNetworkType.NetworkType_Mainnet.value)
+    }
+
+    fun setWalletNetworkType(context: Context, walletName: String, networkType: MoneroNetworkType) {
+        val key = "$WALLET_NETWORK_PREFIX$walletName"
+        PreferenceUtils.getSharedPreferences(context).edit {
+            putInt(key, networkType.value)
+        }
+    }
+
+    fun deleteWalletNetworkType(context: Context, walletName: String) {
+        val key = "$WALLET_NETWORK_PREFIX$walletName"
+        PreferenceUtils.getSharedPreferences(context).edit {
+            remove(key)
+        }
+    }
+
+    fun renameWalletNetworkType(context: Context, oldWalletName: String, newWalletName: String) {
+        val oldKey = "$WALLET_NETWORK_PREFIX$oldWalletName"
+        val newKey = "$WALLET_NETWORK_PREFIX$newWalletName"
+
+        val sharedPreferences = getSharedPreferences(context)
+        val networkTypeValue = sharedPreferences.getInt(oldKey, MoneroNetworkType.NetworkType_Mainnet.value)
+
+        sharedPreferences.edit {
+            putInt(newKey, networkTypeValue)
+            remove(oldKey)
+        }
     }
 }

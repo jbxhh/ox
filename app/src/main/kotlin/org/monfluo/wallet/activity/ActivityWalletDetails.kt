@@ -16,6 +16,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import org.monfluo.wallet.util.component.ActivityLogging
 import org.monfluo.wallet.util.Constants
+import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.R
 import kotlin.math.max
 import kotlin.io.path.Path
@@ -74,6 +75,7 @@ class ActivityWalletDetails() : ActivityLogging() {
             if (Path(walletPath).name != newWalletName) {
                 Path(walletPath).moveTo(Path(walletPath).resolveSibling(newWalletName))
                 Path("$walletPath.keys").moveTo(Path(walletPath).resolveSibling("$newWalletName.keys"))
+                PreferenceUtils.renameWalletNetworkType(this@ActivityWalletDetails, Path(walletPath).name, newWalletName)
             }
             finish()
         }
@@ -86,6 +88,7 @@ class ActivityWalletDetails() : ActivityLogging() {
                 .setPositiveButton(getString(R.string.dialog_delete_wallet_action_yes)) { _, _ ->
                     Path(walletPath).deleteIfExists()
                     Path("$walletPath.keys").deleteIfExists()
+                    PreferenceUtils.deleteWalletNetworkType(this@ActivityWalletDetails, Path(walletPath).name)
                     finish()
                 }
                 .setNegativeButton(getString(R.string.dialog_delete_wallet_action_no), null)

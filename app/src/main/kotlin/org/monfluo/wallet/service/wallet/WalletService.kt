@@ -35,6 +35,7 @@ import org.monfluo.wallet.model.TransactionInfo
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.model.Wallet.Companion.NEW_ACCOUNT_NAME
 import org.monfluo.wallet.model.WalletListener
+import org.monfluo.wallet.model.MoneroNetworkType
 import org.monfluo.wallet.model.WalletManager
 import org.monfluo.wallet.model.WalletStatusWithError
 import org.monfluo.wallet.util.Constants
@@ -133,7 +134,9 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
                     val daemonPassword = data.getString(Constants.EXTRA_DAEMON_PASSWORD)!!
                     val daemonTrusted = data.getBoolean(Constants.EXTRA_DAEMON_TRUSTED, false)
                     val proxy = data.getString(Constants.EXTRA_PROXY)!!
-                    handleOpenWallet(walletPath, walletPassword, daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
+                    val networkTypeInt = data.getInt(Constants.EXTRA_WALLET_NETWORK_TYPE)
+                    val networkType = MoneroNetworkType.fromInteger(networkTypeInt) ?: MoneroNetworkType.NetworkType_Mainnet
+                    handleOpenWallet(walletPath, walletPassword, daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy, networkType)
                 }
                 WalletServiceCommand.CLOSE_WALLET -> {
                     handleCloseWallet()
@@ -249,11 +252,12 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
             daemonUsername: String,
             daemonPassword: String,
             daemonTrusted: Boolean,
-            proxy: String
+            proxy: String,
+            networkType: MoneroNetworkType
         ) {
             this@WalletService.walletNameRef.set(runCatching { Path(walletPath).name }.getOrNull())
             preOpenWallet(daemonAddress, proxy)
-            val wallet = WalletManager.instance.openWallet(walletPath, walletPassword)
+            val wallet = WalletManager.instance.openWallet(walletPath, walletPassword, networkType)
             postOpenWallet(wallet, daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
         }
 
@@ -352,7 +356,8 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
 
         private fun resolveDestination(destination: TransactionDestination): TransactionDestinationResolved {
             val value = destination.value
-            if (Wallet.isAddressValid(value)) {
+            val wallet = getWalletOrThrow()
+            if (Wallet.isAddressValid(value, wallet.networkType())) {
                 return destination.toResolved()
             } else if (Helper.isOpenaliasLike(destination.value)) {
                 Timber.d("Trying to resolve destination $value because it looks like an openalias")
@@ -852,13 +857,17 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
     }
 
     fun getPendingTransaction(): PendingTransaction? {
-        return pendingTransactionRef.get();
+        return pendingTransactionRef.get()
     }
 
     fun setUninitWallet(
         wallet: Wallet,
     ) {
         uninitWalletRef.set(wallet)
+    }
+
+    fun getUninitWallet(): Wallet? {
+        return uninitWalletRef.get()
     }
 
     // used by activities that CREATE wallets (and therefore have a wallet already opened but not initialized)
@@ -889,7 +898,8 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         daemonUsername: String,
         daemonPassword: String,
         daemonTrusted: Boolean,
-        proxy: String
+        proxy: String,
+        networkType: MoneroNetworkType
     ) {
         closeWallet()
         val message = handler.obtainMessage()
@@ -901,6 +911,7 @@ class WalletService : Service(), WalletListener, DefaultLifecycleObserver {
         message.data.putString(Constants.EXTRA_DAEMON_PASSWORD, daemonPassword)
         message.data.putBoolean(Constants.EXTRA_DAEMON_TRUSTED, daemonTrusted)
         message.data.putString(Constants.EXTRA_PROXY, proxy)
+        message.data.putInt(Constants.EXTRA_WALLET_NETWORK_TYPE, networkType.value)
         handler.sendMessage(message)
     }
 
