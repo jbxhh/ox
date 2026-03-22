@@ -365,13 +365,11 @@ class Wallet(private val handle: Long, val info: WalletInfo, private var account
         @JvmStatic
         external fun isPaymentIdValid(payment_id: String): Boolean
 
-        fun isAddressValid(address: String): Boolean {
-            return WalletManager.instance.networkType.value.let {
-                isAddressValid(
-                    address,
-                    it
-                )
-            }
+        fun isAddressValid(address: String, networkType: MoneroNetworkType): Boolean {
+            return isAddressValid(
+                address,
+                networkType.value
+            )
         }
 
         @JvmStatic

@@ -19,9 +19,7 @@ import timber.log.Timber
 import java.io.File
 
 class WalletManager {
-    val networkType = MoneroNetworkType.NetworkType_Mainnet
-
-    fun createWallet(aFile: File, password: String, language: String): Wallet {
+    fun createWallet(aFile: File, password: String, language: String, networkType: MoneroNetworkType): Wallet {
         val walletHandle = createWalletJ(aFile.absolutePath, password, language, networkType.value)
         val wallet = Wallet(
             walletHandle,
@@ -41,7 +39,8 @@ class WalletManager {
         aFile: File,
         password: String,
         passphrase: String,
-        language: String
+        language: String,
+        networkType: MoneroNetworkType
     ): Wallet {
         val walletHandle = createWalletPolyseedJ(
             aFile.absolutePath,
@@ -68,7 +67,7 @@ class WalletManager {
         networkType: Int
     ): Long
 
-    fun openWallet(path: String, password: String): Wallet {
+    fun openWallet(path: String, password: String, networkType: MoneroNetworkType): Wallet {
         val walletHandle = openWalletJ(path, password, networkType.value)
         val wallet = Wallet(
             walletHandle,
@@ -81,7 +80,8 @@ class WalletManager {
     fun recoveryWallet(
         aFile: File, password: String,
         mnemonic: String, offset: String,
-        restoreHeight: Long
+        restoreHeight: Long,
+        networkType: MoneroNetworkType
     ): Wallet {
         val walletHandle = recoveryWalletJ(
             aFile.absolutePath, password,
@@ -103,7 +103,8 @@ class WalletManager {
 
     fun recoveryWalletPolyseed(
         aFile: File, password: String,
-        mnemonic: String, offset: String
+        mnemonic: String, offset: String,
+        networkType: MoneroNetworkType
     ): Wallet {
         val walletHandle = recoveryWalletPolyseedJ(
             aFile.absolutePath, password,
@@ -125,7 +126,8 @@ class WalletManager {
 
     fun createWalletWithKeys(
         aFile: File, password: String, language: String, restoreHeight: Long,
-        addressString: String, viewKeyString: String, spendKeyString: String
+        addressString: String, viewKeyString: String, spendKeyString: String,
+        networkType: MoneroNetworkType
     ): Wallet {
         val walletHandle = createWalletFromKeysJ(
             aFile.absolutePath, password,

@@ -29,4 +29,12 @@ enum class MoneroNetworkType(val value: Int, val string: String, val resourceId:
 
         fun fromString(s: String): MoneroNetworkType? = entries.find { it.string == s }
     }
+
+    fun next(): MoneroNetworkType {
+        return when (this) {
+            MoneroNetworkType.NetworkType_Mainnet -> MoneroNetworkType.NetworkType_Stagenet
+            MoneroNetworkType.NetworkType_Stagenet -> MoneroNetworkType.NetworkType_Testnet
+            MoneroNetworkType.NetworkType_Testnet -> MoneroNetworkType.NetworkType_Mainnet
+        }
+    }
 }

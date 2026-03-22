@@ -16,9 +16,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
+import androidx.activity.viewModels
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import org.monfluo.wallet.data.DefaultNode
 import org.monfluo.wallet.data.Node
-import org.monfluo.wallet.data.SortOrder
 import org.monfluo.wallet.activity.ActivityNodeList
 import org.monfluo.wallet.model.WalletManager
 import org.monfluo.wallet.util.Helper
@@ -28,8 +30,13 @@ import org.monfluo.wallet.R
 import org.monfluo.wallet.BuildConfig
 import timber.log.Timber
 import kotlin.math.max
+import org.monfluo.wallet.model.MoneroNetworkType
+import org.monfluo.wallet.model.Wallet
+import org.monfluo.wallet.service.wallet.WalletService
 
 class ActivityApplicationSettings : ActivityMonero() {
+
+    private val viewModel: ActivityApplicationSettingsViewModel by viewModels()
 
     private lateinit var layoutView: View
     private lateinit var backImageView: ImageView
@@ -55,6 +62,7 @@ class ActivityApplicationSettings : ActivityMonero() {
     private lateinit var buildApplicationVersionTextView: TextView
     private lateinit var buildMoneroVersionTextView: TextView
     private lateinit var enableAddressBookSwitch: SwitchCompat
+    private lateinit var developerModeSwitch: SwitchCompat
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,6 +92,7 @@ class ActivityApplicationSettings : ActivityMonero() {
         buildApplicationVersionTextView = findViewById(R.id.monfluo_build_application_version_textview)
         buildMoneroVersionTextView = findViewById(R.id.monfluo_build_monero_version_textview)
         enableAddressBookSwitch = findViewById(R.id.enable_address_book_switch)
+        developerModeSwitch = findViewById(R.id.developer_mode_switch)
 
         val isMultiWalletMode = PreferenceUtils.isMultiWalletMode(applicationContext)
         val isMultiAccountMode = PreferenceUtils.isMultiAccountMode(applicationContext)
@@ -98,6 +107,7 @@ class ActivityApplicationSettings : ActivityMonero() {
         val isMaxBrightnessQrCodes = PreferenceUtils.isMaxBrightnessQrCodes(applicationContext)
         val isForceUriFormatQrCodes = PreferenceUtils.isForceUriFormatQrCodes(applicationContext)
         val isAddressBookEnabled = PreferenceUtils.isEnableAddressBook(applicationContext)
+        val isDeveloperModeEnabled = PreferenceUtils.isDeveloperModeEnabled(applicationContext)
         val isUseProxy = PreferenceUtils.isUseProxy(applicationContext)
 
         multiWalletModeSwitch.isChecked = isMultiWalletMode
@@ -113,12 +123,10 @@ class ActivityApplicationSettings : ActivityMonero() {
         maxBrightnessQrCodesSwitch.isChecked = isMaxBrightnessQrCodes
         forceUriFormatQrCodesSwitch.isChecked = isForceUriFormatQrCodes
         enableAddressBookSwitch.isChecked = isAddressBookEnabled
+        developerModeSwitch.isChecked = isDeveloperModeEnabled
         proxySwitch.isChecked = isUseProxy
 
         walletProxyAddressEditText.setText(PreferenceUtils.getProxy(this) ?: "")
-
-        val node = PreferenceUtils.getOrSetDefaultNode(this, DefaultNode.defaultNode())
-        selectNodeButton.text = getString(R.string.node_button_text, node.name)
 
         aboutMonfluoTextView.movementMethod = LinkMovementMethod.getInstance()
 
@@ -129,6 +137,7 @@ class ActivityApplicationSettings : ActivityMonero() {
 
         bindWindowInsetsListener()
         bindListeners()
+        bindObservers()
     }
 
     private fun bindWindowInsetsListener() {
@@ -193,6 +202,9 @@ class ActivityApplicationSettings : ActivityMonero() {
         enableAddressBookSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
             PreferenceUtils.setEnableAddressBook(applicationContext, b)
         }
+        developerModeSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PreferenceUtils.setDeveloperModeEnabled(applicationContext, b)
+        }
 
         selectNodeButton.setOnClickListener {
             startActivity(Intent(this, ActivityNodeList::class.java))
@@ -222,6 +234,13 @@ class ActivityApplicationSettings : ActivityMonero() {
         }
     }
 
+    private fun bindObservers() {
+        viewModel.walletNetworkType.observe(this) { networkType ->
+            val node = PreferenceUtils.getDefaultNode(this, networkType)
+            selectNodeButton.text = getString(R.string.node_button_text, node?.name ?: "null")
+        }
+    }
+
     // overridden to not finish the activity if wallet service is not active
     override fun onWalletServiceNotFound() {
         Timber.d("Wallet Service not found")
@@ -230,6 +249,16 @@ class ActivityApplicationSettings : ActivityMonero() {
     // overridden to not finish the activity if wallet service gets disconnected
     override fun onWalletServiceDisconnected() {
         Timber.d("Wallet Service disconnected")
+    }
+
+    override fun onWalletServiceConnected(walletService: WalletService) {
+        walletService.getWallet()?.let { wallet ->
+            viewModel.walletNetworkType.value = wallet.networkType()
+        }
+    }
+
+    override fun onWalletUpdated(wallet: Wallet) {
+        viewModel.walletNetworkType.postValue(wallet.networkType())
     }
 
     override fun onProxyUpdated(proxy: String, success: Boolean) {
@@ -249,4 +278,9 @@ class ActivityApplicationSettings : ActivityMonero() {
             }
         }
     }
+}
+
+internal class ActivityApplicationSettingsViewModel : ViewModel() {
+
+    val walletNetworkType: MutableLiveData<MoneroNetworkType> = MutableLiveData(MoneroNetworkType.NetworkType_Mainnet)
 }

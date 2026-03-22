@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.app.AlertDialog
 import androidx.activity.viewModels
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.MutableLiveData
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
@@ -23,6 +24,7 @@ import org.monfluo.wallet.data.Node
 import org.monfluo.wallet.model.MoneroNetworkType
 import kotlin.math.max
 import timber.log.Timber
+import android.widget.TextView
 
 class ActivityNodeDetails() : ActivityLogging() {
 
@@ -34,6 +36,8 @@ class ActivityNodeDetails() : ActivityLogging() {
     private lateinit var nodeNameEditText: EditText
     private lateinit var nodeAddressEditText: EditText
     private lateinit var nodeDaemonTrustedCheckBox: CheckBox
+    private lateinit var nodeNetworkTypeButton: Button
+    private lateinit var nodeNetworkTypeLabelTextView: TextView
     private lateinit var nodeUsernameEditText: EditText
     private lateinit var nodePasswordEditText: EditText
     private lateinit var nodeDeleteButton: Button
@@ -48,6 +52,8 @@ class ActivityNodeDetails() : ActivityLogging() {
         nodeNameEditText = findViewById(R.id.node_name_edittext)
         nodeAddressEditText = findViewById(R.id.node_address_edittext)
         nodeDaemonTrustedCheckBox = findViewById(R.id.trusted_node_checkbox)
+        nodeNetworkTypeButton = findViewById(R.id.node_network_type_button)
+        nodeNetworkTypeLabelTextView = findViewById(R.id.node_network_type_label_textview)
         nodeUsernameEditText = findViewById(R.id.node_username_edittext)
         nodePasswordEditText = findViewById(R.id.node_password_edittext)
         nodeDeleteButton = findViewById(R.id.delete_node_button)
@@ -55,6 +61,7 @@ class ActivityNodeDetails() : ActivityLogging() {
 
         bindWindowInsetsListener()
         bindListeners()
+        bindObservers()
         init()
     }
 
@@ -79,12 +86,18 @@ class ActivityNodeDetails() : ActivityLogging() {
         if (!viewModel.nodeDaemonTrusedClicked) {
             nodeDaemonTrustedCheckBox.isChecked = node.trusted
         }
+        if (!viewModel.nodeNetworkTypeClicked) {
+            viewModel.networkType.value = node.networkType
+        }
         if (nodeUsernameEditText.text.isEmpty()) {
             nodeUsernameEditText.setText(node.username ?: "")
         }
         if (nodePasswordEditText.text.isEmpty()) {
             nodePasswordEditText.setText(node.password ?: "")
         }
+
+        val isDeveloperModeEnabled = PreferenceUtils.isDeveloperModeEnabled(applicationContext)
+        viewModel.developerModeEnabled.value = isDeveloperModeEnabled
     }
 
     private fun bindWindowInsetsListener() {
@@ -104,8 +117,12 @@ class ActivityNodeDetails() : ActivityLogging() {
         backImageView.setOnClickListener {
             finish()
         }
+        nodeNetworkTypeButton.setOnClickListener {
+            viewModel.nodeNetworkTypeClicked = true
+            toggleNetworkType()
+        }
         nodeDaemonTrustedCheckBox.setOnClickListener {
-            viewModel.nodeDaemonTrusedClicked = !viewModel.nodeDaemonTrusedClicked
+            viewModel.nodeDaemonTrusedClicked = true
         }
         nodeDeleteButton.setOnClickListener {
             val nodeName = viewModel.nodeName!!
@@ -141,6 +158,7 @@ class ActivityNodeDetails() : ActivityLogging() {
             val username = nodeUsernameEditText.text.toString().ifBlank { null }
             val password = nodePasswordEditText.text.toString().ifBlank { null }
             val trusted = nodeDaemonTrustedCheckBox.isChecked
+            val networkType = viewModel.networkType.value!!
 
             if (name.isBlank()) {
                 Toast.makeText(this, getText(R.string.toast_enter_node_name), Toast.LENGTH_SHORT).show()
@@ -153,7 +171,7 @@ class ActivityNodeDetails() : ActivityLogging() {
                 return@setOnClickListener
             }
 
-            val newNode = Node(name, address, username, password, MoneroNetworkType.NetworkType_Mainnet, trusted)
+            val newNode = Node(name, address, username, password, networkType, trusted)
 
             val newNodes = PreferenceUtils.getOrSetDefaultNodes(this, DefaultNode.defaultNodes()).toMutableList()
             val nodeIndex = newNodes.indexOfFirst { node -> node.name == nodeName }
@@ -177,6 +195,22 @@ class ActivityNodeDetails() : ActivityLogging() {
         }
     }
 
+    private fun bindObservers() {
+        viewModel.networkType.observe(this) { networkType ->
+            nodeNetworkTypeButton.text = getString(networkType.resourceId)
+        }
+
+        viewModel.developerModeEnabled.observe(this) { isDeveloperModeEnabled ->
+            if (isDeveloperModeEnabled) {
+                nodeNetworkTypeButton.visibility = View.VISIBLE
+                nodeNetworkTypeLabelTextView.visibility = View.VISIBLE
+            } else {
+                nodeNetworkTypeButton.visibility = View.GONE
+                nodeNetworkTypeLabelTextView.visibility = View.GONE
+            }
+        }
+    }
+
     private fun init() {
         if (viewModel.nodeName == null) {
             val extras = intent.extras
@@ -188,10 +222,17 @@ class ActivityNodeDetails() : ActivityLogging() {
             }
         }
     }
+
+    fun toggleNetworkType() {
+        viewModel.networkType.value = viewModel.networkType.value!!.next()
+    }
 }
 
 internal class ActivityNodeDetailsViewModel : ViewModel() {
 
     var nodeName: String? = null
     var nodeDaemonTrusedClicked: Boolean = false
+    var nodeNetworkTypeClicked: Boolean = false
+    val developerModeEnabled: MutableLiveData<Boolean> = MutableLiveData(false)
+    val networkType: MutableLiveData<MoneroNetworkType> = MutableLiveData(MoneroNetworkType.NetworkType_Mainnet)
 }
