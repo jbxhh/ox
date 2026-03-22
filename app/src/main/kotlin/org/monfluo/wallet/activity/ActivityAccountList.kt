@@ -12,7 +12,6 @@ import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlin.math.max
 import org.monfluo.wallet.R
 import org.monfluo.wallet.adapter.AdapterAccount
 import org.monfluo.wallet.model.Account
@@ -20,9 +19,9 @@ import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.component.ActivityMonero
+import kotlin.math.max
 
 class ActivityAccountList : ActivityMonero() {
-
     private lateinit var layoutView: View
     private lateinit var backImageView: ImageView
 
@@ -30,19 +29,31 @@ class ActivityAccountList : ActivityMonero() {
 
     private lateinit var adapterRecyclerView: RecyclerView
 
-    private val adapterAccount: AdapterAccount = AdapterAccount(listOf(), null, object : AdapterAccount.Listener {
+    private val adapterAccount: AdapterAccount =
+        AdapterAccount(
+            listOf(),
+            null,
+            object : AdapterAccount.Listener {
+                override fun onAccountSelected(
+                    self: AdapterAccount,
+                    account: Account,
+                ) {
+                    self.setSelectedAccount(account)
+                    walletService?.setAccount(account.index)
+                }
 
-        override fun onAccountSelected(self: AdapterAccount, account: Account) {
-            self.setSelectedAccount(account)
-            walletService?.setAccount(account.index)
-        }
-
-        override fun onAccountEditClicked(self: AdapterAccount, account: Account) {
-            startActivity(Intent(this@ActivityAccountList, ActivityAccountDetails::class.java).apply {
-                putExtra(Constants.EXTRA_ACCOUNT_INDEX, account.index)
-            })
-        }
-    })
+                override fun onAccountEditClicked(
+                    self: AdapterAccount,
+                    account: Account,
+                ) {
+                    startActivity(
+                        Intent(this@ActivityAccountList, ActivityAccountDetails::class.java).apply {
+                            putExtra(Constants.EXTRA_ACCOUNT_INDEX, account.index)
+                        },
+                    )
+                }
+            },
+        )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,7 +78,7 @@ class ActivityAccountList : ActivityMonero() {
                 left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
                 top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
                 right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom),
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -110,7 +121,10 @@ class ActivityAccountList : ActivityMonero() {
         }
     }
 
-    override fun onAccountLabelChanged(index: Int, label: String) {
+    override fun onAccountLabelChanged(
+        index: Int,
+        label: String,
+    ) {
         walletService?.getWallet()?.let { wallet ->
             runOnUiThread {
                 updateAdapterAccount(wallet)
@@ -119,12 +133,13 @@ class ActivityAccountList : ActivityMonero() {
     }
 
     private fun updateAdapterAccount(wallet: Wallet) {
-        val accounts = (0 until wallet.getNumAccounts()).map {
-            val index = it
-            val label = wallet.getAccountLabel(index)
-            val balance = wallet.getBalance(index)
-            Account(index, label, balance)
-        }
+        val accounts =
+            (0 until wallet.getNumAccounts()).map {
+                val index = it
+                val label = wallet.getAccountLabel(index)
+                val balance = wallet.getBalance(index)
+                Account(index, label, balance)
+            }
         adapterAccount.setAccounts(accounts)
         adapterAccount.setSelectedAccount(accounts[wallet.getAccountIndex()])
     }

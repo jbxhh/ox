@@ -17,10 +17,12 @@ private const val VIEW_TYPE_TRANSFER: Int = 1
 private const val VIEW_TYPE_FOOTER: Int = 2
 
 class AdapterTransactionPending(
-    private var pendingTransaction: PendingTransaction? = null
+    private var pendingTransaction: PendingTransaction? = null,
 ) : RecyclerView.Adapter<AdapterTransactionPending.ViewHolder>() {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {
             VIEW_TYPE_HEADER -> {
@@ -62,7 +64,10 @@ class AdapterTransactionPending(
         }
     }
 
-    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        viewHolder: ViewHolder,
+        position: Int,
+    ) {
         val pendingTransaction = pendingTransaction!!
         val transactionDescriptionCount = if (pendingTransaction.description != null) 1 else 0
         when (viewHolder) {
@@ -86,10 +91,11 @@ class AdapterTransactionPending(
                 val amount = pendingTransaction.getAmount()
                 val fee = pendingTransaction.getFee()
                 val dust = pendingTransaction.getDust()
-                val single = when (val destination = pendingTransaction.destination) {
-                    is PendingTransactionDestination.Default -> destination.value.size == 1
-                    is PendingTransactionDestination.Sweep -> true
-                }
+                val single =
+                    when (val destination = pendingTransaction.destination) {
+                        is PendingTransactionDestination.Default -> destination.value.size == 1
+                        is PendingTransactionDestination.Sweep -> true
+                    }
                 viewHolder.bind(amount, fee, dust, single)
             }
         }
@@ -100,10 +106,13 @@ class AdapterTransactionPending(
         notifyDataSetChanged()
     }
 
-    sealed class ViewHolder(view: View) : RecyclerView.ViewHolder(view)
+    sealed class ViewHolder(
+        view: View,
+    ) : RecyclerView.ViewHolder(view)
 
-    inner class HeaderViewHolder(view: View) : ViewHolder(view) {
-
+    inner class HeaderViewHolder(
+        view: View,
+    ) : ViewHolder(view) {
         private val transactionDescriptionTextView: TextView = itemView.findViewById(R.id.transaction_description_textview)
 
         fun bind(description: String) {
@@ -111,8 +120,9 @@ class AdapterTransactionPending(
         }
     }
 
-    inner class TransferViewHolder(view: View) : ViewHolder(view) {
-
+    inner class TransferViewHolder(
+        view: View,
+    ) : ViewHolder(view) {
         private val amountLabelTextView: TextView = itemView.findViewById(R.id.amount_label_textview)
         private val amountTextView: TextView = itemView.findViewById(R.id.amount_textview)
         private val addressLabelTextView: TextView = itemView.findViewById(R.id.address_label_textview)
@@ -134,7 +144,7 @@ class AdapterTransactionPending(
             address: String,
             resolvedFrom: TransactionDestinationResolvedFrom?,
             index: Int,
-            single: Boolean
+            single: Boolean,
         ) {
             if (single) {
                 amountLabelTextView.setText(transactionDestinationPendingAmountLabel)
@@ -156,8 +166,9 @@ class AdapterTransactionPending(
         }
     }
 
-    inner class FooterViewHolder(view: View) : ViewHolder(view) {
-
+    inner class FooterViewHolder(
+        view: View,
+    ) : ViewHolder(view) {
         private val totalLabelTextView: TextView = itemView.findViewById(R.id.total_label_textview)
         private val totalTextView: TextView = itemView.findViewById(R.id.total_textview)
         private val feeTextView: TextView = itemView.findViewById(R.id.fee_textview)
@@ -165,7 +176,12 @@ class AdapterTransactionPending(
         private val dustTextView: TextView = itemView.findViewById(R.id.dust_textview)
         private val grandTotalTextView: TextView = itemView.findViewById(R.id.grand_total_textview)
 
-        fun bind(totalAmount: Long, feeAmount: Long, dustAmount: Long, single: Boolean) {
+        fun bind(
+            totalAmount: Long,
+            feeAmount: Long,
+            dustAmount: Long,
+            single: Boolean,
+        ) {
             if (single) {
                 totalLabelTextView.visibility = View.GONE
                 totalTextView.visibility = View.GONE

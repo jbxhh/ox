@@ -1,26 +1,25 @@
 package org.monfluo.wallet.activity
 
-import org.monfluo.wallet.util.component.ActivityMonero
-import org.monfluo.wallet.R
-import org.monfluo.wallet.model.Wallet
-import org.monfluo.wallet.service.wallet.WalletService
-import org.monfluo.wallet.util.Constants
-import android.view.View
-import android.widget.ImageView
-import android.widget.EditText
-import android.widget.Button
 import android.os.Bundle
+import android.view.View
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
 import androidx.activity.viewModels
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModel
+import org.monfluo.wallet.R
+import org.monfluo.wallet.model.Wallet
+import org.monfluo.wallet.service.wallet.WalletService
+import org.monfluo.wallet.util.Constants
+import org.monfluo.wallet.util.component.ActivityMonero
 import timber.log.Timber
 import kotlin.math.max
 
 class ActivityAddressDetails : ActivityMonero() {
-
     private val viewModel: ActivityAddressDetailsViewModel by viewModels()
 
     private lateinit var layoutView: View
@@ -69,7 +68,7 @@ class ActivityAddressDetails : ActivityMonero() {
                 left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
                 top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
                 right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom),
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -97,7 +96,11 @@ class ActivityAddressDetails : ActivityMonero() {
         }
     }
 
-    override fun onAddressLabelChanged(accountIndex: Int, addressIndex: Int, label: String) {
+    override fun onAddressLabelChanged(
+        accountIndex: Int,
+        addressIndex: Int,
+        label: String,
+    ) {
         if (accountIndex == viewModel.accountIndex && addressIndex == viewModel.addressIndex) {
             runOnUiThread {
                 updateAddressName(label)
@@ -107,17 +110,18 @@ class ActivityAddressDetails : ActivityMonero() {
 
     private fun updateAddressName(label: String? = null) {
         if (addressNameEditText.text.isBlank()) {
-            label ?: walletService?.getWallet()?.let {
-                wallet -> wallet.getAddressLabel(viewModel.accountIndex!!, viewModel.addressIndex!!)
-            }?.let { newLabel ->
-                addressNameEditText.setText(newLabel)
-            }
+            label ?: walletService
+                ?.getWallet()
+                ?.let { wallet ->
+                    wallet.getAddressLabel(viewModel.accountIndex!!, viewModel.addressIndex!!)
+                }?.let { newLabel ->
+                    addressNameEditText.setText(newLabel)
+                }
         }
     }
 }
 
 internal class ActivityAddressDetailsViewModel : ViewModel() {
-
     var accountIndex: Int? = null
     var addressIndex: Int? = null
 }

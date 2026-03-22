@@ -15,9 +15,12 @@
  */
 package org.monfluo.wallet.model
 
-class TransactionHistory(private val handle: Long) {
+class TransactionHistory(
+    private val handle: Long,
+) {
     external fun getCount(): Int
 
     external fun refreshJ(): MutableList<TransactionInfo>
+
     external fun getAllJ(): MutableList<TransactionInfo>
 }

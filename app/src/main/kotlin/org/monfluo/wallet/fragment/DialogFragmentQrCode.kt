@@ -1,29 +1,20 @@
 package org.monfluo.wallet.fragment
 
-import android.os.Bundle
-import android.graphics.Bitmap
 import android.app.Dialog
+import android.graphics.Bitmap
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
-import android.widget.Button
 import android.widget.ImageView
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import org.monfluo.wallet.R
-import org.monfluo.wallet.model.WalletManager
-import org.monfluo.wallet.util.Helper.getClipBoardText
-import android.widget.LinearLayout
 
 class DialogFragmentQrCode(
     private val bitmap: Bitmap,
     private val showIconOnQrCodes: Boolean,
     private val increaseBrightness: Boolean,
 ) : DialogFragment() {
-
     private lateinit var qrCodeImageView: ImageView
     private lateinit var qrCodeIconImageView: ImageView
 
@@ -36,9 +27,10 @@ class DialogFragmentQrCode(
         val dialog = super.onCreateDialog(savedInstanceState)
         if (increaseBrightness) {
             val window = dialog.window!!
-            window.attributes = window.attributes.also {
-                it.screenBrightness = 1f
-            }
+            window.attributes =
+                window.attributes.also {
+                    it.screenBrightness = 1f
+                }
         }
         return dialog
     }
@@ -46,12 +38,13 @@ class DialogFragmentQrCode(
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return inflater.inflate(R.layout.dialog_fragment_qr_code, container)
-    }
+        savedInstanceState: Bundle?,
+    ): View = inflater.inflate(R.layout.dialog_fragment_qr_code, container)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         qrCodeImageView = view.findViewById(R.id.qrcode_imageview)
         qrCodeIconImageView = view.findViewById(R.id.qrcode_icon_imageview)
 

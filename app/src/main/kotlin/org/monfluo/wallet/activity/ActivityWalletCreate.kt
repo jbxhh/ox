@@ -1,8 +1,8 @@
 package org.monfluo.wallet.activity
 
 import android.content.ComponentName
-import android.content.ServiceConnection
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
 import android.text.Editable
@@ -20,32 +20,29 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.monfluo.wallet.MoneroApplication
+import org.monfluo.wallet.R
 import org.monfluo.wallet.data.SeedType
 import org.monfluo.wallet.livedata.combineLiveDatas
 import org.monfluo.wallet.model.MoneroNetworkType
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.model.WalletManager
 import org.monfluo.wallet.model.WalletStatus
-import android.content.Context
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.component.ActivityLogging
-import org.monfluo.wallet.R
-import org.monfluo.wallet.MoneroApplication
 import timber.log.Timber
 import java.io.File
 import kotlin.math.max
 
 class ActivityWalletCreate : ActivityLogging() {
-
     private val viewModel: CreateWalletViewModel by viewModels()
 
     private lateinit var layoutView: View
@@ -117,20 +114,23 @@ class ActivityWalletCreate : ActivityLogging() {
                 left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
                 top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
                 right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom),
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
     }
 
     private fun bindBackPressedCallback() {
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (!intent.getBooleanExtra(Constants.EXTRA_PREVENT_GOING_BACK, false)) {
-                    finish()
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (!intent.getBooleanExtra(Constants.EXTRA_PREVENT_GOING_BACK, false)) {
+                        finish()
+                    }
                 }
-            }
-        })
+            },
+        )
     }
 
     private fun bindListeners() {
@@ -149,47 +149,103 @@ class ActivityWalletCreate : ActivityLogging() {
         createWalletButton.setOnClickListener {
             createOrImportWallet(
                 walletSeedEditText.text.toString().trim(),
-                walletRestoreHeightEditText.text.toString().trim()
+                walletRestoreHeightEditText.text.toString().trim(),
             )
         }
 
-        walletPasswordEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-            override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-            override fun afterTextChanged(editable: Editable) {
-                viewModel.setPassphrase(editable.toString())
-            }
-        })
+        walletPasswordEditText.addTextChangedListener(
+            object : TextWatcher {
+                override fun beforeTextChanged(
+                    charSequence: CharSequence,
+                    i: Int,
+                    i1: Int,
+                    i2: Int,
+                ) {}
 
-        walletPasswordConfirmEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-            override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-            override fun afterTextChanged(editable: Editable) {
-                viewModel.setConfirmedPassphrase(editable.toString())
-            }
-        })
+                override fun onTextChanged(
+                    charSequence: CharSequence,
+                    i: Int,
+                    i1: Int,
+                    i2: Int,
+                ) {}
 
-        walletSeedEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-            override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-            override fun afterTextChanged(editable: Editable) {
-                val text = editable.toString()
-                viewModel.seed.value = text
-                if (text.isEmpty()) {
-                    createWalletButton.setText(R.string.create_wallet)
-                } else {
-                    createWalletButton.setText(R.string.restore_wallet)
+                override fun afterTextChanged(editable: Editable) {
+                    viewModel.setPassphrase(editable.toString())
                 }
-            }
-        })
+            },
+        )
 
-        walletSeedOffsetPassphraseEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-            override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
-            override fun afterTextChanged(editable: Editable) {
-                viewModel.seedOffsetPassphrase.value = editable.toString()
-            }
-        })
+        walletPasswordConfirmEditText.addTextChangedListener(
+            object : TextWatcher {
+                override fun beforeTextChanged(
+                    charSequence: CharSequence,
+                    i: Int,
+                    i1: Int,
+                    i2: Int,
+                ) {}
+
+                override fun onTextChanged(
+                    charSequence: CharSequence,
+                    i: Int,
+                    i1: Int,
+                    i2: Int,
+                ) {}
+
+                override fun afterTextChanged(editable: Editable) {
+                    viewModel.setConfirmedPassphrase(editable.toString())
+                }
+            },
+        )
+
+        walletSeedEditText.addTextChangedListener(
+            object : TextWatcher {
+                override fun beforeTextChanged(
+                    charSequence: CharSequence,
+                    i: Int,
+                    i1: Int,
+                    i2: Int,
+                ) {}
+
+                override fun onTextChanged(
+                    charSequence: CharSequence,
+                    i: Int,
+                    i1: Int,
+                    i2: Int,
+                ) {}
+
+                override fun afterTextChanged(editable: Editable) {
+                    val text = editable.toString()
+                    viewModel.seed.value = text
+                    if (text.isEmpty()) {
+                        createWalletButton.setText(R.string.create_wallet)
+                    } else {
+                        createWalletButton.setText(R.string.restore_wallet)
+                    }
+                }
+            },
+        )
+
+        walletSeedOffsetPassphraseEditText.addTextChangedListener(
+            object : TextWatcher {
+                override fun beforeTextChanged(
+                    charSequence: CharSequence,
+                    i: Int,
+                    i1: Int,
+                    i2: Int,
+                ) {}
+
+                override fun onTextChanged(
+                    charSequence: CharSequence,
+                    i: Int,
+                    i1: Int,
+                    i2: Int,
+                ) {}
+
+                override fun afterTextChanged(editable: Editable) {
+                    viewModel.seedOffsetPassphrase.value = editable.toString()
+                }
+            },
+        )
 
         seedTypeButton.setOnClickListener { toggleSeedType() }
         networkTypeButton.setOnClickListener { toggleNetworkType() }
@@ -260,11 +316,12 @@ class ActivityWalletCreate : ActivityLogging() {
 
     private fun toggleSeedType() {
         val seedType = viewModel.seedType.value ?: return
-        val newSeedType = if (seedType == SeedType.POLYSEED) {
-            SeedType.MONERO
-        } else {
-            SeedType.POLYSEED
-        }
+        val newSeedType =
+            if (seedType == SeedType.POLYSEED) {
+                SeedType.MONERO
+            } else {
+                SeedType.POLYSEED
+            }
         viewModel.seedType.value = newSeedType
     }
 
@@ -274,7 +331,7 @@ class ActivityWalletCreate : ActivityLogging() {
 
     private fun createOrImportWallet(
         walletSeed: String,
-        restoreHeightText: String
+        restoreHeightText: String,
     ) {
         lifecycleScope.launch(Dispatchers.IO) {
             viewModel.createOrImportWallet(
@@ -303,37 +360,37 @@ class ActivityWalletCreate : ActivityLogging() {
 }
 
 internal class CreateWalletViewModel : ViewModel() {
-
     val seedType = MutableLiveData(SeedType.MONERO)
     val showMoreOptions = MutableLiveData(false)
     val developerModeEnabled = MutableLiveData(false)
     val networkType = MutableLiveData(MoneroNetworkType.NetworkType_Mainnet)
-    private val _password = MutableLiveData("")
-    val password: LiveData<String> = _password
-    private val _confirmedPassphrase = MutableLiveData("")
+    val password: MutableLiveData<String> = MutableLiveData("")
+    private val confirmedPassphrase = MutableLiveData("")
     val seed = MutableLiveData("")
     val seedOffsetPassphrase = MutableLiveData("")
-    private val _creatingWallet = MutableLiveData(false)
+    private val creatingWallet = MutableLiveData(false)
 
-    val enableButton = combineLiveDatas(
-        seedType,
-        _password,
-        _confirmedPassphrase,
-        _creatingWallet,
-    ) { seedType, passphrase, confirmedPassphrase, creatingWallet ->
-        if (seedType == null || passphrase == null || confirmedPassphrase == null || creatingWallet == null) return@combineLiveDatas false
-        if ((passphrase.isNotEmpty() || confirmedPassphrase.isNotEmpty()) && passphrase != confirmedPassphrase) return@combineLiveDatas false
-        if (creatingWallet) return@combineLiveDatas false
+    val enableButton =
+        combineLiveDatas(
+            seedType,
+            password,
+            confirmedPassphrase,
+            creatingWallet,
+        ) { seedType, passphrase, confirmedPassphrase, creatingWallet ->
+            if (seedType == null || passphrase == null || confirmedPassphrase == null || creatingWallet == null) return@combineLiveDatas false
+            if ((passphrase.isNotEmpty() || confirmedPassphrase.isNotEmpty()) && passphrase != confirmedPassphrase) return@combineLiveDatas false
+            if (creatingWallet) return@combineLiveDatas false
 
-        return@combineLiveDatas true
-    }
+            return@combineLiveDatas true
+        }
 
-    val seedAndType = combineLiveDatas(
-        seedType,
-        seed
-    ) { seedType, seed ->
-        Pair(seedType!!, seed!!)
-    }
+    val seedAndType =
+        combineLiveDatas(
+            seedType,
+            seed,
+        ) { seedType, seed ->
+            Pair(seedType!!, seed!!)
+        }
 
     fun createOrImportWallet(
         activity: ActivityWalletCreate,
@@ -341,22 +398,23 @@ internal class CreateWalletViewModel : ViewModel() {
         walletSeed: String,
         restoreHeightText: String,
     ) {
-        val password = _password.value ?: return
-        val confirmedPassword = _confirmedPassphrase.value ?: return
+        val password = password.value ?: return
+        val confirmedPassword = confirmedPassphrase.value ?: return
 
         val application = activity.application as MoneroApplication
-        _creatingWallet.postValue(true)
+        creatingWallet.postValue(true)
 
         val offset = seedOffsetPassphrase.value!!
         if (password.isNotEmpty()) {
             if (password != confirmedPassword) {
-                _creatingWallet.postValue(false)
+                creatingWallet.postValue(false)
                 activity.runOnUiThread {
-                    Toast.makeText(
-                        activity,
-                        application.getString(R.string.invalid_confirmed_password),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast
+                        .makeText(
+                            activity,
+                            application.getString(R.string.invalid_confirmed_password),
+                            Toast.LENGTH_SHORT,
+                        ).show()
                 }
                 return
             }
@@ -364,97 +422,106 @@ internal class CreateWalletViewModel : ViewModel() {
         val walletFile = File(Helper.getWalletRoot(activity), walletName)
         val seedTypeValue = seedType.value ?: return
 
-        val wallet: Wallet = if (walletSeed.isEmpty()) {
-            when (seedTypeValue) {
-                SeedType.MONERO -> {
-                    WalletManager.instance.createWallet(
-                        walletFile,
-                        password,
-                        "English",
-                        networkType.value!!
-                    )
+        val wallet: Wallet =
+            if (walletSeed.isEmpty()) {
+                when (seedTypeValue) {
+                    SeedType.MONERO -> {
+                        WalletManager.instance.createWallet(
+                            walletFile,
+                            password,
+                            "English",
+                            networkType.value!!,
+                        )
+                    }
+                    SeedType.POLYSEED -> {
+                        WalletManager.instance.createWalletPolyseed(
+                            walletFile,
+                            password,
+                            offset,
+                            Constants.MNEMONIC_LANGUAGE,
+                            networkType.value!!,
+                        )
+                    }
                 }
-                SeedType.POLYSEED -> {
-                    WalletManager.instance.createWalletPolyseed(
-                        walletFile,
-                        password,
-                        offset,
-                        Constants.MNEMONIC_LANGUAGE,
-                        networkType.value!!
-                    )
+            } else {
+                if (getMnemonicType(walletSeed) == null) {
+                    activity.runOnUiThread {
+                        creatingWallet.postValue(false)
+                        Toast
+                            .makeText(
+                                activity,
+                                application.getString(R.string.invalid_mnemonic_code),
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                    }
+                    return
                 }
-            }
-        } else {
-            if (getMnemonicType(walletSeed) == null) {
-                activity.runOnUiThread {
-                    _creatingWallet.postValue(false)
-                    Toast.makeText(
-                        activity,
-                        application.getString(R.string.invalid_mnemonic_code),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                return
-            }
-            val restoreHeight = restoreHeightText.toLongOrNull() ?: 0
+                val restoreHeight = restoreHeightText.toLongOrNull() ?: 0
 
-            when (seedTypeValue) {
-                SeedType.MONERO -> {
-                    WalletManager.instance.recoveryWallet(
-                        walletFile,
-                        password,
-                        walletSeed,
-                        offset,
-                        restoreHeight,
-                        networkType.value!!
-                    )
-                }
-                SeedType.POLYSEED -> {
-                    WalletManager.instance.recoveryWalletPolyseed(
-                        walletFile,
-                        password,
-                        walletSeed,
-                        offset,
-                        networkType.value!!
-                    )
+                when (seedTypeValue) {
+                    SeedType.MONERO -> {
+                        WalletManager.instance.recoveryWallet(
+                            walletFile,
+                            password,
+                            walletSeed,
+                            offset,
+                            restoreHeight,
+                            networkType.value!!,
+                        )
+                    }
+                    SeedType.POLYSEED -> {
+                        WalletManager.instance.recoveryWalletPolyseed(
+                            walletFile,
+                            password,
+                            walletSeed,
+                            offset,
+                            networkType.value!!,
+                        )
+                    }
                 }
             }
-        }
         val walletStatus = wallet.getWalletStatusWithError()
         val ok = walletStatus.status == WalletStatus.Ok
         if (ok) {
             PreferenceUtils.setWalletNetworkType(
                 activity,
                 walletName,
-                networkType.value!!
+                networkType.value!!,
             )
             val walletServiceIntent = Intent(activity.applicationContext, WalletService::class.java)
             activity.startForegroundService(walletServiceIntent)
-            activity.bindService(walletServiceIntent, object : ServiceConnection {
-                override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-                    Timber.d("Wallet Service connected")
-                    val walletService = (service as WalletService.WalletServiceBinder).service
-                    walletService.setUninitWallet(wallet)
-                    activity.setResult(1, Intent())
-                    activity.finish()
-                }
+            activity.bindService(
+                walletServiceIntent,
+                object : ServiceConnection {
+                    override fun onServiceConnected(
+                        name: ComponentName?,
+                        service: IBinder?,
+                    ) {
+                        Timber.d("Wallet Service connected")
+                        val walletService = (service as WalletService.WalletServiceBinder).service
+                        walletService.setUninitWallet(wallet)
+                        activity.setResult(1, Intent())
+                        activity.finish()
+                    }
 
-                override fun onServiceDisconnected(name: ComponentName?) {
-                    Timber.i("Wallet Service disconnected")
-                }
-            }, 0)
-
+                    override fun onServiceDisconnected(name: ComponentName?) {
+                        Timber.i("Wallet Service disconnected")
+                    }
+                },
+                0,
+            )
         } else {
             activity.runOnUiThread {
-                _creatingWallet.postValue(false)
-                Toast.makeText(
-                    activity,
-                    application.getString(
-                        R.string.create_wallet_failed,
-                        walletStatus.error
-                    ),
-                    Toast.LENGTH_SHORT
-                ).show()
+                creatingWallet.postValue(false)
+                Toast
+                    .makeText(
+                        activity,
+                        application.getString(
+                            R.string.create_wallet_failed,
+                            walletStatus.error,
+                        ),
+                        Toast.LENGTH_SHORT,
+                    ).show()
             }
         }
     }
@@ -472,10 +539,10 @@ internal class CreateWalletViewModel : ViewModel() {
     }
 
     fun setPassphrase(passphrase: String) {
-        _password.value = passphrase
+        this.password.value = passphrase
     }
 
     fun setConfirmedPassphrase(confirmedPassphrase: String) {
-        _confirmedPassphrase.value = confirmedPassphrase
+        this.confirmedPassphrase.value = confirmedPassphrase
     }
 }

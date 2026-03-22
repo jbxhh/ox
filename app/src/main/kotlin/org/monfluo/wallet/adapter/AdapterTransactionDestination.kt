@@ -2,58 +2,61 @@ package org.monfluo.wallet.adapter
 
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
-import android.icu.text.DateFormat
+import android.text.Editable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.TextView
-import android.text.Editable
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.appcompat.widget.LinearLayoutCompat
-import androidx.recyclerview.widget.RecyclerView
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.R
 import org.monfluo.wallet.model.Contact
-import org.monfluo.wallet.model.MoneroUnit
 import org.monfluo.wallet.model.TransactionDestinationRaw
-import org.monfluo.wallet.model.PendingTransactionDestination
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.Helper.replaceElementWithList
-import org.monfluo.wallet.util.TextHelper
 import org.monfluo.wallet.util.SimpleTextWatcher
-import java.util.Date
 import timber.log.Timber
 
 class AdapterTransactionDestination(
-    val listener: Listener
+    val listener: Listener,
 ) : RecyclerView.Adapter<AdapterTransactionDestination.ViewHolder>() {
-
     private var transactionDestinations: List<TransactionDestinationRaw> = listOf(TransactionDestinationRaw())
     private var addressBookEnabled: Boolean = true
     private var sendAll: MutableLiveData<Boolean> = MutableLiveData(false)
     private var enabled: Boolean = true
 
-    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(
+        viewGroup: ViewGroup,
+        viewType: Int,
+    ): ViewHolder {
         val view = LayoutInflater.from(viewGroup.context).inflate(R.layout.recycler_view_item_transaction_destination, viewGroup, false)
         return ViewHolder(view)
     }
 
-    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        viewHolder: ViewHolder,
+        position: Int,
+    ) {
         val transactionDestination = transactionDestinations[position]
-        val sendAll = if (this.sendAll.value!!) SendAll.SELECTED else if (transactionDestinations.size > 1) SendAll.UNAVAILABLE else SendAll.UNSELECTED
+        val sendAll =
+            if (this.sendAll.value!!) {
+                SendAll.SELECTED
+            } else if (transactionDestinations.size > 1) {
+                SendAll.UNAVAILABLE
+            } else {
+                SendAll.UNSELECTED
+            }
         val listener = ViewHolderListenerImpl(position)
         viewHolder.bind(transactionDestination, enabled, sendAll, position, addressBookEnabled, listener)
     }
 
-    override fun getItemCount(): Int {
-        return transactionDestinations.size
-    }
+    override fun getItemCount(): Int = transactionDestinations.size
 
     fun setEnabled(enabled: Boolean) {
         if (this.enabled != enabled) {
@@ -79,7 +82,10 @@ class AdapterTransactionDestination(
 
     fun getSendAll(): LiveData<Boolean> = sendAll
 
-    fun replaceElementWithList(transactionDestinations: List<TransactionDestinationRaw>, index: Int) {
+    fun replaceElementWithList(
+        transactionDestinations: List<TransactionDestinationRaw>,
+        index: Int,
+    ) {
         if (transactionDestinations.isEmpty()) {
             Timber.w("Attempted to fill with empty transaction destinations list")
             return
@@ -92,7 +98,10 @@ class AdapterTransactionDestination(
         notifyDataSetChanged()
     }
 
-    fun restore(transactionDestinations: List<TransactionDestinationRaw>, sendAll: Boolean) {
+    fun restore(
+        transactionDestinations: List<TransactionDestinationRaw>,
+        sendAll: Boolean,
+    ) {
         this.sendAll.value = sendAll
         if (transactionDestinations.isEmpty()) {
             this.transactionDestinations = listOf(TransactionDestinationRaw())
@@ -104,7 +113,10 @@ class AdapterTransactionDestination(
         notifyDataSetChanged()
     }
 
-    fun insertContact(contact: Contact, index: Int) {
+    fun insertContact(
+        contact: Contact,
+        index: Int,
+    ) {
         if (index > this.transactionDestinations.size) {
             Timber.w("Attempted to insert contact at index $index but the length of transaction destinations is ${this.transactionDestinations.size}")
             return
@@ -116,24 +128,30 @@ class AdapterTransactionDestination(
     }
 
     interface Listener {
-
         fun onScanRequested(position: Int)
+
         fun onAddressBookRequested(position: Int)
     }
 
     interface ViewHolderListener {
-
         fun onSendAllClicked()
+
         fun onRemoveClicked()
+
         fun onAmountChanged(amount: String)
+
         fun onRecipientNameChanged(recipientName: String)
+
         fun onAddressChanged(address: String)
+
         fun onScanRequested()
+
         fun onAddressBookRequested()
     }
 
-    inner class ViewHolderListenerImpl(val index: Int) : ViewHolderListener {
-
+    inner class ViewHolderListenerImpl(
+        val index: Int,
+    ) : ViewHolderListener {
         override fun onSendAllClicked() {
             if (this@AdapterTransactionDestination.sendAll.value!!) {
                 this@AdapterTransactionDestination.sendAll.value = false
@@ -170,8 +188,9 @@ class AdapterTransactionDestination(
         }
     }
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-
+    inner class ViewHolder(
+        view: View,
+    ) : RecyclerView.ViewHolder(view) {
         private val transactionDestinationRemoveImageButton: ImageButton = itemView.findViewById(R.id.transaction_destination_remove_image_button)
         private val transactionDestinationScanImageButton: ImageButton = itemView.findViewById(R.id.transaction_destination_scan_image_button)
         private val transactionDestinationAddressBookImageButton: ImageButton = itemView.findViewById(R.id.transaction_destination_address_book_button)
@@ -220,11 +239,12 @@ class AdapterTransactionDestination(
                 transactionDestinationRecipientNameEditText.visibility = View.GONE
                 transactionDestinationAddressBookImageButton.visibility = View.GONE
             }
-            val single = when (sendAll) {
-                SendAll.UNSELECTED -> true
-                SendAll.SELECTED -> true
-                SendAll.UNAVAILABLE -> false
-            }
+            val single =
+                when (sendAll) {
+                    SendAll.UNSELECTED -> true
+                    SendAll.SELECTED -> true
+                    SendAll.UNAVAILABLE -> false
+                }
             when (sendAll) {
                 SendAll.UNSELECTED -> {
                     transactionDestinationAmountSendAllButton.setText(transactionDestinationSendAllLabel)
@@ -271,29 +291,35 @@ class AdapterTransactionDestination(
                 transactionDestinationAmountEditText.setText(transactionDestination.amount)
                 transactionDestinationAmountEditText.setFocusableInTouchMode(enabled)
             }
-            transactionDestinationAmountEditText.addTextChangedListener(object : SimpleTextWatcher() {
-                override fun afterTextChanged(s: Editable) {
-                    val text = s.toString()
-                    if (text != transactionDestinationSendingAllText) {
-                        listener.onAmountChanged(s.toString())
+            transactionDestinationAmountEditText.addTextChangedListener(
+                object : SimpleTextWatcher() {
+                    override fun afterTextChanged(s: Editable) {
+                        val text = s.toString()
+                        if (text != transactionDestinationSendingAllText) {
+                            listener.onAmountChanged(s.toString())
+                        }
                     }
-                }
-            })
+                },
+            )
             transactionDestinationAddressEditText.setText(transactionDestination.value)
             transactionDestinationAddressEditText.setFocusableInTouchMode(enabled)
-            transactionDestinationAddressEditText.addTextChangedListener(object : SimpleTextWatcher() {
-                override fun afterTextChanged(s: Editable) {
-                    listener.onAddressChanged(s.toString())
-                    updateDonateLabel(isDonatingAddress(s.toString()))
-                }
-            })
+            transactionDestinationAddressEditText.addTextChangedListener(
+                object : SimpleTextWatcher() {
+                    override fun afterTextChanged(s: Editable) {
+                        listener.onAddressChanged(s.toString())
+                        updateDonateLabel(isDonatingAddress(s.toString()))
+                    }
+                },
+            )
             transactionDestinationRecipientNameEditText.setText(transactionDestination.recipientName)
             transactionDestinationRecipientNameEditText.setFocusableInTouchMode(enabled)
-            transactionDestinationRecipientNameEditText.addTextChangedListener(object : SimpleTextWatcher() {
-                override fun afterTextChanged(s: Editable) {
-                    listener.onRecipientNameChanged(s.toString())
-                }
-            })
+            transactionDestinationRecipientNameEditText.addTextChangedListener(
+                object : SimpleTextWatcher() {
+                    override fun afterTextChanged(s: Editable) {
+                        listener.onRecipientNameChanged(s.toString())
+                    }
+                },
+            )
             if (enabled) {
                 transactionDestinationDonateLabelTextView.setOnClickListener {
                     val isDonatingAddress = isDonatingAddress(transactionDestinationAddressEditText.text.toString())
@@ -322,17 +348,11 @@ class AdapterTransactionDestination(
             updateDonateLabel(isDonatingAddress(transactionDestinationAddressEditText.text.toString()))
         }
 
-        private fun getTintedRemoveTransactionDestinationDrawable(enabled: Boolean): Drawable {
-            return Helper.tintDrawable(itemView.context, transactionDestinationRemoveIcon, enabled)
-        }
+        private fun getTintedRemoveTransactionDestinationDrawable(enabled: Boolean): Drawable = Helper.tintDrawable(itemView.context, transactionDestinationRemoveIcon, enabled)
 
-        private fun getTintedScanTransactionDestinationDrawable(enabled: Boolean): Drawable {
-            return Helper.tintDrawable(itemView.context, transactionDestinationScanIcon, enabled)
-        }
+        private fun getTintedScanTransactionDestinationDrawable(enabled: Boolean): Drawable = Helper.tintDrawable(itemView.context, transactionDestinationScanIcon, enabled)
 
-        private fun isDonatingAddress(address: String): Boolean {
-            return address == Constants.DONATE_ADDRESS
-        }
+        private fun isDonatingAddress(address: String): Boolean = address == Constants.DONATE_ADDRESS
 
         private fun updateDonateLabel(donating: Boolean) {
             if (donating) {

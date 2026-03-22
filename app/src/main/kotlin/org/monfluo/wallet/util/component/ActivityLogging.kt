@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity
 import timber.log.Timber
 
 abstract class ActivityLogging : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.d("Activity ${javaClass.simpleName} is being created")

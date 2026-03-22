@@ -1,64 +1,68 @@
 package org.monfluo.wallet.activity
 
+import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import androidx.activity.viewModels
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
-import android.widget.Toast
 import android.widget.ImageView
-import android.content.Intent
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.MutableLiveData
+import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.R
 import org.monfluo.wallet.adapter.AdapterNode
+import org.monfluo.wallet.data.DefaultNode
 import org.monfluo.wallet.data.Node
 import org.monfluo.wallet.data.SortOrder
-import org.monfluo.wallet.util.component.ActivityMonero
-import org.monfluo.wallet.util.PreferenceUtils
-import org.monfluo.wallet.util.Constants
-import org.monfluo.wallet.data.DefaultNode
 import org.monfluo.wallet.livedata.combineLiveDatas
 import org.monfluo.wallet.model.MoneroNetworkType
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.service.wallet.WalletService
+import org.monfluo.wallet.util.Constants
+import org.monfluo.wallet.util.PreferenceUtils
+import org.monfluo.wallet.util.component.ActivityMonero
 import timber.log.Timber
 import kotlin.math.max
 
-class ActivityNodeList() : ActivityMonero() {
+class ActivityNodeList : ActivityMonero() {
+    private val nodeAdapterListener =
+        object : AdapterNode.Listener {
+            override fun onSelectNode(
+                self: AdapterNode,
+                node: Node,
+            ) {
+                PreferenceUtils.setNode(this@ActivityNodeList, node).fold(
+                    {
+                        Timber.i("Node ${node.name} selected")
+                        val proxy = PreferenceUtils.getProxyIfEnabled(this@ActivityNodeList) ?: ""
+                        walletService?.setDaemonAddress(node.address, node.username ?: "", node.password ?: "", node.trusted, proxy)
+                        self.setSelectedNode(node)
+                    },
+                    {
+                        Timber.e(it, "Failed to select node ${node.name}")
+                        Toast.makeText(this@ActivityNodeList, getText(R.string.toast_failed_to_select_node), Toast.LENGTH_SHORT).show()
+                    },
+                )
+            }
 
-    private val nodeAdapterListener = object : AdapterNode.Listener {
-
-        override fun onSelectNode(self: AdapterNode, node: Node) {
-            PreferenceUtils.setNode(this@ActivityNodeList, node).fold(
-                {
-                    Timber.i("Node ${node.name} selected")
-                    val proxy = PreferenceUtils.getProxyIfEnabled(this@ActivityNodeList) ?: ""
-                    walletService?.setDaemonAddress(node.address, node.username ?: "", node.password ?: "", node.trusted, proxy)
-                    self.setSelectedNode(node)
-                },
-                {
-                    Timber.e(it, "Failed to select node ${node.name}")
-                    Toast.makeText(this@ActivityNodeList, getText(R.string.toast_failed_to_select_node), Toast.LENGTH_SHORT).show()
-                }
-            )
+            override fun onEditNode(
+                self: AdapterNode,
+                node: Node,
+            ) {
+                startActivity(
+                    Intent(this@ActivityNodeList, ActivityNodeDetails::class.java).apply {
+                        putExtra(Constants.EXTRA_NODE_NAME, node.name)
+                    },
+                )
+            }
         }
-
-        override fun onEditNode(self: AdapterNode, node: Node) {
-            startActivity(Intent(this@ActivityNodeList, ActivityNodeDetails::class.java).apply {
-                putExtra(Constants.EXTRA_NODE_NAME, node.name)
-            })
-        }
-    }
 
     private val viewModel: ActivityNodeListViewModel by viewModels()
 
@@ -96,7 +100,7 @@ class ActivityNodeList() : ActivityMonero() {
                 left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
                 top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
                 right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom),
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -165,16 +169,16 @@ class ActivityNodeList() : ActivityMonero() {
 }
 
 class ActivityNodeListViewModel : ViewModel() {
-
     val nodes: MutableLiveData<List<Node>> = MutableLiveData(emptyList())
     val selectedNode: MutableLiveData<Node?> = MutableLiveData(null)
     val sortOrder: MutableLiveData<SortOrder> = MutableLiveData(SortOrder.ASCENDING)
     val walletNetworkType: MutableLiveData<MoneroNetworkType> = MutableLiveData(MoneroNetworkType.NetworkType_Mainnet)
 
-    val sortedNodes = combineLiveDatas(nodes, sortOrder) { nodes, sortOrder ->
-        return@combineLiveDatas when (sortOrder!!) {
-            SortOrder.ASCENDING -> nodes!!
-            SortOrder.DESCENDING -> nodes!!.reversed()
+    val sortedNodes =
+        combineLiveDatas(nodes, sortOrder) { nodes, sortOrder ->
+            return@combineLiveDatas when (sortOrder!!) {
+                SortOrder.ASCENDING -> nodes!!
+                SortOrder.DESCENDING -> nodes!!.reversed()
+            }
         }
-    }
 }

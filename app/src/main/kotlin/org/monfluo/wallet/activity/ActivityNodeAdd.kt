@@ -1,32 +1,30 @@
 package org.monfluo.wallet.activity
 
+import android.os.Bundle
 import android.view.View
-import android.widget.ImageView
-import android.widget.EditText
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
-import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
-import org.monfluo.wallet.util.component.ActivityLogging
-import org.monfluo.wallet.util.Helper
-import org.monfluo.wallet.util.PreferenceUtils
-import org.monfluo.wallet.R
-import org.monfluo.wallet.data.Node
-import org.monfluo.wallet.data.DefaultNode
-import org.monfluo.wallet.model.MoneroNetworkType
-import kotlin.math.max
-import timber.log.Timber
-import androidx.activity.viewModels
-import android.widget.TextView
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import org.monfluo.wallet.R
+import org.monfluo.wallet.data.DefaultNode
+import org.monfluo.wallet.data.Node
+import org.monfluo.wallet.model.MoneroNetworkType
+import org.monfluo.wallet.util.PreferenceUtils
+import org.monfluo.wallet.util.component.ActivityLogging
+import timber.log.Timber
+import kotlin.math.max
 
-class ActivityNodeAdd() : ActivityLogging() {
-
+class ActivityNodeAdd : ActivityLogging() {
     private val viewModel: ActivityNodeAddViewModel by viewModels()
 
     private lateinit var layoutView: View
@@ -75,7 +73,7 @@ class ActivityNodeAdd() : ActivityLogging() {
                 left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
                 top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
                 right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom),
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -123,10 +121,9 @@ class ActivityNodeAdd() : ActivityLogging() {
                     {
                         Timber.e(it, "Failed to add new node")
                         Toast.makeText(this, getText(R.string.toast_failed_to_add_node), Toast.LENGTH_SHORT).show()
-                    }
+                    },
                 )
             }
-
         }
     }
 
@@ -152,7 +149,6 @@ class ActivityNodeAdd() : ActivityLogging() {
 }
 
 internal class ActivityNodeAddViewModel : ViewModel() {
-
     val developerModeEnabled: MutableLiveData<Boolean> = MutableLiveData(false)
     val networkType: MutableLiveData<MoneroNetworkType> = MutableLiveData(MoneroNetworkType.NetworkType_Mainnet)
 }

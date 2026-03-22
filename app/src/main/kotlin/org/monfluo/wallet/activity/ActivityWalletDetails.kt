@@ -1,12 +1,11 @@
 package org.monfluo.wallet.activity
 
-import android.view.View
-import android.widget.ImageView
-import android.widget.EditText
-import android.widget.Button
-import android.os.Bundle
 import android.app.AlertDialog
-import android.content.DialogInterface
+import android.os.Bundle
+import android.view.View
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
 import androidx.activity.viewModels
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
@@ -14,19 +13,17 @@ import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import org.monfluo.wallet.util.component.ActivityLogging
+import org.monfluo.wallet.R
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.PreferenceUtils
-import org.monfluo.wallet.R
-import kotlin.math.max
+import org.monfluo.wallet.util.component.ActivityLogging
 import kotlin.io.path.Path
-import kotlin.io.path.name
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.moveTo
 import kotlin.io.path.name
+import kotlin.math.max
 
-class ActivityWalletDetails() : ActivityLogging() {
-
+class ActivityWalletDetails : ActivityLogging() {
     private val viewModel: ActivityWalletDetailsViewModel by viewModels()
 
     private lateinit var layoutView: View
@@ -59,7 +56,7 @@ class ActivityWalletDetails() : ActivityLogging() {
                 left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
                 top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
                 right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom),
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -82,7 +79,8 @@ class ActivityWalletDetails() : ActivityLogging() {
         deleteButton.setOnClickListener {
             val walletPath = viewModel.walletPath.value!!
 
-            AlertDialog.Builder(this)
+            AlertDialog
+                .Builder(this)
                 .setTitle(getString(R.string.dialog_delete_wallet_title))
                 .setMessage(getString(R.string.dialog_delete_wallet_message))
                 .setPositiveButton(getString(R.string.dialog_delete_wallet_action_yes)) { _, _ ->
@@ -90,8 +88,7 @@ class ActivityWalletDetails() : ActivityLogging() {
                     Path("$walletPath.keys").deleteIfExists()
                     PreferenceUtils.deleteWalletNetworkType(this@ActivityWalletDetails, Path(walletPath).name)
                     finish()
-                }
-                .setNegativeButton(getString(R.string.dialog_delete_wallet_action_no), null)
+                }.setNegativeButton(getString(R.string.dialog_delete_wallet_action_no), null)
                 .create()
                 .show()
         }
@@ -114,6 +111,5 @@ class ActivityWalletDetails() : ActivityLogging() {
 }
 
 internal class ActivityWalletDetailsViewModel : ViewModel() {
-
     val walletPath: MutableLiveData<String?> = MutableLiveData(null)
 }

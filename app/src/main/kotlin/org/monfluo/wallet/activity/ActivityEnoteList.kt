@@ -17,6 +17,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.monfluo.wallet.R
 import org.monfluo.wallet.adapter.AdapterEnote
 import org.monfluo.wallet.model.Enote
 import org.monfluo.wallet.model.Wallet
@@ -24,11 +25,9 @@ import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.component.ActivityMonero
-import org.monfluo.wallet.R
 import kotlin.math.max
 
 class ActivityEnoteList : ActivityMonero() {
-
     private val viewModel: EnotesViewModel by viewModels()
 
     private lateinit var layoutView: View
@@ -56,34 +55,39 @@ class ActivityEnoteList : ActivityMonero() {
         enotesRecyclerView = findViewById(R.id.transaction_history_recyclerview)
 
         val streetMode = PreferenceUtils.isStreetMode(this)
-        adapter = AdapterEnote(listOf(), streetMode, object : AdapterEnote.AdapterEnoteListener {
-            override fun onEnoteSelected(enote: Enote) {
-                val selected = adapter.contains(enote)
-                if (selected) {
-                    adapter.deselectEnote(enote)
-                } else {
-                    adapter.selectEnote(enote)
-                }
-                var frozenExists = false
-                var unfrozenExists = false
-                for (selectedEnote in adapter.getSelectedEnotes().values) {
-                    if (selectedEnote.isFrozen)
-                        frozenExists = true
-                    else {
-                        unfrozenExists = true
+        adapter =
+            AdapterEnote(
+                listOf(),
+                streetMode,
+                object : AdapterEnote.AdapterEnoteListener {
+                    override fun onEnoteSelected(enote: Enote) {
+                        val selected = adapter.contains(enote)
+                        if (selected) {
+                            adapter.deselectEnote(enote)
+                        } else {
+                            adapter.selectEnote(enote)
+                        }
+                        var frozenExists = false
+                        var unfrozenExists = false
+                        for (selectedEnote in adapter.getSelectedEnotes().values) {
+                            if (selectedEnote.isFrozen) {
+                                frozenExists = true
+                            } else {
+                                unfrozenExists = true
+                            }
+                        }
+                        if (adapter.getSelectedEnotes().isEmpty()) {
+                            sendEnotesButton.isEnabled = false
+                            freezeEnotesButton.isEnabled = false
+                            unfreezeEnotesButton.isEnabled = false
+                        } else {
+                            sendEnotesButton.isEnabled = unfrozenExists
+                            freezeEnotesButton.isEnabled = unfrozenExists
+                            unfreezeEnotesButton.isEnabled = frozenExists
+                        }
                     }
-                }
-                if (adapter.getSelectedEnotes().isEmpty()) {
-                    sendEnotesButton.isEnabled = false
-                    freezeEnotesButton.isEnabled = false
-                    unfreezeEnotesButton.isEnabled = false
-                } else {
-                    sendEnotesButton.isEnabled = unfrozenExists
-                    freezeEnotesButton.isEnabled = unfrozenExists
-                    unfreezeEnotesButton.isEnabled = frozenExists
-                }
-            }
-        })
+                },
+            )
 
         bindWindowInsetsListener()
         bindListeners()
@@ -97,7 +101,7 @@ class ActivityEnoteList : ActivityMonero() {
                 left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
                 top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
                 right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom),
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -174,12 +178,15 @@ class ActivityEnoteList : ActivityMonero() {
 
     private fun updateState(wallet: Wallet) {
         val enotes = wallet.getEnotes()
-        val addresses = (0 until wallet.numAddresses).map {
-            wallet.getAddress(wallet.getAccountIndex(), it)
-        }.toSet()
-        val filteredEnotes = enotes.filter {
-            it.address != null && addresses.contains(it.address)
-        }
+        val addresses =
+            (0 until wallet.numAddresses)
+                .map {
+                    wallet.getAddress(wallet.getAccountIndex(), it)
+                }.toSet()
+        val filteredEnotes =
+            enotes.filter {
+                it.address != null && addresses.contains(it.address)
+            }
         viewModel.updateEnotes(filteredEnotes)
     }
 }

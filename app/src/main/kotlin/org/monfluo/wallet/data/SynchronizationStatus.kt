@@ -7,7 +7,6 @@ import org.monfluo.wallet.service.wallet.State
 import java.text.NumberFormat
 
 sealed interface SynchronizationStatus {
-
     fun getText(context: Context): String
 
     companion object {
@@ -44,38 +43,38 @@ sealed interface SynchronizationStatus {
     }
 
     data object OpeningWallet : SynchronizationStatus {
-        override fun getText(context: Context): String  {
-            return context.getString(R.string.starting_wallet_synchronization)
-        }
+        override fun getText(context: Context): String = context.getString(R.string.starting_wallet_synchronization)
     }
 
     data object StartingSynchronization : SynchronizationStatus {
-        override fun getText(context: Context): String  {
-            return context.getString(R.string.starting_wallet_synchronization)
-        }
+        override fun getText(context: Context): String = context.getString(R.string.starting_wallet_synchronization)
     }
 
-    data class NodeSynchronization(val blockchainDisplayHeight: String, val targetDisplayHeight: String, val diffDisplay: String) : SynchronizationStatus {
-        override fun getText(context: Context): String  {
-            return context.getString(R.string.node_synchronization_blocks_remaining, blockchainDisplayHeight, targetDisplayHeight, diffDisplay)
-        }
+    data class NodeSynchronization(
+        val blockchainDisplayHeight: String,
+        val targetDisplayHeight: String,
+        val diffDisplay: String,
+    ) : SynchronizationStatus {
+        override fun getText(context: Context): String = context.getString(R.string.node_synchronization_blocks_remaining, blockchainDisplayHeight, targetDisplayHeight, diffDisplay)
     }
 
-    data class WalletSynchronization(val walletDisplayHeight: String, val blockchainDisplayHeight: String, val diffDisplay: String) : SynchronizationStatus {
-        override fun getText(context: Context): String  {
-            return context.getString(R.string.wallet_synchronization_blocks_remaining, walletDisplayHeight, blockchainDisplayHeight, diffDisplay)
-        }
+    data class WalletSynchronization(
+        val walletDisplayHeight: String,
+        val blockchainDisplayHeight: String,
+        val diffDisplay: String,
+    ) : SynchronizationStatus {
+        override fun getText(context: Context): String = context.getString(R.string.wallet_synchronization_blocks_remaining, walletDisplayHeight, blockchainDisplayHeight, diffDisplay)
     }
 
-    data class Synchronized(val walletDisplayHeight: String) : SynchronizationStatus {
-        override fun getText(context: Context): String {
-            return context.getString(R.string.synchronized_at_label, walletDisplayHeight)
-        }
+    data class Synchronized(
+        val walletDisplayHeight: String,
+    ) : SynchronizationStatus {
+        override fun getText(context: Context): String = context.getString(R.string.synchronized_at_label, walletDisplayHeight)
     }
 
-    data class WalletError(val error: String) : SynchronizationStatus {
-        override fun getText(context: Context): String {
-            return context.getString(R.string.wallet_error, error)
-        }
+    data class WalletError(
+        val error: String,
+    ) : SynchronizationStatus {
+        override fun getText(context: Context): String = context.getString(R.string.wallet_error, error)
     }
 }

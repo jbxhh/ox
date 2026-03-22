@@ -15,28 +15,49 @@
  */
 package org.monfluo.wallet.model
 
-class PendingTransaction internal constructor(val handle: Long, val destination: PendingTransactionDestination, val description: String?) {
+class PendingTransaction internal constructor(
+    val handle: Long,
+    val destination: PendingTransactionDestination,
+    val description: String?,
+) {
     val status: Status
         get() = Status.entries[getStatusJ()]
 
     external fun getStatusJ(): Int
+
     external fun getErrorString(): String
 
     external fun txid(): List<String>
 
     // commit transaction or save to file if filename is provided.
-    external fun commit(filename: String?, overwrite: Boolean): Boolean
+    external fun commit(
+        filename: String?,
+        overwrite: Boolean,
+    ): Boolean
 
     external fun getAmount(): Long
+
     external fun getDust(): Long
+
     external fun getFee(): Long
 
+    @Suppress("ktlint:standard:enum-entry-name-case")
     enum class Status {
-        Status_Ok, Status_Error, Status_Critical
+        Status_Ok,
+        Status_Error,
+        Status_Critical,
     }
 
-    enum class Priority(val value: Int) {
-        Priority_Default(0), Priority_Low(1), Priority_Medium(2), Priority_High(3), Priority_Last(4);
+    @Suppress("ktlint:standard:enum-entry-name-case")
+    enum class Priority(
+        val value: Int,
+    ) {
+        Priority_Default(0),
+        Priority_Low(1),
+        Priority_Medium(2),
+        Priority_High(3),
+        Priority_Last(4),
+        ;
 
         companion object {
             fun fromInteger(n: Int): Priority? {

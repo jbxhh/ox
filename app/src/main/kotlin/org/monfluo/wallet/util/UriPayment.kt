@@ -1,9 +1,9 @@
 package org.monfluo.wallet.util
 
-import java.net.URLDecoder
-import java.net.URLEncoder
 import org.monfluo.wallet.model.TransactionDestinationRaw
 import timber.log.Timber
+import java.net.URLDecoder
+import java.net.URLEncoder
 
 private const val URI_SCHEMA = "monero"
 private const val SCHEMA_SEPARATOR = ':'
@@ -21,7 +21,6 @@ data class UriPayment(
     val recipientNames: List<String>,
     val description: String?,
 ) {
-
     companion object {
         fun parse(string: String): UriPayment? {
             val schemaSplit = string.split(SCHEMA_SEPARATOR, limit = 2)
@@ -30,7 +29,7 @@ data class UriPayment(
                 return null
             }
             val withoutSchema = schemaSplit.last()
-            val addressesAndParams = withoutSchema.split(QUERY_SEPARATOR, limit = 2);
+            val addressesAndParams = withoutSchema.split(QUERY_SEPARATOR, limit = 2)
             if (addressesAndParams.isEmpty()) {
                 Timber.w("Addresses and params are empty")
                 return null
@@ -47,16 +46,17 @@ data class UriPayment(
                     val keyAndValue = paramRaw.split(KEY_VALUE_SEPARATOR, limit = 2)
                     if (keyAndValue.size != 2) {
                         Timber.w("Bad parameter: $paramRaw")
-                        continue;
+                        continue
                     }
                     val key = keyAndValue[0]
                     val value = keyAndValue[1]
                     if (URI_AMOUNT_KEYS.contains(key)) {
                         amounts = value.split(VALUE_SEPARATOR)
                     } else if (URI_RECIPIENT_NAME_KEY == key) {
-                        recipientNames = value.split(VALUE_SEPARATOR).map {
-                            URLDecoder.decode(it)
-                        }
+                        recipientNames =
+                            value.split(VALUE_SEPARATOR).map {
+                                URLDecoder.decode(it)
+                            }
                     } else if (URI_DESCRIPTION_KEYS.contains(key)) {
                         description = URLDecoder.decode(value)
                     } else {
@@ -85,9 +85,10 @@ data class UriPayment(
 
         if (recipientNames.isNotEmpty()) {
             val key = URI_RECIPIENT_NAME_KEY
-            val recipientNamesEncoded = recipientNames.joinToString(separator = VALUE_SEPARATOR.toString()) {
-                URLEncoder.encode(it)
-            }
+            val recipientNamesEncoded =
+                recipientNames.joinToString(separator = VALUE_SEPARATOR.toString()) {
+                    URLEncoder.encode(it)
+                }
             parameters.add("$key$KEY_VALUE_SEPARATOR$recipientNamesEncoded")
         }
 
@@ -105,13 +106,12 @@ data class UriPayment(
         return builder.toString()
     }
 
-    fun toTransactionDestinationRawList(): List<TransactionDestinationRaw> {
-        return (0 until maxOf(addresses.size, amounts.size, recipientNames.size)).map { i ->
+    fun toTransactionDestinationRawList(): List<TransactionDestinationRaw> =
+        (0 until maxOf(addresses.size, amounts.size, recipientNames.size)).map { i ->
             TransactionDestinationRaw(
                 addresses.getOrNull(i) ?: "",
                 amounts.getOrNull(i) ?: "",
                 recipientNames.getOrNull(i) ?: "",
             )
         }
-    }
 }

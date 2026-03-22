@@ -18,10 +18,10 @@ package org.monfluo.wallet.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import android.widget.RadioButton
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.RadioButton
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.R
 import org.monfluo.wallet.data.Address
@@ -32,9 +32,8 @@ class AdapterAddress(
     private var addresses: List<Address>,
     private var selectedAddress: Address?,
     private val streetMode: Boolean,
-    private val listener: AdapterAddressListener
-): RecyclerView.Adapter<AdapterAddress.ViewHolder>() {
-
+    private val listener: AdapterAddressListener,
+) : RecyclerView.Adapter<AdapterAddress.ViewHolder>() {
     fun submitAddresses(addresses: List<Address>) {
         if (this.addresses != addresses) {
             this.addresses = addresses
@@ -49,29 +48,39 @@ class AdapterAddress(
         }
     }
 
-    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.recycler_view_item_address, viewGroup, false)
+    override fun onCreateViewHolder(
+        viewGroup: ViewGroup,
+        viewType: Int,
+    ): ViewHolder {
+        val view =
+            LayoutInflater
+                .from(viewGroup.context)
+                .inflate(R.layout.recycler_view_item_address, viewGroup, false)
         return ViewHolder(view, listener)
     }
 
-    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        viewHolder: ViewHolder,
+        position: Int,
+    ) {
         val address = addresses[position]
         viewHolder.bind(address, streetMode, selectedAddress != null && address == selectedAddress)
     }
 
-    override fun getItemCount(): Int {
-        return addresses.size
-    }
+    override fun getItemCount(): Int = addresses.size
 
     interface AdapterAddressListener {
         fun onAddressSelected(address: Address)
+
         fun onAddressEditLabel(address: Address)
+
         fun onAddressCopy(address: Address)
     }
 
-    class ViewHolder(val view: View, val listener: AdapterAddressListener) : RecyclerView.ViewHolder(view) {
-
+    class ViewHolder(
+        val view: View,
+        val listener: AdapterAddressListener,
+    ) : RecyclerView.ViewHolder(view) {
         private val addressWrapperLayout: View = itemView.findViewById(R.id.address_wrapper_layout)
         private val addressRadioButton: RadioButton = itemView.findViewById(R.id.address_radiobutton)
         private val addressIconImageView: ImageView = itemView.findViewById(R.id.address_icon_imagebutton)

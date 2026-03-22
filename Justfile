@@ -15,6 +15,12 @@ build-native-all:
 bird: build-debug install-debug run-debug
 cbird: clean build-debug install-debug run-debug
 
+lint:
+    ./gradlew ktlintCheck
+
+format:
+    ./gradlew ktlintFormat
+
 clean:
     ./gradlew clean
 

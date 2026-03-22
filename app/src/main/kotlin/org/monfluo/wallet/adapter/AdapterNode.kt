@@ -19,23 +19,19 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.ImageButton
-import android.widget.TextView
+import android.widget.ImageView
 import android.widget.RadioButton
-import androidx.core.content.ContextCompat
+import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.R
 import org.monfluo.wallet.data.Node
 import org.monfluo.wallet.model.NodeNetworkType
-import org.monfluo.wallet.util.Helper
 
 class AdapterNode(
-    private val listener: Listener
+    private val listener: Listener,
 ) : RecyclerView.Adapter<AdapterNode.ViewHolder>() {
-
     private var nodes: List<Node> = emptyList()
     private var selectedNode: Node? = null
 
@@ -59,27 +55,40 @@ class AdapterNode(
         }
     }
 
-    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(
+        viewGroup: ViewGroup,
+        viewType: Int,
+    ): ViewHolder {
         val view = LayoutInflater.from(viewGroup.context).inflate(R.layout.recycler_view_item_node, viewGroup, false)
         return ViewHolder(listener, view)
     }
 
-    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        viewHolder: ViewHolder,
+        position: Int,
+    ) {
         val node = nodes[position]
         viewHolder.bind(node, node == selectedNode)
     }
 
-    override fun getItemCount(): Int {
-        return nodes.size
-    }
+    override fun getItemCount(): Int = nodes.size
 
     interface Listener {
-        fun onSelectNode(self: AdapterNode, node: Node)
-        fun onEditNode(self: AdapterNode, node: Node)
+        fun onSelectNode(
+            self: AdapterNode,
+            node: Node,
+        )
+
+        fun onEditNode(
+            self: AdapterNode,
+            node: Node,
+        )
     }
 
-    inner class ViewHolder(private val listener: Listener, view: View) : RecyclerView.ViewHolder(view) {
-
+    inner class ViewHolder(
+        private val listener: Listener,
+        view: View,
+    ) : RecyclerView.ViewHolder(view) {
         private val nodeWrapperLayout: View = itemView.findViewById(R.id.node_wrapper_layout)
         private val nodeRadioButton: RadioButton = itemView.findViewById(R.id.node_radiobutton)
         private val nodeIconImageView: ImageView = itemView.findViewById(R.id.node_icon_imagebutton)
@@ -87,7 +96,10 @@ class AdapterNode(
         private val nodeAddressTextView: TextView = itemView.findViewById(R.id.node_address_textview)
         private val nodeEditImageButton: ImageButton = itemView.findViewById(R.id.node_edit_imagebutton)
 
-        fun bind(node: Node, isSelected: Boolean) {
+        fun bind(
+            node: Node,
+            isSelected: Boolean,
+        ) {
             nodeRadioButton.setChecked(isSelected)
             nodeNameTextView.text = node.name
             nodeAddressTextView.text = node.address

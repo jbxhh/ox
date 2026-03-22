@@ -1,43 +1,30 @@
 package org.monfluo.wallet.activity
 
-import android.icu.text.DateFormat
 import android.os.Bundle
 import android.view.View
-import android.graphics.Typeface
-import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.TextView
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.activity.viewModels
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import org.monfluo.wallet.R
 import org.monfluo.wallet.adapter.AdapterTransactionDetails
 import org.monfluo.wallet.livedata.combineLiveDatas
-import org.monfluo.wallet.model.MoneroUnit
 import org.monfluo.wallet.model.TransactionInfo
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
-import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
-import org.monfluo.wallet.util.TextHelper
 import org.monfluo.wallet.util.component.ActivityMonero
-import org.monfluo.wallet.R
-import java.text.NumberFormat
-import java.util.Calendar
-import java.util.Date
 import timber.log.Timber
 import kotlin.math.max
 
 class ActivityTransactionDetails : ActivityMonero() {
-
     private val viewModel: TransactionActivityViewModel by viewModels()
 
     private lateinit var layoutView: View
@@ -45,14 +32,19 @@ class ActivityTransactionDetails : ActivityMonero() {
 
     private lateinit var transactionDetailsRecyclerView: RecyclerView
 
-    private val adapterTransactionDetails: AdapterTransactionDetails = AdapterTransactionDetails(object : AdapterTransactionDetails.Listener {
-
-        override fun onTransactionDescriptionUpdated(transactionInfo: TransactionInfo, description: String) {
-            val wallet = walletService!!.getWalletOrThrow()
-            wallet.setUserNote(transactionInfo.hash, description)
-            updateState(wallet)
-        }
-    })
+    private val adapterTransactionDetails: AdapterTransactionDetails =
+        AdapterTransactionDetails(
+            object : AdapterTransactionDetails.Listener {
+                override fun onTransactionDescriptionUpdated(
+                    transactionInfo: TransactionInfo,
+                    description: String,
+                ) {
+                    val wallet = walletService!!.getWalletOrThrow()
+                    wallet.setUserNote(transactionInfo.hash, description)
+                    updateState(wallet)
+                }
+            },
+        )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,7 +88,7 @@ class ActivityTransactionDetails : ActivityMonero() {
                 left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
                 top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
                 right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom),
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -135,12 +127,13 @@ class ActivityTransactionDetails : ActivityMonero() {
 
     private fun updateState(wallet: Wallet) {
         val transactions = wallet.getHistory()
-        val transactionInfo = transactions.find { it.hash == viewModel.transactionHash }?.let {
-            val key = wallet.getTxKey(it.hash)
-            val addressValue = wallet.getAddress(it.accountIndex, it.addressIndex)
-            val description = wallet.getUserNote(it.hash).takeIf { !it.isBlank() }
-            it.copy(key = key, addressValue = addressValue, description = description)
-        }
+        val transactionInfo =
+            transactions.find { it.hash == viewModel.transactionHash }?.let {
+                val key = wallet.getTxKey(it.hash)
+                val addressValue = wallet.getAddress(it.accountIndex, it.addressIndex)
+                val description = wallet.getUserNote(it.hash).takeIf { !it.isBlank() }
+                it.copy(key = key, addressValue = addressValue, description = description)
+            }
 
         viewModel.transactionInfo.postValue(transactionInfo)
     }
@@ -152,10 +145,11 @@ internal class TransactionActivityViewModel : ViewModel() {
     val streetMode: MutableLiveData<Boolean> = MutableLiveData(false)
     val transactionInfo: MutableLiveData<TransactionInfo?> = MutableLiveData()
 
-    val streetModeAndTransactionInfo = combineLiveDatas(
-        streetMode,
-        transactionInfo,
-    ) { streetMode, transactionInfo ->
-        return@combineLiveDatas Pair(streetMode!!, transactionInfo)
-    }
+    val streetModeAndTransactionInfo =
+        combineLiveDatas(
+            streetMode,
+            transactionInfo,
+        ) { streetMode, transactionInfo ->
+            return@combineLiveDatas Pair(streetMode!!, transactionInfo)
+        }
 }

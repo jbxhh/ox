@@ -9,7 +9,6 @@ import org.monfluo.wallet.util.Constants.TRANSFERS_NOTIFICATION_CHANNEL
 import timber.log.Timber
 
 class MoneroApplication : Application() {
-
     companion object {
         init {
             System.loadLibrary("monfluo")

@@ -23,14 +23,13 @@ import org.monfluo.wallet.livedata.combineLiveDatas
 import org.monfluo.wallet.model.Wallet
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Helper.clipBoardCopy
-import org.monfluo.wallet.util.TextHelper
 import org.monfluo.wallet.util.PreferenceUtils
+import org.monfluo.wallet.util.TextHelper
 import org.monfluo.wallet.util.component.ActivityMonero
 import java.text.NumberFormat
 import kotlin.math.max
 
 class ActivityWalletSecrets : ActivityMonero() {
-
     private val viewModel: ActivityWalletSecretsViewModel by viewModels()
 
     private lateinit var layoutView: View
@@ -116,7 +115,7 @@ class ActivityWalletSecrets : ActivityMonero() {
                 left = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.left),
                 top = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.top),
                 right = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.right),
-                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom)
+                bottom = max(resources.getDimensionPixelOffset(R.dimen.padding_big), insets.bottom),
             )
             return@setOnApplyWindowInsetsListener insetsCompat
         }
@@ -128,10 +127,11 @@ class ActivityWalletSecrets : ActivityMonero() {
         }
         seedTypeButton.setOnClickListener {
             walletService?.getWalletOrLog()?.let { wallet ->
-                val newSeedType = when (viewModel.seedType.value!!) {
-                    SeedType.MONERO -> SeedType.POLYSEED
-                    SeedType.POLYSEED -> SeedType.MONERO
-                }
+                val newSeedType =
+                    when (viewModel.seedType.value!!) {
+                        SeedType.MONERO -> SeedType.POLYSEED
+                        SeedType.POLYSEED -> SeedType.MONERO
+                    }
                 viewModel.setSeedType(newSeedType, wallet)
             }
         }
@@ -267,7 +267,6 @@ class ActivityWalletSecrets : ActivityMonero() {
 }
 
 internal class ActivityWalletSecretsViewModel : ViewModel() {
-
     fun init(wallet: Wallet) {
         val polyseedAndOffset = wallet.getPolyseedSeedAndPassphrase()
         if (polyseedAndOffset != null) {
@@ -292,8 +291,8 @@ internal class ActivityWalletSecretsViewModel : ViewModel() {
     val allowCopyingSecrets = MutableLiveData(false)
     private val _seedType = MutableLiveData(SeedType.MONERO)
     val seedType: LiveData<SeedType> = _seedType
-    private val _useLegacySeedOffsetPassphrase = MutableLiveData(false)
-    private val _legacySeedOffsetPassphrase = MutableLiveData("")
+    private val useLegacySeedOffsetPassphrase = MutableLiveData(false)
+    private val legacySeedOffsetPassphrase = MutableLiveData("")
     val seed = MutableLiveData("")
     val polyseedOffsetPassphrase = MutableLiveData("")
     val restoreHeight = MutableLiveData(0L)
@@ -304,40 +303,51 @@ internal class ActivityWalletSecretsViewModel : ViewModel() {
     val secretSpendKey = MutableLiveData("")
     val publicSpendKey = MutableLiveData("")
 
-    val seedTypeAndUseLegacySeedOffsetPassphrase: LiveData<Pair<SeedType, Boolean>> = combineLiveDatas(
-        _seedType,
-        _useLegacySeedOffsetPassphrase,
-    ) { seedType, useLegacySeedOffsetPassphrase ->
-        return@combineLiveDatas Pair(seedType!!, useLegacySeedOffsetPassphrase!!)
-    }
+    val seedTypeAndUseLegacySeedOffsetPassphrase: LiveData<Pair<SeedType, Boolean>> =
+        combineLiveDatas(
+            _seedType,
+            useLegacySeedOffsetPassphrase,
+        ) { seedType, useLegacySeedOffsetPassphrase ->
+            return@combineLiveDatas Pair(seedType!!, useLegacySeedOffsetPassphrase!!)
+        }
 
-    val seedTypeAndPolyseedSeedOffsetPassphrase: LiveData<Pair<SeedType, String>> = combineLiveDatas(
-        _seedType,
-        polyseedOffsetPassphrase,
-    ) { seedType, polyseedOffsetPassphrase ->
-        return@combineLiveDatas Pair(seedType!!, polyseedOffsetPassphrase!!)
-    }
+    val seedTypeAndPolyseedSeedOffsetPassphrase: LiveData<Pair<SeedType, String>> =
+        combineLiveDatas(
+            _seedType,
+            polyseedOffsetPassphrase,
+        ) { seedType, polyseedOffsetPassphrase ->
+            return@combineLiveDatas Pair(seedType!!, polyseedOffsetPassphrase!!)
+        }
 
-    fun setSeedType(seedType: SeedType, wallet: Wallet) {
+    fun setSeedType(
+        seedType: SeedType,
+        wallet: Wallet,
+    ) {
         _seedType.value = seedType
         updateSeed(wallet)
     }
 
-    fun setUseLegacySeedOffsetPassphrase(useLegacySeedOffsetPassphrase: Boolean, wallet: Wallet) {
-        _useLegacySeedOffsetPassphrase.value = useLegacySeedOffsetPassphrase
+    fun setUseLegacySeedOffsetPassphrase(
+        useLegacySeedOffsetPassphrase: Boolean,
+        wallet: Wallet,
+    ) {
+        this.useLegacySeedOffsetPassphrase.value = useLegacySeedOffsetPassphrase
         updateSeed(wallet)
     }
 
-    fun setLegacySeedOffsetPassphrase(legacySeedOffsetPassphrase: String, wallet: Wallet) {
-        _legacySeedOffsetPassphrase.value = legacySeedOffsetPassphrase
+    fun setLegacySeedOffsetPassphrase(
+        legacySeedOffsetPassphrase: String,
+        wallet: Wallet,
+    ) {
+        this.legacySeedOffsetPassphrase.value = legacySeedOffsetPassphrase
         updateSeed(wallet)
     }
 
     private fun updateSeed(wallet: Wallet) {
         when (_seedType.value!!) {
             SeedType.MONERO -> {
-                if (_useLegacySeedOffsetPassphrase.value!!) {
-                    seed.value = wallet.getLegacySeed(_legacySeedOffsetPassphrase.value!!)
+                if (useLegacySeedOffsetPassphrase.value!!) {
+                    seed.value = wallet.getLegacySeed(legacySeedOffsetPassphrase.value!!)
                 } else {
                     seed.value = wallet.getLegacySeed("")
                 }
