@@ -303,6 +303,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="activity_wallet_create_wallet_height_label">Recovery height</string>
     <string name="activity_wallet_create_wallet_seed_offset_label">Seed offset passphrase</string>
     <string name="activity_wallet_create_wallet_network_type_label">Network Type</string>
+    <string name="activity_wallet_create_wallet_encrypted_polyseed_toast">Encrypted polyseeds are not supported</string>
 
     <string name="activity_wallet_details_wallet_name_label">Name</string>
 
