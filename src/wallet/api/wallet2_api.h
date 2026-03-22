@@ -753,6 +753,7 @@ struct Wallet
     virtual bool getPolyseed(std::string &seed, std::string &passphrase) const = 0;
     static bool createPolyseed(std::string &seed_words, std::string &err, const std::string &language = "English");
     static std::vector<std::pair<std::string, std::string>> getPolyseedLanguages();
+    static bool isEncryptedPolyseed(const std::string &polyseed);
 
    /**
     * @brief StartRefresh - Start/resume refresh thread (refresh every 10 seconds)
