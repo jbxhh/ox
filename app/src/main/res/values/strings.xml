@@ -1,10 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?><!DOCTYPE resources [<!ENTITY nbsp "&#160;">]>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE resources [
+<!ENTITY nbsp "&#160;">
+]>
 <resources xmlns:tools="http://schemas.android.com/tools" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2" tools:locale="en">
     <string name="app_name" translatable="false">Monfluo</string>
-
     <!-- Toast shown when user enters incorrect wallet password -->
     <string name="toast_bad_password">Incorrect password!</string>
-
     <!-- Toast shown when user tries to freeze enotes -->
     <string name="toast_freezing_enotes">Freezing enotes</string>
     <!-- Toast shown when user tries to thaw enotes -->
@@ -72,15 +73,12 @@
     <string name="transfer_notification_header">Received <xliff:g>%1$s</xliff:g> <xliff:g>%2$s</xliff:g></string>
     <!-- Transfer notification transaction id -->
     <string name="transfer_notification_description_transaction_id">Transaction id: <xliff:g>%1$s</xliff:g></string>
-
     <!-- Label in failed transactions used in list views -->
     <string name="tx_list_failed_text">failed</string>
-
     <!-- Button for creating wallet in onboarding activity -->
     <string name="create_wallet">Create wallet</string>
     <!-- Button for restoring wallet in onboarding activity -->
     <string name="restore_wallet">Restore wallet</string>
-
     <!-- Toast shown when failing to send transaction -->
     <string name="toast_error_sending_tx">Error sending transaction</string>
     <!-- Toast shown when attempting to restore wallet from invalid seed -->
@@ -256,7 +254,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="content_description_enotes">Enotes</string>
     <string name="account_label">#<xliff:g>%1$d</xliff:g> <xliff:g>%2$s</xliff:g></string>
     <string name="address_label">#<xliff:g>%1$d</xliff:g> <xliff:g>%2$s</xliff:g></string>
-
     <!-- Unit XMR -->
     <string name="unit_xmr" translatable="false">XMR</string>
     <!-- Unit milli XMR -->
@@ -273,7 +270,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="monero_network_stagenet" translatable="false">STAGENET</string>
     <!-- Monero network TESTNET -->
     <string name="monero_network_testnet" translatable="false">TESTNET</string>
-
     <string name="network_header">Network</string>
     <string name="accounts_header">Accounts</string>
     <string name="add_account_header">Add account</string>
@@ -298,7 +294,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="contacts_header">Contacts</string>
     <string name="add_contact_header">Add contact</string>
     <string name="contact_details_header">Contact details</string>
-
     <string name="activity_wallet_create_wallet_name_label">Name</string>
     <string name="activity_wallet_create_wallet_password_label">Password</string>
     <string name="activity_wallet_create_wallet_seed_label">Recovery seed</string>
@@ -308,15 +303,12 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="activity_wallet_create_wallet_encrypted_polyseed_toast">Encrypted polyseeds are not supported</string>
 
     <string name="activity_wallet_details_wallet_name_label">Name</string>
-
     <string name="activity_home_wallet_name_content_description">Wallet - <xliff:g>%1$s</xliff:g></string>
     <string name="activity_home_account_name_content_description">Account - <xliff:g>%1$s</xliff:g></string>
-
     <string name="recycler_view_item_wallet_edit_content_description">Edit wallet</string>
     <string name="recycler_view_item_node_edit_content_description">Edit node</string>
     <string name="recycler_view_item_account_edit_content_description">Edit account</string>
     <string name="recycler_view_item_address_edit_content_description">Edit address</string>
-
     <string name="activity_payment_request_address_label">Address</string>
     <string name="activity_payment_request_amount_requested_label">Requested amount</string>
     <string name="activity_payment_request_amount_requested_hint" translatable="false">0.00</string>
@@ -324,7 +316,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="activity_payment_request_recipient_name_hint">Me</string>
     <string name="activity_payment_request_transaction_description_label">Transaction description</string>
     <string name="activity_payment_request_transaction_description_hint">Payment to Me</string>
-
     <string name="activity_send_selected_enotes_value_text">Selected value: %1$s XMR</string>
     <string name="activity_send_fee_label">Fee:</string>
     <string name="activity_send_fee_default_label">Default</string>
@@ -341,7 +332,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="activity_send_transaction_create_failed_no_wallet_toast">Cannot create transaction - wallet is not opened yet</string>
     <string name="activity_send_transaction_create_failed">Creating transaction failed: %1$s</string>
     <string name="activity_send_transaction_creating_toast">Creating transaction…</string>
-
     <string name="recycler_view_item_transaction_destination_remove_content_description">Remove destination from transaction</string>
     <string name="recycler_view_item_transaction_destination_amount_label">Amount</string>
     <string name="recycler_view_item_transaction_destination_amount_with_position_label">Amount #<xliff:g>%1$d</xliff:g></string>
@@ -360,7 +350,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="recycler_view_item_transaction_destination_donating_label">Donating to Monfluo. Thank you!</string>
     <string name="recycler_view_item_transaction_destination_address_book_description">Choose contact from address book</string>
     <string name="recycler_view_item_transaction_destination_scan_content_description">Scan destination from QR code</string>
-
     <string name="recycler_view_item_transaction_pending_description_label">Description</string>
     <string name="recycler_view_item_transaction_pending_amount_label">Amount</string>
     <string name="recycler_view_item_transaction_pending_amount_with_position_label">Amount #<xliff:g>%1$d</xliff:g></string>
@@ -371,7 +360,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="recycler_view_item_transaction_pending_summary_fee_label">Fee</string>
     <string name="recycler_view_item_transaction_pending_summary_dust_label">Dust</string>
     <string name="recycler_view_item_transaction_pending_summary_grand_total_label">Grand total</string>
-
     <string name="activity_wallet_settings_wallet_name_label">Name</string>
     <string name="activity_wallet_settings_wallet_network_label">Network</string>
     <string name="activity_wallet_settings_total_balance_label">Total balance</string>
@@ -379,7 +367,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="activity_wallet_settings_display_wallet_secrets">Display wallet secrets</string>
     <string name="activity_wallet_settings_change_password">Change password</string>
     <string name="activity_wallet_settings_close_wallet">Close wallet</string>
-
     <string name="activity_wallet_change_password_current_password_label">Current password</string>
     <string name="activity_wallet_change_password_current_password_hint">Current wallet password</string>
     <string name="activity_wallet_change_password_new_password_label">New password</string>
@@ -390,23 +377,17 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="activity_wallet_change_password_new_password_does_not_match_toast">Password confirmation does not match</string>
     <string name="activity_wallet_change_password_changing_password_toast">Saving password…</string>
     <string name="activity_wallet_change_password_password_changed_toast">Password changed</string>
-
     <string name="activity_account_add_name_label">Name</string>
     <string name="activity_account_add_name_hint">My Account</string>
     <string name="activity_account_add_create_button">Add</string>
-
     <string name="activity_account_details_name_label">Name</string>
     <string name="activity_account_details_name_hint">My Account</string>
     <string name="activity_account_details_save_button">Save</string>
-
     <string name="activity_account_list_create_button">Add account</string>
-
     <string name="activity_address_details_name_label">Name</string>
     <string name="activity_address_details_name_hint">My Address</string>
     <string name="activity_address_details_save_button">Save</string>
-
     <string name="activity_contact_list_create_button">Add contact</string>
-
     <string name="activity_contact_add_name_label">Name</string>
     <string name="activity_contact_add_name_hint">Contact name</string>
     <string name="activity_contact_add_address_label">Address</string>
@@ -414,7 +395,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="activity_contact_add_create_button">Add</string>
     <string name="activity_contact_add_toast_contact_created">Contact created</string>
     <string name="activity_contact_add_toast_failed_to_create_contact">Failed to create contact</string>
-
     <string name="activity_contact_details_name_label">Name</string>
     <string name="activity_contact_details_name_hint">Contact name</string>
     <string name="activity_contact_details_address_label">Address</string>
@@ -424,7 +404,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="activity_contact_details_toast_failed_to_delete_contact">Failed to delete contact</string>
     <string name="activity_contact_details_toast_contact_saved">Contact saved</string>
     <string name="activity_contact_details_toast_failed_to_save_contact">Failed to save contact</string>
-
     <string name="activity_node_add_node_name_label">Name</string>
     <string name="activity_node_add_node_name_placeholder">My Monero Node</string>
     <string name="activity_node_add_node_address_label">Address</string>
@@ -451,24 +430,20 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="activity_node_details_node_network_type_label">Network Type</string>
 
     <string name="activity_node_list_create_button">Add node</string>
-
     <string name="dialog_delete_node_title">Delete node</string>
     <string name="dialog_delete_node_message">Are you sure that you want to delete your node?</string>
     <string name="dialog_delete_node_action_yes">Yes, delete node</string>
     <string name="dialog_delete_node_action_no">No</string>
-
     <string name="dialog_delete_wallet_title">Delete wallet</string>
     <string name="dialog_delete_wallet_message">Are you sure that you want to delete your wallet? This action is irreversible and you will permanently lose your funds unless you have backed up your wallet.</string>
     <string name="dialog_delete_wallet_action_yes">Yes, delete wallet</string>
     <string name="dialog_delete_wallet_action_no">No</string>
-
     <string name="content_description_network_status_icon_opening_wallet">Network status - opening wallet</string>
     <string name="content_description_network_status_icon_starting_synchronization">Network status - starting synchronization</string>
     <string name="content_description_network_status_icon_synchronizing_node">Network status - synchronizing node</string>
     <string name="content_description_network_status_icon_synchronizing_wallet">Network status - synchronizing wallet</string>
     <string name="content_description_network_status_icon_synchronized">Network status - synchronized</string>
     <string name="content_description_network_status_icon_wallet_error">Network status - wallet error</string>
-
     <string name="activity_network_node_status_header_waiting_for_wallet">Waiting for wallet…</string>
     <string name="activity_network_node_status_header_fetching_blockchain_data">Fetching blockchain height…</string>
     <string name="activity_network_node_status_header_node_is_synchronizing">Node is synchronizing…</string>
@@ -484,7 +459,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="activity_network_wallet_status_header_wallet_is_synchronized">Wallet is synchronized</string>
     <string name="activity_network_wallet_status_description_wallet_is_synchronized">Height: %1$s</string>
     <string name="activity_network_wallet_last_updated_at">Last updated: %1$s</string>
-
     <string name="recycler_view_item_transaction_details_transaction_type_label">Type</string>
     <string name="recycler_view_item_transaction_details_transaction_type_incoming">Incoming</string>
     <string name="recycler_view_item_transaction_details_transaction_type_coinbase">Coinbase</string>
