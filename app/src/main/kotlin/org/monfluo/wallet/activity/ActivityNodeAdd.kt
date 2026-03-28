@@ -20,11 +20,11 @@ import org.monfluo.wallet.data.DefaultNode
 import org.monfluo.wallet.data.Node
 import org.monfluo.wallet.model.MoneroNetworkType
 import org.monfluo.wallet.util.PreferenceUtils
-import org.monfluo.wallet.util.component.ActivityLogging
+import org.monfluo.wallet.util.component.ActivityBase
 import timber.log.Timber
 import kotlin.math.max
 
-class ActivityNodeAdd : ActivityLogging() {
+class ActivityNodeAdd : ActivityBase() {
     private val viewModel: ActivityNodeAddViewModel by viewModels()
 
     private lateinit var layoutView: View

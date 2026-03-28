@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
 import android.view.View
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.CompoundButton
 import android.widget.EditText
@@ -44,6 +45,7 @@ class ActivityApplicationSettings : ActivityMonero() {
     private lateinit var streetModeSwitch: SwitchCompat
     private lateinit var allowFeeOverrideSwitch: SwitchCompat
     private lateinit var allowCopyingSecretsToClipboardSwitch: SwitchCompat
+    private lateinit var enableSecureFlagSwitch: SwitchCompat
     private lateinit var showTransferNotificationsSwitch: SwitchCompat
     private lateinit var showIconOnQrCodesSwitch: SwitchCompat
     private lateinit var autoRotateAddressesSwitch: SwitchCompat
@@ -80,6 +82,7 @@ class ActivityApplicationSettings : ActivityMonero() {
         balanceTapTogglesStreetModeSwitch = findViewById(R.id.balance_tap_toggles_street_mode_switch)
         maxBrightnessQrCodesSwitch = findViewById(R.id.max_brightness_qr_codes_switch)
         forceUriFormatQrCodesSwitch = findViewById(R.id.force_uri_format_qr_codes_switch)
+        enableSecureFlagSwitch = findViewById(R.id.enable_secure_flag_switch)
         proxySwitch = findViewById(R.id.proxy_switch)
         proxySettingsLayout = findViewById(R.id.wallet_proxy_settings_layout)
         walletProxyAddressEditText = findViewById(R.id.wallet_proxy_address_edittext)
@@ -103,6 +106,7 @@ class ActivityApplicationSettings : ActivityMonero() {
         val isBalanceTapTogglesStreetMode = PreferenceUtils.isBalanceTapTogglesStreetMode(applicationContext)
         val isMaxBrightnessQrCodes = PreferenceUtils.isMaxBrightnessQrCodes(applicationContext)
         val isForceUriFormatQrCodes = PreferenceUtils.isForceUriFormatQrCodes(applicationContext)
+        val isEnableSecureFlag = PreferenceUtils.isSecureFlagEnabled(applicationContext)
         val isAddressBookEnabled = PreferenceUtils.isEnableAddressBook(applicationContext)
         val isDeveloperModeEnabled = PreferenceUtils.isDeveloperModeEnabled(applicationContext)
         val isUseProxy = PreferenceUtils.isUseProxy(applicationContext)
@@ -119,6 +123,7 @@ class ActivityApplicationSettings : ActivityMonero() {
         balanceTapTogglesStreetModeSwitch.isChecked = isBalanceTapTogglesStreetMode
         maxBrightnessQrCodesSwitch.isChecked = isMaxBrightnessQrCodes
         forceUriFormatQrCodesSwitch.isChecked = isForceUriFormatQrCodes
+        enableSecureFlagSwitch.isChecked = isEnableSecureFlag
         enableAddressBookSwitch.isChecked = isAddressBookEnabled
         developerModeSwitch.isChecked = isDeveloperModeEnabled
         proxySwitch.isChecked = isUseProxy
@@ -192,6 +197,16 @@ class ActivityApplicationSettings : ActivityMonero() {
         }
         forceUriFormatQrCodesSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
             PreferenceUtils.setForceUriFormatQrCodes(applicationContext, b)
+        }
+        enableSecureFlagSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PreferenceUtils.setSecureFlagEnabled(applicationContext, b)
+            if (b) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                Timber.d("Adding FLAG_SECURE to window from settings")
+            } else {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                Timber.d("Clearing FLAG_SECURE from window from settings")
+            }
         }
         proxySwitch.setOnCheckedChangeListener { _, b: Boolean ->
             PreferenceUtils.setUseProxy(applicationContext, b)

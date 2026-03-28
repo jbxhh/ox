@@ -188,6 +188,13 @@ object PreferenceUtils {
         value: Boolean,
     ) = setBoolean(context, Constants.PREF_ENABLE_DEVELOPER_MODE, value)
 
+    fun isSecureFlagEnabled(context: Context): Boolean = getBoolean(context, Constants.PREF_SECURE_FLAG_ENABLED, false)
+
+    fun setSecureFlagEnabled(
+        context: Context,
+        value: Boolean,
+    ) = setBoolean(context, Constants.PREF_SECURE_FLAG_ENABLED, value)
+
     fun getProxy(context: Context): String? = getString(context, Constants.PREF_PROXY)
 
     fun setProxy(

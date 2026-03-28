@@ -37,12 +37,12 @@ import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
-import org.monfluo.wallet.util.component.ActivityLogging
+import org.monfluo.wallet.util.component.ActivityBase
 import timber.log.Timber
 import java.io.File
 import kotlin.math.max
 
-class ActivityWalletCreate : ActivityLogging() {
+class ActivityWalletCreate : ActivityBase() {
     private val viewModel: CreateWalletViewModel by viewModels()
 
     private lateinit var layoutView: View

@@ -19,11 +19,11 @@ import org.monfluo.wallet.fragment.DialogFragmentPassword
 import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
-import org.monfluo.wallet.util.component.ActivityLogging
+import org.monfluo.wallet.util.component.ActivityBase
 import timber.log.Timber
 import kotlin.math.max
 
-class ActivityWalletList : ActivityLogging() {
+class ActivityWalletList : ActivityBase() {
     private val startActivityToCreateWallet =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == 0) {
