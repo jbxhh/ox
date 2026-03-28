@@ -41,7 +41,8 @@
             android:maxWidth="40dp"
             android:maxHeight="40dp"
             android:background="@drawable/highlighted_on_card_background"
-            android:src="@drawable/logo_monero_alternative" />
+            android:src="@drawable/logo_monero_alternative"
+            android:importantForAccessibility="no" />
 
         <TextView
             android:id="@+id/node_name_textview"
