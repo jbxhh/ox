@@ -309,6 +309,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="recycler_view_item_node_edit_content_description">Edit node</string>
     <string name="recycler_view_item_account_edit_content_description">Edit account</string>
     <string name="recycler_view_item_address_edit_content_description">Edit address</string>
+    <string name="recycler_view_item_contact_edit_content_description">Edit contact</string>
     <string name="activity_payment_request_address_label">Address</string>
     <string name="activity_payment_request_amount_requested_label">Requested amount</string>
     <string name="activity_payment_request_amount_requested_hint" translatable="false">0.00</string>
@@ -465,7 +466,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="recycler_view_item_transaction_details_transaction_type_outgoing">Outgoing</string>
     <string name="recycler_view_item_transaction_details_transaction_description_label">Description</string>
     <string name="recycler_view_item_transaction_details_transaction_description_hint">Transaction description (optional)</string>
-    <string name="recycler_view_item_transaction_details_transaction_description_none">none</string>
+    <string name="recycler_view_item_transaction_details_transaction_description_none">none (tap to edit)</string>
     <string name="recycler_view_item_transaction_details_amount_label">Amount</string>
     <string name="recycler_view_item_transaction_details_amount_with_position_label">Amount #<xliff:g>%1$d</xliff:g></string>
     <string name="recycler_view_item_transaction_details_address_label">Address</string>

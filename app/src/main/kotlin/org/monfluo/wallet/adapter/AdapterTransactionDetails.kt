@@ -1,5 +1,6 @@
 package org.monfluo.wallet.adapter
 
+import android.content.Context
 import android.graphics.Typeface
 import android.icu.text.DateFormat
 import android.text.Editable
@@ -7,9 +8,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.R
 import org.monfluo.wallet.model.MoneroUnit
@@ -39,8 +42,6 @@ class AdapterTransactionDetails(
     fun submitTransaction(transaction: TransactionInfo?) {
         if (this.transaction != transaction) {
             this.transaction = transaction
-            this.transactionDescriptionText = transaction?.description ?: ""
-            this.editingTransactionDescription = false
             notifyDataSetChanged()
         }
     }
@@ -121,12 +122,10 @@ class AdapterTransactionDetails(
 
     fun editTransactionDescription() {
         this.editingTransactionDescription = true
-        notifyItemChanged(0)
     }
 
     fun finishEditingTransactionDescription() {
         this.editingTransactionDescription = false
-        notifyItemChanged(0)
         listener.onTransactionDescriptionUpdated(transaction!!, transactionDescriptionText)
     }
 
@@ -145,7 +144,6 @@ class AdapterTransactionDetails(
         view: View,
     ) : ViewHolder(view) {
         private val transactionTypeTextView: TextView = itemView.findViewById(R.id.transaction_type_textview)
-        private val transactionDescriptionLabelTextView: TextView = itemView.findViewById(R.id.transaction_description_label_textview)
         private val transactionDescriptionTextView: TextView = itemView.findViewById(R.id.transaction_description_textview)
         private val transactionDescriptionEditText: EditText = itemView.findViewById(R.id.transaction_description_edittext)
 
@@ -190,6 +188,12 @@ class AdapterTransactionDetails(
                 transactionDescriptionTextView.setTypeface(null, Typeface.ITALIC)
             }
             transactionDescriptionTextView.setOnClickListener {
+                transactionDescriptionTextView.visibility = View.GONE
+                transactionDescriptionEditText.visibility = View.VISIBLE
+                transactionDescriptionEditText.requestFocus()
+                transactionDescriptionEditText.setSelection(transactionDescriptionEditText.text.length)
+                val imm = itemView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(transactionDescriptionEditText, InputMethodManager.SHOW_IMPLICIT)
                 editTransactionDescription()
             }
             transactionDescriptionEditText.setText(transactionDescriptionText)
@@ -202,6 +206,8 @@ class AdapterTransactionDetails(
             )
             transactionDescriptionEditText.setOnEditorActionListener { _, actionId, _ ->
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    transactionDescriptionTextView.visibility = View.VISIBLE
+                    transactionDescriptionEditText.visibility = View.GONE
                     finishEditingTransactionDescription()
                     return@setOnEditorActionListener true
                 }

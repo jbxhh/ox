@@ -20,7 +20,8 @@
         android:minWidth="40dp"
         android:minHeight="40dp"
         android:background="@drawable/highlighted_on_card_background"
-        android:src="@drawable/logo_monero_alternative" />
+        android:src="@drawable/logo_monero_alternative"
+        android:importantForAccessibility="no" />
 
     <TextView
         android:id="@+id/contact_label_textview"
@@ -60,5 +61,5 @@
         android:minHeight="40dp"
         android:background="@color/transparent"
         android:src="@drawable/edit"
-        android:contentDescription="TODO" />
+        android:contentDescription="@string/recycler_view_item_contact_edit_content_description" />
 </androidx.constraintlayout.widget.ConstraintLayout>

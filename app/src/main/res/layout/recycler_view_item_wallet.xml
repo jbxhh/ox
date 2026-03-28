@@ -29,7 +29,8 @@
             android:minWidth="40dp"
             android:minHeight="40dp"
             android:background="@drawable/highlighted_on_card_background"
-            android:src="@drawable/logo_monero_alternative" />
+            android:src="@drawable/logo_monero_alternative"
+            android:importantForAccessibility="no" />
 
         <TextView
             android:id="@+id/wallet_label_textview"
