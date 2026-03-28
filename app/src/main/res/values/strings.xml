@@ -103,7 +103,7 @@
     <string name="allow_copying_secrets_to_clipboard">Allow copying secrets to clipboard</string>
     <!-- Label for showing transfer notifications setting toggle -->
     <string name="show_transfer_notifications">Show transfer notifications</string>
-    <!-- Label for showing transfer notifications setting toggle -->
+    <!-- Label for enabling address book setting toggle -->
     <string name="enable_address_book">Enable address book</string>
     <!-- Label for developer mode setting toggle -->
     <string name="developer_mode">Enable developer mode</string>
