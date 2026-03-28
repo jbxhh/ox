@@ -18,12 +18,12 @@ import org.monfluo.wallet.service.wallet.WalletService
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
-import org.monfluo.wallet.util.component.ActivityLogging
+import org.monfluo.wallet.util.component.ActivityBase
 import timber.log.Timber
 import kotlin.io.path.Path
 import kotlin.io.path.name
 
-class ActivityStart : ActivityLogging() {
+class ActivityStart : ActivityBase() {
     private val startActivityToOpenWallet =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == 0) {

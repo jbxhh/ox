@@ -16,14 +16,14 @@ import androidx.lifecycle.ViewModel
 import org.monfluo.wallet.R
 import org.monfluo.wallet.util.Constants
 import org.monfluo.wallet.util.PreferenceUtils
-import org.monfluo.wallet.util.component.ActivityLogging
+import org.monfluo.wallet.util.component.ActivityBase
 import kotlin.io.path.Path
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.moveTo
 import kotlin.io.path.name
 import kotlin.math.max
 
-class ActivityWalletDetails : ActivityLogging() {
+class ActivityWalletDetails : ActivityBase() {
     private val viewModel: ActivityWalletDetailsViewModel by viewModels()
 
     private lateinit var layoutView: View

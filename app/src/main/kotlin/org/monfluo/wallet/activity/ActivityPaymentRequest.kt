@@ -29,7 +29,7 @@ import org.monfluo.wallet.util.QrCodeHelper
 import org.monfluo.wallet.util.SimpleTextWatcher
 import org.monfluo.wallet.util.TextHelper
 import org.monfluo.wallet.util.UriPayment
-import org.monfluo.wallet.util.component.ActivityLogging
+import org.monfluo.wallet.util.component.ActivityBase
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.max
@@ -40,7 +40,7 @@ import kotlin.time.measureTimedValue
 private const val ALPHA_OPAQUE: Int = 255
 private const val ALPHA_HALF_TRANSPARENT: Int = 128
 
-class ActivityPaymentRequest : ActivityLogging() {
+class ActivityPaymentRequest : ActivityBase() {
     private val viewModel: ActivityUriPaymentViewModel by viewModels()
 
     private lateinit var layoutView: View
