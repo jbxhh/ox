@@ -202,7 +202,7 @@
     <string name="activity_send_selected_enotes_value_text">Nilai yang dipilih: %1$s XMR</string>
     <string name="activity_send_fee_label">Biaya:</string>
     <string name="activity_send_fee_default_label">Bawaan</string>
-    <string name="activity_send_fee_medium_label">Tengah-tengah</string>
+    <string name="activity_send_fee_medium_label">Medium</string>
     <string name="activity_send_fee_high_label">Tinggi</string>
     <string name="activity_send_transaction_create">Membuat</string>
     <string name="activity_send_camera_permission_denied_toast">Tidak ada izin kamera</string>
@@ -364,4 +364,11 @@
     <string name="activity_contact_details_toast_failed_to_delete_contact">Gagal menghapus kontak</string>
     <string name="activity_contact_details_toast_contact_saved">Kontak tersimpan</string>
     <string name="activity_contact_details_toast_failed_to_save_contact">Gagal menyimpan kontak</string>
+    <string name="toast_no_node_for_network">Tidak ditemukan node untuk jaringan <xliff:g>%1$s</xliff:g></string>
+    <string name="developer_mode">Aktifkan mode pengembang</string>
+    <string name="enable_secure_flag">Cegah pengambilan tangkapan layar</string>
+    <string name="activity_wallet_create_wallet_network_type_label">Jenis Jaringan</string>
+    <string name="activity_wallet_create_wallet_encrypted_polyseed_toast">Polyseed terenkripsi tidak didukung</string>
+    <string name="activity_node_add_node_network_type_label">Jenis Jaringan</string>
+    <string name="activity_node_details_node_network_type_label">Jenis Jaringan</string>
 </resources>
