@@ -82,7 +82,7 @@ android {
     }
 
     namespace = "org.monfluo.wallet"
-    base.archivesName = "monfluo"
+    base.archivesName = "monfluo-${android.defaultConfig.versionName?.replace('.', 'x') ?: "unknown"}"
 }
 
 androidComponents {

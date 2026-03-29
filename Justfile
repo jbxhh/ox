@@ -37,11 +37,8 @@ test:
 
 install: install-debug
 
-install-release:
-    adb install app/build/outputs/apk/release/monfluo-arm64-v8a-release.apk
-
 install-debug:
-    adb install app/build/outputs/apk/debug/monfluo-arm64-v8a-debug.apk
+    adb install app/build/outputs/apk/debug/monfluo-*-arm64-v8a-debug.apk
 
 kill-release:
     adb shell am force-stop org.monfluo.wallet.beta

@@ -7,10 +7,11 @@
 * Commit and push changes
 * Build native libraries and APKs: `just clean build-native-all build-release`
   * The APKs will be in `app/build/outputs/apk/release` directory
-* Sign the APKs
+* Sign and rename the APKs
 ```bash
 for f in ./*.apk; do
-    apksigner sign --ks ~/acx.jks "$f"
+  apksigner sign --ks ~/acx.jks "$f"
+  mv -- "$f" "${f/-unsigned/}"
 done
 ```
 * Generate SHA256 hashes: `sha256sum *.apk >> sha256sum.txt`
