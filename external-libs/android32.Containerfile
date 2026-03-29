@@ -1,8 +1,7 @@
-FROM debian:bookworm
+FROM debian:bookworm AS build
 
 RUN set -x && apt-get update && apt-get install -y unzip automake build-essential curl file pkg-config git python3 python-is-python3 libtool libtinfo5 yacc wget
 
-COPY monero/ /src/external-libs/monero
 COPY bin/download-native-libs-dependencies.sh /src/external-libs/bin/
 COPY bin/envs.sh /src/external-libs/bin/
 
@@ -13,9 +12,11 @@ RUN set -x \
     && . ./external-libs/bin/envs.sh \
     && ./external-libs/bin/download-native-libs-dependencies.sh
 
+FROM build
+
+COPY monero/ /src/external-libs/monero
 COPY bin/build-native-libs.sh /src/external-libs/bin
 COPY bin/build-native-libs-arm32.sh /src/external-libs/bin
-COPY bin/envs.sh /src/external-libs/bin
 
 ENV MONFLUO_BUILD_DIRECTORY=/opt/android/monfluo-build-arm32
 ENV MONFLUO_OUTPUT_DIRECTORY=/opt/android/monfluo-output-arm32
