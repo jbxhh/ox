@@ -12,8 +12,8 @@ android {
         minSdk = 26
         targetSdk = 36
         compileSdk = 36
-        versionCode = 90400
-        versionName = "0.9.4"
+        versionCode = 90500
+        versionName = "0.9.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         externalNativeBuild {

@@ -1,0 +1,8 @@
+* Update Monero to v0.18.4.6
+* Implement adjusted restore height
+* Use scroll layout for potentially long views
+* Implement transaction descriptions / notes
+* Implement address book
+* Implement support for stagenet/testnet networks
+* Refuse to restore encrypted polyseeds instead of silently restoring wrong wallet
+* Add setting for preventing screenshots
