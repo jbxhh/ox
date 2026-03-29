@@ -4,7 +4,7 @@ IFS=$'\n\t'
 
 CHANGELOGS_FOLDER="fastlane/metadata/android/en-US/changelogs"
 ABI_VERSION_CODES=(1 2 4)
-VERSION_CODE=$(rg -N -o 'versionCode (\d+)' --replace '$1' app/build.gradle)
+VERSION_CODE=$(rg -N -o 'versionCode = (\d+)' --replace '$1' app/build.gradle.kts)
 
 cd "$CHANGELOGS_FOLDER"
 

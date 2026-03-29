@@ -2,7 +2,7 @@
 
 ## Releasing
 
-* Bump `versionCode` & `versionName` in `build.gradle`
+* Bump `versionCode` & `versionName` in `app/build.gradle.kts`
 * Create changelog files `just create-changelog` and fill the main file (the one ending with 0)
 * Commit and push changes
 * Build native libraries and APKs: `just clean build-native-all build-release`
