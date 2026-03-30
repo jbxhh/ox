@@ -148,6 +148,14 @@ pub enum Language {
   ChineseTraditional,
 }
 
+impl Language {
+
+    /// Get language words
+    pub fn get_words(&self) -> &'static [&'static str] {
+        LANGUAGES[self].words
+    }
+}
+
 struct WordList {
   words: &'static [&'static str],
   has_prefix: bool,

@@ -69,6 +69,14 @@ pub enum Language {
   DeprecatedEnglish,
 }
 
+impl Language {
+
+    /// Get language words
+    pub fn get_words(&self) -> &'static [&'static str] {
+        LANGUAGES[self].word_list
+    }
+}
+
 fn trim(word: &str, len: usize) -> Zeroizing<String> {
   Zeroizing::new(word.chars().take(len).collect())
 }
