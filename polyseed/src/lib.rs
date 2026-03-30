@@ -125,6 +125,7 @@ pub enum PolyseedError {
 
 /// Language options for Polyseed.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Zeroize)]
+#[cfg_attr(feature = "strum", derive(strum_macros::Display, strum_macros::EnumString, strum_macros::VariantArray))]
 pub enum Language {
   /// English language option.
   English,

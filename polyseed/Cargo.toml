@@ -26,6 +26,8 @@ rand_core = { version = "0.6", default-features = false }
 
 sha2 = { version = "0.10", default-features = false }
 pbkdf2 = { version = "0.12", features = ["simple"], default-features = false }
+strum = { version = "0.27.2", optional = true }
+strum_macros = { version = "0.27.2", optional = true }
 
 [dev-dependencies]
 hex = { version = "0.4", default-features = false, features = ["std"] }
@@ -44,3 +46,4 @@ std = [
   "pbkdf2/std",
 ]
 default = ["std"]
+strum = ["dep:strum", "dep:strum_macros"]

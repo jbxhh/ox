@@ -40,6 +40,7 @@ pub enum SeedError {
 
 /// Language options.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, Zeroize)]
+#[cfg_attr(feature = "strum", derive(strum_macros::Display, strum_macros::EnumString, strum_macros::VariantArray))]
 pub enum Language {
   /// Chinese language option.
   Chinese,

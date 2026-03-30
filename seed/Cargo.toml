@@ -24,6 +24,8 @@ zeroize = { version = "1.5", default-features = false, features = ["zeroize_deri
 rand_core = { version = "0.6", default-features = false }
 
 curve25519-dalek = { version = "4", default-features = false, features = ["alloc", "zeroize"] }
+strum = { version = "0.27.2", optional = true }
+strum_macros = { version = "0.27.2", optional = true }
 
 [dev-dependencies]
 hex = { version = "0.4", default-features = false, features = ["std"] }
@@ -39,3 +41,4 @@ std = [
   "rand_core/std",
 ]
 default = ["std"]
+strum = ["dep:strum", "dep:strum_macros"]

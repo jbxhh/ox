@@ -48,3 +48,4 @@ std = [
 compile-time-generators = ["monero-wallet/compile-time-generators"]
 multisig = ["monero-wallet/multisig"]
 default = ["std", "compile-time-generators"]
+strum = ["monero-seed/strum", "polyseed/strum"]
