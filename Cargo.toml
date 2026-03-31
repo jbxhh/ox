@@ -4,10 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-# TODO: use submodules
-monero-wallet-util = { path = "../monero-wallet-util/util", features = ["strum"] }
-monero-wallet = { path = "../monero-oxide/monero-oxide/wallet" }
-monero-simple-request-rpc = { path = "../monero-oxide/monero-oxide/interface/daemon/simple-request" }
+monero-wallet-util = { git = "https://codeberg.org/Monfluo/monero-wallet-util.git", branch = "monfluo", features = ["strum"] }
+monero-wallet = { git = "https://codeberg.org/Monfluo/monero-oxide.git", branch = "monfluo" }
+monero-simple-request-rpc = { git = "https://codeberg.org/Monfluo/monero-oxide.git", branch = "monfluo" }
 tokio = { version = "1.49.0", features = ["fs", "io-util"] }
 thiserror = "2.0.18"
 serde = { version = "1.0.228", features = ["derive"] }
