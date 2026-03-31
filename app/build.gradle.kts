@@ -8,12 +8,12 @@ android {
     ndkVersion = "28.2.13676358"
 
     defaultConfig {
-        applicationId = "org.monfluo.wallet.beta"
+        applicationId = "org.monfluo.wallet.android"
         minSdk = 26
         targetSdk = 36
         compileSdk = 36
-        versionCode = 90500
-        versionName = "0.9.5"
+        versionCode = 1000
+        versionName = "0.10.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         externalNativeBuild {
@@ -81,7 +81,7 @@ android {
         }
     }
 
-    namespace = "org.monfluo.wallet"
+    namespace = "org.monfluo.wallet.android"
     base.archivesName = "monfluo-${android.defaultConfig.versionName?.replace('.', 'x') ?: "unknown"}"
 }
 
@@ -118,6 +118,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.10.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0")
     implementation("com.google.android.material:material:1.13.0")
+    // Oxide
+    implementation(project(":monfluo-oxide-kotlin"))
     // Logging
     implementation("com.jakewharton.timber:timber:5.0.1")
     // Slide to Send tx sliders
@@ -125,8 +127,8 @@ dependencies {
     // QR Code stuff
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     // Testing
-    testImplementation("org.junit.jupiter:junit-jupiter-api:6.0.3")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:6.0.3")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.0.3")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:6.0.3")
+    testImplementation(libs.junit.jupiter.api)
+    testImplementation(libs.junit.jupiter.params)
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testRuntimeOnly(libs.junit.jupiter.engine)
 }

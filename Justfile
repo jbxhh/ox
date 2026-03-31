@@ -1,66 +1,184 @@
-clean-native: clean-native-all
+set dotenv-load := true
 
-clean-native-all:
+
+default:
+  @just --list --justfile {{justfile()}} --list-submodules --unsorted
+
+[group('utils')]
+setup:
+    cp .env.example .env
+    @echo '<=== ACTION REQUIRED! ===>'
+    @echo 'Please edit the created .env file and fill/change the configuration inside'
+
+[group('utils')]
+create-changelog:
+    ./bin/create-changelog.nu
+
+
+[group('common')]
+clean: oxide-jni-clean oxide-kotlin-clean monero-clean app-clean
+
+[group('common')]
+test: oxide-jni-test oxide-kotlin-test app-test
+
+
+[group('oxide-jni')]
+[working-directory: 'monfluo-oxide-jni']
+oxide-jni-clean:
+    cargo clean
+
+[group('oxide-jni')]
+[working-directory: 'monfluo-oxide-jni']
+oxide-jni-test:
+    cargo test
+    
+[group('oxide-jni')]
+[working-directory: 'monfluo-oxide-jni']
+oxide-jni-doc:
+    cargo doc --open
+
+[group('oxide-jni')]
+_oxide-jni-build PROFILE TARGET:
+    ./bin/build-oxide-native-lib.nu {{TARGET}} {{PROFILE}}
+
+[group('oxide-jni')]
+oxide-jni-build: (_oxide-jni-build "dev" "native")
+
+[group('oxide-jni')]
+oxide-jni-build-release: (_oxide-jni-build "release" "native")
+
+[group('oxide-jni')]
+oxide-jni-build-android-arm32: (_oxide-jni-build "dev" "arm32")
+
+[group('oxide-jni')]
+oxide-jni-build-android-arm64: (_oxide-jni-build "dev" "arm64")
+
+[group('oxide-jni')]
+oxide-jni-build-android-x86_64: (_oxide-jni-build "dev" "x86_64")
+
+[group('oxide-jni')]
+oxide-jni-build-android-all: oxide-jni-build-android-arm32 oxide-jni-build-android-arm64 oxide-jni-build-android-x86_64
+
+[group('oxide-jni')]
+oxide-jni-build-android-arm32-release: (_oxide-jni-build "release" "arm32")
+
+[group('oxide-jni')]
+oxide-jni-build-android-arm64-release: (_oxide-jni-build "release" "arm64")
+
+[group('oxide-jni')]
+oxide-jni-build-android-x86_64-release: (_oxide-jni-build "release" "x86_64")
+
+[group('oxide-jni')]
+oxide-jni-build-android-all-release: oxide-jni-build-android-arm32-release oxide-jni-build-android-arm64-release oxide-jni-build-android-x86_64-release
+
+
+[group('oxide-kotlin')]
+oxide-kotlin-clean:
+    ./gradlew :monfluo-oxide-kotlin:clean
+
+[group('oxide-kotlin')]
+oxide-kotlin-test: oxide-jni-build
+    export LD_LIBRARY_PATH=$(realpath monfluo-oxide-jni/target/debug) && ./gradlew :monfluo-oxide-kotlin:test --rerun-tasks
+
+[group('oxide-kotlin')]
+oxide-kotlin-build:
+    ./gradlew :monfluo-oxide-kotlin:build
+
+
+[group('monero-legacy')]
+monero-clean:
     cd external-libs && make clean
 
-build-native: build-native-debug
-
-build-native-debug:
+[group('monero-legacy')]
+monero-build:
     cd external-libs && make debug
 
-build-native-all:
+[group('monero-legacy')]
+monero-build-all:
     cd external-libs && make all
 
-# (Clean) Build Install Run (Debug)
-bird: build-debug install-debug run-debug
-cbird: clean build-debug install-debug run-debug
 
-lint:
+[group('app')]
+_app-copy-native-libs ABI ANDROID_ARCH PROFILE:
+    mkdir -p app/src/main/jniLibs/{{ANDROID_ARCH}}
+    cp monfluo-oxide-jni/target/{{ABI}}/{{PROFILE}}/libmonfluo_oxide.so app/src/main/jniLibs/{{ANDROID_ARCH}}/
+
+[group('app')]
+app-copy-native-libs-arm32: oxide-jni-build-android-arm32 (_app-copy-native-libs "armv7-linux-androideabi" "armeabi-v7a" "debug")
+
+[group('app')]
+app-copy-native-libs-arm64: oxide-jni-build-android-arm64 (_app-copy-native-libs "aarch64-linux-android" "arm64-v8a" "debug")
+
+[group('app')]
+app-copy-native-libs-x86_64: oxide-jni-build-android-x86_64 (_app-copy-native-libs "x86_64-linux-android" "x86_64" "debug")
+
+[group('app')]
+app-copy-native-libs-all: app-copy-native-libs-arm32 app-copy-native-libs-arm64 app-copy-native-libs-x86_64
+
+[group('app')]
+app-copy-native-libs-arm32-release: oxide-jni-build-android-arm32-release (_app-copy-native-libs "armv7-linux-androideabi" "armeabi-v7a" "release")
+
+[group('app')]
+app-copy-native-libs-arm64-release: oxide-jni-build-android-arm64-release (_app-copy-native-libs "aarch64-linux-android" "arm64-v8a" "release")
+
+[group('app')]
+app-copy-native-libs-x86_64-release: oxide-jni-build-android-x86_64-release (_app-copy-native-libs "x86_64-linux-android" "x86_64" "release")
+
+[group('app')]
+app-copy-native-libs-all-release: app-copy-native-libs-arm32-release app-copy-native-libs-arm64-release app-copy-native-libs-x86_64-release
+
+[group('app')]
+app-lint:
     ./gradlew ktlintCheck
 
-format:
+[group('app')]
+app-format:
     ./gradlew ktlintFormat
 
-clean:
-    ./gradlew clean
+[group('app')]
+app-clean:
+    ./gradlew :app:clean
 
-build: build-debug
+[group('app')]
+app-test:
+    ./gradlew :app:test --rerun-tasks
 
-build-debug:
+[group('app')]
+app-build: app-copy-native-libs-arm64
     ./gradlew -P monfluo-arm64 assembleDebug
 
-build-release:
+[group('app')]
+app-build-all: app-copy-native-libs-all
+    ./gradlew -P monfluo-all -P monfluo-universal assembleDebug
+
+[group('app')]
+app-build-release: app-copy-native-libs-arm64-release
+    ./gradlew -P monfluo-arm64 assembleRelease
+
+[group('app')]
+app-build-release-all: app-copy-native-libs-all-release
     ./gradlew -P monfluo-all -P monfluo-universal assembleRelease
 
-test:
-    ./gradlew test
-
-install: install-debug
-
-install-debug:
+[group('app')]
+app-install: app-build
     adb install app/build/outputs/apk/debug/monfluo-*-arm64-v8a-debug.apk
+    
+[group('app')]
+app-kill:
+    adb shell am force-stop org.monfluo.wallet.android.debug
 
-kill-release:
-    adb shell am force-stop org.monfluo.wallet.beta
+[group('app')]
+app-kill-release:
+    adb shell am force-stop org.monfluo.wallet.android
 
-kill-debug:
-    adb shell am force-stop org.monfluo.wallet.beta.debug
+[group('app')]
+app-run: app-install app-kill
+    adb shell monkey -p org.monfluo.wallet.android.debug 1
 
-run: run-debug
+[group('app')]
+app-logcat:
+    adb shell run-as org.monfluo.wallet.android.debug logcat
 
-run-release: kill-release
-    adb shell monkey -p org.monfluo.wallet.beta 1
-
-run-debug: kill-debug
-    adb shell monkey -p org.monfluo.wallet.beta.debug 1
-
-logcat: logcat-debug
-
-logcat-release:
-    adb shell run-as org.monfluo.wallet.beta logcat
-
-logcat-debug:
-    adb shell run-as org.monfluo.wallet.beta.debug logcat
-
-create-changelog:
-    ./bin/create-changelog.sh
+[group('app')]
+app-logcat-release:
+    adb shell run-as org.monfluo.wallet.android logcat
