@@ -1,4 +1,4 @@
-package org.monfluo.wallet.util
+package org.monfluo.wallet.android.util
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.params.ParameterizedTest

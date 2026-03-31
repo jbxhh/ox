@@ -52,12 +52,12 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
     class_List = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("java/util/List")));
     class_ArrayList = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("java/util/ArrayList")));
     class_Pair = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("kotlin/Pair")));
-    class_TransactionInfo = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/model/TransactionInfo")));
-    class_Transfer = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/model/Transfer")));
-    class_WalletListener = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/model/WalletListener")));
-    class_WalletStatusWithError = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/model/WalletStatusWithError")));
-    class_CoinsInfo = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/model/Enote")));
-    class_Contact = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/model/Contact")));
+    class_TransactionInfo = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/android/model/TransactionInfo")));
+    class_Transfer = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/android/model/Transfer")));
+    class_WalletListener = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/android/model/WalletListener")));
+    class_WalletStatusWithError = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/android/model/WalletStatusWithError")));
+    class_CoinsInfo = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/android/model/Enote")));
+    class_Contact = reinterpret_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("org/monfluo/wallet/android/model/Contact")));
     return JNI_VERSION_1_6;
 }
 #ifdef __cplusplus
@@ -345,7 +345,7 @@ extern "C"
 /********** WalletManager *********/
 /**********************************/
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_WalletManager_createWalletJ(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_WalletManager_createWalletJ(JNIEnv *env, jobject instance,
                                                          jstring path, jstring password,
                                                          jstring language,
                                                          jint networkType) {
@@ -368,7 +368,7 @@ Java_org_monfluo_wallet_model_WalletManager_createWalletJ(JNIEnv *env, jobject i
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_WalletManager_createWalletPolyseedJ(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_WalletManager_createWalletPolyseedJ(JNIEnv *env, jobject instance,
                                                                  jstring path, jstring password,
                                                                  jstring passpharse,
                                                                  jstring language,
@@ -402,7 +402,7 @@ Java_org_monfluo_wallet_model_WalletManager_createWalletPolyseedJ(JNIEnv *env, j
 
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_WalletManager_openWalletJ(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_WalletManager_openWalletJ(JNIEnv *env, jobject instance,
                                                        jstring path, jstring password,
                                                        jint networkType) {
     const char *_path = env->GetStringUTFChars(path, nullptr);
@@ -421,7 +421,7 @@ Java_org_monfluo_wallet_model_WalletManager_openWalletJ(JNIEnv *env, jobject ins
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_WalletManager_recoveryWalletJ(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_WalletManager_recoveryWalletJ(JNIEnv *env, jobject instance,
                                                            jstring path, jstring password,
                                                            jstring mnemonic, jstring offset,
                                                            jint networkType,
@@ -450,7 +450,7 @@ Java_org_monfluo_wallet_model_WalletManager_recoveryWalletJ(JNIEnv *env, jobject
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_WalletManager_recoveryWalletPolyseedJ(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_WalletManager_recoveryWalletPolyseedJ(JNIEnv *env, jobject instance,
                                                                    jstring path, jstring password,
                                                                    jstring mnemonic, jstring offset,
                                                                    jint networkType) {
@@ -477,7 +477,7 @@ Java_org_monfluo_wallet_model_WalletManager_recoveryWalletPolyseedJ(JNIEnv *env,
 
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_WalletManager_createWalletFromKeysJ(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_WalletManager_createWalletFromKeysJ(JNIEnv *env, jobject instance,
                                                                  jstring path, jstring password,
                                                                  jstring language,
                                                                  jint networkType,
@@ -517,7 +517,7 @@ Java_org_monfluo_wallet_model_WalletManager_createWalletFromKeysJ(JNIEnv *env, j
 // virtual void setSubaddressLookahead(uint32_t major, uint32_t minor) = 0;
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_WalletManager_walletExists(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_WalletManager_walletExists(JNIEnv *env, jobject instance,
                                                         jstring path) {
     const char *_path = env->GetStringUTFChars(path, nullptr);
     bool exists = Monero::WalletManagerFactory::getWalletManager()->walletExists(std::string(_path));
@@ -526,7 +526,7 @@ Java_org_monfluo_wallet_model_WalletManager_walletExists(JNIEnv *env, jobject in
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_WalletManager_verifyWalletPassword(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_WalletManager_verifyWalletPassword(JNIEnv *env, jobject instance,
                                                                 jstring keys_file_name,
                                                                 jstring password,
                                                                 jboolean no_spend_key) {
@@ -540,7 +540,7 @@ Java_org_monfluo_wallet_model_WalletManager_verifyWalletPassword(JNIEnv *env, jo
 }
 
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_WalletManager_setDaemonAddressJ(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_WalletManager_setDaemonAddressJ(JNIEnv *env, jobject instance,
                                                              jstring address) {
     const char *_address = env->GetStringUTFChars(address, nullptr);
     Monero::WalletManagerFactory::getWalletManager()->setDaemonAddress(std::string(_address));
@@ -549,7 +549,7 @@ Java_org_monfluo_wallet_model_WalletManager_setDaemonAddressJ(JNIEnv *env, jobje
 
 // returns whether the daemon can be reached, and its version number
 JNIEXPORT jint JNICALL
-Java_org_monfluo_wallet_model_WalletManager_getDaemonVersion(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_WalletManager_getDaemonVersion(JNIEnv *env, jobject instance) {
     uint32_t version;
     bool isConnected = Monero::WalletManagerFactory::getWalletManager()->connected(&version);
     if (!isConnected) version = 0;
@@ -557,19 +557,19 @@ Java_org_monfluo_wallet_model_WalletManager_getDaemonVersion(JNIEnv *env, jobjec
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_WalletManager_getBlockchainHeight(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_WalletManager_getBlockchainHeight(JNIEnv *env, jobject instance) {
     auto wm = Monero::WalletManagerFactory::getWalletManager();
     auto result = wm->blockchainHeight();
     return static_cast<jlong>(result);
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_WalletManager_getBlockchainTargetHeight(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_WalletManager_getBlockchainTargetHeight(JNIEnv *env, jobject instance) {
     return static_cast<jlong>(Monero::WalletManagerFactory::getWalletManager()->blockchainTargetHeight());
 }
 
 JNIEXPORT jobject JNICALL
-Java_org_monfluo_wallet_model_WalletManager_getBlockchainAndTargetHeight(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_WalletManager_getBlockchainAndTargetHeight(JNIEnv *env, jobject instance) {
     auto wm = Monero::WalletManagerFactory::getWalletManager();
     auto result = wm->blockchainAndTargetHeight();
     auto height = static_cast<jlong>(result.first);
@@ -578,17 +578,17 @@ Java_org_monfluo_wallet_model_WalletManager_getBlockchainAndTargetHeight(JNIEnv 
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_WalletManager_getNetworkDifficulty(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_WalletManager_getNetworkDifficulty(JNIEnv *env, jobject instance) {
     return static_cast<jlong>(Monero::WalletManagerFactory::getWalletManager()->networkDifficulty());
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_WalletManager_getBlockTarget(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_WalletManager_getBlockTarget(JNIEnv *env, jobject instance) {
     return static_cast<jlong>(Monero::WalletManagerFactory::getWalletManager()->blockTarget());
 }
 
 JNIEXPORT jobject JNICALL
-Java_org_monfluo_wallet_model_WalletManager_resolveOpenAlias(JNIEnv *env, jobject instance, jstring address) {
+Java_org_monfluo_wallet_android_model_WalletManager_resolveOpenAlias(JNIEnv *env, jobject instance, jstring address) {
     const char *_address = env->GetStringUTFChars(address, nullptr);
     bool dnssec_valid;
     std::string resolvedAlias =Monero::WalletManagerFactory::getWalletManager()->resolveOpenAlias(std::string(_address), dnssec_valid);
@@ -597,7 +597,7 @@ Java_org_monfluo_wallet_model_WalletManager_resolveOpenAlias(JNIEnv *env, jobjec
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_WalletManager_setProxyJ(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_WalletManager_setProxyJ(JNIEnv *env, jobject instance,
                                                      jstring address) {
     const char *_address = env->GetStringUTFChars(address, nullptr);
     bool rc =
@@ -608,7 +608,7 @@ Java_org_monfluo_wallet_model_WalletManager_setProxyJ(JNIEnv *env, jobject insta
 
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_WalletManager_closeJ(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_WalletManager_closeJ(JNIEnv *env, jobject instance,
                                                   jobject walletInstance) {
     auto *wallet = getHandle<Monero::Wallet>(env, walletInstance);
     bool closeSuccess = Monero::WalletManagerFactory::getWalletManager()->closeWallet(wallet,
@@ -632,7 +632,7 @@ Java_org_monfluo_wallet_model_WalletManager_closeJ(JNIEnv *env, jobject instance
 /**********************************/
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_Wallet_getSeed(JNIEnv *env, jobject instance, jstring seedOffset) {
+Java_org_monfluo_wallet_android_model_Wallet_getSeed(JNIEnv *env, jobject instance, jstring seedOffset) {
     const char *_seedOffset = env->GetStringUTFChars(seedOffset, nullptr);
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
 
@@ -656,7 +656,7 @@ Java_org_monfluo_wallet_model_Wallet_getSeed(JNIEnv *env, jobject instance, jstr
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_Wallet_getLegacySeed(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_getLegacySeed(JNIEnv *env, jobject instance,
                                                   jstring seedOffset) {
     const char *_seedOffset = env->GetStringUTFChars(seedOffset, nullptr);
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
@@ -672,7 +672,7 @@ Java_org_monfluo_wallet_model_Wallet_getLegacySeed(JNIEnv *env, jobject instance
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_Wallet_isPolyseedSupported(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_isPolyseedSupported(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
 
     std::string seed;
@@ -683,7 +683,7 @@ Java_org_monfluo_wallet_model_Wallet_isPolyseedSupported(JNIEnv *env, jobject in
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_WalletManager_isEncryptedPolyseed(JNIEnv *env, jclass clazz, jstring polyseed) {
+Java_org_monfluo_wallet_android_model_WalletManager_isEncryptedPolyseed(JNIEnv *env, jclass clazz, jstring polyseed) {
     const char *_polyseed = env->GetStringUTFChars(polyseed, nullptr);
 
     bool isEncrypted = Monero::Wallet::isEncryptedPolyseed(std::string(_polyseed));
@@ -694,7 +694,7 @@ Java_org_monfluo_wallet_model_WalletManager_isEncryptedPolyseed(JNIEnv *env, jcl
 }
 
 JNIEXPORT jobject JNICALL
-Java_org_monfluo_wallet_model_Wallet_getPolyseedSeedAndPassphrase(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getPolyseedSeedAndPassphrase(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
 
     std::string seed;
@@ -720,7 +720,7 @@ jobject newWalletStatusInstance(JNIEnv *env, int status, const std::string &erro
 
 
 JNIEXPORT jobject JNICALL
-Java_org_monfluo_wallet_model_Wallet_getWalletStatusWithError(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getWalletStatusWithError(JNIEnv *env, jobject instance) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
 
     int status;
@@ -731,14 +731,14 @@ Java_org_monfluo_wallet_model_Wallet_getWalletStatusWithError(JNIEnv *env, jobje
 }
 
 JNIEXPORT jobject JNICALL
-Java_org_monfluo_wallet_model_Wallet_getPassword(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getPassword(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return env->NewStringUTF(wallet->getPassword().c_str());
 }
 
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_Wallet_setPassword(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_setPassword(JNIEnv *env, jobject instance,
                                                 jstring password) {
     const char *_password = env->GetStringUTFChars(password, nullptr);
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
@@ -748,7 +748,7 @@ Java_org_monfluo_wallet_model_Wallet_setPassword(JNIEnv *env, jobject instance,
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_Wallet_getAddressJ(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_getAddressJ(JNIEnv *env, jobject instance,
                                                 jint accountIndex,
                                                 jint addressIndex) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
@@ -757,19 +757,19 @@ Java_org_monfluo_wallet_model_Wallet_getAddressJ(JNIEnv *env, jobject instance,
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_Wallet_getPath(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getPath(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return env->NewStringUTF(wallet->path().c_str());
 }
 
 JNIEXPORT jint JNICALL
-Java_org_monfluo_wallet_model_Wallet_nettype(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_nettype(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return wallet->nettype();
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_Wallet_getIntegratedAddress(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_getIntegratedAddress(JNIEnv *env, jobject instance,
                                                          jstring payment_id) {
     const char *_payment_id = env->GetStringUTFChars(payment_id, nullptr);
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
@@ -779,31 +779,31 @@ Java_org_monfluo_wallet_model_Wallet_getIntegratedAddress(JNIEnv *env, jobject i
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_Wallet_getSecretViewKey(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getSecretViewKey(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return env->NewStringUTF(wallet->secretViewKey().c_str());
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_Wallet_getPublicViewKey(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getPublicViewKey(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return env->NewStringUTF(wallet->publicViewKey().c_str());
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_Wallet_getSecretSpendKey(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getSecretSpendKey(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return env->NewStringUTF(wallet->secretSpendKey().c_str());
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_Wallet_getPublicSpendKey(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getPublicSpendKey(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return env->NewStringUTF(wallet->publicSpendKey().c_str());
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_Wallet_store(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_store(JNIEnv *env, jobject instance,
                                           jstring path) {
     const char *_path = env->GetStringUTFChars(path, nullptr);
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
@@ -816,13 +816,13 @@ Java_org_monfluo_wallet_model_Wallet_store(JNIEnv *env, jobject instance,
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_Wallet_getFilename(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getFilename(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return env->NewStringUTF(wallet->filename().c_str());
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_Wallet_initJ(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_initJ(JNIEnv *env, jobject instance,
                                           jstring daemon_address,
                                           jlong upper_transaction_size_limit,
                                           jstring daemon_username, jstring daemon_password,
@@ -844,25 +844,25 @@ Java_org_monfluo_wallet_model_Wallet_initJ(JNIEnv *env, jobject instance,
 }
 
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_Wallet_setRestoreHeight(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_setRestoreHeight(JNIEnv *env, jobject instance,
                                                      jlong height) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     wallet->setRefreshFromBlockHeight((uint64_t) height);
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_getRestoreHeight(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getRestoreHeight(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return static_cast<jlong>(wallet->getRefreshFromBlockHeight());
 }
 
 JNIEXPORT jint JNICALL
-Java_org_monfluo_wallet_model_Wallet_getConnectionStatusJ(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getConnectionStatusJ(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return wallet->connected();
 }
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_Wallet_setTrustedDaemonJ(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_setTrustedDaemonJ(JNIEnv *env, jobject instance,
                                                       jboolean trusted) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     if (trusted) {
@@ -872,14 +872,14 @@ Java_org_monfluo_wallet_model_Wallet_setTrustedDaemonJ(JNIEnv *env, jobject inst
     }
 }
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_Wallet_isTrustedDaemonJ(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_isTrustedDaemonJ(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     bool td = wallet->trustedDaemon();
     return td;
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_Wallet_setProxyJ(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_setProxyJ(JNIEnv *env, jobject instance,
                                               jstring address) {
     const char *_address = env->GetStringUTFChars(address, nullptr);
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
@@ -889,77 +889,77 @@ Java_org_monfluo_wallet_model_Wallet_setProxyJ(JNIEnv *env, jobject instance,
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_getBalance(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_getBalance(JNIEnv *env, jobject instance,
                                                jint accountIndex) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return static_cast<jlong>(wallet->balance((uint32_t) accountIndex));
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_getBalanceAll(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getBalanceAll(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return static_cast<jlong>(wallet->balanceAll());
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_getUnlockedBalance(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_getUnlockedBalance(JNIEnv *env, jobject instance,
                                                        jint accountIndex) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return static_cast<jlong>(wallet->unlockedBalance((uint32_t) accountIndex));
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_getUnlockedBalanceAll(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getUnlockedBalanceAll(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return static_cast<jlong>(wallet->unlockedBalanceAll());
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_Wallet_isWatchOnly(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_isWatchOnly(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return static_cast<jboolean>(wallet->watchOnly());
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_getBlockChainHeightJ(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getBlockChainHeightJ(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return static_cast<jlong>(wallet->blockChainHeight());
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_getApproximateBlockChainHeight(JNIEnv *env,
+Java_org_monfluo_wallet_android_model_Wallet_getApproximateBlockChainHeight(JNIEnv *env,
                                                                    jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return static_cast<jlong>(wallet->approximateBlockChainHeight());
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_getDaemonBlockChainHeightJ(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getDaemonBlockChainHeightJ(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return static_cast<jlong>(wallet->daemonBlockChainHeight());
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_getDaemonBlockChainTargetHeight(JNIEnv *env,
+Java_org_monfluo_wallet_android_model_Wallet_getDaemonBlockChainTargetHeight(JNIEnv *env,
                                                                     jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return static_cast<jlong>(wallet->daemonBlockChainTargetHeight());
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_Wallet_isSynchronizedJ(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_isSynchronizedJ(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return static_cast<jboolean>(wallet->synchronized());
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_Wallet_getDisplayAmount(JNIEnv *env, jclass clazz,
+Java_org_monfluo_wallet_android_model_Wallet_getDisplayAmount(JNIEnv *env, jclass clazz,
                                                      jlong amount) {
     return env->NewStringUTF(Monero::Wallet::displayAmount(amount).c_str());
 }
 
 JNIEXPORT jobject JNICALL
-Java_org_monfluo_wallet_model_Wallet_getAmountFromString(JNIEnv *env, jclass clazz,
+Java_org_monfluo_wallet_android_model_Wallet_getAmountFromString(JNIEnv *env, jclass clazz,
                                                         jstring amount) {
     const char *_amount = env->GetStringUTFChars(amount, nullptr);
     jobject jAmount = nullptr;
@@ -973,12 +973,12 @@ Java_org_monfluo_wallet_model_Wallet_getAmountFromString(JNIEnv *env, jclass cla
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_Wallet_generatePaymentId(JNIEnv *env, jclass clazz) {
+Java_org_monfluo_wallet_android_model_Wallet_generatePaymentId(JNIEnv *env, jclass clazz) {
     return env->NewStringUTF(Monero::Wallet::genPaymentId().c_str());
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_Wallet_isPaymentIdValid(JNIEnv *env, jclass clazz,
+Java_org_monfluo_wallet_android_model_Wallet_isPaymentIdValid(JNIEnv *env, jclass clazz,
                                                      jstring payment_id) {
     const char *_payment_id = env->GetStringUTFChars(payment_id, nullptr);
     bool isValid = Monero::Wallet::paymentIdValid(_payment_id);
@@ -987,7 +987,7 @@ Java_org_monfluo_wallet_model_Wallet_isPaymentIdValid(JNIEnv *env, jclass clazz,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_Wallet_isAddressValid(JNIEnv *env, jclass clazz,
+Java_org_monfluo_wallet_android_model_Wallet_isAddressValid(JNIEnv *env, jclass clazz,
                                                    jstring address, jint networkType) {
     const char *_address = env->GetStringUTFChars(address, nullptr);
     auto _networkType = static_cast<Monero::NetworkType>(networkType);
@@ -997,7 +997,7 @@ Java_org_monfluo_wallet_model_Wallet_isAddressValid(JNIEnv *env, jclass clazz,
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_Wallet_getPaymentIdFromAddress(JNIEnv *env, jclass clazz,
+Java_org_monfluo_wallet_android_model_Wallet_getPaymentIdFromAddress(JNIEnv *env, jclass clazz,
                                                             jstring address,
                                                             jint networkType) {
     auto _networkType = static_cast<Monero::NetworkType>(networkType);
@@ -1008,42 +1008,42 @@ Java_org_monfluo_wallet_model_Wallet_getPaymentIdFromAddress(JNIEnv *env, jclass
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_getMaximumAllowedAmount(JNIEnv *env, jclass clazz) {
+Java_org_monfluo_wallet_android_model_Wallet_getMaximumAllowedAmount(JNIEnv *env, jclass clazz) {
     return static_cast<jlong>(Monero::Wallet::maximumAllowedAmount());
 }
 
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_Wallet_startRefreshJ(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_startRefreshJ(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     wallet->startRefresh();
 }
 
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_Wallet_pauseRefresh(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_pauseRefresh(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     wallet->pauseRefresh();
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_Wallet_refresh(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_refresh(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return static_cast<jboolean>(wallet->refresh());
 }
 
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_Wallet_refreshAsync(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_refreshAsync(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     wallet->refreshAsync();
 }
 
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_Wallet_rescanBlockchainAsyncJ(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_rescanBlockchainAsyncJ(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     wallet->rescanBlockchainAsync();
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_createTransactionMultDestJ(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_createTransactionMultDestJ(JNIEnv *env, jobject instance,
                                                                jobject dst_addrs,
                                                                jstring payment_id,
                                                                jlongArray amounts, jint mixin_count,
@@ -1069,7 +1069,7 @@ Java_org_monfluo_wallet_model_Wallet_createTransactionMultDestJ(JNIEnv *env, job
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_estimateTransactionFee(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_estimateTransactionFee(JNIEnv *env, jobject instance,
                                                            jobject destinations, jint priority) {
     std::vector<std::pair<std::string, uint64_t>> dest_vector = java2cpp_pairvector(env,
                                                                                     destinations);
@@ -1080,7 +1080,7 @@ Java_org_monfluo_wallet_model_Wallet_estimateTransactionFee(JNIEnv *env, jobject
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_createSweepTransaction(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_createSweepTransaction(JNIEnv *env, jobject instance,
                                                            jstring dst_addr, jstring payment_id,
                                                            jint mixin_count,
                                                            jint priority,
@@ -1106,7 +1106,7 @@ Java_org_monfluo_wallet_model_Wallet_createSweepTransaction(JNIEnv *env, jobject
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_createSweepUnmixableTransactionJ(JNIEnv *env,
+Java_org_monfluo_wallet_android_model_Wallet_createSweepUnmixableTransactionJ(JNIEnv *env,
                                                                      jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     Monero::PendingTransaction *tx = wallet->createSweepUnmixableTransaction();
@@ -1115,7 +1115,7 @@ Java_org_monfluo_wallet_model_Wallet_createSweepUnmixableTransactionJ(JNIEnv *en
 
 
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_Wallet_disposeTransaction(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_disposeTransaction(JNIEnv *env, jobject instance,
                                                        jobject pendingTransaction) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     auto *_pendingTransaction =
@@ -1180,38 +1180,38 @@ jobject coins_cpp2java(JNIEnv *env, const std::vector<Monero::Enote>& vector) {
 }
 
 JNIEXPORT jobject JNICALL
-Java_org_monfluo_wallet_model_Wallet_getEnotesJ(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getEnotesJ(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     std::vector<Monero::Enote> enotes = wallet->enotes();
     return coins_cpp2java(env, enotes);
 }
 
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_Wallet_freeze(JNIEnv *env, jobject instance, jlong idx) {
+Java_org_monfluo_wallet_android_model_Wallet_freeze(JNIEnv *env, jobject instance, jlong idx) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     wallet->freeze(static_cast<ssize_t>(idx));
 }
 
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_Wallet_thaw(JNIEnv *env, jobject instance, jlong idx) {
+Java_org_monfluo_wallet_android_model_Wallet_thaw(JNIEnv *env, jobject instance, jlong idx) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     wallet->thaw(static_cast<ssize_t>(idx));
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_getHistoryJ(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getHistoryJ(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return reinterpret_cast<jlong>(wallet->history());
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_getAddressBookJ(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getAddressBookJ(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return reinterpret_cast<jlong>(wallet->addressBook());
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_Wallet_setListenerJ(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_setListenerJ(JNIEnv *env, jobject instance,
                                                  jobject javaListener) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     wallet->setListener(nullptr); // clear old listener
@@ -1232,7 +1232,7 @@ Java_org_monfluo_wallet_model_Wallet_setListenerJ(JNIEnv *env, jobject instance,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_Wallet_setUserNote(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_setUserNote(JNIEnv *env, jobject instance,
                                                 jstring txid, jstring note) {
 
     const char *_txid = env->GetStringUTFChars(txid, nullptr);
@@ -1249,7 +1249,7 @@ Java_org_monfluo_wallet_model_Wallet_setUserNote(JNIEnv *env, jobject instance,
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_Wallet_getUserNote(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_getUserNote(JNIEnv *env, jobject instance,
                                                 jstring txid) {
 
     const char *_txid = env->GetStringUTFChars(txid, nullptr);
@@ -1263,7 +1263,7 @@ Java_org_monfluo_wallet_model_Wallet_getUserNote(JNIEnv *env, jobject instance,
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_Wallet_getTxKey(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_getTxKey(JNIEnv *env, jobject instance,
                                              jstring txid) {
 
     const char *_txid = env->GetStringUTFChars(txid, nullptr);
@@ -1277,7 +1277,7 @@ Java_org_monfluo_wallet_model_Wallet_getTxKey(JNIEnv *env, jobject instance,
 }
 
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_Wallet_addAccount(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_addAccount(JNIEnv *env, jobject instance,
                                                jstring label) {
 
     const char *_label = env->GetStringUTFChars(label, nullptr);
@@ -1289,7 +1289,7 @@ Java_org_monfluo_wallet_model_Wallet_addAccount(JNIEnv *env, jobject instance,
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_Wallet_getAddressLabel(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_getAddressLabel(JNIEnv *env, jobject instance,
                                                        jint accountIndex, jint addressIndex) {
 
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
@@ -1301,7 +1301,7 @@ Java_org_monfluo_wallet_model_Wallet_getAddressLabel(JNIEnv *env, jobject instan
 }
 
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_Wallet_setAddressLabel(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_setAddressLabel(JNIEnv *env, jobject instance,
                                                        jint accountIndex, jint addressIndex,
                                                        jstring label) {
 
@@ -1314,20 +1314,20 @@ Java_org_monfluo_wallet_model_Wallet_setAddressLabel(JNIEnv *env, jobject instan
 }
 
 JNIEXPORT jint JNICALL
-Java_org_monfluo_wallet_model_Wallet_getNumAccounts(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_Wallet_getNumAccounts(JNIEnv *env, jobject instance) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return static_cast<jint>(wallet->numSubaddressAccounts());
 }
 
 JNIEXPORT jint JNICALL
-Java_org_monfluo_wallet_model_Wallet_getNumAddresses(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_getNumAddresses(JNIEnv *env, jobject instance,
                                                        jint accountIndex) {
     auto *wallet = getHandle<Monero::Wallet>(env, instance);
     return static_cast<jint>(wallet->numSubaddresses(accountIndex));
 }
 
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_Wallet_addAddress(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_Wallet_addAddress(JNIEnv *env, jobject instance,
                                                   jint accountIndex,
                                                   jstring label) {
 
@@ -1339,7 +1339,7 @@ Java_org_monfluo_wallet_model_Wallet_addAddress(JNIEnv *env, jobject instance,
 
 
 JNIEXPORT jint JNICALL
-Java_org_monfluo_wallet_model_TransactionHistory_getCount(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_TransactionHistory_getCount(JNIEnv *env, jobject instance) {
     auto *history = getHandle<Monero::TransactionHistory>(env,
                                                                                 instance);
     return history->count();
@@ -1425,20 +1425,20 @@ jobject cpp2java(JNIEnv *env, const std::vector<Monero::TransactionInfo *> &vect
 }
 
 JNIEXPORT jobject JNICALL
-Java_org_monfluo_wallet_model_TransactionHistory_refreshJ(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_TransactionHistory_refreshJ(JNIEnv *env, jobject instance) {
     auto *history = getHandle<Monero::TransactionHistory>(env, instance);
     history->refresh();
     return cpp2java(env, history->getAll());
 }
 
 JNIEXPORT jobject JNICALL
-Java_org_monfluo_wallet_model_TransactionHistory_getAllJ(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_TransactionHistory_getAllJ(JNIEnv *env, jobject instance) {
     auto *history = getHandle<Monero::TransactionHistory>(env, instance);
     return cpp2java(env, history->getAll());
 }
 
 JNIEXPORT jobject JNICALL
-Java_org_monfluo_wallet_model_AddressBook_getContacts(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_AddressBook_getContacts(JNIEnv *env, jobject instance) {
     auto *addressBook = getHandle<Monero::AddressBook>(env, instance);
 
     std::vector<Monero::AddressBookRow*> all = addressBook->getAll();
@@ -1457,7 +1457,7 @@ Java_org_monfluo_wallet_model_AddressBook_getContacts(JNIEnv *env, jobject insta
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_AddressBook_addContact(JNIEnv *env, jobject instance, jobject contact) {
+Java_org_monfluo_wallet_android_model_AddressBook_addContact(JNIEnv *env, jobject instance, jobject contact) {
     auto *addressBook = getHandle<Monero::AddressBook>(env, instance);
 
     jmethodID monfluo_Contact_name = env->GetMethodID(class_Contact, "getName", "()Ljava/lang/String;");
@@ -1477,7 +1477,7 @@ Java_org_monfluo_wallet_model_AddressBook_addContact(JNIEnv *env, jobject instan
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_AddressBook_setName(JNIEnv *env, jobject instance, jint index, jstring name) {
+Java_org_monfluo_wallet_android_model_AddressBook_setName(JNIEnv *env, jobject instance, jint index, jstring name) {
     auto *addressBook = getHandle<Monero::AddressBook>(env, instance);
 
     const char* _name = env->GetStringUTFChars(name, nullptr);
@@ -1490,7 +1490,7 @@ Java_org_monfluo_wallet_model_AddressBook_setName(JNIEnv *env, jobject instance,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_AddressBook_delete(JNIEnv *env, jobject instance, jint index) {
+Java_org_monfluo_wallet_android_model_AddressBook_delete(JNIEnv *env, jobject instance, jint index) {
     auto *addressBook = getHandle<Monero::AddressBook>(env, instance);
 
     bool result = addressBook->deleteRow(static_cast<std::size_t>(index));
@@ -1499,19 +1499,19 @@ Java_org_monfluo_wallet_model_AddressBook_delete(JNIEnv *env, jobject instance, 
 }
 
 JNIEXPORT jint JNICALL
-Java_org_monfluo_wallet_model_PendingTransaction_getStatusJ(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_PendingTransaction_getStatusJ(JNIEnv *env, jobject instance) {
     auto *tx = getHandle<Monero::PendingTransaction>(env, instance);
     return tx->status();
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_PendingTransaction_getErrorString(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_PendingTransaction_getErrorString(JNIEnv *env, jobject instance) {
     auto *tx = getHandle<Monero::PendingTransaction>(env, instance);
     return env->NewStringUTF(tx->errorString().c_str());
 }
 
 JNIEXPORT jobject JNICALL
-Java_org_monfluo_wallet_model_PendingTransaction_txid(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_PendingTransaction_txid(JNIEnv *env, jobject instance) {
     auto *tx = getHandle<Monero::PendingTransaction>(env, instance);
     std::vector<std::string> txids = tx->txid();
     return stringVecToJavaList(env, txids);
@@ -1519,7 +1519,7 @@ Java_org_monfluo_wallet_model_PendingTransaction_txid(JNIEnv *env, jobject insta
 
 // commit transaction or save to file if filename is provided.
 JNIEXPORT jboolean JNICALL
-Java_org_monfluo_wallet_model_PendingTransaction_commit(JNIEnv *env, jobject instance,
+Java_org_monfluo_wallet_android_model_PendingTransaction_commit(JNIEnv *env, jobject instance,
                                                        jstring filename, jboolean overwrite) {
 
     const char *_filename = env->GetStringUTFChars(filename, nullptr);
@@ -1533,26 +1533,26 @@ Java_org_monfluo_wallet_model_PendingTransaction_commit(JNIEnv *env, jobject ins
 
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_PendingTransaction_getAmount(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_PendingTransaction_getAmount(JNIEnv *env, jobject instance) {
     auto *tx = getHandle<Monero::PendingTransaction>(env, instance);
     return static_cast<jlong>(tx->amount());
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_PendingTransaction_getDust(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_PendingTransaction_getDust(JNIEnv *env, jobject instance) {
     auto *tx = getHandle<Monero::PendingTransaction>(env, instance);
     return static_cast<jlong>(tx->dust());
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_monfluo_wallet_model_PendingTransaction_getFee(JNIEnv *env, jobject instance) {
+Java_org_monfluo_wallet_android_model_PendingTransaction_getFee(JNIEnv *env, jobject instance) {
     auto *tx = getHandle<Monero::PendingTransaction>(env, instance);
     return static_cast<jlong>(tx->fee());
 }
 
 
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_WalletManager_initLogger(JNIEnv *env, jclass clazz,
+Java_org_monfluo_wallet_android_model_WalletManager_initLogger(JNIEnv *env, jclass clazz,
                                                       jstring argv0,
                                                       jstring default_log_base_name) {
 
@@ -1566,12 +1566,12 @@ Java_org_monfluo_wallet_model_WalletManager_initLogger(JNIEnv *env, jclass clazz
 }
 
 JNIEXPORT void JNICALL
-Java_org_monfluo_wallet_model_WalletManager_setLogLevel(JNIEnv *env, jclass clazz, jint level) {
+Java_org_monfluo_wallet_android_model_WalletManager_setLogLevel(JNIEnv *env, jclass clazz, jint level) {
     Monero::WalletManagerFactory::setLogLevel(level);
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_monfluo_wallet_model_WalletManager_moneroVersion(JNIEnv *env, jclass clazz) {
+Java_org_monfluo_wallet_android_model_WalletManager_moneroVersion(JNIEnv *env, jclass clazz) {
     return env->NewStringUTF(MONERO_VERSION);
 }
 

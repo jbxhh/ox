@@ -1,6 +1,0 @@
-* Rework send transaction screens
-* Fix scanning of transaction destinations, implement scanning of multiple addresses
-* Fix redirect to password when opening monero uri, now send screen is opened instead
-* Implement copying balance on home screen on long touch
-* Automatically focus password input and automatically show keyboard when entering password
-* Add full balance to wallet setting screen

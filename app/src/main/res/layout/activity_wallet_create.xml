@@ -245,7 +245,9 @@
                     android:layout_marginTop="@dimen/padding_mini"
                     android:background="@drawable/edittext_background"
                     android:hint="@string/recovery_phrase_optional_polyseed"
-                    android:singleLine="true" />
+                    android:inputType="textMultiLine"
+                    android:lines="5"
+                    android:maxLines="5" />
 
                 <TextView
                     android:id="@+id/wallet_height_label_textview"

@@ -1,10 +1,10 @@
-package org.monfluo.wallet.util
+package org.monfluo.wallet.android.util
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import org.monfluo.wallet.model.MoneroUnit
+import org.monfluo.wallet.android.model.MoneroUnit
 
 class TextHelperTest {
     @ParameterizedTest
@@ -15,6 +15,15 @@ class TextHelperTest {
         expected: String,
     ) {
         assertEquals(expected, TextHelper.getDisplayAmount(amount, unit, false))
+    }
+
+    @ParameterizedTest
+    @MethodSource("wordGroups")
+    fun `should correctly group words`(
+        text: String,
+        expected: List<Triple<Boolean, Int, Int>>,
+    ) {
+        assertEquals(expected, TextHelper.groupWordsBy(text) { word -> word == "good" })
     }
 
     companion object {
@@ -65,6 +74,99 @@ class TextHelperTest {
                     1L,
                     MoneroUnit.PICONERO,
                     "1",
+                ),
+            )
+
+        @JvmStatic
+        fun wordGroups(): List<Arguments> =
+            listOf(
+                Arguments.of(
+                    "",
+                    emptyList<Triple<Boolean, Int, Int>>(),
+                ),
+                Arguments.of(
+                    "good",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(true, 0, 4)),
+                ),
+                Arguments.of(
+                    "good ",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(true, 0, 4)),
+                ),
+                Arguments.of(
+                    "good  ",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(true, 0, 4)),
+                ),
+                Arguments.of(
+                    " good",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(true, 1, 5)),
+                ),
+                Arguments.of(
+                    "  good",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(true, 2, 6)),
+                ),
+                Arguments.of(
+                    "bad",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(false, 0, 3)),
+                ),
+                Arguments.of(
+                    "bad ",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(false, 0, 3)),
+                ),
+                Arguments.of(
+                    "bad  ",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(false, 0, 3)),
+                ),
+                Arguments.of(
+                    " bad",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(false, 1, 4)),
+                ),
+                Arguments.of(
+                    "  bad",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(false, 2, 5)),
+                ),
+                Arguments.of(
+                    "good bad",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(true, 0, 4), Triple(false, 5, 8)),
+                ),
+                Arguments.of(
+                    "good bad ",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(true, 0, 4), Triple(false, 5, 8)),
+                ),
+                Arguments.of(
+                    "good bad  ",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(true, 0, 4), Triple(false, 5, 8)),
+                ),
+                Arguments.of(
+                    " good bad",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(true, 1, 5), Triple(false, 6, 9)),
+                ),
+                Arguments.of(
+                    "  good bad",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(true, 2, 6), Triple(false, 7, 10)),
+                ),
+                Arguments.of(
+                    "good  bad",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(true, 0, 4), Triple(false, 6, 9)),
+                ),
+                Arguments.of(
+                    "bad good",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(false, 0, 3), Triple(true, 4, 8)),
+                ),
+                Arguments.of(
+                    "bad good good",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(false, 0, 3), Triple(true, 4, 13)),
+                ),
+                Arguments.of(
+                    "bad bad good",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(false, 0, 7), Triple(true, 8, 12)),
+                ),
+                Arguments.of(
+                    "good bad bad good",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(true, 0, 4), Triple(false, 5, 12), Triple(true, 13, 17)),
+                ),
+                Arguments.of(
+                    "bad good good bad",
+                    listOf<Triple<Boolean, Int, Int>>(Triple(false, 0, 3), Triple(true, 4, 13), Triple(false, 14, 17)),
                 ),
             )
     }
