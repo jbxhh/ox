@@ -103,6 +103,7 @@ jobs:
             # Does not work because Ubuntu 24 has old `just` package :/
             # just app-copy-native-libs-all
             export ANDROID_NDK_HOST=linux-x86_64
+            ./bin/build-oxide-native-lib.nu native
             ./bin/build-oxide-native-lib.nu arm32
             ./bin/build-oxide-native-lib.nu arm64
             ./bin/build-oxide-native-lib.nu x86_64
@@ -139,7 +140,8 @@ jobs:
 # </X86_64>
       - name: Run tests, lints and make sure release build succeeds
         run: |
-          ./gradlew test
+          export LD_LIBRARY_PATH=$(realpath monfluo-oxide-jni/target/debug) && ./gradlew :monfluo-oxide-kotlin:test
+          ./gradlew :app:test
           ./gradlew ktlintCheck
           ./gradlew -P monfluo-all -P monfluo-universal assembleRelease
       - name: Build debug APKs
