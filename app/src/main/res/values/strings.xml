@@ -234,8 +234,8 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="transaction_unconfirmed">unconfirmed</string>
     <string name="transaction_confirming"><xliff:g>%1$s</xliff:g> confirmations</string>
     <string name="transaction_confirmed">confirmed</string>
-    <string name="loading_wallet_header">Loading Wallet…</string>
-    <string name="no_transactions_header">Looks Empty</string>
+    <string name="loading_wallet_header">Loading wallet…</string>
+    <string name="no_transactions_header">Looks empty</string>
     <string name="no_transactions_description">Your wallet transactions will show up here</string>
     <string name="wallet_name_label">Wallet name</string>
     <string name="account_name_label">Account name</string>
@@ -265,11 +265,11 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <!-- Unit pico XMR -->
     <string name="unit_pico_xmr" translatable="false">pXMR</string>
     <!-- Monero network MAINNET -->
-    <string name="monero_network_mainnet" translatable="false">MAINNET</string>
+    <string name="monero_network_mainnet" translatable="false">Mainnet</string>
     <!-- Monero network STAGENET -->
-    <string name="monero_network_stagenet" translatable="false">STAGENET</string>
+    <string name="monero_network_stagenet" translatable="false">Stagenet</string>
     <!-- Monero network TESTNET -->
-    <string name="monero_network_testnet" translatable="false">TESTNET</string>
+    <string name="monero_network_testnet" translatable="false">Testnet</string>
     <string name="network_header">Network</string>
     <string name="accounts_header">Accounts</string>
     <string name="add_account_header">Add account</string>
