@@ -155,7 +155,7 @@ jobs:
           ./gradlew -P monfluo-all -P monfluo-universal assembleRelease
       - name: Save debug keystore
         run: |
-            if -n [ "${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}" ]; then
+            if [ -n "${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}" ]; then
               mkdir -p "$HOME/.android"
               echo "${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}" | base64 -d > "$HOME/.android/debug.keystore"
             else
