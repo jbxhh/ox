@@ -37,7 +37,7 @@ jobs:
           export NPROC=$(nproc)
           . ./external-libs/bin/envs.sh
           ./external-libs/bin/build-native-libs-arm32.sh
-      - name: Upload built native libraries (ARM32)
+      - name: Upload built legacy native libraries (ARM32)
         uses: actions/upload-artifact@v3
         with:
           name: legacy-native-libs-armeabi-v7a
@@ -52,7 +52,7 @@ jobs:
           export NPROC=$(nproc)
           . ./external-libs/bin/envs.sh
           ./external-libs/bin/build-native-libs-arm64.sh
-      - name: Upload built native libraries (ARM64)
+      - name: Upload built legacy native libraries (ARM64)
         uses: actions/upload-artifact@v3
         with:
           name: legacy-native-libs-arm64-v8a
@@ -67,7 +67,7 @@ jobs:
           export NPROC=$(nproc)
           . ./external-libs/bin/envs.sh
           ./external-libs/bin/build-native-libs-x86_64.sh
-      - name: Upload built native libraries (X86_64)
+      - name: Upload built legacy native libraries (X86_64)
         uses: actions/upload-artifact@v3
         with:
           name: legacy-native-libs-x86_64
@@ -130,21 +130,21 @@ jobs:
           mkdir -p external-libs/build/include
           cp external-libs/monero/src/wallet/api/wallet2_api.h external-libs/build/include/wallet2_api.h
 # <ARM32>
-      - name: Download built native libs (ARM32)
+      - name: Download built legacy native libs (ARM32)
         uses: actions/download-artifact@v3
         with:
           name: legacy-native-libs-armeabi-v7a
           path: external-libs/build/armeabi-v7a
 # </ARM32>
 # <ARM64>
-      - name: Download built native libs (ARM64)
+      - name: Download built legacy native libs (ARM64)
         uses: actions/download-artifact@v3
         with:
           name: legacy-native-libs-arm64-v8a
           path: external-libs/build/arm64-v8a
 # </ARM64>
 # <X86_64>
-      - name: Download built native libs (X86_64)
+      - name: Download built legacy native libs (X86_64)
         uses: actions/download-artifact@v3
         with:
           name: legacy-native-libs-x86_64
@@ -155,7 +155,7 @@ jobs:
           ./gradlew -P monfluo-all -P monfluo-universal assembleRelease
       - name: Save debug keystore
         run: |
-            if -n [ ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}" ]; then
+            if -n [ "${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}" ]; then
               mkdir -p "$HOME/.android"
               echo "${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}" | base64 -d > "$HOME/.android/debug.keystore"
             else
