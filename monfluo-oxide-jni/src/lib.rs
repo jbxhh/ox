@@ -16,9 +16,7 @@ pub extern "system" fn JNI_OnLoad(jvm: JavaVM, _reserved: *mut std::ffi::c_void)
 }
 
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_org_monfluo_wallet_lib_seed_MoneroSeedLanguage_getWords<
-    'local,
->(
+pub extern "system" fn Java_org_monfluo_wallet_lib_seed_MoneroSeedLanguage_getWords<'local>(
     mut env: JNIEnv<'local>,
     object: JObject<'local>,
 ) -> jobject {
@@ -32,7 +30,9 @@ pub extern "system" fn Java_org_monfluo_wallet_lib_seed_MoneroSeedLanguage_getWo
     let enum_name = enum_name
         .to_str()
         .expect("MoneroSeedLanguage enum name was not a UTF-8 string");
-    let words = monfluo_oxide::monero_wallet_util::seed::original::Language::from_str(enum_name).unwrap().get_words();
+    let words = monfluo_oxide::monero_wallet_util::seed::original::Language::from_str(enum_name)
+        .unwrap()
+        .get_words();
 
     for word in words {
         let word = env
@@ -45,9 +45,7 @@ pub extern "system" fn Java_org_monfluo_wallet_lib_seed_MoneroSeedLanguage_getWo
 }
 
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_org_monfluo_wallet_lib_seed_PolyseedLanguage_getWords<
-    'local,
->(
+pub extern "system" fn Java_org_monfluo_wallet_lib_seed_PolyseedLanguage_getWords<'local>(
     mut env: JNIEnv<'local>,
     object: JObject<'local>,
 ) -> jobject {
@@ -61,7 +59,9 @@ pub extern "system" fn Java_org_monfluo_wallet_lib_seed_PolyseedLanguage_getWord
     let enum_name = enum_name
         .to_str()
         .expect("PolyseedLanguage enum name was not a UTF-8 string");
-    let words = monfluo_oxide::monero_wallet_util::seed::polyseed::Language::from_str(enum_name).unwrap().get_words();
+    let words = monfluo_oxide::monero_wallet_util::seed::polyseed::Language::from_str(enum_name)
+        .unwrap()
+        .get_words();
 
     for word in words {
         let word = env
