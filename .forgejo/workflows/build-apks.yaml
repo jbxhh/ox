@@ -1,4 +1,10 @@
-on: [push]
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    types: [opened, synchronize, reopened]
+
 jobs:
   build-legacy-native-libraries:
     runs-on: docker
@@ -88,17 +94,18 @@ jobs:
             curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh
             sudo bash nodesource_setup.sh
             sudo apt install -y nodejs
-      - name: Save debug keystore
-        run: |
-            mkdir -p "$HOME/.android"
-            echo "${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}" | base64 -d > "$HOME/.android/debug.keystore"
       - name: Checkout Monfluo
         uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Build native libraries
+      - name: Build, test and lint native libraries
         run: |
             rustup default stable
+            (
+              cd monfluo-oxide-jni
+              cargo test
+              cargo fmt --check
+            ) || exit $?
             rustup target add armv7-linux-androideabi aarch64-linux-android x86_64-linux-android
             # Does not work because Ubuntu 24 has old `just` package :/
             # just app-copy-native-libs-all
@@ -113,6 +120,11 @@ jobs:
             cp monfluo-oxide-jni/target/armv7-linux-androideabi/debug/libmonfluo_oxide.so app/src/main/jniLibs/armeabi-v7a
             cp monfluo-oxide-jni/target/aarch64-linux-android/debug/libmonfluo_oxide.so app/src/main/jniLibs/arm64-v8a
             cp monfluo-oxide-jni/target/x86_64-linux-android/debug/libmonfluo_oxide.so app/src/main/jniLibs/x86_64
+      - name: Run tests and lints
+        run: |
+          export LD_LIBRARY_PATH=$(realpath monfluo-oxide-jni/target/debug) && ./gradlew :monfluo-oxide-kotlin:test
+          ./gradlew :app:test
+          ./gradlew ktlintCheck
       - name: Copy legacy native headers
         run: |
           mkdir -p external-libs/build/include
@@ -138,15 +150,19 @@ jobs:
           name: legacy-native-libs-x86_64
           path: external-libs/build/x86_64
 # </X86_64>
-      - name: Run tests, lints and make sure release build succeeds
+      - name: Make sure release build succeeds
         run: |
-          export LD_LIBRARY_PATH=$(realpath monfluo-oxide-jni/target/debug) && ./gradlew :monfluo-oxide-kotlin:test
-          ./gradlew :app:test
-          ./gradlew ktlintCheck
           ./gradlew -P monfluo-all -P monfluo-universal assembleRelease
+      - name: Save debug keystore
+        if: test -n ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}
+        run: |
+            mkdir -p "$HOME/.android"
+            echo "${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}" | base64 -d > "$HOME/.android/debug.keystore"
       - name: Build debug APKs
+        if: test -n ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}
         run: ./gradlew -P monfluo-all -P monfluo-universal assembleDebug
-      - name: Upload built APKs
+      - name: Upload built debug APKs
+        if: test -n ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}
         uses: actions/upload-artifact@v3
         with:
           name: apks
