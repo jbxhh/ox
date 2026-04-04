@@ -7,6 +7,7 @@ edition = "2024"
 monfluo-oxide = { path = "../external-libs/monfluo-oxide" }
 jni = "0.21.1"
 const_format = "0.2.35"
+jni-macros = "0.22.4"
 
 [lib]
 name = "monfluo_oxide"
