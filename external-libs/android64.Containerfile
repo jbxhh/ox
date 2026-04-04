@@ -1,6 +1,9 @@
-FROM debian:bookworm AS build
+FROM debian:trixie AS build
 
-RUN set -x && apt-get update && apt-get install -y unzip automake build-essential curl file pkg-config git python3 python-is-python3 libtool libtinfo5 yacc wget
+RUN set -x && apt-get update && apt-get install -y unzip automake build-essential curl file pkg-config git python3 python-is-python3 yacc wget
+
+# libtinfo5 is not available in Debian 13 but it is needed for Android's standalone toolchain
+RUN wget http://ftp.us.debian.org/debian/pool/main/n/ncurses/libtinfo5_6.4-4_amd64.deb && apt install ./libtinfo5_6.4-4_amd64.deb
 
 COPY bin/download-native-libs-dependencies.sh /src/external-libs/bin/
 COPY bin/envs.sh /src/external-libs/bin/
