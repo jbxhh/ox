@@ -3,8 +3,10 @@
 use std::{fmt::Debug, sync::OnceLock};
 
 use jni::{
-    JNIEnv,
+    Env,
     objects::{JMethodID, JObject, JString, JValue},
+    signature::RuntimeMethodSignature,
+    strings::JNIString,
 };
 
 #[rustfmt::skip]
@@ -40,31 +42,58 @@ impl Debug for JniCache {
 static JNI_CACHE: OnceLock<JniCache> = OnceLock::new();
 
 #[rustfmt::skip]
+macro_rules! find_class {
+    ($env:expr, $name:ident) => {
+        $env.find_class(JNIString::from($name))
+            .expect(const_format::concatcp!(
+                "Could not find class with name ",
+                $name
+            ))
+    };
+}
+
+#[rustfmt::skip]
+macro_rules! create_runtime_method_signature {
+    ($env:expr, $name:ident) => {
+        RuntimeMethodSignature::from_str($name)
+            .expect(const_format::concatcp!(
+                "Could not create runtime method signature ",
+                $name,
+            ))
+    };
+}
+
+#[rustfmt::skip]
 macro_rules! find_method {
-    ($env:expr, $class:expr, $name:expr, $signature:expr) => {
-        $env.get_method_id($class, $name, $signature)
+    ($env:expr, $class:ident, $name:ident, $signature:ident) => {{
+        let class = find_class!($env, $class);
+        let name = JNIString::from($name);
+        let runtime_method_signature = create_runtime_method_signature!($env, $signature);
+        $env.get_method_id(class, name, runtime_method_signature.method_signature())
             .expect(const_format::concatcp!(
                 "Could not find method with name ",
                 $name,
                 " and signature ",
                 $signature,
                 " in class ",
-                $class
+                $class,
             ))
-    };
+    }};
 }
 
 #[rustfmt::skip]
 macro_rules! create_new_object {
-    ($env:expr, $class:expr, $signature:expr, $arguments:expr) => {
-        $env.new_object($class, $signature, $arguments)
+    ($env:expr, $class:ident, $signature:ident, $arguments:expr) => {{
+        let class = find_class!($env, $class);
+        let runtime_method_signature = create_runtime_method_signature!($env, $signature);
+        $env.new_object(class, runtime_method_signature.method_signature(), $arguments)
             .expect(const_format::concatcp!(
                 "Could not create new object for class ",
                 $class,
                 " and signature ",
                 $signature
             ))
-    };
+    }};
 }
 
 #[rustfmt::skip]
@@ -192,7 +221,7 @@ macro_rules! call_cached_method {
 }
 
 #[rustfmt::skip]
-pub fn init_cache<'local>(env: &mut JNIEnv<'local>) {
+pub fn init_cache<'local>(env: &mut Env<'local>) {
     let class__java_lang_Enum__method__name0 = find_method!(env, CLASS__java_lang_Enum, CLASS__java_lang_Enum__METHOD__name0, CLASS__java_lang_Enum__METHOD__name0__SIGNATURE);
     let class__java_util_List__method__add1 = find_method!(env, CLASS__java_util_List, CLASS__java_util_List__METHOD__add1, CLASS__java_util_List__METHOD__add1__SIGNATURE);
 
@@ -212,19 +241,19 @@ pub fn get_cache() -> &'static JniCache {
 pub struct ArrayList<'local>(pub JObject<'local>);
 
 impl<'local> ArrayList<'local> {
-    pub fn new(env: &mut JNIEnv<'local>) -> Self {
+    pub fn new(env: &mut Env<'local>) -> Self {
         let object = create_new_object!(
             env,
             CLASS__java_util_ArrayList,
             CLASS__java_util_ArrayList__METHOD__init0__SIGNATURE,
             &[]
         );
-        ArrayList(object)
+        Self(object)
     }
 
     pub fn add(
         &self,
-        env: &mut JNIEnv<'local>,
+        env: &mut Env<'local>,
         cache: &'static JniCache,
         object: JObject<'local>,
     ) -> bool {
@@ -243,7 +272,7 @@ impl<'local> ArrayList<'local> {
 pub struct Enum<'local>(pub JObject<'local>);
 
 impl<'local> Enum<'local> {
-    pub fn name(&self, env: &mut JNIEnv<'local>, cache: &'static JniCache) -> JString<'local> {
+    pub fn name(&self, env: &mut Env<'local>, cache: &'static JniCache) -> JString<'local> {
         let name = call_cached_method!(
             env,
             cache,
@@ -252,6 +281,6 @@ impl<'local> Enum<'local> {
             jobject,
             &[]
         );
-        JString::from(name)
+        JString::cast_local(env, name).expect("Enum name returned Object that is not a String")
     }
 }
