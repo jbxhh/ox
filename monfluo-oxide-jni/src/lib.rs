@@ -8,6 +8,8 @@ use jni::objects::JObject;
 use jni::sys::{JNI_VERSION_1_6, jint, jobject};
 use jni::{JNIEnv, JavaVM};
 
+use jni_macros::jni_mangle;
+
 #[unsafe(no_mangle)]
 pub extern "system" fn JNI_OnLoad(jvm: JavaVM, _reserved: *mut std::ffi::c_void) -> jint {
     let mut env = jvm.get_env().expect("Failed to get env during JNI load");
@@ -15,11 +17,8 @@ pub extern "system" fn JNI_OnLoad(jvm: JavaVM, _reserved: *mut std::ffi::c_void)
     JNI_VERSION_1_6
 }
 
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_org_monfluo_wallet_lib_seed_MoneroSeedLanguage_getWords<'local>(
-    mut env: JNIEnv<'local>,
-    object: JObject<'local>,
-) -> jobject {
+#[jni_mangle("org.monfluo.wallet.lib.seed.MoneroSeedLanguage", "getWords")]
+pub fn get_words_monero<'local>(mut env: JNIEnv<'local>, object: JObject<'local>) -> jobject {
     let cache = java::get_cache();
 
     let list = java::ArrayList::new(&mut env);
@@ -44,11 +43,8 @@ pub extern "system" fn Java_org_monfluo_wallet_lib_seed_MoneroSeedLanguage_getWo
     list.0.into_raw()
 }
 
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_org_monfluo_wallet_lib_seed_PolyseedLanguage_getWords<'local>(
-    mut env: JNIEnv<'local>,
-    object: JObject<'local>,
-) -> jobject {
+#[jni_mangle("org.monfluo.wallet.lib.seed.PolyseedLanguage", "getWords")]
+pub fn get_words_polyseed<'local>(mut env: JNIEnv<'local>, object: JObject<'local>) -> jobject {
     let cache = java::get_cache();
 
     let list = java::ArrayList::new(&mut env);
