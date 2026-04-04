@@ -3,12 +3,14 @@ jobs:
   build-native-libraries:
     runs-on: docker
     container:
-      image: debian:bookworm
+      image: debian:trixie
     steps:
       - name: Update Debian repository, upgrade existing packages and install new required packages
         run: |
             apt update && apt upgrade -y
-            apt install -y unzip automake build-essential curl file pkg-config git python3 python-is-python3 libtool libtinfo5 yacc nodejs wget
+            apt install -y unzip automake build-essential curl file pkg-config git python3 python-is-python3 libtool yacc nodejs wget
+            # libtinfo5 is not available in Debian 13 but it is needed for Android's standalone toolchain
+            wget http://ftp.us.debian.org/debian/pool/main/n/ncurses/libtinfo5_6.4-4_amd64.deb && apt install ./libtinfo5_6.4-4_amd64.deb
       - name: Checkout Monfluo
         uses: actions/checkout@v4
         with:
