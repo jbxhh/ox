@@ -1076,6 +1076,7 @@ dependencies = [
 [[package]]
 name = "monfluo-oxide"
 version = "0.1.0"
+source = "git+https://codeberg.org/Monfluo/monfluo-oxide#d7c54a5e19d0e302de84868588c909073ee73946"
 dependencies = [
  "curve25519-dalek",
  "monero-simple-request-rpc",

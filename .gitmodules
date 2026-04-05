@@ -2,6 +2,3 @@
 	path = external-libs/monero
 	url = https://codeberg.org/Monfluo/monero.git
 	branch = v0.18.4.6-monfluo-2
-[submodule "external-libs/monfluo-oxide"]
-	path = external-libs/monfluo-oxide
-	url = https://codeberg.org/Monfluo/monfluo-oxide.git
