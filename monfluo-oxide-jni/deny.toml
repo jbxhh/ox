@@ -1,0 +1,25 @@
+[advisories]
+version = 2
+ignore = []
+
+[licenses]
+allow = [
+  "MIT",
+  "BSD-3-Clause",
+  "GPL-3.0-only",
+  "Zlib",
+  "ISC",
+  "Unicode-3.0",
+  "Apache-2.0"
+]
+
+[bans]
+multiple-versions = "allow"
+
+[sources]
+allow-git = [
+  "git+https://github.com/monero-oxide/monero-oxide",
+  "git+https://codeberg.org/Monfluo/monfluo-oxide",
+  "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo",
+  "git+https://codeberg.org/Monfluo/monero-wallet-util.git?branch=monfluo",
+]
