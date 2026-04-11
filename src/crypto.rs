@@ -2,10 +2,13 @@
 
 use std::ops::Deref;
 
-use monero_wallet::{WalletOutput, ed25519::{CompressedPoint, Point, Scalar}};
-use zeroize::Zeroizing;
 use curve25519_dalek::constants::ED25519_BASEPOINT_TABLE;
+use monero_wallet::{
+    WalletOutput,
+    ed25519::{CompressedPoint, Point, Scalar},
+};
 use subtle::ConstantTimeEq;
+use zeroize::Zeroizing;
 
 fn sc_reduce32(s: &mut [u8; 32]) {
     let mut s0: i64 = 2097151 & load_3(&s[0..]) as i64;
@@ -213,7 +216,10 @@ pub fn spend_key_to_view_key(spend: &[u8; 32]) -> [u8; 32] {
     return key2keccaked;
 }
 
-pub fn spend_key_of_output(output: &WalletOutput, sender_spend_key: &Scalar) -> Option<Zeroizing<CompressedPoint>> {
+pub fn spend_key_of_output(
+    output: &WalletOutput,
+    sender_spend_key: &Scalar,
+) -> Option<Zeroizing<CompressedPoint>> {
     let input_key = Zeroizing::new((*sender_spend_key).into() + output.key_offset().into());
     if bool::from(!(input_key.deref() * ED25519_BASEPOINT_TABLE).ct_eq(&output.key().into())) {
         return None;

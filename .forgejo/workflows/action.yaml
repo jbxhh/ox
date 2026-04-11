@@ -1,0 +1,25 @@
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build-apks:
+    runs-on: codeberg-small-lazy
+    container:
+      image: ubuntu:26.04
+    steps:
+      - name: Update, upgrade and install packages
+        run: |
+            apt update
+            apt upgrade -y
+            apt install -y build-essential nodejs rustup
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build, test and lint
+        run: |
+            rustup default stable
+            cargo test
+            cargo fmt --check
