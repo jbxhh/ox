@@ -660,7 +660,7 @@ dependencies = [
 [[package]]
 name = "monero-address"
 version = "0.1.0"
-source = "git+https://github.com/monero-oxide/monero-oxide#a941dfff1a5333b6349d9a1ee5de49c158b0e3d2"
+source = "git+https://github.com/monero-oxide/monero-oxide#055accb2d87dcfc5f1b09bbc089574fdd680fb74"
 dependencies = [
  "monero-base58 0.1.0 (git+https://github.com/monero-oxide/monero-oxide)",
  "monero-ed25519 0.1.0 (git+https://github.com/monero-oxide/monero-oxide)",
@@ -682,7 +682,7 @@ dependencies = [
 [[package]]
 name = "monero-base58"
 version = "0.1.0"
-source = "git+https://github.com/monero-oxide/monero-oxide#a941dfff1a5333b6349d9a1ee5de49c158b0e3d2"
+source = "git+https://github.com/monero-oxide/monero-oxide#055accb2d87dcfc5f1b09bbc089574fdd680fb74"
 dependencies = [
  "monero-primitives 0.1.0 (git+https://github.com/monero-oxide/monero-oxide)",
  "std-shims",
@@ -703,7 +703,7 @@ dependencies = [
 [[package]]
 name = "monero-borromean"
 version = "0.1.0"
-source = "git+https://github.com/monero-oxide/monero-oxide#a941dfff1a5333b6349d9a1ee5de49c158b0e3d2"
+source = "git+https://github.com/monero-oxide/monero-oxide#055accb2d87dcfc5f1b09bbc089574fdd680fb74"
 dependencies = [
  "curve25519-dalek",
  "monero-ed25519 0.1.0 (git+https://github.com/monero-oxide/monero-oxide)",
@@ -731,7 +731,7 @@ dependencies = [
 [[package]]
 name = "monero-bulletproofs"
 version = "0.1.0"
-source = "git+https://github.com/monero-oxide/monero-oxide#a941dfff1a5333b6349d9a1ee5de49c158b0e3d2"
+source = "git+https://github.com/monero-oxide/monero-oxide#055accb2d87dcfc5f1b09bbc089574fdd680fb74"
 dependencies = [
  "curve25519-dalek",
  "monero-bulletproofs-generators 0.1.0 (git+https://github.com/monero-oxide/monero-oxide)",
@@ -759,7 +759,7 @@ dependencies = [
 [[package]]
 name = "monero-bulletproofs-generators"
 version = "0.1.0"
-source = "git+https://github.com/monero-oxide/monero-oxide#a941dfff1a5333b6349d9a1ee5de49c158b0e3d2"
+source = "git+https://github.com/monero-oxide/monero-oxide#055accb2d87dcfc5f1b09bbc089574fdd680fb74"
 dependencies = [
  "curve25519-dalek",
  "monero-ed25519 0.1.0 (git+https://github.com/monero-oxide/monero-oxide)",
@@ -788,7 +788,7 @@ dependencies = [
 [[package]]
 name = "monero-clsag"
 version = "0.1.0"
-source = "git+https://github.com/monero-oxide/monero-oxide#a941dfff1a5333b6349d9a1ee5de49c158b0e3d2"
+source = "git+https://github.com/monero-oxide/monero-oxide#055accb2d87dcfc5f1b09bbc089574fdd680fb74"
 dependencies = [
  "curve25519-dalek",
  "group",
@@ -835,7 +835,7 @@ dependencies = [
 [[package]]
 name = "monero-ed25519"
 version = "0.1.0"
-source = "git+https://github.com/monero-oxide/monero-oxide#a941dfff1a5333b6349d9a1ee5de49c158b0e3d2"
+source = "git+https://github.com/monero-oxide/monero-oxide#055accb2d87dcfc5f1b09bbc089574fdd680fb74"
 dependencies = [
  "crypto-bigint",
  "curve25519-dalek",
@@ -855,7 +855,7 @@ source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#a941d
 [[package]]
 name = "monero-epee"
 version = "0.2.0"
-source = "git+https://github.com/monero-oxide/monero-oxide#a941dfff1a5333b6349d9a1ee5de49c158b0e3d2"
+source = "git+https://github.com/monero-oxide/monero-oxide#055accb2d87dcfc5f1b09bbc089574fdd680fb74"
 
 [[package]]
 name = "monero-epee-derive"
@@ -885,7 +885,7 @@ dependencies = [
 [[package]]
 name = "monero-interface"
 version = "0.1.0"
-source = "git+https://github.com/monero-oxide/monero-oxide#a941dfff1a5333b6349d9a1ee5de49c158b0e3d2"
+source = "git+https://github.com/monero-oxide/monero-oxide#055accb2d87dcfc5f1b09bbc089574fdd680fb74"
 dependencies = [
  "hex",
  "monero-oxide 0.1.4-alpha (git+https://github.com/monero-oxide/monero-oxide)",
@@ -905,7 +905,7 @@ dependencies = [
 [[package]]
 name = "monero-io"
 version = "0.1.0"
-source = "git+https://github.com/monero-oxide/monero-oxide#a941dfff1a5333b6349d9a1ee5de49c158b0e3d2"
+source = "git+https://github.com/monero-oxide/monero-oxide#055accb2d87dcfc5f1b09bbc089574fdd680fb74"
 dependencies = [
  "std-shims",
 ]
@@ -926,7 +926,7 @@ dependencies = [
 [[package]]
 name = "monero-mlsag"
 version = "0.1.0"
-source = "git+https://github.com/monero-oxide/monero-oxide#a941dfff1a5333b6349d9a1ee5de49c158b0e3d2"
+source = "git+https://github.com/monero-oxide/monero-oxide#055accb2d87dcfc5f1b09bbc089574fdd680fb74"
 dependencies = [
  "curve25519-dalek",
  "monero-ed25519 0.1.0 (git+https://github.com/monero-oxide/monero-oxide)",
@@ -957,7 +957,7 @@ dependencies = [
 [[package]]
 name = "monero-oxide"
 version = "0.1.4-alpha"
-source = "git+https://github.com/monero-oxide/monero-oxide#a941dfff1a5333b6349d9a1ee5de49c158b0e3d2"
+source = "git+https://github.com/monero-oxide/monero-oxide#055accb2d87dcfc5f1b09bbc089574fdd680fb74"
 dependencies = [
  "curve25519-dalek",
  "hex-literal",
@@ -983,7 +983,7 @@ dependencies = [
 [[package]]
 name = "monero-primitives"
 version = "0.1.0"
-source = "git+https://github.com/monero-oxide/monero-oxide#a941dfff1a5333b6349d9a1ee5de49c158b0e3d2"
+source = "git+https://github.com/monero-oxide/monero-oxide#055accb2d87dcfc5f1b09bbc089574fdd680fb74"
 dependencies = [
  "sha3",
 ]
@@ -1039,7 +1039,7 @@ dependencies = [
 [[package]]
 name = "monero-wallet"
 version = "0.1.0"
-source = "git+https://github.com/monero-oxide/monero-oxide#a941dfff1a5333b6349d9a1ee5de49c158b0e3d2"
+source = "git+https://github.com/monero-oxide/monero-oxide#055accb2d87dcfc5f1b09bbc089574fdd680fb74"
 dependencies = [
  "curve25519-dalek",
  "hex",
@@ -1076,7 +1076,7 @@ dependencies = [
 [[package]]
 name = "monfluo-oxide"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monfluo-oxide#d7c54a5e19d0e302de84868588c909073ee73946"
+source = "git+https://codeberg.org/Monfluo/monfluo-oxide#264c955194d6cdb26ed7973b222acd2ff86cfba9"
 dependencies = [
  "curve25519-dalek",
  "monero-simple-request-rpc",
@@ -1319,9 +1319,9 @@ dependencies = [
 
 [[package]]
 name = "rustls-webpki"
-version = "0.103.9"
+version = "0.103.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d7df23109aa6c1567d1c575b9952556388da57401e4ace1d15f79eedad0d8f53"
+checksum = "20a6af516fea4b20eccceaf166e8aa666ac996208e8a644ce3ef5aa783bc7cd4"
 dependencies = [
  "ring",
  "rustls-pki-types",
