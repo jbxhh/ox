@@ -210,22 +210,17 @@ fn load_4(in_bytes: &[u8]) -> u64 {
     result
 }
 
-pub fn spend_key_to_view_key(spend: &[u8; 32]) -> [u8; 32] {
+pub fn spend_key_to_view_key(spend: &[u8; 32]) -> Zeroizing<[u8; 32]> {
     let mut key2keccaked = monero_wallet::primitives::keccak256(spend);
     sc_reduce32(&mut key2keccaked);
-    return key2keccaked;
+    Zeroizing::new(key2keccaked)
 }
 
-pub fn spend_key_of_output(
-    output: &WalletOutput,
-    sender_spend_key: &Scalar,
-) -> Option<Zeroizing<CompressedPoint>> {
+pub fn spend_key_of_output(output: &WalletOutput, sender_spend_key: &Scalar) -> Option<Zeroizing<CompressedPoint>> {
     let input_key = Zeroizing::new((*sender_spend_key).into() + output.key_offset().into());
     if bool::from(!(input_key.deref() * ED25519_BASEPOINT_TABLE).ct_eq(&output.key().into())) {
         return None;
     }
-    let key_image = Point::from(
-        input_key.deref() * Point::biased_hash(output.key().compress().to_bytes()).into(),
-    );
-    return Some(Zeroizing::new(key_image.compress()));
+    let key_image = Point::from(input_key.deref() * Point::biased_hash(output.key().compress().to_bytes()).into());
+    Some(Zeroizing::new(key_image.compress()))
 }
