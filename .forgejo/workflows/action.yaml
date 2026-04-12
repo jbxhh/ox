@@ -15,7 +15,7 @@ jobs:
         run: |
             apt update
             apt upgrade -y
-            apt install -y build-essential nodejs rustup
+            apt install -y build-essential musl-tools nodejs rustup
       - name: Checkout
         uses: actions/checkout@v4
       - name: Build, test and lint
@@ -23,9 +23,16 @@ jobs:
             rustup default stable
             cargo test
             cargo fmt --check
-            cargo build
-      - name: Upload built binary
+            rustup target add x86_64-unknown-linux-musl
+            cargo build --target=x86_64-unknown-linux-musl
+            cargo build --target=x86_64-unknown-linux-musl --release
+      - name: Upload built debug binary
         uses: actions/upload-artifact@v3
         with:
-          name: monfluo
-          path: target/debug/monfluo
+          name: monfluo-debug
+          path: target/x86_64-unknown-linux-musl/debug/monfluo
+      - name: Upload built release binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: monfluo-release
+          path: target/x86_64-unknown-linux-musl/release/monfluo

@@ -43,7 +43,7 @@ enum Commands {
         langugage: Option<String>,
         seed: String,
     },
-    // List wallets
+    /// List wallets
     ListWallets {
         #[arg(long)]
         root_dir: Option<PathBuf>,
