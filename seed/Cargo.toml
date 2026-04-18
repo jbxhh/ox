@@ -29,7 +29,7 @@ strum_macros = { version = "0.27.2", optional = true }
 
 [dev-dependencies]
 hex = { version = "0.4", default-features = false, features = ["std"] }
-monero-primitives = { git = "https://github.com/monero-oxide/monero-oxide", default-features = false, features = ["std"] }
+monero-primitives = { git = "https://codeberg.org/Monfluo/monero-oxide", default-features = false, features = ["std"] }
 
 [features]
 std = [

@@ -15,4 +15,4 @@ rustdoc-args = ["--cfg", "docsrs"]
 workspace = true
 
 [dependencies]
-monero-epee = { git = "https://github.com/monero-oxide/monero-oxide", default-features = false }
+monero-epee = { git = "https://codeberg.org/Monfluo/monero-oxide", default-features = false }

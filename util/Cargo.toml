@@ -23,7 +23,7 @@ thiserror = { version = "1", default-features = false, optional = true }
 zeroize = { version = "1.5", default-features = false, features = ["zeroize_derive"] }
 rand_core = { version = "0.6", default-features = false }
 
-monero-wallet = { git = "https://github.com/monero-oxide/monero-oxide", default-features = false }
+monero-wallet = { git = "https://codeberg.org/Monfluo/monero-oxide", default-features = false }
 
 monero-seed = { path = "../seed", default-features = false }
 polyseed = { path = "../polyseed", default-features = false }
