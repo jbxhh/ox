@@ -342,6 +342,8 @@
     <string name="recycler_view_item_transaction_details_transaction_description_none">tidak ada</string>
     <string name="recycler_view_item_transaction_details_transaction_description_hint">Deskripsi transaksi (opsional)</string>
     <string name="enable_address_book">Aktifkan buku alamat</string>
+    <!-- Label for developer mode setting toggle -->
+    <string name="developer_mode">Aktifkan mode pengembang</string>
     <string name="contacts_header">Kontak</string>
     <string name="add_contact_header">Tambahkan kontak</string>
     <string name="contact_details_header">Detail kontak</string>
