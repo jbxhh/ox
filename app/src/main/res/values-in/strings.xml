@@ -130,6 +130,8 @@
     <string name="option_enable_enote_management">Aktifkan manajemen enote</string>
     <string name="show_icon_on_qr_codes">Tampilkan ikon pada kode QR</string>
     <string name="force_uri_format_qr_codes">Paksa format URI untuk kode QR</string>
+    <!-- Label for secure flag setting toggle -->
+    <string name="enable_secure_flag">Cegah tangkapan layar</string>
     <string name="wallet_adjusted_restore_height_label">Sesuaikan pemulihan tinggi blok</string>
     <string name="create_payment_qr_code">Buat kode QR pembayaran</string>
     <string name="wallet_error">Dompet error: %1$s</string>
@@ -202,7 +204,7 @@
     <string name="activity_send_selected_enotes_value_text">Nilai yang dipilih: %1$s XMR</string>
     <string name="activity_send_fee_label">Biaya:</string>
     <string name="activity_send_fee_default_label">Bawaan</string>
-    <string name="activity_send_fee_medium_label">Tengah-tengah</string>
+    <string name="activity_send_fee_medium_label">Sedang</string>
     <string name="activity_send_fee_high_label">Tinggi</string>
     <string name="activity_send_transaction_create">Membuat</string>
     <string name="activity_send_camera_permission_denied_toast">Tidak ada izin kamera</string>
@@ -340,6 +342,8 @@
     <string name="recycler_view_item_transaction_details_transaction_description_none">tidak ada</string>
     <string name="recycler_view_item_transaction_details_transaction_description_hint">Deskripsi transaksi (opsional)</string>
     <string name="enable_address_book">Aktifkan buku alamat</string>
+    <!-- Label for developer mode setting toggle -->
+    <string name="developer_mode">Aktifkan mode pengembang</string>
     <string name="contacts_header">Kontak</string>
     <string name="add_contact_header">Tambahkan kontak</string>
     <string name="contact_details_header">Detail kontak</string>
