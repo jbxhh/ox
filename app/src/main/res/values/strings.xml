@@ -117,6 +117,8 @@
     <string name="force_uri_format_qr_codes">Force URI format for QR codes</string>
     <!-- Label for secure flag setting toggle -->
     <string name="enable_secure_flag">Prevent screenshots</string>
+    <!-- Label for hide notification content setting toggle -->
+    <string name="hide_notification_content">Hide notification content</string>
     <!-- Label for SOCKS proxy setting -->
     <string name="tor_switch_label">SOCKS Proxy</string>
     <!-- Placeholder for address field -->
