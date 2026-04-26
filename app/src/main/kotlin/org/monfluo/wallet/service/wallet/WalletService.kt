@@ -27,6 +27,7 @@ import org.monfluo.wallet.activity.ActivityTransactionDetails
 import org.monfluo.wallet.data.Heights
 import org.monfluo.wallet.data.SynchronizationStatus
 import org.monfluo.wallet.model.MoneroNetworkType
+import org.monfluo.wallet.model.MoneroUnit
 import org.monfluo.wallet.model.PendingTransaction
 import org.monfluo.wallet.model.PendingTransactionDestination
 import org.monfluo.wallet.model.TransactionDestination
@@ -43,6 +44,7 @@ import org.monfluo.wallet.util.Constants.FOREGROUND_SERVICE_NOTIFICATION_CHANNEL
 import org.monfluo.wallet.util.Constants.TRANSFERS_NOTIFICATION_CHANNEL
 import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
+import org.monfluo.wallet.util.TextHelper
 import timber.log.Timber
 import java.time.Clock
 import java.util.concurrent.ArrayBlockingQueue
@@ -851,8 +853,19 @@ class WalletService :
                 .setSmallIcon(R.drawable.monfluo_notification_icon)
                 .setOnlyAlertOnce(true)
                 .setWhen(firstSeenAt)
-                .setContentTitle(getString(R.string.transfer_notification_header, Wallet.getDisplayAmount(amount), getString(R.string.unit_xmr)))
-                .setContentText(getString(R.string.transfer_notification_description_transaction_id, txId))
+                .setContentTitle(
+                    getString(
+                        R.string.transfer_notification_header,
+                        TextHelper.getDisplayAmount(amount, MoneroUnit.MONERO, PreferenceUtils.isHideNotificationContent(this)),
+                        getString(R.string.unit_xmr),
+                    )
+                )
+                .setContentText(
+                    getString(
+                        R.string.transfer_notification_description_transaction_id,
+                        if (PreferenceUtils.isHideNotificationContent(this)) "#".repeat(txId.length) else txId,
+                    )
+                )
                 .setProgress(Constants.CONFIRMATIONS, progress, false)
                 .setContentIntent(openTransactionActivityPendingIntent)
                 .setDeleteIntent(deleteNotificationBroadcastPendingIntent)

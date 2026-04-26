@@ -195,6 +195,13 @@ object PreferenceUtils {
         value: Boolean,
     ) = setBoolean(context, Constants.PREF_SECURE_FLAG_ENABLED, value)
 
+    fun isHideNotificationContent(context: Context): Boolean = getBoolean(context, Constants.PREF_HIDE_NOTIFICATION_CONTENT, false)
+
+    fun setHideNotificationContent(
+        context: Context,
+        value: Boolean,
+    ) = setBoolean(context, Constants.PREF_HIDE_NOTIFICATION_CONTENT, value)
+
     fun getProxy(context: Context): String? = getString(context, Constants.PREF_PROXY)
 
     fun setProxy(
