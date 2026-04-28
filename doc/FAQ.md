@@ -5,13 +5,13 @@
 
 ## What features does it have?
 
-- Uses Monero v0.18.3.4
+- Uses Monero v0.18.4.6
 - Support for Android >= 8.0
 - Generate new wallets
 - Recover wallets from mnemonic seed
 - View transactions including details and copy to clipboard
 - Spend Moneroj (handle with care on mainnet!)
-- QR Code scanning - make sure to *ALWAYS* verify the scanned code is what it is advertised to be!
+- QR code scanning - make sure to *ALWAYS* verify the scanned code is what it is advertised to be!
 - Custom daemons (remote or local network)
 - Tor and I2P support, with settings to customize proxy address and port.
 
