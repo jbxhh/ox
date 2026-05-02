@@ -858,15 +858,13 @@ class WalletService :
                         R.string.transfer_notification_header,
                         TextHelper.getDisplayAmount(amount, MoneroUnit.MONERO, PreferenceUtils.isHideNotificationContent(this)),
                         getString(R.string.unit_xmr),
-                    )
-                )
-                .setContentText(
+                    ),
+                ).setContentText(
                     getString(
                         R.string.transfer_notification_description_transaction_id,
                         if (PreferenceUtils.isHideNotificationContent(this)) "#".repeat(txId.length) else txId,
-                    )
-                )
-                .setProgress(Constants.CONFIRMATIONS, progress, false)
+                    ),
+                ).setProgress(Constants.CONFIRMATIONS, progress, false)
                 .setContentIntent(openTransactionActivityPendingIntent)
                 .setDeleteIntent(deleteNotificationBroadcastPendingIntent)
                 .build()
