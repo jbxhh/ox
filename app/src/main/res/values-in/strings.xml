@@ -26,6 +26,7 @@
     <string name="toast_enter_node_name">Masukkan nama node</string>
     <string name="toast_enter_node_address">Masukkan alamat node</string>
     <string name="toast_enter_node_password">Masukkan password node</string>
+    <string name="toast_no_node_for_network">Tidak ada node untuk jaringan <xliff:g>%1$s</xliff:g></string>
     <string name="service_notification_header">Layanan dompet Monfluo sedang berjalan</string>
     <string name="service_notification_close_wallet_action">Menutup dompet</string>
     <string name="service_notification_description_opening_wallet">Membuka dompet</string>
@@ -132,6 +133,7 @@
     <string name="force_uri_format_qr_codes">Paksa format URI untuk kode QR</string>
     <!-- Label for secure flag setting toggle -->
     <string name="enable_secure_flag">Cegah tangkapan layar</string>
+    <string name="hide_notification_content">Sembunyikan konten notifikasi</string>
     <string name="wallet_adjusted_restore_height_label">Sesuaikan pemulihan tinggi blok</string>
     <string name="create_payment_qr_code">Buat kode QR pembayaran</string>
     <string name="wallet_error">Dompet error: %1$s</string>
@@ -188,6 +190,8 @@
     <string name="activity_wallet_create_wallet_seed_label">Seed pemulihan</string>
     <string name="activity_wallet_create_wallet_height_label">Pemulihan tinggi blok</string>
     <string name="activity_wallet_create_wallet_seed_offset_label">Frasa sandi seed tambahan</string>
+    <string name="activity_wallet_create_wallet_network_type_label">Jenis Jaringan</string>
+    <string name="activity_wallet_create_wallet_encrypted_polyseed_toast">Polyseed terenkripsi tidak didukung</string>
     <string name="activity_wallet_details_wallet_name_label">Nama</string>
     <string name="activity_home_wallet_name_content_description">Dompet - <xliff:g>%1$s</xliff:g></string>
     <string name="activity_home_account_name_content_description">Akun - <xliff:g>%1$s</xliff:g></string>
@@ -195,6 +199,7 @@
     <string name="recycler_view_item_node_edit_content_description">Ubah node</string>
     <string name="recycler_view_item_account_edit_content_description">Ubah akun</string>
     <string name="recycler_view_item_address_edit_content_description">Ubah alamat</string>
+    <string name="recycler_view_item_contact_edit_content_description">Edit kontak</string>
     <string name="activity_payment_request_address_label">Alamat</string>
     <string name="activity_payment_request_amount_requested_label">Permintaan jumlah</string>
     <string name="activity_payment_request_recipient_name_label">Nama penerima</string>
@@ -276,6 +281,7 @@
     <string name="activity_node_add_node_name_label">Nama</string>
     <string name="activity_node_add_node_name_placeholder">Node Monero Saya</string>
     <string name="activity_node_add_node_address_label">Alamat</string>
+    <string name="activity_node_add_node_network_type_label">Jenis Jaringan</string>
     <string name="activity_node_add_node_daemon_trusted_label">Daemon terpercaya</string>
     <string name="activity_node_add_node_username_label">Nama pengguna</string>
     <string name="activity_node_add_node_username_placeholder">Nama pengguna (opsional)</string>
@@ -285,6 +291,7 @@
     <string name="activity_node_details_node_name_label">Nama</string>
     <string name="activity_node_details_node_name_placeholder">Node Monero Saya</string>
     <string name="activity_node_details_node_address_label">Alamat</string>
+    <string name="activity_node_details_node_network_type_label">Jenis Jaringan</string>
     <string name="activity_node_details_node_daemon_trusted_label">Daemon terpercaya</string>
     <string name="activity_node_details_node_username_label">Nama pengguna</string>
     <string name="activity_node_details_node_username_placeholder">Nama pengguna (opsional)</string>
