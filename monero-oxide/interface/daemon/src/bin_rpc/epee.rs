@@ -284,6 +284,7 @@ pub(super) fn extract_blocks_from_blocks_bin(
 
                     https://github.com/monero-project/monero/issues/10120
                   */
+                  #[cfg(not(feature = "skip-transaction-hash-validation"))]
                   if matches!(transaction, Transaction::V2 { proofs: Some(_), .. }) &&
                     (prunable_hash.is_none() || (prunable_hash == Some([0; 32])))
                   {

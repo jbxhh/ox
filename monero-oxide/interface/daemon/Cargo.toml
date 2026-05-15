@@ -40,4 +40,5 @@ std = [
   "monero-address/std",
   "monero-interface/std",
 ]
+skip-transaction-hash-validation = []
 default = ["std"]
