@@ -153,7 +153,7 @@
     <string name="balance_frozen">Dibekukan</string>
     <string name="wallet_header">Dompet</string>
     <string name="wallet_change_password_header">Ganti kata sandi</string>
-    <string name="enotes_header">Catatan</string>
+    <string name="enotes_header">Enotes</string>
     <string name="enotes_with_amount_header">Catatan (<xliff:g>%1$d</xliff:g>)</string>
     <string name="content_description_back">Kembali</string>
     <string name="content_description_account">Pilih akun</string>
