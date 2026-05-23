@@ -1,4 +1,4 @@
-// everything in this module should ideally be upstream either to monero-oxide or monero-wallet-util
+// everything in this module should ideally be upstreamed either to monero-oxide or monero-wallet-util
 
 use std::ops::Deref;
 
@@ -216,11 +216,15 @@ pub fn spend_key_to_view_key(spend: &[u8; 32]) -> Zeroizing<[u8; 32]> {
     Zeroizing::new(key2keccaked)
 }
 
-pub fn spend_key_of_output(output: &WalletOutput, sender_spend_key: &Scalar) -> Option<Zeroizing<CompressedPoint>> {
+pub fn key_image_of_output(output: &WalletOutput, sender_spend_key: &Scalar) -> CompressedPoint {
+    key_image_of_output_inner(output, sender_spend_key).expect("Failed to compute key image of an output")
+}
+
+fn key_image_of_output_inner(output: &WalletOutput, sender_spend_key: &Scalar) -> Option<CompressedPoint> {
     let input_key = Zeroizing::new((*sender_spend_key).into() + output.key_offset().into());
     if bool::from(!(input_key.deref() * ED25519_BASEPOINT_TABLE).ct_eq(&output.key().into())) {
         return None;
     }
     let key_image = Point::from(input_key.deref() * Point::biased_hash(output.key().compress().to_bytes()).into());
-    Some(Zeroizing::new(key_image.compress()))
+    Some(key_image.compress())
 }

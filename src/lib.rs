@@ -2,6 +2,7 @@
 
 pub mod crypto;
 pub mod seed;
+pub mod transport;
 pub mod util;
 pub mod wallet;
 
@@ -12,6 +13,8 @@ use rand::SeedableRng;
 pub use monero_wallet;
 pub use monero_wallet_util;
 use rand_chacha::ChaCha20Rng;
+
+pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 static RNG: LazyLock<RwLock<ChaCha20Rng>> = LazyLock::new(|| RwLock::new(ChaCha20Rng::from_entropy()));
 
