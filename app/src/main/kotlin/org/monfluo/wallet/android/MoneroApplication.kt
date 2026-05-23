@@ -11,8 +11,7 @@ import timber.log.Timber
 class MoneroApplication : Application() {
     companion object {
         init {
-            System.loadLibrary("monfluo")
-            System.loadLibrary("monfluo_oxide")
+            System.loadLibrary("monfluo_oxide_jni")
         }
     }
 

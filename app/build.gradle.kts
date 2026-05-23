@@ -5,8 +5,6 @@ plugins {
 }
 
 android {
-    ndkVersion = "28.2.13676358"
-
     defaultConfig {
         applicationId = "org.monfluo.wallet.android"
         minSdk = 26
@@ -15,13 +13,6 @@ android {
         versionCode = 1000
         versionName = "0.10.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        externalNativeBuild {
-            cmake {
-                cppFlags("-std=c++11")
-                arguments("-DANDROID_STL=c++_shared")
-            }
-        }
     }
 
     buildFeatures {
@@ -41,12 +32,6 @@ android {
         }
         getByName("debug") {
             applicationIdSuffix = ".debug"
-        }
-    }
-
-    externalNativeBuild {
-        cmake {
-            path = file("CMakeLists.txt")
         }
     }
 
@@ -73,6 +58,10 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    lintOptions {
+        disable("MissingTranslation")
     }
 
     testOptions {

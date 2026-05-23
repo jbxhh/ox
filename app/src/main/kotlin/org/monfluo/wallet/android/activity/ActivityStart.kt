@@ -19,6 +19,7 @@ import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.Helper
 import org.monfluo.wallet.android.util.PreferenceUtils
 import org.monfluo.wallet.android.util.component.ActivityBase
+import org.monfluo.wallet.lib.Monfluo
 import timber.log.Timber
 import kotlin.io.path.Path
 import kotlin.io.path.name
@@ -53,7 +54,7 @@ class ActivityStart : ActivityBase() {
 
     private fun launch() {
         val isMultiWalletMode = PreferenceUtils.isMultiWalletMode(this)
-        val walletPaths = Helper.findWallets(Helper.getWalletRoot(this))
+        val walletPaths = Monfluo.listWallets(Helper.getWalletRoot(this).absolutePath)
         if (walletPaths.isEmpty()) {
             Timber.d("No wallets found, launching onboarding activity")
             startActivityToOpenWallet.launch(Intent(this, ActivityWalletCreate::class.java))

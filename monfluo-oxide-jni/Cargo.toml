@@ -6,12 +6,14 @@ edition = "2024"
 
 [dependencies]
 monfluo-oxide = { git = "https://codeberg.org/Monfluo/monfluo-oxide" }
+# monfluo-oxide = { path = "../../monfluo-oxide" }
 jni = "0.22.4"
 const_format = "0.2.35"
 jni-macros = "0.22.4"
+tokio = { version = "1.52.3", features = ["full"] }
 
 [lib]
-name = "monfluo_oxide"
+name = "monfluo_oxide_jni"
 crate-type = ["cdylib"]
 
 [profile.release]

@@ -5,6 +5,6 @@ import org.junit.jupiter.api.extension.ExtensionContext
 
 class LibMonfluoOxideExtension : BeforeAllCallback {
     override fun beforeAll(context: ExtensionContext) {
-        System.loadLibrary("monfluo_oxide")
+        System.loadLibrary("monfluo_oxide_jni")
     }
 }

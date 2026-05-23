@@ -25,11 +25,11 @@ import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.activity.ActivityNodeList
 import org.monfluo.wallet.android.model.MoneroNetworkType
 import org.monfluo.wallet.android.model.Wallet
-import org.monfluo.wallet.android.model.WalletManager
 import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.util.Helper
 import org.monfluo.wallet.android.util.PreferenceUtils
 import org.monfluo.wallet.android.util.component.ActivityMonero
+import org.monfluo.wallet.lib.Monfluo
 import timber.log.Timber
 import kotlin.math.max
 
@@ -135,7 +135,7 @@ class ActivityApplicationSettings : ActivityMonero() {
         buildApplicationIdTextView.text = BuildConfig.APPLICATION_ID
         buildApplicationVersionTextView.text = getString(R.string.settings_build_version, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)
 
-        buildMoneroVersionTextView.text = WalletManager.moneroVersion()
+        buildMoneroVersionTextView.text = Monfluo.monfluoVersion()
 
         bindWindowInsetsListener()
         bindListeners()

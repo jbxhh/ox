@@ -20,6 +20,7 @@ import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.Helper
 import org.monfluo.wallet.android.util.component.ActivityBase
+import org.monfluo.wallet.lib.Monfluo
 import timber.log.Timber
 import kotlin.math.max
 
@@ -137,5 +138,5 @@ class ActivityWalletList : ActivityBase() {
         }
     }
 
-    private fun findWallets(): List<String> = Helper.findWallets(Helper.getWalletRoot(this@ActivityWalletList))
+    private fun findWallets(): List<String> = Monfluo.listWallets(Helper.getWalletRoot(this).toString())
 }

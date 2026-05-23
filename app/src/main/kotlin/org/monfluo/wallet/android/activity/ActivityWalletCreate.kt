@@ -41,9 +41,12 @@ import org.monfluo.wallet.android.util.PreferenceUtils
 import org.monfluo.wallet.android.util.SimpleTextWatcher
 import org.monfluo.wallet.android.util.TextHelper
 import org.monfluo.wallet.android.util.component.ActivityBase
+import org.monfluo.wallet.lib.Monfluo
 import org.monfluo.wallet.lib.seed.PolyseedLanguage
 import timber.log.Timber
 import java.io.File
+import kotlin.io.path.Path
+import kotlin.io.path.name
 import kotlin.math.max
 
 class ActivityWalletCreate : ActivityBase() {
@@ -307,13 +310,13 @@ class ActivityWalletCreate : ActivityBase() {
     }
 
     private fun getWalletNameSuggestion(): String {
-        val walletRoot = Helper.getWalletRoot(this)
-        if (!WalletManager.instance.walletExists(walletRoot.resolve(Constants.DEFAULT_WALLET_NAME))) {
+        val wallets = Monfluo.listWallets(Helper.getWalletRoot(this).absolutePath).map { Path(it).name }.toSet()
+        if (!wallets.contains(Constants.DEFAULT_WALLET_NAME)) {
             return Constants.DEFAULT_WALLET_NAME
         }
         for (i in 2 until Int.MAX_VALUE) {
             val name = "${Constants.DEFAULT_WALLET_NAME} ($i)"
-            if (!WalletManager.instance.walletExists(walletRoot.resolve(name))) {
+            if (!wallets.contains(name)) {
                 return name
             }
         }
