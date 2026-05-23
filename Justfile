@@ -16,7 +16,7 @@ create-changelog:
 
 
 [group('common')]
-clean: oxide-jni-clean oxide-kotlin-clean monero-clean app-clean
+clean: oxide-jni-clean oxide-kotlin-clean app-clean
 
 [group('common')]
 test: oxide-jni-test oxide-kotlin-test app-test
@@ -85,23 +85,10 @@ oxide-kotlin-build:
     ./gradlew :monfluo-oxide-kotlin:build
 
 
-[group('monero-legacy')]
-monero-clean:
-    cd external-libs && make clean
-
-[group('monero-legacy')]
-monero-build:
-    cd external-libs && make debug
-
-[group('monero-legacy')]
-monero-build-all:
-    cd external-libs && make all
-
-
 [group('app')]
 _app-copy-native-libs ABI ANDROID_ARCH PROFILE:
     mkdir -p app/src/main/jniLibs/{{ANDROID_ARCH}}
-    cp monfluo-oxide-jni/target/{{ABI}}/{{PROFILE}}/libmonfluo_oxide.so app/src/main/jniLibs/{{ANDROID_ARCH}}/
+    cp monfluo-oxide-jni/target/{{ABI}}/{{PROFILE}}/libmonfluo_oxide_jni.so app/src/main/jniLibs/{{ANDROID_ARCH}}/
 
 [group('app')]
 app-copy-native-libs-arm32: oxide-jni-build-android-arm32 (_app-copy-native-libs "armv7-linux-androideabi" "armeabi-v7a" "debug")

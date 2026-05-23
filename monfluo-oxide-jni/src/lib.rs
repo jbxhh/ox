@@ -2,14 +2,20 @@
 
 pub mod java;
 
+use std::path::PathBuf;
 use std::str::FromStr;
+use std::sync::LazyLock;
 
 use jni::errors::ThrowRuntimeExAndDefault;
-use jni::objects::JObject;
+use jni::objects::{JClass, JObject, JString};
 use jni::sys::{JNI_VERSION_1_6, jint, jobject};
 use jni::{EnvUnowned, JavaVM};
 
 use jni_macros::jni_mangle;
+use tokio::runtime::Runtime;
+
+static RUNTIME: LazyLock<Runtime> =
+    LazyLock::new(|| tokio::runtime::Runtime::new().expect("Failed to create tokio runtime"));
 
 #[unsafe(no_mangle)]
 pub extern "system" fn JNI_OnLoad(
@@ -77,6 +83,44 @@ pub fn get_words_polyseed<'local>(mut env: EnvUnowned<'local>, object: JObject<'
         }
 
         Ok::<jobject, jni::errors::Error>(list.0.into_raw())
+    })
+    .resolve::<ThrowRuntimeExAndDefault>()
+}
+
+#[jni_mangle("org.monfluo.wallet.lib.Monfluo", "monfluoVersion")]
+pub fn monfluo_version<'local>(mut env: EnvUnowned<'local>, _class: JClass<'local>) -> jobject {
+    env.with_env(|env| {
+        let version = env.new_string(monfluo_oxide::VERSION).unwrap();
+        Ok::<jobject, jni::errors::Error>(JObject::from(version).into_raw())
+    })
+    .resolve::<ThrowRuntimeExAndDefault>()
+}
+
+#[jni_mangle("org.monfluo.wallet.lib.Monfluo", "listWallets")]
+pub fn list_wallets<'local>(
+    mut env: EnvUnowned<'local>,
+    _class: JClass<'local>,
+    monfluo_directory: JString,
+) -> jobject {
+    let cache = java::get_cache();
+
+    env.with_env(|mut env| {
+        RUNTIME.block_on(async {
+            let monfluo_directory = monfluo_directory.mutf8_chars(env).unwrap();
+            let monfluo_directory = monfluo_directory.to_str();
+            let monfluo_directory = PathBuf::from_str(&*monfluo_directory).unwrap();
+            let wallets = monfluo_oxide::wallet::Wallet::list(monfluo_directory)
+                .await
+                .unwrap();
+            let list = java::ArrayList::new(&mut env);
+            for wallet in wallets {
+                let wallet = env
+                    .new_string(wallet)
+                    .expect("Failed to create java string for a wallet path");
+                list.add(&mut env, cache, JObject::from(wallet));
+            }
+            Ok::<jobject, jni::errors::Error>(list.0.into_raw())
+        })
     })
     .resolve::<ThrowRuntimeExAndDefault>()
 }
