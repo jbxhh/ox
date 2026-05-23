@@ -157,7 +157,7 @@
     <string name="balance_frozen">Dibekukan</string>
     <string name="wallet_header">Dompet</string>
     <string name="wallet_change_password_header">Ganti kata sandi</string>
-    <string name="enotes_header">Catatan</string>
+    <string name="enotes_header">Enotes</string>
     <string name="enotes_with_amount_header">Catatan (<xliff:g>%1$d</xliff:g>)</string>
     <string name="content_description_back">Kembali</string>
     <string name="content_description_account">Pilih akun</string>
@@ -375,4 +375,11 @@
     <string name="activity_contact_details_toast_failed_to_delete_contact">Gagal menghapus kontak</string>
     <string name="activity_contact_details_toast_contact_saved">Kontak tersimpan</string>
     <string name="activity_contact_details_toast_failed_to_save_contact">Gagal menyimpan kontak</string>
+    <string name="toast_no_node_for_network">Tidak ditemukan node untuk jaringan <xliff:g>%1$s</xliff:g></string>
+    <string name="developer_mode">Aktifkan mode pengembang</string>
+    <string name="enable_secure_flag">Cegah pengambilan tangkapan layar</string>
+    <string name="activity_wallet_create_wallet_network_type_label">Jenis Jaringan</string>
+    <string name="activity_wallet_create_wallet_encrypted_polyseed_toast">Polyseed terenkripsi tidak didukung</string>
+    <string name="activity_node_add_node_network_type_label">Jenis Jaringan</string>
+    <string name="activity_node_details_node_network_type_label">Jenis Jaringan</string>
 </resources>
