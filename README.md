@@ -88,4 +88,4 @@ XMR address: `48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU
 
 Matrix room: https://matrix.to/#/%23monfluo%3Amonero.social?via=monero.social
 
-SimpleX chat (by rottenwheel): https://simplex.chat/contact#/?v=2-7&smp=smp%3A%2F%2Fh--vW7ZSkXPeOUpfxlFGgauQmXNFOzGoizak7Ult7cw%3D%40smp15.simplex.im%2FXLArIRV2DON7SkwfMCRZh4eeU0Sw_3nZ%23%2F%3Fv%3D1-4%26dh%3DMCowBQYDK2VuAyEAZwonKBgo9RVrvUTk-ojEXWuMhv9MYj6ZYFUh0jaqam8%253D%26q%3Dc%26srv%3Doauu4bgijybyhczbnxtlggo6hiubahmeutaqineuyy23aojpih3dajad.onion&data=%7B%22groupLinkId%22%3A%22ouYmW7kh0XqRz22htWNnhA%3D%3D%22%7D
+SimpleX chat (by rottenwheel): https://smp6.simplex.im/g#YDL6oaJK3YOTlAtHKbC9zWB3U72QQw1v729HR3k_6Gs
