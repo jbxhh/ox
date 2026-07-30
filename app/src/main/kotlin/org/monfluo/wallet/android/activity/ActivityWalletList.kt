@@ -57,11 +57,11 @@ class ActivityWalletList : ActivityBase() {
                 object : AdapterWallet.AdapterWalletListener {
                     override fun onWalletSelected(
                         self: AdapterWallet,
-                        walletPath: String,
+                        wallet: String,
                     ) {
                         val passwordDialog =
                             DialogFragmentPassword(
-                                walletPath,
+                                wallet,
                                 false,
                                 object : DialogFragmentPassword.Listener {
                                     override fun onCorrectPasswordSubmitted(
@@ -73,7 +73,7 @@ class ActivityWalletList : ActivityBase() {
                                         setResult(
                                             1,
                                             Intent().apply {
-                                                putExtra(Constants.EXTRA_WALLET_PATH, walletPath)
+                                                putExtra(Constants.EXTRA_WALLET_NAME, wallet)
                                                 putExtra(Constants.EXTRA_WALLET_PASSWORD, password)
                                             },
                                         )
@@ -86,7 +86,7 @@ class ActivityWalletList : ActivityBase() {
 
                     override fun onWalletEdit(
                         self: AdapterWallet,
-                        walletPath: String,
+                        wallet: String,
                     ) {
                         if (WalletService.RUNNING.get()) {
                             Toast.makeText(this@ActivityWalletList, getText(R.string.toast_wallet_not_closed), Toast.LENGTH_SHORT).show()
@@ -94,7 +94,7 @@ class ActivityWalletList : ActivityBase() {
                         }
                         startActivity(
                             Intent(this@ActivityWalletList, ActivityWalletDetails::class.java).apply {
-                                putExtra(Constants.EXTRA_WALLET_PATH, walletPath)
+                                putExtra(Constants.EXTRA_WALLET_NAME, wallet)
                             },
                         )
                     }

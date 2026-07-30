@@ -49,7 +49,7 @@
 
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/network_status_fragment"
-                android:name="org.monfluo.wallet.fragment.FragmentNetworkStatus"
+                android:name="org.monfluo.wallet.android.fragment.FragmentNetworkStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"

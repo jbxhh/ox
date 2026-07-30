@@ -20,9 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.adapter.AdapterTransactionInfo
 import org.monfluo.wallet.android.livedata.combineLiveDatas
-import org.monfluo.wallet.android.model.Balance
 import org.monfluo.wallet.android.model.MoneroUnit
-import org.monfluo.wallet.android.model.TransactionInfo
 import org.monfluo.wallet.android.model.Wallet
 import org.monfluo.wallet.android.service.wallet.State
 import org.monfluo.wallet.android.service.wallet.WalletService
@@ -31,6 +29,10 @@ import org.monfluo.wallet.android.util.Helper
 import org.monfluo.wallet.android.util.PreferenceUtils
 import org.monfluo.wallet.android.util.TextHelper
 import org.monfluo.wallet.android.util.component.ActivityMonero
+import org.monfluo.wallet.lib.data.Balance
+import org.monfluo.wallet.lib.data.TransactionView
+import org.monfluo.wallet.lib.wallet.FinishedSyncing
+import org.monfluo.wallet.lib.wallet.WalletSyncState
 import timber.log.Timber
 import kotlin.math.max
 
@@ -61,9 +63,9 @@ class ActivityHome : ActivityMonero() {
     private val transactionInfoAdapter: AdapterTransactionInfo =
         AdapterTransactionInfo(
             object : AdapterTransactionInfo.Listener {
-                override fun onClickTransaction(transactionInfo: TransactionInfo) {
+                override fun onClickTransaction(transaction: TransactionView) {
                     val intent = Intent(this@ActivityHome, ActivityTransactionDetails::class.java)
-                    intent.putExtra(Constants.EXTRA_TRANSACTION_ID, transactionInfo.hash)
+                    intent.putExtra(Constants.EXTRA_TRANSACTION_ID, transaction.transactionHash.toString())
                     startActivity(intent)
                 }
             },
@@ -141,19 +143,19 @@ class ActivityHome : ActivityMonero() {
             }
         }
         unlockedBalanceTextView.setOnLongClickListener {
-            viewModel.balance.value?.let { balance ->
+            viewModel.walletCardInfo.value?.data?.balance?.let { balance ->
                 Helper.clipBoardCopy(this, "unlocked wallet balance", TextHelper.getDisplayAmount(balance.unlocked, MoneroUnit.MONERO, false))
             }
             return@setOnLongClickListener true
         }
         lockedBalanceTextView.setOnLongClickListener {
-            viewModel.balance.value?.let { balance ->
-                Helper.clipBoardCopy(this, "locked wallet balance", TextHelper.getDisplayAmount(balance.locked, MoneroUnit.MONERO, false))
+            viewModel.walletCardInfo.value?.data?.balance?.let { balance ->
+                Helper.clipBoardCopy(this, "locked wallet balance", TextHelper.getDisplayAmount(balance.pending, MoneroUnit.MONERO, false))
             }
             return@setOnLongClickListener true
         }
         frozenBalanceTextView.setOnLongClickListener {
-            viewModel.balance.value?.let { balance ->
+            viewModel.walletCardInfo.value?.data?.balance?.let { balance ->
                 Helper.clipBoardCopy(this, "frozen wallet balance", TextHelper.getDisplayAmount(balance.frozen, MoneroUnit.MONERO, false))
             }
             return@setOnLongClickListener true
@@ -173,15 +175,12 @@ class ActivityHome : ActivityMonero() {
     }
 
     private fun bindObservers() {
-        viewModel.walletCardInfo.observe(this) { (walletConnected, isSynchronized, streetMode, multiAccountMode, enableEnoteManagement, balance) ->
-            val walletName = walletService?.getWalletName()
+        viewModel.walletCardInfo.observe(this) { (streetMode, multiAccountMode, enableEnoteManagement, walletCard) ->
+            if (walletCard != null) {
+                walletNameTextView.text = walletCard.name
+                walletNameTextView.contentDescription = getString(R.string.activity_home_wallet_name_content_description, walletCard.name)
+                walletNameTextView.visibility = View.VISIBLE
 
-            if (walletName != null) {
-                walletNameTextView.text = walletName
-                walletNameTextView.contentDescription = getString(R.string.activity_home_wallet_name_content_description, walletName)
-            }
-
-            if (walletConnected) {
                 if (multiAccountMode) {
                     accountNameTextView.visibility = View.VISIBLE
 
@@ -194,27 +193,21 @@ class ActivityHome : ActivityMonero() {
                     accountNameTextView.visibility = View.INVISIBLE
                 }
 
-                if (balance != null) {
-                    val balanceTextStyle = if (isSynchronized) Typeface.BOLD else Typeface.BOLD_ITALIC
+                val balanceTextStyle = if (walletCard.isSynchronized) Typeface.BOLD else Typeface.BOLD_ITALIC
 
-                    unlockedBalanceTextView.text = TextHelper.formatUnlockedBalance(this, balance.unlocked, MoneroUnit.MONERO, streetMode, balanceTextStyle)
-                    unlockedBalanceTextView.visibility = View.VISIBLE
+                unlockedBalanceTextView.text = TextHelper.formatUnlockedBalance(this, walletCard.balance.unlocked, MoneroUnit.MONERO, streetMode, balanceTextStyle)
+                unlockedBalanceTextView.visibility = View.VISIBLE
 
-                    if (balance.locked != 0L) {
-                        lockedBalanceTextView.text = TextHelper.formatLockedBalance(this, balance.locked, MoneroUnit.MONERO, streetMode, balanceTextStyle)
-                        lockedBalanceTextView.visibility = View.VISIBLE
-                    } else {
-                        lockedBalanceTextView.visibility = View.INVISIBLE
-                    }
-                    if (balance.frozen != 0L) {
-                        frozenBalanceTextView.text = TextHelper.formatFrozenBalance(this, balance.frozen, MoneroUnit.MONERO, streetMode, balanceTextStyle)
-                        frozenBalanceTextView.visibility = View.VISIBLE
-                    } else {
-                        frozenBalanceTextView.visibility = View.INVISIBLE
-                    }
+                if (walletCard.balance.pending != 0L) {
+                    lockedBalanceTextView.text = TextHelper.formatLockedBalance(this, walletCard.balance.pending, MoneroUnit.MONERO, streetMode, balanceTextStyle)
+                    lockedBalanceTextView.visibility = View.VISIBLE
                 } else {
-                    unlockedBalanceTextView.visibility = View.INVISIBLE
                     lockedBalanceTextView.visibility = View.INVISIBLE
+                }
+                if (walletCard.balance.frozen != 0L) {
+                    frozenBalanceTextView.text = TextHelper.formatFrozenBalance(this, walletCard.balance.frozen, MoneroUnit.MONERO, streetMode, balanceTextStyle)
+                    frozenBalanceTextView.visibility = View.VISIBLE
+                } else {
                     frozenBalanceTextView.visibility = View.INVISIBLE
                 }
 
@@ -224,6 +217,7 @@ class ActivityHome : ActivityMonero() {
                     enotesImageView.visibility = View.INVISIBLE
                 }
             } else {
+                walletNameTextView.visibility = View.INVISIBLE
                 accountNameTextView.visibility = View.INVISIBLE
                 unlockedBalanceTextView.visibility = View.INVISIBLE
                 lockedBalanceTextView.visibility = View.INVISIBLE
@@ -277,9 +271,9 @@ class ActivityHome : ActivityMonero() {
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
-        val wallet = walletService.getWallet()
+        val wallet = walletService.getNewWalletOrLog()
         viewModel.state.postValue(walletService.getState())
-        updateWallet(wallet)
+        updateNewWallet(wallet!!)
     }
 
     override fun onWalletServiceDisconnected() {
@@ -292,7 +286,7 @@ class ActivityHome : ActivityMonero() {
 
     private fun stop() {
         Timber.d("Stopping")
-        walletService?.closeWallet()
+        walletService?.closeNewWallet()
         finish()
     }
 
@@ -300,7 +294,14 @@ class ActivityHome : ActivityMonero() {
         walletService?.let { walletService ->
             viewModel.state.postValue(walletService.getState())
         }
-        updateWallet(wallet)
+//        updateWallet(wallet)
+    }
+
+    override fun onNewWalletUpdated(
+        wallet: org.monfluo.wallet.lib.wallet.Wallet,
+        state: WalletSyncState,
+    ) {
+        updateNewWallet(wallet, state)
     }
 
     override fun onNewBlock(wallet: Wallet) {
@@ -318,9 +319,17 @@ class ActivityHome : ActivityMonero() {
         }
     }
 
-    private fun updateWallet(wallet: Wallet?) {
-        viewModel.balance.postValue(wallet?.getBalance())
-        viewModel.transactions.postValue(wallet?.getHistory())
+    private fun updateNewWallet(
+        wallet: org.monfluo.wallet.lib.wallet.Wallet,
+        state: WalletSyncState? = null,
+    ) {
+        // TODO: turn FinishedSyncing into object and simplify comparison. Refactor Rust side also to correctly construct/reference object
+        val name = wallet.getName()
+        val isSynchronized = state != null && state::class == FinishedSyncing::class
+        val balance = wallet.getBalance()
+        val transactions = wallet.getTransactionViews()
+        viewModel.cardData.postValue(WalletCardData(name, isSynchronized, balance))
+        viewModel.transactions.postValue(wallet.getTransactionViews())
     }
 }
 
@@ -332,40 +341,35 @@ internal class ActivityHomeViewModel : ViewModel() {
     val balanceTapTogglesStreetMode: MutableLiveData<Boolean> = MutableLiveData(false)
     val streetMode: MutableLiveData<Boolean> = MutableLiveData(false)
 
-    val balance: MutableLiveData<Balance?> = MutableLiveData(null)
-    val transactions = MutableLiveData<List<TransactionInfo>?>(null)
+    val cardData: MutableLiveData<WalletCardData?> = MutableLiveData(null)
+    val transactions = MutableLiveData<List<TransactionView>?>(null)
 
     val walletCardInfo =
         combineLiveDatas(
             state,
-            balance,
+            cardData,
             streetMode,
             multiAccountMode,
             enoteManagement,
-        ) { state, balance, streetMode, multiAccountMode, enableEnoteManagement ->
-            val walletConnected = state != null && state.heights.walletHeight > 0L
-            val isSynchronized =
-                state != null &&
-                    state.heights.walletHeight > 0L &&
-                    state.heights.blockchainHeight > 0L &&
-                    state.heights.blockchainHeight - state.heights.walletHeight == 0L
-
+        ) { state, cardData, streetMode, multiAccountMode, enableEnoteManagement ->
             WalletCardState(
-                walletConnected = walletConnected,
-                isSynchronized = isSynchronized,
                 streetMode = streetMode!!,
                 multiAccountMode = multiAccountMode!!,
                 enableEnoteManagement = enableEnoteManagement!!,
-                balance = balance,
+                cardData,
             )
         }
 }
 
 internal data class WalletCardState(
-    val walletConnected: Boolean,
-    val isSynchronized: Boolean,
     val streetMode: Boolean,
     val multiAccountMode: Boolean,
     val enableEnoteManagement: Boolean,
-    val balance: Balance?,
+    val data: WalletCardData?,
+)
+
+internal data class WalletCardData(
+    val name: String,
+    val isSynchronized: Boolean,
+    val balance: Balance,
 )

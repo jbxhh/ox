@@ -21,8 +21,6 @@ import org.monfluo.wallet.android.util.PreferenceUtils
 import org.monfluo.wallet.android.util.component.ActivityBase
 import org.monfluo.wallet.lib.Monfluo
 import timber.log.Timber
-import kotlin.io.path.Path
-import kotlin.io.path.name
 
 class ActivityStart : ActivityBase() {
     private val startActivityToOpenWallet =
@@ -84,14 +82,14 @@ class ActivityStart : ActivityBase() {
 
     private fun openWalletFromActivityResult(result: ActivityResult) {
         val data = result.data
-        val walletPath = data?.getStringExtra(Constants.EXTRA_WALLET_PATH)
+        val wallet = data?.getStringExtra(Constants.EXTRA_WALLET_NAME)
         val walletPassword = data?.getStringExtra(Constants.EXTRA_WALLET_PASSWORD)
-        Timber.i("Opening wallet at path $walletPath")
-        openWallet(walletPath, walletPassword, viewModel.takeUriPayment())
+        Timber.i("Opening wallet \"$wallet\"")
+        openWallet(wallet, walletPassword, viewModel.takeUriPayment())
     }
 
     private fun openWallet(
-        walletPath: String?,
+        wallet: String?,
         walletPassword: String?,
         uriPaymentRaw: String?,
     ) {
@@ -106,11 +104,11 @@ class ActivityStart : ActivityBase() {
                 ) {
                     Timber.d("Wallet Service connected")
                     val walletService = (service as WalletService.WalletServiceBinder).service
-                    if (walletPath != null && walletPassword != null) {
-                        val networkType = MoneroNetworkType.fromInteger(PreferenceUtils.getWalletNetworkType(this@ActivityStart, Path(walletPath!!).name)) ?: MoneroNetworkType.NetworkType_Mainnet
+                    if (wallet != null && walletPassword != null) {
+                        val networkType = MoneroNetworkType.fromInteger(PreferenceUtils.getWalletNetworkType(this@ActivityStart, wallet)) ?: MoneroNetworkType.NetworkType_Mainnet
                         val node = PreferenceUtils.getOrSetDefaultOrAnyNode(this@ActivityStart, networkType, DefaultNode.defaultNodes())
                         if (node != null) {
-                            walletService.openWallet(walletPath, walletPassword, node.address, node.username ?: "", node.password ?: "", node.trusted, PreferenceUtils.getProxyIfEnabled(applicationContext) ?: "", networkType)
+                            walletService.openWallet(wallet, walletPassword, node.address, node.username ?: "", node.password ?: "", node.trusted, PreferenceUtils.getProxyIfEnabled(applicationContext) ?: "", networkType)
                         } else {
                             Timber.e("No node found for network $networkType, not starting wallet")
                             Toast.makeText(this@ActivityStart, this@ActivityStart.getString(R.string.toast_no_node_for_network, this@ActivityStart.getString(networkType.resourceId)), Toast.LENGTH_SHORT).show()

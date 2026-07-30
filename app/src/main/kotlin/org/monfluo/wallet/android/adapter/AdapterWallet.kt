@@ -7,17 +7,15 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.android.R
-import kotlin.io.path.Path
-import kotlin.io.path.name
 
 class AdapterWallet(
     private val listener: AdapterWalletListener,
 ) : RecyclerView.Adapter<AdapterWallet.ViewHolder>() {
-    private var walletPaths: List<String> = listOf()
+    private var wallets: List<String> = listOf()
 
-    fun setWalletPaths(walletPaths: List<String>) {
-        if (this.walletPaths != walletPaths) {
-            this.walletPaths = walletPaths
+    fun setWalletPaths(wallets: List<String>) {
+        if (this.wallets != wallets) {
+            this.wallets = wallets
             notifyDataSetChanged()
         }
     }
@@ -30,24 +28,24 @@ class AdapterWallet(
         return ViewHolder(listener, view)
     }
 
-    override fun getItemCount(): Int = walletPaths.size
+    override fun getItemCount(): Int = wallets.size
 
     override fun onBindViewHolder(
         holder: ViewHolder,
         position: Int,
     ) {
-        holder.bind(walletPaths[position])
+        holder.bind(wallets[position])
     }
 
     interface AdapterWalletListener {
         fun onWalletSelected(
             self: AdapterWallet,
-            walletPath: String,
+            wallet: String,
         )
 
         fun onWalletEdit(
             self: AdapterWallet,
-            walletPath: String,
+            wallet: String,
         )
     }
 
@@ -60,23 +58,23 @@ class AdapterWallet(
         private lateinit var editWalletImageButton: ImageButton
 
         fun bind(
-            walletPath: String,
+            wallet: String,
         ) {
             walletIconImageButton = itemView.findViewById(R.id.wallet_icon_imagebutton)
             walletNameTextView = itemView.findViewById(R.id.wallet_label_textview)
             editWalletImageButton = itemView.findViewById(R.id.edit_wallet_imagebutton)
 
-            walletNameTextView.text = Path(walletPath).name
+            walletNameTextView.text = wallet
 
             itemView.setOnClickListener {
-                listener.onWalletSelected(this@AdapterWallet, walletPath)
+                listener.onWalletSelected(this@AdapterWallet, wallet)
             }
             walletIconImageButton.setOnClickListener {
-                listener.onWalletSelected(this@AdapterWallet, walletPath)
+                listener.onWalletSelected(this@AdapterWallet, wallet)
             }
 
             editWalletImageButton.setOnClickListener {
-                listener.onWalletEdit(this@AdapterWallet, walletPath)
+                listener.onWalletEdit(this@AdapterWallet, wallet)
             }
         }
     }

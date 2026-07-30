@@ -10,25 +10,22 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.map
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.adapter.AdapterAddress
 import org.monfluo.wallet.android.adapter.AdapterAddress.AdapterAddressListener
-import org.monfluo.wallet.android.data.Address
 import org.monfluo.wallet.android.model.Wallet
 import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.Helper.clipBoardCopy
 import org.monfluo.wallet.android.util.PreferenceUtils
 import org.monfluo.wallet.android.util.component.ActivityMonero
-import timber.log.Timber
-import java.util.concurrent.atomic.AtomicReference
+import org.monfluo.wallet.lib.data.AddressView
 import kotlin.math.max
+import org.monfluo.wallet.lib.wallet.Wallet as NewWallet
 
 class ActivityReceive : ActivityMonero() {
     private val viewModel: ReceiveViewModel by viewModels()
@@ -79,16 +76,18 @@ class ActivityReceive : ActivityMonero() {
         }
         freshAddressImageView.setOnClickListener {
             walletService?.let { walletService ->
-                walletService.getWalletOrLog()?.let { wallet ->
-                    walletService.generateNewAddress(wallet.getAccountIndex(), "")
+                walletService.getNewWalletOrLog()?.let { wallet ->
+                    wallet.registerNewAddressForCurrentAccount()
+                    wallet.store()
+                    viewModel.refreshAddresses(wallet, true)
                 }
             }
         }
         createPaymentQrCodeImageView.setOnClickListener {
-            viewModel.selectedAddress.value?.let { selectedAddress ->
+            viewModel.addressIndex.value?.let { addressIndex ->
                 startActivity(
                     Intent(this, ActivityPaymentRequest::class.java).apply {
-                        putExtra(Constants.EXTRA_ADDRESS_VALUE, selectedAddress.address)
+                        putExtra(Constants.EXTRA_ADDRESS_VALUE, viewModel.addresses.value!![addressIndex]!!.value)
                     },
                 )
             }
@@ -106,31 +105,29 @@ class ActivityReceive : ActivityMonero() {
 
         val adapterAddressListener =
             object : AdapterAddressListener {
-                override fun onAddressSelected(address: Address) {
+                override fun onAddressSelected(address: AddressView) {
                     viewModel.selectAddress(address)
                 }
 
-                override fun onAddressEditLabel(address: Address) {
+                override fun onAddressEditLabel(address: AddressView) {
                     editAddressLabel(address)
                 }
 
-                override fun onAddressCopy(address: Address) {
-                    clipBoardCopy(this@ActivityReceive, "monero address", address.address)
+                override fun onAddressCopy(address: AddressView) {
+                    clipBoardCopy(this@ActivityReceive, "monero address", address.value)
                 }
             }
 
         val streetMode = PreferenceUtils.isStreetMode(this)
-        val adapter = AdapterAddress(emptyList(), null, streetMode, adapterAddressListener)
+        val adapter = AdapterAddress(emptyList(), -1, streetMode, adapterAddressListener)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
-        viewModel.selectedAddress.observe(this) { address: Address? ->
-            if (address != null) {
-                adapter.submitSelectedAddress(address)
-            }
+        viewModel.addressIndex.observe(this) { addressIndex ->
+            adapter.submitSelectedAddressIndex(addressIndex)
         }
-        viewModel.addresses.observe(this) { addresses: List<Address> ->
+        viewModel.addresses.observe(this) { addresses: List<AddressView>? ->
             // We want newer addresses to be shown first
-            adapter.submitAddresses(addresses.reversed())
+            adapter.submitAddresses((addresses ?: emptyList()).reversed())
         }
     }
 
@@ -143,24 +140,22 @@ class ActivityReceive : ActivityMonero() {
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
-        walletService.getWallet()?.let { wallet ->
+        walletService.getNewWalletOrLog()?.let { wallet ->
             showUi()
             viewModel.refreshAddresses(wallet)
-            autoRotateAddresses()
         }
     }
 
     override fun onWalletUpdated(wallet: Wallet) {
-        runOnUiThread {
-            showUi()
-            viewModel.refreshAddresses(wallet)
-            autoRotateAddresses()
-        }
+        // runOnUiThread {
+        //     showUi()
+        //     viewModel.refreshAddresses(wallet)
+        // }
     }
 
     override fun onAddressGenerated() {
         runOnUiThread {
-            walletService?.getWallet()?.let { wallet ->
+            walletService?.getNewWalletOrLog()?.let { wallet ->
                 showUi()
                 viewModel.refreshAddresses(wallet, true)
             }
@@ -173,7 +168,7 @@ class ActivityReceive : ActivityMonero() {
         label: String,
     ) {
         runOnUiThread {
-            walletService?.getWallet()?.let { wallet ->
+            walletService?.getNewWalletOrLog()?.let { wallet ->
                 showUi()
                 viewModel.refreshAddresses(wallet, false)
             }
@@ -182,7 +177,7 @@ class ActivityReceive : ActivityMonero() {
 
     override fun onAccountSet(index: Int) {
         runOnUiThread {
-            walletService?.getWallet()?.let { wallet ->
+            walletService?.getNewWalletOrLog()?.let { wallet ->
                 showUi()
                 viewModel.refreshAddresses(wallet)
             }
@@ -195,7 +190,7 @@ class ActivityReceive : ActivityMonero() {
         createPaymentQrCodeImageView.visibility = View.VISIBLE
     }
 
-    private fun editAddressLabel(address: Address) {
+    private fun editAddressLabel(address: AddressView) {
         startActivity(
             Intent(this, ActivityAddressDetails::class.java).apply {
                 putExtra(Constants.EXTRA_ACCOUNT_INDEX, address.accountIndex)
@@ -203,57 +198,30 @@ class ActivityReceive : ActivityMonero() {
             },
         )
     }
-
-    private fun autoRotateAddresses() {
-        if (PreferenceUtils.isAutoRotateAddresses(this)) {
-            viewModel.addresses.value?.lastOrNull()?.let { lastAddress ->
-                if (lastAddress.used) {
-                    val lastAutoRotatedAddress = viewModel.lastAutoRotatedAddress.getAndSet(lastAddress.address)
-                    if (lastAddress.address != lastAutoRotatedAddress) {
-                        Timber.i("Latest address ${lastAddress.address} has been used, auto-rotating it")
-                        walletService?.let { walletService ->
-                            walletService.getWallet()?.let { wallet ->
-                                walletService.generateNewAddress(wallet.getAccountIndex(), "")
-                            }
-                        }
-                    } else {
-                        Timber.d("Not auto-rotating latest address ${lastAddress.address} because it was already rotated")
-                    }
-                }
-            }
-        }
-    }
 }
 
 class ReceiveViewModel : ViewModel() {
-    // we need to store this in order to avoid rotating a single address more than once
-    // which might happen when we get second callback before new address has been generated
-    val lastAutoRotatedAddress: AtomicReference<String?> = AtomicReference(null)
-
-    val multiAccountMode = MutableLiveData(false)
-
-    private val _selectedAddress = MutableLiveData<Address?>()
-    val selectedAddress: LiveData<Address?> = _selectedAddress
-
-    private val _addresses = MutableLiveData<List<Address>>()
-    val addresses: LiveData<List<Address>> = _addresses
+    val multiAccountMode: MutableLiveData<Boolean> = MutableLiveData(false)
+    val addressIndex: MutableLiveData<Int> = MutableLiveData(-1)
+    val addresses: MutableLiveData<List<AddressView>> = MutableLiveData(null)
 
     fun refreshAddresses(
-        wallet: Wallet,
+        wallet: NewWallet,
         selectLatest: Boolean = false,
     ) {
-        val newAddresses = (0 until wallet.numAddresses).map { wallet.getAddressObject(it) }
-        _addresses.value = newAddresses
+        val accountView = wallet.getAccountView(0)
+        val addresses = accountView.addresses
+        this.addresses.value = addresses
 
-        val currentSelectedAddress = selectedAddress.value
-        if (currentSelectedAddress == null || selectLatest) {
-            selectAddress(newAddresses.lastOrNull())
+        val addressIndex = this.addressIndex.value!!
+        if (addressIndex == -1 || selectLatest) {
+            selectAddress(addresses.lastOrNull())
         } else {
-            selectAddress(newAddresses.getOrNull(currentSelectedAddress.addressIndex))
+            selectAddress(addresses.getOrNull(addressIndex))
         }
     }
 
-    fun selectAddress(subaddress: Address?) {
-        _selectedAddress.value = subaddress
+    fun selectAddress(subaddress: AddressView?) {
+        addressIndex.value = subaddress?.addressIndex ?: -1
     }
 }

@@ -21,6 +21,9 @@ clean: oxide-jni-clean oxide-kotlin-clean app-clean
 [group('common')]
 test: oxide-jni-test oxide-kotlin-test app-test
 
+[group('common')]
+app: oxide-jni-build-android-arm64-release app-copy-native-libs-arm64-release app-build app-install app-kill app-run
+
 
 [group('oxide-jni')]
 [working-directory: 'monfluo-oxide-jni']
@@ -77,7 +80,7 @@ oxide-kotlin-clean:
     ./gradlew :monfluo-oxide-kotlin:clean
 
 [group('oxide-kotlin')]
-oxide-kotlin-test: oxide-jni-build
+oxide-kotlin-test:
     export LD_LIBRARY_PATH=$(realpath monfluo-oxide-jni/target/debug) && ./gradlew :monfluo-oxide-kotlin:test --rerun-tasks
 
 [group('oxide-kotlin')]
@@ -131,23 +134,23 @@ app-test:
     ./gradlew :app:test --rerun-tasks
 
 [group('app')]
-app-build: app-copy-native-libs-arm64
+app-build:
     ./gradlew -P monfluo-arm64 assembleDebug
 
 [group('app')]
-app-build-all: app-copy-native-libs-all
+app-build-all:
     ./gradlew -P monfluo-all -P monfluo-universal assembleDebug
 
 [group('app')]
-app-build-release: app-copy-native-libs-arm64-release
+app-build-release:
     ./gradlew -P monfluo-arm64 assembleRelease
 
 [group('app')]
-app-build-release-all: app-copy-native-libs-all-release
+app-build-release-all:
     ./gradlew -P monfluo-all -P monfluo-universal assembleRelease
 
 [group('app')]
-app-install: app-build
+app-install:
     adb install app/build/outputs/apk/debug/monfluo-*-arm64-v8a-debug.apk
     
 [group('app')]
@@ -159,7 +162,7 @@ app-kill-release:
     adb shell am force-stop org.monfluo.wallet.android
 
 [group('app')]
-app-run: app-install app-kill
+app-run:
     adb shell monkey -p org.monfluo.wallet.android.debug 1
 
 [group('app')]
