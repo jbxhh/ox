@@ -3,6 +3,7 @@ pub struct TransactionView {
     pub transaction_hash: [u8; 32],
     pub timestamp: u64,
     pub fee: u64,
+    pub confirmations: u32,
     pub inputs: Vec<TransactionViewInput>,
     pub spends: Vec<TransactionViewSpend>,
 }

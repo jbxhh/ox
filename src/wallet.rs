@@ -1,16 +1,20 @@
+pub mod view;
 mod atomic_fs;
 mod encryption;
 mod io;
 mod secrets;
 mod state;
 mod sync;
-mod view;
+
+use monero_wallet::transaction::Timelock;
+pub use sync::WalletSyncState;
+pub use sync::WalletSyncObserver;
 
 use crate::transport::MonfluoTransport;
 use crate::wallet::secrets::WalletSecrets;
 use crate::wallet::state::{WalletOutputWrapper, WalletState};
 use crate::wallet::view::transaction::{TransactionViewInput, TransactionViewSpend};
-use arc_swap::{ArcSwap, ArcSwapOption};
+use arc_swap::ArcSwap;
 use chrono::NaiveDateTime;
 use curve25519_dalek::constants::ED25519_BASEPOINT_TABLE;
 use monero_daemon_rpc::MoneroDaemon;
@@ -28,6 +32,7 @@ use monero_wallet::{
 use monero_wallet_util::seed::Seed;
 use rand::RngCore;
 use std::collections::HashMap;
+use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
@@ -36,6 +41,8 @@ const WALLETS_DIRECTORY_FILE_NAME: &str = "wallets";
 const WALLET_SECRETS_FILE_NAME: &str = "secrets.bin";
 const WALLET_DATA_FILE_NAME: &str = "data.bin";
 
+pub type Daemon = Arc<MoneroDaemon<MonfluoTransport>>;
+
 #[derive(Zeroize, ZeroizeOnDrop)]
 pub struct Wallet {
     #[zeroize(skip)]
@@ -43,10 +50,6 @@ pub struct Wallet {
     secrets: WalletSecrets,
     #[zeroize(skip)]
     state: ArcSwap<WalletState>,
-    #[zeroize(skip)]
-    daemon: ArcSwapOption<MoneroDaemon<MonfluoTransport>>,
-    #[zeroize(skip)]
-    status: ArcSwap<WalletStatus>,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -100,8 +103,6 @@ impl Wallet {
             path: wallet_dir_path,
             secrets,
             state,
-            daemon: ArcSwapOption::new(None),
-            status: ArcSwap::new(Arc::new(WalletStatus::Connecting)),
         })
     }
 
@@ -156,50 +157,13 @@ impl Wallet {
             .and_then(|file_name| file_name.to_str())
     }
 
-    pub fn status(&self) -> WalletStatus {
-        **self.status.load()
-    }
-
-    pub(crate) fn set_status(&self, status: WalletStatus) {
-        self.status.store(Arc::new(status));
-    }
-
-    // TODO: there is obviously a race, think of a better way to do that
-    // Also, what if we have already connected to a daemon?
-    pub async fn connect(&self, url: String, proxy: Option<reqwest::Proxy>) {
-        self.set_status(WalletStatus::Connecting);
-        let daemon = MonfluoTransport::new(url, proxy).await.unwrap();
-        self.daemon.store(Some(Arc::new(daemon)));
-        self.set_status(WalletStatus::Connected);
-    }
-
-    pub async fn refresh(self: Arc<Self>) -> bool {
-        match sync::start_sync(self) {
-            Some(future) => {
-                future.await;
-                true
-            }
-            None => false,
-        }
-    }
-
-    pub fn refresh_async(self: Arc<Self>) -> bool {
-        match sync::start_sync(self) {
-            Some(future) => {
-                tokio::spawn(future);
-                true
-            }
-            None => false,
-        }
+    pub async fn sync<O: sync::WalletSyncObserver>(self: Arc<Self>, daemon: Daemon, observer: O) {
+        sync::sync(self, daemon, observer).await;
     }
 
     pub async fn close(self) {}
 
-    pub async fn create_transaction(&self, address: &str, amount: u64) -> SignableTransaction {
-        let daemon = self
-            .daemon
-            .load_full()
-            .expect("Failed to create transaction because there is no daemon");
+    pub async fn create_transaction(&self, address: &str, amount: u64, daemon: Daemon) -> SignableTransaction {
         let state = self.state.load();
         let rct_type: RctType = RctType::ClsagBulletproofPlus;
         let outgoing_view_key: Zeroizing<[u8; 32]> = {
@@ -228,17 +192,47 @@ impl Wallet {
             .unwrap()
     }
 
-    pub async fn send_transaction(&self, transaction: Transaction) {
-        let daemon = self
-            .daemon
-            .load_full()
-            .expect("Failed to create transaction because there is no daemon");
+    pub async fn send_transaction(&self, transaction: Transaction, daemon: Daemon) {
         daemon.publish_transaction(&transaction).await.unwrap();
+    }
+
+    pub fn register_new_account(&self) -> u32 {
+        let mut last_account = None;
+        self.state.rcu(|state| {
+            let mut state = state.deref().clone();
+            let last_tracked_account = state.tracked_addresses.last_key_value().map(|(k, _v)| *k).expect("there are no tracked addresses");
+            let new_account = last_tracked_account + 1;
+            state.tracked_addresses.insert(new_account, 0);
+            last_account = Some(new_account);
+            Arc::new(state)
+        });
+        last_account.expect("last account was not set after registering new account")
+    }
+
+    pub fn register_new_address(&self, account_index: u32) -> Option<u32> {
+        let mut last_address = None;
+        self.state.rcu(|state| {
+            let mut state = state.deref().clone();
+            match state.tracked_addresses.get(&account_index).copied() {
+                Some(last_tracked_address) => {
+                    let new_address = last_tracked_address + 1;
+                    state.tracked_addresses.insert(account_index, new_address);
+                    last_address = Some(new_address);
+                    Arc::new(state)
+                },
+                None => {
+                    Arc::new(state)
+                },
+            }
+        });
+        last_address
     }
 
     pub fn balance_view(&self) -> view::balance::BalanceView {
         let state = self.state.load();
         let mut total = 0;
+        let mut unlocked = 0;
+        let mut pending = 0;
         for output in state.outputs.iter() {
             if state
                 .cache
@@ -246,13 +240,19 @@ impl Wallet {
                 .get(&output.cached_key_image)
                 .is_none()
             {
-                total += output.inner.commitment().amount;
+                let amount = output.inner.commitment().amount;
+                total += amount;
+                if let Some(wallet_height) = state.height && let Some(height) = wallet_height.current && (output.inner.additional_timelock() == Timelock::None || matches!(output.inner.additional_timelock(), Timelock::Block(block) if block >= height as usize)) {
+                    unlocked += amount;
+                } else {
+                    pending += amount;
+                }
             }
         }
         view::balance::BalanceView {
             total,
-            unlocked: 0,
-            pending: 0,
+            unlocked,
+            pending,
             frozen: 0,
         }
     }
@@ -314,8 +314,9 @@ impl Wallet {
         }
     }
 
-    pub fn transactions_view(&self) -> Vec<view::transaction::TransactionView> {
+    pub fn transaction_views(&self) -> Vec<view::transaction::TransactionView> {
         let state = self.state.load();
+        let current_height = state.height.and_then(|wallet_height| wallet_height.current);
 
         let mut raw_transactions = state.transactions.clone();
         raw_transactions.sort_by_key(|raw_transaction| (raw_transaction.block_info.block.height, raw_transaction.hash));
@@ -367,6 +368,7 @@ impl Wallet {
                     transaction_hash: raw_transaction.hash,
                     timestamp: raw_transaction.block_info.timestamp,
                     fee: raw_transaction.inner.fee(),
+                    confirmations: current_height.map_or(0, |current_height| current_height.saturating_sub(raw_transaction.block_info.block.height)),
                     inputs,
                     spends,
                 }

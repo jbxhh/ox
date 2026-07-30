@@ -1,39 +1,38 @@
 use std::sync::Arc;
 
-use chrono::Local;
-use monero_daemon_rpc::MoneroDaemon;
 use monero_wallet::{
     Scanner,
     address::SubaddressIndex,
     interface::{ProvidesBlockchainMeta, ProvidesUnvalidatedScannableBlocks, ScannableBlock},
     transaction::Input,
 };
-use tracing::{debug, info, warn};
+use tracing::{debug, info};
 
 use crate::{
-    transport::MonfluoTransport,
-    wallet::{Wallet, WalletStatus, state::BlockIdentifier},
+    wallet::{Wallet, state::BlockIdentifier},
 };
 
 const STEP: u32 = 1000;
+const ACCOUNTS: u32 = 100;
+const ADDRESSES: u32 = 1000;
 
-// the future must be awaited, otherwise the status is going to be wrong
-#[must_use]
-pub fn start_sync(wallet: Arc<Wallet>) -> Option<impl Future<Output = ()> + 'static> {
-    let Some(daemon) = wallet.daemon.load_full() else {
-        warn!("Cannot sync because there is no daemon available");
-        return None;
-    };
-    let initial_wallet_status = wallet.status();
-    if !matches!(initial_wallet_status, WalletStatus::Connected | WalletStatus::Synchronized { .. }) {
-        warn!("Refusing to sync, because wallet status is neither connected nor synchronized");
-        return None;
-    }
-    wallet.set_status(WalletStatus::StartingSynchronization);
-    Some(sync(wallet, daemon))
+pub enum WalletSyncState {
+    PreparingForSync,
+    StartingSync {
+        target_height: u32,
+    },
+    Syncing {
+        target_height: u32,
+    },
+    FinishedSync,
 }
 
-async fn sync(wallet: Arc<Wallet>, daemon: Arc<MoneroDaemon<MonfluoTransport>>) {
+pub trait WalletSyncObserver {
+    fn observe(&mut self, state: WalletSyncState) -> impl Future<Output = ()>;
+}
+
+pub async fn sync<O: WalletSyncObserver>(wallet: Arc<Wallet>, daemon: super::Daemon, mut observer: O) {
+    observer.observe(WalletSyncState::PreparingForSync).await;
     let mut state = (*wallet.state()).clone();
     let wallet_height = state
         .height()
@@ -43,26 +42,20 @@ async fn sync(wallet: Arc<Wallet>, daemon: Arc<MoneroDaemon<MonfluoTransport>>) 
                 .unwrap_or(wallet_height.start.saturating_sub(1))
         })
         .unwrap_or(0);
-
     let mut scanner = Scanner::new(wallet.view_pair());
-    for (&account, &max_address) in state.tracked_addresses() {
+    for account in 0..ACCOUNTS {
         let from_address = if account == 0 { 1 } else { 0 };
-        for address in from_address..=max_address {
+        for address in from_address..=ADDRESSES {
             scanner.register_subaddress(SubaddressIndex::new(account, address).expect("failed to construct subbaddress index during sync when registering addresses in scanner"));
         }
     }
-
     let target_height = daemon
         .latest_block_number()
         .await
         .expect("Failed to fetch latest block number") as u32;
     info!("Will be syncing from current wallet height {} to the latest block number {}", wallet_height, target_height);
 
-    wallet.set_status(WalletStatus::Synchronizing {
-        target: target_height,
-        updated_at: Local::now().naive_local(),
-    });
-
+    observer.observe(WalletSyncState::StartingSync { target_height }).await;
     let mut handle = Some(tokio::spawn({
         let daemon = daemon.clone();
         async move {
@@ -134,6 +127,15 @@ async fn sync(wallet: Arc<Wallet>, daemon: Arc<MoneroDaemon<MonfluoTransport>>) 
                         .find(|(transaction_hash, _transaction)| **transaction_hash == output.transaction())
                         .expect("Could not find transaction of a wallet output");
                     info!("Found output with relative id {} to address {:?} and amount {} in transaction {}", output.index_on_blockchain(), output.subaddress(), output.commitment().amount, *crate::util::bytes_to_hex(transaction_hash));
+                    if let Some(subaddress_index) = output.subaddress() {
+                        let account = subaddress_index.account();
+                        let address = subaddress_index.address();
+                        if state.tracked_addresses.get(&account).map_or(true, |&last_tracked_address| last_tracked_address <= address) {
+                            let new_last_tracked_address = address + 1;
+                            info!("Updating last tracked address for account {} to {}", account, new_last_tracked_address);
+                            state.tracked_addresses.insert(account, new_last_tracked_address);
+                        }
+                    }
                     state.add_transaction(transaction.clone(), *transaction_hash, BlockIdentifier::new(block_number, block_hash), block.block.header.timestamp);
                     state.add_output(output, wallet.secrets.spend_key());
                 }
@@ -161,17 +163,13 @@ async fn sync(wallet: Arc<Wallet>, daemon: Arc<MoneroDaemon<MonfluoTransport>>) 
             state.set_current_height(Some(block_number));
         }
 
-        info!("Finished processing batch of blocks");
         wallet.update_state(state.clone());
-        wallet.set_status(WalletStatus::Synchronizing {
-            target: target_height,
-            updated_at: Local::now().naive_local(),
-        });
+        info!("Finished processing batch of blocks");
         wallet.store().await;
+        debug!("Wallet stored after processing batch of blocks");
+        observer.observe(WalletSyncState::Syncing { target_height }).await;
     }
 
     info!("Finished syncing");
-    wallet.set_status(WalletStatus::Synchronized {
-        finished_at: Local::now().naive_local(),
-    });
+    observer.observe(WalletSyncState::FinishedSync).await;
 }

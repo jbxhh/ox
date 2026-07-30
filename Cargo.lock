@@ -786,7 +786,7 @@ dependencies = [
 [[package]]
 name = "monero-address"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#28928cefcac8903660c2bcc53fcfa5bdeae8336e"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
 dependencies = [
  "monero-base58 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
  "monero-ed25519 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
@@ -812,7 +812,7 @@ dependencies = [
 [[package]]
 name = "monero-base58"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#28928cefcac8903660c2bcc53fcfa5bdeae8336e"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
 dependencies = [
  "monero-primitives 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
  "std-shims",
@@ -830,7 +830,7 @@ dependencies = [
 [[package]]
 name = "monero-borromean"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#28928cefcac8903660c2bcc53fcfa5bdeae8336e"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
 dependencies = [
  "curve25519-dalek",
  "monero-ed25519 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
@@ -854,7 +854,7 @@ dependencies = [
 [[package]]
 name = "monero-bulletproofs"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#28928cefcac8903660c2bcc53fcfa5bdeae8336e"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
 dependencies = [
  "curve25519-dalek",
  "monero-bulletproofs-generators 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
@@ -886,7 +886,7 @@ dependencies = [
 [[package]]
 name = "monero-bulletproofs-generators"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#28928cefcac8903660c2bcc53fcfa5bdeae8336e"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
 dependencies = [
  "curve25519-dalek",
  "monero-ed25519 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
@@ -910,7 +910,7 @@ dependencies = [
 [[package]]
 name = "monero-clsag"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#28928cefcac8903660c2bcc53fcfa5bdeae8336e"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
 dependencies = [
  "curve25519-dalek",
  "group",
@@ -944,7 +944,7 @@ dependencies = [
 [[package]]
 name = "monero-daemon-rpc"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#28928cefcac8903660c2bcc53fcfa5bdeae8336e"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
 dependencies = [
  "hex",
  "monero-address 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
@@ -959,7 +959,7 @@ dependencies = [
 [[package]]
 name = "monero-ed25519"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#28928cefcac8903660c2bcc53fcfa5bdeae8336e"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
 dependencies = [
  "crypto-bigint",
  "curve25519-dalek",
@@ -989,7 +989,7 @@ dependencies = [
 [[package]]
 name = "monero-epee"
 version = "0.2.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#28928cefcac8903660c2bcc53fcfa5bdeae8336e"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
 
 [[package]]
 name = "monero-epee"
@@ -999,12 +999,12 @@ source = "git+https://codeberg.org/Monfluo/monero-oxide#055accb2d87dcfc5f1b09bbc
 [[package]]
 name = "monero-epee-derive"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-wallet-util.git?branch=monfluo#6d8ed07121fb97fa80d69da079a0e9612d80dcc0"
+source = "git+https://codeberg.org/Monfluo/monero-wallet-util.git?branch=monfluo#cf4dfac563de75f77c71520a9e9004404554203c"
 
 [[package]]
 name = "monero-epee-traits"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-wallet-util.git?branch=monfluo#6d8ed07121fb97fa80d69da079a0e9612d80dcc0"
+source = "git+https://codeberg.org/Monfluo/monero-wallet-util.git?branch=monfluo#cf4dfac563de75f77c71520a9e9004404554203c"
 dependencies = [
  "monero-epee 0.2.0 (git+https://codeberg.org/Monfluo/monero-oxide)",
 ]
@@ -1012,7 +1012,7 @@ dependencies = [
 [[package]]
 name = "monero-interface"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#28928cefcac8903660c2bcc53fcfa5bdeae8336e"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
 dependencies = [
  "hex",
  "monero-oxide 0.1.4-alpha (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
@@ -1036,7 +1036,7 @@ dependencies = [
 [[package]]
 name = "monero-io"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#28928cefcac8903660c2bcc53fcfa5bdeae8336e"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
 dependencies = [
  "std-shims",
 ]
@@ -1052,7 +1052,7 @@ dependencies = [
 [[package]]
 name = "monero-mlsag"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#28928cefcac8903660c2bcc53fcfa5bdeae8336e"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
 dependencies = [
  "curve25519-dalek",
  "monero-ed25519 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
@@ -1078,7 +1078,7 @@ dependencies = [
 [[package]]
 name = "monero-oxide"
 version = "0.1.4-alpha"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#28928cefcac8903660c2bcc53fcfa5bdeae8336e"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
 dependencies = [
  "curve25519-dalek",
  "hex-literal",
@@ -1114,7 +1114,7 @@ dependencies = [
 [[package]]
 name = "monero-primitives"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#28928cefcac8903660c2bcc53fcfa5bdeae8336e"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
 dependencies = [
  "sha3",
 ]
@@ -1130,7 +1130,7 @@ dependencies = [
 [[package]]
 name = "monero-seed"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-wallet-util.git?branch=monfluo#6d8ed07121fb97fa80d69da079a0e9612d80dcc0"
+source = "git+https://codeberg.org/Monfluo/monero-wallet-util.git?branch=monfluo#cf4dfac563de75f77c71520a9e9004404554203c"
 dependencies = [
  "curve25519-dalek",
  "rand_core",
@@ -1144,7 +1144,7 @@ dependencies = [
 [[package]]
 name = "monero-wallet"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#28928cefcac8903660c2bcc53fcfa5bdeae8336e"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
 dependencies = [
  "curve25519-dalek",
  "hex",
@@ -1186,7 +1186,7 @@ dependencies = [
 [[package]]
 name = "monero-wallet-util"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-wallet-util.git?branch=monfluo#6d8ed07121fb97fa80d69da079a0e9612d80dcc0"
+source = "git+https://codeberg.org/Monfluo/monero-wallet-util.git?branch=monfluo#cf4dfac563de75f77c71520a9e9004404554203c"
 dependencies = [
  "monero-epee-derive",
  "monero-epee-traits",
@@ -1301,7 +1301,7 @@ checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
 [[package]]
 name = "polyseed"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-wallet-util.git?branch=monfluo#6d8ed07121fb97fa80d69da079a0e9612d80dcc0"
+source = "git+https://codeberg.org/Monfluo/monero-wallet-util.git?branch=monfluo#cf4dfac563de75f77c71520a9e9004404554203c"
 dependencies = [
  "pbkdf2",
  "rand_core",

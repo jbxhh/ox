@@ -100,8 +100,7 @@ pub struct WalletStateCache {
 impl WalletState {
     pub fn new(height: Option<u32>) -> Self {
         let mut tracked_addresses = BTreeMap::new();
-        tracked_addresses.insert(0, 10);
-        tracked_addresses.insert(1, 10);
+        tracked_addresses.insert(0, 0);
         Self {
             height: height.map(WalletHeight::new),
             tracked_addresses,

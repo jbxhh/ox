@@ -11,6 +11,7 @@ use std::sync::{LazyLock, RwLock, RwLockWriteGuard};
 use rand::SeedableRng;
 
 pub use monero_wallet;
+pub use monero_daemon_rpc;
 pub use monero_wallet_util;
 use rand_chacha::ChaCha20Rng;
 
