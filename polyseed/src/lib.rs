@@ -315,6 +315,11 @@ impl Polyseed {
 
     Self::from(language, 0, birthday, entropy).unwrap()
   }
+  
+  /// Get language of this seed
+  pub fn language(&self) -> Language {
+    self.language
+  }
 
   /// Create a new `Polyseed` from a String.
   #[allow(clippy::needless_pass_by_value)]

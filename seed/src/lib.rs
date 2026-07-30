@@ -330,6 +330,11 @@ impl Seed {
     key_to_seed(lang, Zeroizing::new(Scalar::from_bytes_mod_order_wide(scalar_bytes.deref())))
   }
 
+  /// Get language of this seed
+  pub fn language(&self) -> Language {
+      self.0
+  }
+
   /// Parse a seed from a string.
   #[allow(clippy::needless_pass_by_value)]
   pub fn from_string(lang: Language, words: Zeroizing<String>) -> Result<Seed, SeedError> {
