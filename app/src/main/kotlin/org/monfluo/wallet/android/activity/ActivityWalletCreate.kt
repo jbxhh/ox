@@ -1,10 +1,7 @@
 package org.monfluo.wallet.android.activity
 
-import android.content.ComponentName
 import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.IBinder
 import android.text.Editable
 import android.text.Spannable
 import android.text.style.ForegroundColorSpan
@@ -31,10 +28,7 @@ import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.data.SeedType
 import org.monfluo.wallet.android.livedata.combineLiveDatas
 import org.monfluo.wallet.android.model.MoneroNetworkType
-import org.monfluo.wallet.android.model.Wallet
 import org.monfluo.wallet.android.model.WalletManager
-import org.monfluo.wallet.android.model.WalletStatus
-import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.Helper
 import org.monfluo.wallet.android.util.PreferenceUtils
@@ -42,7 +36,11 @@ import org.monfluo.wallet.android.util.SimpleTextWatcher
 import org.monfluo.wallet.android.util.TextHelper
 import org.monfluo.wallet.android.util.component.ActivityBase
 import org.monfluo.wallet.lib.Monfluo
+import org.monfluo.wallet.lib.seed.MoneroSeed
+import org.monfluo.wallet.lib.seed.MoneroSeedLanguage
+import org.monfluo.wallet.lib.seed.Polyseed
 import org.monfluo.wallet.lib.seed.PolyseedLanguage
+import org.monfluo.wallet.lib.seed.Seed
 import timber.log.Timber
 import java.io.File
 import kotlin.io.path.Path
@@ -418,108 +416,43 @@ internal class CreateWalletViewModel : ViewModel() {
             return
         }
 
-        val wallet: Wallet =
-            if (walletSeed.isEmpty()) {
-                when (seedTypeValue) {
-                    SeedType.MONERO -> {
-                        WalletManager.instance.createWallet(
-                            walletFile,
-                            password,
-                            "English",
-                            networkType.value!!,
-                        )
-                    }
-                    SeedType.POLYSEED -> {
-                        WalletManager.instance.createWalletPolyseed(
-                            walletFile,
-                            password,
-                            offset,
-                            Constants.MNEMONIC_LANGUAGE,
-                            networkType.value!!,
-                        )
-                    }
+        if (walletSeed.isNotBlank()) {
+            val seed: Seed<*>? = Polyseed.fromMnemonic(walletSeed) ?: MoneroSeed.fromMnemonic(walletSeed)
+            if (seed == null) {
+                activity.runOnUiThread {
+                    Toast
+                        .makeText(
+                            activity,
+                            "Bad seed!",
+                            Toast.LENGTH_SHORT,
+                        ).show()
                 }
-            } else {
-                if (getMnemonicType(walletSeed) == null) {
-                    activity.runOnUiThread {
-                        creatingWallet.postValue(false)
-                        Toast
-                            .makeText(
-                                activity,
-                                application.getString(R.string.invalid_mnemonic_code),
-                                Toast.LENGTH_SHORT,
-                            ).show()
-                    }
-                    return
-                }
-                val restoreHeight = restoreHeightText.toLongOrNull() ?: 0
-
-                when (seedTypeValue) {
-                    SeedType.MONERO -> {
-                        WalletManager.instance.recoveryWallet(
-                            walletFile,
-                            password,
-                            walletSeed,
-                            offset,
-                            restoreHeight,
-                            networkType.value!!,
-                        )
-                    }
-                    SeedType.POLYSEED -> {
-                        WalletManager.instance.recoveryWalletPolyseed(
-                            walletFile,
-                            password,
-                            walletSeed,
-                            offset,
-                            networkType.value!!,
-                        )
-                    }
-                }
+                return
             }
-        val walletStatus = wallet.getWalletStatusWithError()
-        val ok = walletStatus.status == WalletStatus.Ok
-        if (ok) {
-            PreferenceUtils.setWalletNetworkType(
-                activity,
-                walletName,
-                networkType.value!!,
-            )
-            val walletServiceIntent = Intent(activity.applicationContext, WalletService::class.java)
-            activity.startForegroundService(walletServiceIntent)
-            activity.bindService(
-                walletServiceIntent,
-                object : ServiceConnection {
-                    override fun onServiceConnected(
-                        name: ComponentName?,
-                        service: IBinder?,
-                    ) {
-                        Timber.d("Wallet Service connected")
-                        val walletService = (service as WalletService.WalletServiceBinder).service
-                        walletService.setUninitWallet(wallet)
-                        activity.setResult(1, Intent())
-                        activity.finish()
-                    }
+            Monfluo.restoreWallet(Helper.getWalletRoot(activity).absolutePath, walletName, password, seed, null, restoreHeightText.toIntOrNull())
 
-                    override fun onServiceDisconnected(name: ComponentName?) {
-                        Timber.i("Wallet Service disconnected")
-                    }
-                },
-                0,
-            )
-        } else {
             activity.runOnUiThread {
-                creatingWallet.postValue(false)
                 Toast
                     .makeText(
                         activity,
-                        application.getString(
-                            R.string.create_wallet_failed,
-                            walletStatus.error,
-                        ),
+                        "Wallet restored!",
+                        Toast.LENGTH_SHORT,
+                    ).show()
+            }
+        } else {
+            Monfluo.createWallet(Helper.getWalletRoot(activity).absolutePath, walletName, password, MoneroSeedLanguage.English, "")
+
+            activity.runOnUiThread {
+                Toast
+                    .makeText(
+                        activity,
+                        "Wallet created!",
                         Toast.LENGTH_SHORT,
                     ).show()
             }
         }
+
+        activity.finish()
     }
 
     private fun getMnemonicType(seed: String): SeedType? {

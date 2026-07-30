@@ -1,5 +1,8 @@
 package org.monfluo.wallet.lib.seed
 
-sealed interface Seed<L : SeedLanguage> {
-    val type: SeedType
+abstract class Seed<L : SeedLanguage> internal constructor(
+    val mnemonic: String,
+    val language: L,
+) {
+    abstract val type: SeedType
 }

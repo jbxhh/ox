@@ -15,3 +15,4 @@
 * Install rustup targets for cross-compiling to Android: `rustup target add armv7-linux-androideabi aarch64-linux-android x86_64-linux-android`
 * Run the setup script: `just setup`, and follow the instructions
 * Build and test everything: `just test`
+* Run the app: `just app`

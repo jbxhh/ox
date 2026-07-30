@@ -24,26 +24,26 @@ import android.widget.RadioButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.android.R
-import org.monfluo.wallet.android.data.Address
 import org.monfluo.wallet.android.model.MoneroUnit
 import org.monfluo.wallet.android.util.TextHelper
+import org.monfluo.wallet.lib.data.AddressView
 
 class AdapterAddress(
-    private var addresses: List<Address>,
-    private var selectedAddress: Address?,
+    private var addresses: List<AddressView>,
+    private var selectedAddressIndex: Int,
     private val streetMode: Boolean,
     private val listener: AdapterAddressListener,
 ) : RecyclerView.Adapter<AdapterAddress.ViewHolder>() {
-    fun submitAddresses(addresses: List<Address>) {
+    fun submitAddresses(addresses: List<AddressView>) {
         if (this.addresses != addresses) {
             this.addresses = addresses
             notifyDataSetChanged()
         }
     }
 
-    fun submitSelectedAddress(selectedAddress: Address?) {
-        if (this.selectedAddress != selectedAddress) {
-            this.selectedAddress = selectedAddress
+    fun submitSelectedAddressIndex(selectedAddressIndex: Int) {
+        if (this.selectedAddressIndex != selectedAddressIndex) {
+            this.selectedAddressIndex = selectedAddressIndex
             notifyDataSetChanged()
         }
     }
@@ -64,17 +64,17 @@ class AdapterAddress(
         position: Int,
     ) {
         val address = addresses[position]
-        viewHolder.bind(address, streetMode, selectedAddress != null && address == selectedAddress)
+        viewHolder.bind(address, streetMode, position == selectedAddressIndex)
     }
 
     override fun getItemCount(): Int = addresses.size
 
     interface AdapterAddressListener {
-        fun onAddressSelected(address: Address)
+        fun onAddressSelected(address: AddressView)
 
-        fun onAddressEditLabel(address: Address)
+        fun onAddressEditLabel(address: AddressView)
 
-        fun onAddressCopy(address: Address)
+        fun onAddressCopy(address: AddressView)
     }
 
     class ViewHolder(
@@ -91,15 +91,15 @@ class AdapterAddress(
         private val copyAddressImageButton: ImageButton = itemView.findViewById(R.id.copy_address_imagebutton)
 
         fun bind(
-            address: Address,
+            address: AddressView,
             streetMode: Boolean,
             isSelected: Boolean,
         ) {
             addressRadioButton.setChecked(isSelected)
-            addressLabelTextView.text = itemView.resources.getString(R.string.address_label, address.addressIndex, address.label)
-            addressBalanceTextView.text = TextHelper.formatUnlockedBalance(itemView.context, address.totalBalance, MoneroUnit.MONERO, streetMode, 0)
+            addressLabelTextView.text = itemView.resources.getString(R.string.address_label, address.addressIndex, "address.label")
+            addressBalanceTextView.text = TextHelper.formatUnlockedBalance(itemView.context, address.amount, MoneroUnit.MONERO, streetMode, 0)
 
-            addressTextView.text = TextHelper.formatAddress(address.address)
+            addressTextView.text = TextHelper.formatAddress(address.value)
             if (address.used) {
                 addressTextView.setTextColor(view.resources.getColor(R.color.text_subtle))
             } else {

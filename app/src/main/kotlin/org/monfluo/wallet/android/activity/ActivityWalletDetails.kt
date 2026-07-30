@@ -15,12 +15,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.util.Constants
+import org.monfluo.wallet.android.util.Helper
 import org.monfluo.wallet.android.util.PreferenceUtils
 import org.monfluo.wallet.android.util.component.ActivityBase
-import kotlin.io.path.Path
-import kotlin.io.path.deleteIfExists
-import kotlin.io.path.moveTo
-import kotlin.io.path.name
+import org.monfluo.wallet.lib.Monfluo
 import kotlin.math.max
 
 class ActivityWalletDetails : ActivityBase() {
@@ -67,26 +65,24 @@ class ActivityWalletDetails : ActivityBase() {
             finish()
         }
         doneButton.setOnClickListener {
-            val walletPath = viewModel.walletPath.value!!
+            val wallet = viewModel.wallet.value!!
             val newWalletName = walletNameEditText.text.toString()
-            if (Path(walletPath).name != newWalletName) {
-                Path(walletPath).moveTo(Path(walletPath).resolveSibling(newWalletName))
-                Path("$walletPath.keys").moveTo(Path(walletPath).resolveSibling("$newWalletName.keys"))
-                PreferenceUtils.renameWalletNetworkType(this@ActivityWalletDetails, Path(walletPath).name, newWalletName)
+            if (wallet != newWalletName) {
+                Monfluo.renameWallet(Helper.getWalletRoot(this).absolutePath, wallet, newWalletName)
+                PreferenceUtils.renameWalletNetworkType(this@ActivityWalletDetails, wallet, newWalletName)
             }
             finish()
         }
         deleteButton.setOnClickListener {
-            val walletPath = viewModel.walletPath.value!!
+            val wallet = viewModel.wallet.value!!
 
             AlertDialog
                 .Builder(this)
                 .setTitle(getString(R.string.dialog_delete_wallet_title))
                 .setMessage(getString(R.string.dialog_delete_wallet_message))
                 .setPositiveButton(getString(R.string.dialog_delete_wallet_action_yes)) { _, _ ->
-                    Path(walletPath).deleteIfExists()
-                    Path("$walletPath.keys").deleteIfExists()
-                    PreferenceUtils.deleteWalletNetworkType(this@ActivityWalletDetails, Path(walletPath).name)
+                    Monfluo.deleteWallet(Helper.getWalletRoot(this).absolutePath, wallet)
+                    PreferenceUtils.deleteWalletNetworkType(this@ActivityWalletDetails, wallet)
                     finish()
                 }.setNegativeButton(getString(R.string.dialog_delete_wallet_action_no), null)
                 .create()
@@ -95,21 +91,21 @@ class ActivityWalletDetails : ActivityBase() {
     }
 
     private fun bindObservers() {
-        viewModel.walletPath.observe(this) { walletPath ->
-            if (walletPath != null && walletNameEditText.text.isEmpty()) {
-                walletNameEditText.setText(Path(walletPath).name)
+        viewModel.wallet.observe(this) { wallet ->
+            if (wallet != null && walletNameEditText.text.isEmpty()) {
+                walletNameEditText.setText(wallet)
             }
         }
     }
 
     private fun init() {
-        val walletPath = intent.getStringExtra(Constants.EXTRA_WALLET_PATH)
-        if (viewModel.walletPath.value == null) {
-            viewModel.walletPath.value = walletPath
+        val wallet = intent.getStringExtra(Constants.EXTRA_WALLET_NAME)
+        if (viewModel.wallet.value == null) {
+            viewModel.wallet.value = wallet
         }
     }
 }
 
 internal class ActivityWalletDetailsViewModel : ViewModel() {
-    val walletPath: MutableLiveData<String?> = MutableLiveData(null)
+    val wallet: MutableLiveData<String?> = MutableLiveData(null)
 }

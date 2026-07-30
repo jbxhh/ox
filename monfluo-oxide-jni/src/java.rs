@@ -1,12 +1,14 @@
 #![allow(non_snake_case, non_upper_case_globals)]
 
-use std::{fmt::Debug, sync::OnceLock};
+use std::{borrow::Cow, fmt::Debug, ops::Deref, str::FromStr, sync::OnceLock};
 
+use const_format::concatcp;
 use jni::{
-    Env,
+    Env, JValueOwned,
     objects::{JMethodID, JObject, JString, JValue},
-    signature::RuntimeMethodSignature,
-    strings::JNIString,
+    signature::{JavaType::Object, Primitive::Long, RuntimeFieldSignature, RuntimeMethodSignature},
+    strings::{JNIString, MUTF8Chars},
+    sys::{jint, jlong},
 };
 
 #[rustfmt::skip]
@@ -15,22 +17,97 @@ mod constants {
 
     pub const CLASS__java_lang_Object: &'static str = "java/lang/Object";
     pub const CLASS__java_lang_String: &'static str = "java/lang/String";
+    pub const CLASS__java_lang_Number: &'static str = "java/lang/Number";
+    pub const CLASS__java_lang_Number__METHOD__intValue0: &'static str = "intValue";
+    pub const CLASS__java_lang_Number__METHOD__intValue0__SIGNATURE: &'static str = "()I";
     pub const CLASS__java_lang_Enum: &'static str = "java/lang/Enum";
     pub const CLASS__java_lang_Enum__METHOD__name0: &'static str = "name";
     pub const CLASS__java_lang_Enum__METHOD__name0__SIGNATURE: &'static str = concat!("()L", CLASS__java_lang_String, ";");
+    
     pub const CLASS__java_util_List: &'static str = "java/util/List";
     pub const CLASS__java_util_List__METHOD__add1: &'static str = "add";
     pub const CLASS__java_util_List__METHOD__add1__SIGNATURE: &'static str = concat!("(L", CLASS__java_lang_Object, ";)Z");
     pub const CLASS__java_util_ArrayList: &'static str = "java/util/ArrayList";
     pub const CLASS__java_util_ArrayList__METHOD__init0__SIGNATURE: &'static str = "()V";
+    
+    pub const CLASS__org_monfluo_wallet_lib_seed_SeedLanguge: &'static str = "org/monfluo/wallet/lib/seed/SeedLanguage";
+    pub const CLASS__org_monfluo_wallet_lib_seed_Seed: &'static str = "org/monfluo/wallet/lib/seed/Seed";
+    pub const CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getMnemonic0: &'static str = "getMnemonic";
+    pub const CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getMnemonic0__SIGNATURE: &'static str = concat!("()L", CLASS__java_lang_String, ";");
+    pub const CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getLanguage0: &'static str = "getLanguage";
+    pub const CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getLanguage0__SIGNATURE: &'static str = concat!("()L", CLASS__org_monfluo_wallet_lib_seed_SeedLanguge, ";");
+    pub const CLASS__org_monfluo_wallet_lib_seed_MoneroSeedLanguage: &'static str = "org/monfluo/wallet/lib/seed/MoneroSeedLanguage";
+    pub const CLASS__DOT__org_monfluo_wallet_lib_seed_MoneroSeedLanguage: &'static str = "org.monfluo.wallet.lib.seed.MoneroSeedLanguage";
+    pub const CLASS__org_monfluo_wallet_lib_seed_MoneroSeed: &'static str = "org/monfluo/wallet/lib/seed/MoneroSeed";
+    pub const CLASS__DOT__org_monfluo_wallet_lib_seed_MoneroSeed: &'static str = "org.monfluo.wallet.lib.seed.MoneroSeed";
+    pub const CLASS__org_monfluo_wallet_lib_seed_MoneroSeed__METHOD__init2__SIGNATURE: &'static str = concat!("(L", CLASS__java_lang_String, ";L", CLASS__org_monfluo_wallet_lib_seed_MoneroSeedLanguage, ";)V");
+    pub const CLASS__org_monfluo_wallet_lib_seed_PolyseedLanguage: &'static str = "org/monfluo/wallet/lib/seed/PolyseedLanguage";
+    pub const CLASS__DOT__org_monfluo_wallet_lib_seed_PolyseedLanguage: &'static str = "org.monfluo.wallet.lib.seed.PolyseedLanguage";
+    pub const CLASS__org_monfluo_wallet_lib_seed_Polyseed: &'static str = "org/monfluo/wallet/lib/seed/Polyseed";
+    pub const CLASS__DOT__org_monfluo_wallet_lib_seed_Polyseed: &'static str = "org.monfluo.wallet.lib.seed.Polyseed";
+    pub const CLASS__org_monfluo_wallet_lib_seed_Polyseed__METHOD__init2__SIGNATURE: &'static str = concat!("(L", CLASS__java_lang_String, ";L", CLASS__org_monfluo_wallet_lib_seed_PolyseedLanguage, ";)V");
+    
+    pub const CLASS__org_monfluo_wallet_lib_wallet_Wallet: &'static str = "org/monfluo/wallet/lib/wallet/Wallet";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_Wallet__METHOD__init1__SIGNATURE: &'static str = "(J)V";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_Daemon: &'static str = "org/monfluo/wallet/lib/wallet/Daemon";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_Daemon__METHOD__init1__SIGNATURE: &'static str = "(J)V";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_WalletSyncState: &'static str = "org/monfluo/wallet/lib/wallet/WalletSyncState";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_PreparingForSync: &'static str = "org/monfluo/wallet/lib/wallet/PreparingForSync";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_PreparingForSync__METHOD__init0__SIGNATURE: &'static str = "()V";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_StartingSync: &'static str = "org/monfluo/wallet/lib/wallet/StartingSync";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_StartingSync__METHOD__init1__SIGNATURE: &'static str = "(I)V";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_Syncing: &'static str = "org/monfluo/wallet/lib/wallet/Syncing";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_Syncing__METHOD__init1__SIGNATURE: &'static str = "(I)V";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_FinishedSyncing: &'static str = "org/monfluo/wallet/lib/wallet/FinishedSyncing";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_FinishedSyncing__METHOD__init0__SIGNATURE: &'static str = "()V";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_WalletSyncObserver: &'static str = "org/monfluo/wallet/lib/wallet/WalletSyncObserver";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_WalletSyncObserver__METHOD__observe1: &'static str = "observe";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_WalletSyncObserver__METHOD__observe1__SIGNATURE: &'static str = concat!("(L", CLASS__org_monfluo_wallet_lib_wallet_WalletSyncState, ";)V");
+    
+    pub const CLASS__org_monfluo_wallet_lib_data_Balance: &'static str = "org/monfluo/wallet/lib/data/Balance";
+    pub const CLASS__org_monfluo_wallet_lib_data_Balance__METHOD__init4__SIGNATURE: &'static str = "(JJJJ)V";
+    pub const CLASS__org_monfluo_wallet_lib_data_AccountView: &'static str = "org/monfluo/wallet/lib/data/AccountView";
+    pub const CLASS__org_monfluo_wallet_lib_data_AccountView__METHOD__init2__SIGNATURE: &'static str = concat!("(IL", CLASS__java_util_List, ";)V");
+    pub const CLASS__org_monfluo_wallet_lib_data_AddressView: &'static str = "org/monfluo/wallet/lib/data/AddressView";
+    pub const CLASS__org_monfluo_wallet_lib_data_AddressView__METHOD__init5__SIGNATURE: &'static str = concat!("(IIL", CLASS__java_lang_String, ";ZJ)V");
+    pub const CLASS__org_monfluo_wallet_lib_data_TransactionHash: &'static str = "org/monfluo/wallet/lib/data/TransactionHash";
+    pub const CLASS__org_monfluo_wallet_lib_data_TransactionHash__METHOD__init1__SIGNATURE: &'static str = concat!("([B)V");
+    pub const CLASS__org_monfluo_wallet_lib_data_TransactionViewInput: &'static str = "org/monfluo/wallet/lib/data/TransactionViewInput";
+    pub const CLASS__org_monfluo_wallet_lib_data_TransactionViewInput__METHOD__init2__SIGNATURE: &'static str = concat!("(L", CLASS__java_lang_String, ";J)V");
+    pub const CLASS__org_monfluo_wallet_lib_data_TransactionViewSpend: &'static str = "org/monfluo/wallet/lib/data/TransactionViewSpend";
+    pub const CLASS__org_monfluo_wallet_lib_data_TransactionViewSpend__METHOD__init1__SIGNATURE: &'static str = "(J)V";
+    pub const CLASS__org_monfluo_wallet_lib_data_TransactionView: &'static str = "org/monfluo/wallet/lib/data/TransactionView";
+    pub const CLASS__org_monfluo_wallet_lib_data_TransactionView__METHOD__init6__SIGNATURE: &'static str = concat!("(L", CLASS__org_monfluo_wallet_lib_data_TransactionHash, ";JJIL", CLASS__java_util_List, ";L", CLASS__java_util_List, ";)V");
+
+    pub const CLASS__org_monfluo_wallet_lib_data_NodeInfo: &'static str = "org/monfluo/wallet/lib/data/NodeInfo";
+    pub const CLASS__org_monfluo_wallet_lib_data_NodeInfo__METHOD__init2__SIGNATURE: &'static str = "(JJ)V";
 }
 
 use constants::*;
+use monfluo_oxide::{
+    monero_wallet::interface::NodeInfo,
+    wallet::{
+        WalletSyncState,
+        view::{
+            account::AccountView,
+            address::AddressView,
+            balance::BalanceView,
+            transaction::{TransactionView, TransactionViewInput, TransactionViewSpend},
+        },
+    },
+};
+use zeroize::Zeroizing;
+
+pub const HANDLE_FIELD_NAME: &'static str = "_handle";
 
 #[rustfmt::skip]
 pub struct JniCache {
+    pub class__java_lang_Number__method__intValue0: JMethodID,
     pub class__java_lang_Enum__method__name0: JMethodID,
     pub class__java_util_List__method__add1: JMethodID,
+    pub class__org_monfluo_wallet_lib_wallet_WalletSyncObserver__method__observe1: JMethodID,
+    pub class__org_monfluo_wallet_lib_seed_Seed__method__getMnemonic0: JMethodID,
+    pub class__org_monfluo_wallet_lib_seed_Seed__method__getLanguage0: JMethodID,
 }
 
 impl Debug for JniCache {
@@ -84,8 +161,11 @@ macro_rules! find_method {
 #[rustfmt::skip]
 macro_rules! create_new_object {
     ($env:expr, $class:ident, $signature:ident, $arguments:expr) => {{
+        tracing::trace!("{}", const_format::concatcp!("Creating new object of class ", stringify!($class), " (\"", $class, "\") with constructor signature ", stringify!($signature), " (\"", $signature, "\") and arguments ", stringify!($arguments)));
         let class = find_class!($env, $class);
+        tracing::trace!("Found class");
         let runtime_method_signature = create_runtime_method_signature!($env, $signature);
+        tracing::trace!("Created runtime method signature");
         $env.new_object(class, runtime_method_signature.method_signature(), $arguments)
             .expect(const_format::concatcp!(
                 "Could not create new object for class ",
@@ -222,13 +302,21 @@ macro_rules! call_cached_method {
 
 #[rustfmt::skip]
 pub fn init_cache<'local>(env: &mut Env<'local>) {
+    let class__java_lang_Number__method__intValue0 = find_method!(env, CLASS__java_lang_Number, CLASS__java_lang_Number__METHOD__intValue0, CLASS__java_lang_Number__METHOD__intValue0__SIGNATURE);
     let class__java_lang_Enum__method__name0 = find_method!(env, CLASS__java_lang_Enum, CLASS__java_lang_Enum__METHOD__name0, CLASS__java_lang_Enum__METHOD__name0__SIGNATURE);
     let class__java_util_List__method__add1 = find_method!(env, CLASS__java_util_List, CLASS__java_util_List__METHOD__add1, CLASS__java_util_List__METHOD__add1__SIGNATURE);
+    let class__org_monfluo_wallet_lib_wallet_WalletSyncObserver__method__observe1 = find_method!(env, CLASS__org_monfluo_wallet_lib_wallet_WalletSyncObserver, CLASS__org_monfluo_wallet_lib_wallet_WalletSyncObserver__METHOD__observe1, CLASS__org_monfluo_wallet_lib_wallet_WalletSyncObserver__METHOD__observe1__SIGNATURE);
+    let class__org_monfluo_wallet_lib_seed_Seed__method__getMnemonic0 = find_method!(env, CLASS__org_monfluo_wallet_lib_seed_Seed, CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getMnemonic0, CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getMnemonic0__SIGNATURE);
+    let class__org_monfluo_wallet_lib_seed_Seed__method__getLanguage0 = find_method!(env, CLASS__org_monfluo_wallet_lib_seed_Seed, CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getLanguage0, CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getLanguage0__SIGNATURE);
 
     JNI_CACHE
         .set(JniCache {
+            class__java_lang_Number__method__intValue0,
             class__java_lang_Enum__method__name0,
             class__java_util_List__method__add1,
+            class__org_monfluo_wallet_lib_wallet_WalletSyncObserver__method__observe1,
+            class__org_monfluo_wallet_lib_seed_Seed__method__getMnemonic0,
+            class__org_monfluo_wallet_lib_seed_Seed__method__getLanguage0,
         })
         .expect("Failed to initialize JNI cache");
 }
@@ -237,50 +325,513 @@ pub fn get_cache() -> &'static JniCache {
     JNI_CACHE.get().expect("JNI cache was not initialized")
 }
 
-#[repr(transparent)]
-pub struct ArrayList<'local>(pub JObject<'local>);
+pub struct JavaStringHelper<'local> {
+    mutf8_chars: MUTF8Chars<'local, &'local JString<'local>>,
+}
 
-impl<'local> ArrayList<'local> {
-    pub fn new(env: &mut Env<'local>) -> Self {
-        let object = create_new_object!(
-            env,
-            CLASS__java_util_ArrayList,
-            CLASS__java_util_ArrayList__METHOD__init0__SIGNATURE,
-            &[]
-        );
-        Self(object)
+impl<'local> JavaStringHelper<'local> {
+    pub fn try_from_jstring(
+        env: &Env<'local>,
+        jstring: &'local JString<'local>,
+    ) -> Result<Self, jni::errors::Error> {
+        let mutf8_chars = jstring.mutf8_chars(env)?;
+        Ok(Self { mutf8_chars })
     }
 
-    pub fn add(
-        &self,
-        env: &mut Env<'local>,
-        cache: &'static JniCache,
-        object: JObject<'local>,
-    ) -> bool {
-        call_cached_method!(
-            env,
-            cache,
-            &self.0,
-            class__java_util_List__method__add1,
-            bool,
-            &[JValue::Object(&object).as_jni()]
-        )
+    pub fn from_jstring(env: &Env<'local>, jstring: &'local JString<'local>) -> Self {
+        Self::try_from_jstring(env, jstring)
+            .expect("Failed to construct JavaStringHelper from JString")
+    }
+
+    pub fn to_str(&'local self) -> Cow<'local, str> {
+        self.mutf8_chars.to_str()
     }
 }
 
-#[repr(transparent)]
-pub struct Enum<'local>(pub JObject<'local>);
+pub fn from_java_number_int_value<'local>(
+    env: &mut Env<'local>,
+    cache: &'static JniCache,
+    java_integer: &JObject<'local>,
+) -> Option<i32> {
+    if java_integer.is_null() {
+        return None;
+    }
+    Some(call_cached_method!(
+        env,
+        cache,
+        java_integer,
+        class__java_lang_Number__method__intValue0,
+        i32,
+        &[]
+    ))
+}
 
-impl<'local> Enum<'local> {
-    pub fn name(&self, env: &mut Env<'local>, cache: &'static JniCache) -> JString<'local> {
-        let name = call_cached_method!(
-            env,
-            cache,
-            &self.0,
-            class__java_lang_Enum__method__name0,
-            jobject,
-            &[]
-        );
-        JString::cast_local(env, name).expect("Enum name returned Object that is not a String")
+pub fn arraylist_new<'local>(env: &mut Env<'local>) -> JObject<'local> {
+    create_new_object!(
+        env,
+        CLASS__java_util_ArrayList,
+        CLASS__java_util_ArrayList__METHOD__init0__SIGNATURE,
+        &[]
+    )
+}
+
+pub fn list_add<'local>(
+    env: &mut Env<'local>,
+    cache: &'static JniCache,
+    list: &JObject<'local>,
+    object: &JObject<'local>,
+) -> bool {
+    call_cached_method!(
+        env,
+        cache,
+        list,
+        class__java_util_List__method__add1,
+        bool,
+        &[JValue::Object(&object).as_jni()]
+    )
+}
+
+pub fn enum_name<'local>(
+    env: &mut Env<'local>,
+    cache: &'static JniCache,
+    r#enum: &JObject<'local>,
+) -> JString<'local> {
+    let name = call_cached_method!(
+        env,
+        cache,
+        r#enum,
+        class__java_lang_Enum__method__name0,
+        jobject,
+        &[]
+    );
+    JString::cast_local(env, name).expect("Enum name returned Object that is not a String")
+}
+
+pub fn get_handle<'local>(env: &mut Env<'local>, object: &JObject<'local>) -> usize {
+    let handle = env
+        .get_field(
+            object,
+            JNIString::new(HANDLE_FIELD_NAME),
+            RuntimeFieldSignature::from_str("J")
+                .unwrap()
+                .field_signature(),
+        )
+        .unwrap();
+    let handle = handle.j().unwrap();
+    handle as usize
+}
+
+pub fn new_monero_seed<'local>(
+    env: &mut Env<'local>,
+    java_mnemonic: &JString<'local>,
+    java_language: &JObject<'local>,
+) -> JObject<'local> {
+    create_new_object!(
+        env,
+        CLASS__org_monfluo_wallet_lib_seed_MoneroSeed,
+        CLASS__org_monfluo_wallet_lib_seed_MoneroSeed__METHOD__init2__SIGNATURE,
+        &[JValue::Object(java_mnemonic), JValue::Object(java_language)]
+    )
+}
+
+pub fn new_polyseed<'local>(
+    env: &mut Env<'local>,
+    java_mnemonic: &JString<'local>,
+    java_language: &JObject<'local>,
+) -> JObject<'local> {
+    create_new_object!(
+        env,
+        CLASS__org_monfluo_wallet_lib_seed_Polyseed,
+        CLASS__org_monfluo_wallet_lib_seed_Polyseed__METHOD__init2__SIGNATURE,
+        &[JValue::Object(java_mnemonic), JValue::Object(java_language)]
+    )
+}
+
+pub fn from_java_seed<'local>(
+    env: &mut Env<'local>,
+    cache: &'static JniCache,
+    java_seed: &JObject<'local>,
+) -> monfluo_oxide::monero_wallet_util::seed::Seed {
+    let java_mnemonic = call_cached_method!(
+        env,
+        cache,
+        java_seed,
+        class__org_monfluo_wallet_lib_seed_Seed__method__getMnemonic0,
+        jobject,
+        &[]
+    );
+    let java_mnemonic = JString::cast_local(env, java_mnemonic).unwrap();
+    let mnemonic = JavaStringHelper::from_jstring(env, &java_mnemonic);
+    let java_language = call_cached_method!(
+        env,
+        cache,
+        java_seed,
+        class__org_monfluo_wallet_lib_seed_Seed__method__getLanguage0,
+        jobject,
+        &[]
+    );
+    let language = from_java_seed_language(env, cache, &java_language);
+    match language {
+        monfluo_oxide::monero_wallet_util::seed::SeedType::Original(language) => {
+            let seed = monfluo_oxide::monero_wallet_util::seed::original::Seed::from_string(
+                language,
+                Zeroizing::new(mnemonic.to_str().deref().to_owned()),
+            )
+            .unwrap();
+            monfluo_oxide::monero_wallet_util::seed::Seed::Original(seed)
+        }
+        monfluo_oxide::monero_wallet_util::seed::SeedType::Polyseed(language) => {
+            let seed = monfluo_oxide::monero_wallet_util::seed::polyseed::Polyseed::from_string(
+                language,
+                Zeroizing::new(mnemonic.to_str().deref().to_owned()),
+            )
+            .unwrap();
+            monfluo_oxide::monero_wallet_util::seed::Seed::Polyseed(seed)
+        }
+    }
+}
+
+pub fn new_wallet<'local>(env: &mut Env<'local>, handle: usize) -> JObject<'local> {
+    let handle: jlong = handle as jlong;
+    let jhandle = JValue::Long(handle);
+    create_new_object!(
+        env,
+        CLASS__org_monfluo_wallet_lib_wallet_Wallet,
+        CLASS__org_monfluo_wallet_lib_wallet_Wallet__METHOD__init1__SIGNATURE,
+        &[jhandle]
+    )
+}
+
+pub fn new_daemon<'local>(env: &mut Env<'local>, handle: usize) -> JObject<'local> {
+    let handle: jlong = handle as jlong;
+    let jhandle = JValue::Long(handle);
+    create_new_object!(
+        env,
+        CLASS__org_monfluo_wallet_lib_wallet_Daemon,
+        CLASS__org_monfluo_wallet_lib_wallet_Daemon__METHOD__init1__SIGNATURE,
+        &[jhandle]
+    )
+}
+
+pub fn new_wallet_sync_state<'local>(
+    env: &mut Env<'local>,
+    wallet_sync_state: WalletSyncState,
+) -> JObject<'local> {
+    match wallet_sync_state {
+        WalletSyncState::PreparingForSync => {
+            create_new_object!(
+                env,
+                CLASS__org_monfluo_wallet_lib_wallet_PreparingForSync,
+                CLASS__org_monfluo_wallet_lib_wallet_PreparingForSync__METHOD__init0__SIGNATURE,
+                &[]
+            )
+        }
+        WalletSyncState::StartingSync { target_height } => {
+            create_new_object!(
+                env,
+                CLASS__org_monfluo_wallet_lib_wallet_StartingSync,
+                CLASS__org_monfluo_wallet_lib_wallet_StartingSync__METHOD__init1__SIGNATURE,
+                &[JValue::Int(target_height as jint)]
+            )
+        }
+        WalletSyncState::Syncing { target_height } => {
+            create_new_object!(
+                env,
+                CLASS__org_monfluo_wallet_lib_wallet_Syncing,
+                CLASS__org_monfluo_wallet_lib_wallet_Syncing__METHOD__init1__SIGNATURE,
+                &[JValue::Int(target_height as jint)]
+            )
+        }
+        WalletSyncState::FinishedSync => {
+            create_new_object!(
+                env,
+                CLASS__org_monfluo_wallet_lib_wallet_FinishedSyncing,
+                CLASS__org_monfluo_wallet_lib_wallet_FinishedSyncing__METHOD__init0__SIGNATURE,
+                &[]
+            )
+        }
+    }
+}
+
+pub fn wallet_sync_observer_observe<'local>(
+    env: &mut Env<'local>,
+    cache: &'static JniCache,
+    observer: &JObject<'local>,
+    state: &JObject<'local>,
+) {
+    call_cached_method!(
+        env,
+        cache,
+        observer,
+        class__org_monfluo_wallet_lib_wallet_WalletSyncObserver__method__observe1,
+        unit,
+        &[JValue::Object(&state).as_jni()]
+    );
+}
+
+pub fn new_balance<'local>(env: &mut Env<'local>, balance_view: BalanceView) -> JObject<'local> {
+    let BalanceView {
+        total,
+        unlocked,
+        pending,
+        frozen,
+    } = balance_view;
+    create_new_object!(
+        env,
+        CLASS__org_monfluo_wallet_lib_data_Balance,
+        CLASS__org_monfluo_wallet_lib_data_Balance__METHOD__init4__SIGNATURE,
+        &[
+            JValue::Long(total as i64),
+            JValue::Long(unlocked as i64),
+            JValue::Long(pending as i64),
+            JValue::Long(frozen as i64)
+        ]
+    )
+}
+
+pub fn new_account_view<'local>(
+    env: &mut Env<'local>,
+    cache: &'static JniCache,
+    account_view: AccountView,
+) -> JObject<'local> {
+    let AccountView {
+        account_index,
+        addresses,
+    } = account_view;
+    let java_addresses = arraylist_new(env);
+    for address in addresses {
+        let java_address = new_address_view(env, address);
+        list_add(env, cache, &java_addresses, &java_address);
+    }
+    create_new_object!(
+        env,
+        CLASS__org_monfluo_wallet_lib_data_AccountView,
+        CLASS__org_monfluo_wallet_lib_data_AccountView__METHOD__init2__SIGNATURE,
+        &[
+            JValue::Int(account_index as jint),
+            JValue::Object(&java_addresses)
+        ]
+    )
+}
+
+pub fn new_address_view<'local>(
+    env: &mut Env<'local>,
+    address_view: AddressView,
+) -> JObject<'local> {
+    let AddressView {
+        account_index,
+        address_index,
+        value,
+        used,
+        amount,
+    } = address_view;
+    let java_value = env.new_string(value).unwrap();
+    create_new_object!(
+        env,
+        CLASS__org_monfluo_wallet_lib_data_AddressView,
+        CLASS__org_monfluo_wallet_lib_data_AddressView__METHOD__init5__SIGNATURE,
+        &[
+            JValue::Int(account_index as jint),
+            JValue::Int(address_index as jint),
+            JValue::Object(&java_value),
+            JValue::Bool(used),
+            JValue::Long(amount as jlong)
+        ]
+    )
+}
+
+pub fn new_node_info<'local>(env: &mut Env<'local>, node_info: NodeInfo) -> JObject<'local> {
+    let NodeInfo {
+        height,
+        target_height,
+        nettype: _,
+        status: _,
+    } = node_info;
+    create_new_object!(
+        env,
+        CLASS__org_monfluo_wallet_lib_data_NodeInfo,
+        CLASS__org_monfluo_wallet_lib_data_NodeInfo__METHOD__init2__SIGNATURE,
+        &[
+            JValue::Long(height as jlong),
+            JValue::Long(target_height as jlong)
+        ]
+    )
+}
+
+pub fn new_transaction_hash<'local>(
+    env: &mut Env<'local>,
+    transaction_hash: &[u8; 32],
+) -> JObject<'local> {
+    // SAFETY: u8 and i8 have the same size and alignment
+    let transaction_hash: &[i8; 32] = unsafe { std::mem::transmute(transaction_hash) };
+    let java_array = env.new_byte_array(32).unwrap();
+    java_array.set_region(env, 0, transaction_hash).unwrap();
+    create_new_object!(
+        env,
+        CLASS__org_monfluo_wallet_lib_data_TransactionHash,
+        CLASS__org_monfluo_wallet_lib_data_TransactionHash__METHOD__init1__SIGNATURE,
+        &[JValue::Object(&java_array)]
+    )
+}
+
+pub fn new_transaction_view_input<'local>(
+    env: &mut Env<'local>,
+    transaction_view_input: &TransactionViewInput,
+) -> JObject<'local> {
+    let TransactionViewInput { address, amount } = transaction_view_input;
+    let java_address = env.new_string(address).unwrap();
+    let java_amount = *amount as jlong;
+    create_new_object!(
+        env,
+        CLASS__org_monfluo_wallet_lib_data_TransactionViewInput,
+        CLASS__org_monfluo_wallet_lib_data_TransactionViewInput__METHOD__init2__SIGNATURE,
+        &[JValue::Object(&java_address), JValue::Long(java_amount)]
+    )
+}
+
+pub fn new_transaction_view_spend<'local>(
+    env: &mut Env<'local>,
+    transaction_view_spend: &TransactionViewSpend,
+) -> JObject<'local> {
+    let TransactionViewSpend { amount } = transaction_view_spend;
+    let java_amount = *amount as jlong;
+    create_new_object!(
+        env,
+        CLASS__org_monfluo_wallet_lib_data_TransactionViewSpend,
+        CLASS__org_monfluo_wallet_lib_data_TransactionViewSpend__METHOD__init1__SIGNATURE,
+        &[JValue::Long(java_amount)]
+    )
+}
+
+pub fn new_transaction_view<'local>(
+    env: &mut Env<'local>,
+    cache: &'static JniCache,
+    transaction_view: &TransactionView,
+) -> JObject<'local> {
+    let TransactionView {
+        transaction_hash,
+        timestamp,
+        fee,
+        inputs,
+        confirmations,
+        spends,
+    } = transaction_view;
+    let java_transaction_hash = new_transaction_hash(env, transaction_hash);
+    let java_timestamp = *timestamp as jlong;
+    let java_fee = *fee as jlong;
+    let java_confirmations = *confirmations as jint;
+    let java_inputs = arraylist_new(env);
+    for input in inputs {
+        let java_input = new_transaction_view_input(env, input);
+        list_add(env, cache, &java_inputs, &java_input);
+    }
+    let java_spends = arraylist_new(env);
+    for spend in spends {
+        let java_spend = new_transaction_view_spend(env, spend);
+        list_add(env, cache, &java_spends, &java_spend);
+    }
+    create_new_object!(
+        env,
+        CLASS__org_monfluo_wallet_lib_data_TransactionView,
+        CLASS__org_monfluo_wallet_lib_data_TransactionView__METHOD__init6__SIGNATURE,
+        &[
+            JValue::Object(&java_transaction_hash),
+            JValue::Long(java_timestamp),
+            JValue::Long(java_fee),
+            JValue::Int(java_confirmations),
+            JValue::Object(&java_inputs),
+            JValue::Object(&java_spends),
+        ]
+    )
+}
+
+pub fn new_transaction_views<'local>(
+    env: &mut Env<'local>,
+    cache: &'static JniCache,
+    transaction_views: &[TransactionView],
+) -> JObject<'local> {
+    let java_transaction_views = arraylist_new(env);
+    for transaction_view in transaction_views {
+        let java_transaction_view = new_transaction_view(env, cache, transaction_view);
+        list_add(env, cache, &java_transaction_views, &java_transaction_view);
+    }
+    java_transaction_views
+}
+
+pub fn to_java_monero_seed_language<'local>(
+    env: &mut Env<'local>,
+    monero_seed_language: monfluo_oxide::monero_wallet_util::seed::original::Language,
+) -> JObject<'local> {
+    let class = find_class!(env, CLASS__org_monfluo_wallet_lib_seed_MoneroSeedLanguage);
+    let JValueOwned::Object(java_monero_seed_language) = env
+        .get_static_field(
+            class,
+            JNIString::new(monero_seed_language.to_string()),
+            RuntimeFieldSignature::from_str(concatcp!(
+                "L",
+                CLASS__org_monfluo_wallet_lib_seed_MoneroSeedLanguage,
+                ";"
+            ))
+            .unwrap()
+            .field_signature(),
+        )
+        .unwrap()
+    else {
+        panic!()
+    };
+    java_monero_seed_language
+}
+
+pub fn to_java_polyseed_language<'local>(
+    env: &mut Env<'local>,
+    polyseed_language: monfluo_oxide::monero_wallet_util::seed::polyseed::Language,
+) -> JObject<'local> {
+    let class = find_class!(env, CLASS__org_monfluo_wallet_lib_seed_MoneroSeedLanguage);
+    let JValueOwned::Object(java_monero_seed_language) = env
+        .get_static_field(
+            class,
+            JNIString::new(polyseed_language.to_string()),
+            RuntimeFieldSignature::from_str(concatcp!(
+                "L",
+                CLASS__org_monfluo_wallet_lib_seed_PolyseedLanguage,
+                ";"
+            ))
+            .unwrap()
+            .field_signature(),
+        )
+        .unwrap()
+    else {
+        panic!()
+    };
+    java_monero_seed_language
+}
+
+pub fn from_java_seed_language<'local>(
+    env: &mut Env<'local>,
+    cache: &'static JniCache,
+    seed_language: &JObject<'local>,
+) -> monfluo_oxide::monero_wallet_util::seed::SeedType {
+    let seed_language_class = env.get_object_class(seed_language).unwrap();
+    let seed_language_class_name = seed_language_class.get_name(env).unwrap();
+    let enum_name = enum_name(env, cache, seed_language);
+    let enum_name = JavaStringHelper::from_jstring(env, &enum_name);
+    match &*JavaStringHelper::from_jstring(env, &seed_language_class_name).to_str() {
+        CLASS__DOT__org_monfluo_wallet_lib_seed_MoneroSeedLanguage => {
+            monfluo_oxide::monero_wallet_util::seed::SeedType::Original(
+                monfluo_oxide::monero_wallet_util::seed::original::Language::from_str(
+                    &enum_name.to_str(),
+                )
+                .unwrap(),
+            )
+        }
+        CLASS__DOT__org_monfluo_wallet_lib_seed_PolyseedLanguage => {
+            monfluo_oxide::monero_wallet_util::seed::SeedType::Polyseed(
+                monfluo_oxide::monero_wallet_util::seed::polyseed::Language::from_str(
+                    &enum_name.to_str(),
+                )
+                .unwrap(),
+            )
+        }
+        _ => unreachable!(),
     }
 }

@@ -13,9 +13,10 @@ import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.model.MoneroUnit
-import org.monfluo.wallet.android.model.TransactionInfo
 import org.monfluo.wallet.android.util.TextHelper
+import org.monfluo.wallet.lib.data.TransactionView
 import java.util.Date
+import kotlin.math.absoluteValue
 
 private const val VIEW_TYPE_ITEM: Int = 0
 
@@ -25,11 +26,11 @@ private const val VIEW_TYPE_VOID: Int = 2
 class AdapterTransactionInfo(
     private val listener: Listener,
 ) : RecyclerView.Adapter<AdapterTransactionInfo.ViewHolder>() {
-    private var transactions: List<TransactionInfo> = emptyList()
+    private var transactions: List<TransactionView> = emptyList()
     private var streetMode: Boolean = false
     private var voidHeight: Int = 0
 
-    fun submitList(transactions: List<TransactionInfo>) {
+    fun submitList(transactions: List<TransactionView>) {
         if (this.transactions != transactions) {
             this.transactions = transactions
             notifyDataSetChanged()
@@ -101,7 +102,7 @@ class AdapterTransactionInfo(
     }
 
     interface Listener {
-        fun onClickTransaction(transactionInfo: TransactionInfo)
+        fun onClickTransaction(transaction: TransactionView)
     }
 
     sealed class ViewHolder(
@@ -130,44 +131,44 @@ class AdapterTransactionInfo(
         private val transactionStatusConfirmedText: CharSequence = itemView.resources.getText(R.string.transaction_confirmed)
 
         fun bind(
-            transactionInfo: TransactionInfo,
+            transaction: TransactionView,
             streetMode: Boolean,
         ) {
-            when (transactionInfo.direction) {
-                TransactionInfo.Direction.In -> {
-                    sentOrReceivedIconImageView.setImageDrawable(receiveIconDrawable)
-                    if (transactionInfo.isCoinbase) {
-                        sentOrReceivedLabelTextView.text = transactionTypeMinedText
-                    } else {
-                        sentOrReceivedLabelTextView.text = transactionTypeReceivedText
-                    }
-                    amountTextView.setTextColor(receivedAmountColor)
-                }
-                TransactionInfo.Direction.Out -> {
-                    sentOrReceivedIconImageView.setImageDrawable(sendIconDrawable)
-                    sentOrReceivedLabelTextView.text = transactionTypeSentText
-                    amountTextView.setTextColor(sentAmountColor)
-                }
+            val isSpendTransaction = transaction.spends.isNotEmpty()
+
+            if (isSpendTransaction) {
+                sentOrReceivedIconImageView.setImageDrawable(sendIconDrawable)
+                sentOrReceivedLabelTextView.text = transactionTypeSentText
+                amountTextView.setTextColor(sentAmountColor)
+            } else {
+                sentOrReceivedIconImageView.setImageDrawable(receiveIconDrawable)
+//                if (transactionInfo.isCoinbase) {
+//                    sentOrReceivedLabelTextView.text = transactionTypeMinedText
+//                } else {
+                sentOrReceivedLabelTextView.text = transactionTypeReceivedText
+//                }
+                amountTextView.setTextColor(receivedAmountColor)
             }
 
-            if (transactionInfo.isFailed) {
-                confirmationsTextView.text = transactionStatusFailedText
-                confirmationsTextView.setTypeface(null, Typeface.BOLD)
-            } else if (transactionInfo.isPending) {
+//            if (transaction.isFailed) {
+//                confirmationsTextView.text = transactionStatusFailedText
+//                confirmationsTextView.setTypeface(null, Typeface.BOLD)
+//            } else
+            if (transaction.confirmations == 0) {
                 confirmationsTextView.text = transactionStatusUnconfirmedText
                 confirmationsTextView.setTypeface(null, Typeface.ITALIC)
-            } else if (!transactionInfo.isConfirmed) {
-                confirmationsTextView.text = itemView.resources.getString(R.string.transaction_confirming, transactionInfo.confirmations.toString())
+            } else if (transaction.confirmations < 10) {
+                confirmationsTextView.text = itemView.resources.getString(R.string.transaction_confirming, transaction.confirmations.toString())
                 confirmationsTextView.setTypeface(null, Typeface.ITALIC)
             } else {
                 confirmationsTextView.text = transactionStatusConfirmedText
                 confirmationsTextView.setTypeface(null, Typeface.NORMAL)
             }
 
-            amountTextView.text = TextHelper.formatUnlockedBalance(itemView.context, transactionInfo.amount, MoneroUnit.MONERO, streetMode, Typeface.NORMAL)
-            val formattedDateTime = DateFormat.getInstance().format(Date(transactionInfo.timestamp * 1000))
+            amountTextView.text = TextHelper.formatUnlockedBalance(itemView.context, transaction.amount.absoluteValue, MoneroUnit.MONERO, streetMode, Typeface.NORMAL)
+            val formattedDateTime = DateFormat.getInstance().format(Date(transaction.timestamp * 1000))
             txDateTimeTextView.text = if (streetMode) "#".repeat(formattedDateTime.length) else formattedDateTime
-            itemView.setOnClickListener { _ -> listener.onClickTransaction(transactionInfo) }
+            itemView.setOnClickListener { _ -> listener.onClickTransaction(transaction) }
         }
     }
 

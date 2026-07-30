@@ -9,5 +9,7 @@ interface SeedFactory<L : SeedLanguage, S : Seed<L>> {
             }
     }
 
-    fun generateSeed(): S
+    fun generateSeed(language: L): S
+
+    fun fromMnemonic(text: String): S?
 }
