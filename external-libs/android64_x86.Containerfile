@@ -1,9 +1,9 @@
 FROM debian:trixie AS build
 
-RUN set -x && apt-get update && apt-get install -y unzip automake build-essential curl file pkg-config git python3 python-is-python3 libtool yacc wget
+RUN set -x && apt-get update && apt-get install -y sdkmanager cmake unzip automake build-essential curl file pkg-config git python3 python-is-python3 libtool yacc wget
 
-# libtinfo5 is not available in Debian 13 but it is needed for Android's standalone toolchain
-RUN wget http://ftp.us.debian.org/debian/pool/main/n/ncurses/libtinfo5_6.4-4_amd64.deb && apt install ./libtinfo5_6.4-4_amd64.deb
+RUN set -x && sdkmanager --verbose --install 'build-tools;36.1.0'
+RUN set -x && sdkmanager --verbose --install 'ndk;29.0.14206865'
 
 COPY bin/download-native-libs-dependencies.sh /src/external-libs/bin/
 COPY bin/envs.sh /src/external-libs/bin/
@@ -23,6 +23,10 @@ COPY bin/build-native-libs-x86_64.sh /src/external-libs/bin
 
 ENV MONFLUO_BUILD_DIRECTORY=/opt/android/monfluo-build-x86_64
 ENV MONFLUO_OUTPUT_DIRECTORY=/opt/android/monfluo-output-x86_64
+
+ENV ANDROID_HOME=/opt/android-sdk
+ENV ANDROID_SDK_ROOT=/opt/android-sdk
+ENV ANDROID_NDK_ROOT=/opt/android-sdk/ndk/29.0.14206865
 
 ARG NPROC
 ENV NPROC=$NPROC

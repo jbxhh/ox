@@ -8,9 +8,11 @@ jobs:
       - name: Update Debian repository, upgrade existing packages and install new required packages
         run: |
             apt update && apt upgrade -y
-            apt install -y unzip automake build-essential curl file pkg-config git python3 python-is-python3 libtool yacc nodejs wget
-            # libtinfo5 is not available in Debian 13 but it is needed for Android's standalone toolchain
-            wget http://ftp.us.debian.org/debian/pool/main/n/ncurses/libtinfo5_6.4-4_amd64.deb && apt install ./libtinfo5_6.4-4_amd64.deb
+            apt install -y sdkmanager cmake unzip automake build-essential curl file pkg-config git python3 python-is-python3 libtool yacc nodejs wget
+      - name: Install Android SDK / NDK via sdkmanager
+        run: |
+            sdkmanager --verbose --install 'build-tools;36.1.0'
+            sdkmanager --verbose --install 'ndk;29.0.14206865'
       - name: Checkout Monfluo
         uses: actions/checkout@v4
         with:
@@ -27,6 +29,8 @@ jobs:
 # <ARM32>
       - name: Build native libraries (ARM32)
         run: |
+          export ANDROID_SDK_ROOT=/opt/android-sdk
+          export ANDROID_NDK_ROOT=/opt/android-sdk/ndk/29.0.14206865
           export MONFLUO_DEPENDENCIES_DIRECTORY=/opt/android/dependencies
           export MONFLUO_BUILD_DIRECTORY=/opt/android/monfluo-build-arm32
           export MONFLUO_OUTPUT_DIRECTORY=/opt/android/monfluo-output-arm32
@@ -42,6 +46,8 @@ jobs:
 # <ARM64>
       - name: Build native libraries (ARM64)
         run: |
+          export ANDROID_SDK_ROOT=/opt/android-sdk
+          export ANDROID_NDK_ROOT=/opt/android-sdk/ndk/29.0.14206865
           export MONFLUO_DEPENDENCIES_DIRECTORY=/opt/android/dependencies
           export MONFLUO_BUILD_DIRECTORY=/opt/android/monfluo-build-arm64
           export MONFLUO_OUTPUT_DIRECTORY=/opt/android/monfluo-output-arm64
@@ -57,6 +63,8 @@ jobs:
 # <X86_64>
       - name: Build native libraries (X86_64)
         run: |
+          export ANDROID_SDK_ROOT=/opt/android-sdk
+          export ANDROID_NDK_ROOT=/opt/android-sdk/ndk/29.0.14206865
           export MONFLUO_DEPENDENCIES_DIRECTORY=/opt/android/dependencies
           export MONFLUO_BUILD_DIRECTORY=/opt/android/monfluo-build-x86_64
           export MONFLUO_OUTPUT_DIRECTORY=/opt/android/monfluo-output-x86_64
