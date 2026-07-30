@@ -51,7 +51,7 @@ pub async fn run(monfluo_directory: PathBuf, name: String) {
             }
 
             println!("Transactions\n");
-            for transaction in wallet.transactions_view() {
+            for transaction in wallet.transaction_views() {
                 println!("Transaction hash: {}", *monfluo_oxide::util::bytes_to_hex(&transaction.transaction_hash));
                 println!("Transaction fee: {}", monfluo_oxide::util::atomic_units_to_big_decimal(transaction.fee));
                 println!(

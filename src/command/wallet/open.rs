@@ -1,7 +1,12 @@
 use std::{io::Write, path::PathBuf, sync::Arc};
 use tokio::io::{AsyncBufReadExt, BufReader};
 
-use monfluo_oxide::wallet::Wallet;
+use monfluo_oxide::{
+    transport::MonfluoTransport,
+    wallet::{Daemon, Wallet},
+};
+
+use crate::command::wallet::MonfluoObserver;
 
 pub async fn run(monfluo_directory: PathBuf, name: String, password: String) {
     match monfluo_oxide::wallet::Wallet::open(monfluo_directory, &name, &password).await {
@@ -14,6 +19,7 @@ pub async fn run(monfluo_directory: PathBuf, name: String, password: String) {
 }
 
 async fn run_interactive(wallet: Arc<Wallet>) {
+    let mut daemon: Option<Daemon> = None;
     loop {
         let input = match read_input(&wallet).await {
             Ok(input) => input,
@@ -33,23 +39,32 @@ async fn run_interactive(wallet: Arc<Wallet>) {
         } else if input.starts_with("connect") {
             let url = input.split(' ').skip(1).next().unwrap();
             println!("Connecting to {}...", url);
-            wallet.connect(url.to_owned(), None).await;
+            daemon = Some(Arc::new(MonfluoTransport::new(url.to_owned(), None).await.unwrap()));
             println!("Connected!");
         } else if input == "refresh" {
-            println!("Starting refresh");
-            if wallet.clone().refresh().await {
+            if let Some(daemon) = &daemon {
+                println!("Starting refresh");
+                wallet.clone().sync(daemon.clone(), MonfluoObserver).await;
                 println!("Refreshed!");
             } else {
-                println!("Failed to strart refreshing");
+                println!("Not connected!");
             }
         } else if input.starts_with("send") {
-            let mut params = input.split(' ').skip(1);
-            let atomic_units = u64::from_str_radix(params.next().unwrap(), 10).unwrap(); // TODO: not atomic units but XMR
-            let address = params.next().unwrap();
-            let transaction = wallet.create_transaction(address, atomic_units).await;
-            let signed_transaction = wallet.sign_tranasction(transaction);
-            wallet.send_transaction(signed_transaction).await;
-            println!("Transaction sent!");
+            if let Some(daemon) = &daemon {
+                let mut params = input.split(' ').skip(1);
+                let atomic_units = u64::from_str_radix(params.next().unwrap(), 10).unwrap(); // TODO: not atomic units but XMR
+                let address = params.next().unwrap();
+                let transaction = wallet
+                    .create_transaction(address, atomic_units, daemon.clone())
+                    .await;
+                let signed_transaction = wallet.sign_tranasction(transaction);
+                wallet
+                    .send_transaction(signed_transaction, daemon.clone())
+                    .await;
+                println!("Transaction sent!");
+            } else {
+                println!("Not connected!");
+            }
         } else {
             println!("Unknown command");
         }
