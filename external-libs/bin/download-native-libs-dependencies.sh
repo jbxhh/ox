@@ -9,21 +9,6 @@ fi
 mkdir -p "$MONFLUO_DEPENDENCIES_DIRECTORY"
 cd "$MONFLUO_DEPENDENCIES_DIRECTORY"
 
-(wget --no-verbose --prefer-family=IPv4 https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_REVISION}.zip \
-    && echo "${ANDROID_SDK_HASH} sdk-tools-linux-${ANDROID_SDK_REVISION}.zip" | sha256sum -c \
-    && unzip -q sdk-tools-linux-${ANDROID_SDK_REVISION}.zip \
-    && rm -f sdk-tools-linux-${ANDROID_SDK_REVISION}.zip) || exit $?
-
-(wget --no-verbose --prefer-family=IPv4 https://dl.google.com/android/repository/android-ndk-r${ANDROID_NDK_REVISION}-linux-x86_64.zip \
-    && echo "${ANDROID_NDK_HASH} android-ndk-r${ANDROID_NDK_REVISION}-linux-x86_64.zip" | sha256sum -c \
-    && unzip -q android-ndk-r${ANDROID_NDK_REVISION}-linux-x86_64.zip \
-    && rm -f android-ndk-r${ANDROID_NDK_REVISION}-linux-x86_64.zip) || exit $?
-
-(wget --no-verbose --prefer-family=IPv4 https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz \
-    && echo "${CMAKE_HASH} cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz" | sha256sum -c \
-    && tar -xzf cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz \
-    && rm -f cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz) || exit $?
-
 (wget --no-verbose --prefer-family=IPv4 https://archives.boost.io/release/${BOOST_VERSION_DOT}/source/boost_${BOOST_VERSION}.tar.bz2 \
     && echo "${BOOST_HASH} boost_${BOOST_VERSION}.tar.bz2" | sha256sum -c \
     && tar -xf boost_${BOOST_VERSION}.tar.bz2 \
