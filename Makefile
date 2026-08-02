@@ -26,7 +26,10 @@
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-ANDROID_STANDALONE_TOOLCHAIN_PATH ?= /usr/local/toolchain
+ANDROID_NDK_ROOT ?= /opt/android-sdk/ndk/29.0.14206865
+MONFLUO_PREFIX ?= /opt/android
+HOST_CC ?= /usr/bin/gcc
+HOST_CXX ?= /usr/bin/g++
 
 dotgit=$(shell ls -d .git/config)
 ifneq ($(dotgit), .git/config)
@@ -132,15 +135,15 @@ release-static-android-armv8:
 
 release-static-android-armv7-wallet_api:
 	mkdir -p $(builddir)/release
-	cd $(builddir)/release && CC=arm-linux-androideabi-clang CXX=arm-linux-androideabi-clang++ cmake -D USE_DEVICE_TREZOR=OFF -D BUILD_GUI_DEPS=1 -D BUILD_TESTS=OFF -D ARCH="armv7-a" -D STATIC=ON -D BUILD_64=OFF -D CMAKE_BUILD_TYPE=release -D ANDROID=true -D BUILD_TAG="android-armv7" -D CMAKE_SYSTEM_NAME="Android" -D CMAKE_ANDROID_STANDALONE_TOOLCHAIN="${ANDROID_STANDALONE_TOOLCHAIN_PATH}" -D CMAKE_ANDROID_ARM_MODE=ON -D CMAKE_ANDROID_ARCH_ABI="armeabi-v7a" -D NO_AES=true ../.. && $(MAKE) wallet_api
+	cd $(builddir)/release && cmake -D USE_DEVICE_TREZOR=OFF -D BUILD_GUI_DEPS=ON -D BUILD_TESTS=OFF -D ARCH="armv7-a" -D STATIC=ON -D BUILD_64=OFF -D CMAKE_BUILD_TYPE=release -D ANDROID=true -D BUILD_TAG="android-armv7" -D CMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_ROOT}/build/cmake/android.toolchain.cmake" -D ANDROID_ABI="armeabi-v7a" -D ANDROID_PLATFORM=26 -D NO_AES=true -D OPENSSL_ROOT_DIR="${MONFLUO_PREFIX}" -D Boost_NO_SYSTEM_PATHS=TRUE -D CMAKE_PREFIX_PATH="${MONFLUO_PREFIX}" -D CMAKE_FIND_ROOT_PATH_MODE_LIBRARY=BOTH -D CMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH -D HOST_CC="${HOST_CC}" -D HOST_CXX="${HOST_CXX}" -D STACK_TRACE=OFF ../.. && $(MAKE) wallet_api
 
 release-static-android-armv8-wallet_api:
 	mkdir -p $(builddir)/release
-	cd $(builddir)/release && CC=aarch64-linux-android-clang CXX=aarch64-linux-android-clang++ cmake -D USE_DEVICE_TREZOR=OFF -D BUILD_GUI_DEPS=1 -D BUILD_TESTS=OFF -D ARCH="armv8-a" -D STATIC=ON -D BUILD_64=ON -D CMAKE_BUILD_TYPE=release -D ANDROID=true -D BUILD_TAG="android-armv8" -D CMAKE_SYSTEM_NAME="Android" -D CMAKE_ANDROID_STANDALONE_TOOLCHAIN="${ANDROID_STANDALONE_TOOLCHAIN_PATH}" -D CMAKE_ANDROID_ARCH_ABI="arm64-v8a" ../.. && $(MAKE) wallet_api
+	cd $(builddir)/release && cmake -D USE_DEVICE_TREZOR=OFF -D BUILD_GUI_DEPS=ON -D BUILD_TESTS=OFF -D ARCH="armv8-a" -D STATIC=ON -D BUILD_64=ON -D CMAKE_BUILD_TYPE=release -D ANDROID=true -D BUILD_TAG="android-armv8" -D CMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_ROOT}/build/cmake/android.toolchain.cmake" -D ANDROID_ABI="arm64-v8a" -D ANDROID_PLATFORM=26 -D OPENSSL_ROOT_DIR="${MONFLUO_PREFIX}" -D Boost_NO_SYSTEM_PATHS=TRUE -D CMAKE_PREFIX_PATH="${MONFLUO_PREFIX}" -D CMAKE_FIND_ROOT_PATH_MODE_LIBRARY=BOTH -D CMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH -D HOST_CC="${HOST_CC}" -D HOST_CXX="${HOST_CXX}" -D STACK_TRACE=OFF ../.. && $(MAKE) wallet_api
 
 release-static-android-x86_64-wallet_api:
 	mkdir -p $(builddir)/release
-	cd $(builddir)/release && CC=x86_64-linux-android-clang CXX=x86_64-linux-android-clang++ cmake -D USE_DEVICE_TREZOR=OFF -D BUILD_GUI_DEPS=1 -D BUILD_TESTS=OFF -D ARCH="x86-64" -D STATIC=ON -D BUILD_64=ON -D CMAKE_BUILD_TYPE=release -D ANDROID=true -D BUILD_TAG="android-x86_64" -D CMAKE_SYSTEM_NAME="Android" -D CMAKE_ANDROID_STANDALONE_TOOLCHAIN="${ANDROID_STANDALONE_TOOLCHAIN_PATH}" -D CMAKE_ANDROID_ARCH_ABI="x86_64" ../.. && $(MAKE) wallet_api
+	cd $(builddir)/release && cmake -D USE_DEVICE_TREZOR=OFF -D BUILD_GUI_DEPS=ON -D BUILD_TESTS=OFF -D ARCH="x86-64" -D STATIC=ON -D BUILD_64=ON -D CMAKE_BUILD_TYPE=release -D ANDROID=true -D BUILD_TAG="android-x86_64" -D CMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_ROOT}/build/cmake/android.toolchain.cmake" -D ANDROID_ABI="x86_64" -D ANDROID_PLATFORM=26 -D OPENSSL_ROOT_DIR="${MONFLUO_PREFIX}" -D Boost_NO_SYSTEM_PATHS=TRUE -D CMAKE_PREFIX_PATH="${MONFLUO_PREFIX}" -D CMAKE_FIND_ROOT_PATH_MODE_LIBRARY=BOTH -D CMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH -D HOST_CC="${HOST_CC}" -D HOST_CXX="${HOST_CXX}" -D STACK_TRACE=OFF ../.. && $(MAKE) wallet_api
 
 release-static-android-x86-wallet_api:
 	mkdir -p $(builddir)/release
