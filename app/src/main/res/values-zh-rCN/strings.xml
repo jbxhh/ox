@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE resources [
+<!ENTITY nbsp "&#160;">
+]>
+<resources xmlns:tools="http://schemas.android.com/tools" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2" tools:locale="en">
+    <string name="app_name" translatable="false">Monfluo</string>
+    <!-- Toast shown when user enters incorrect wallet password -->
+    <string name="toast_bad_password">密码错误！</string>
+    <!-- Toast shown when user tries to freeze enotes -->
+    <string name="toast_freezing_enotes">正在冻结电子票据 (enotes)</string>
+    <!-- Toast shown when user tries to thaw enotes -->
+    <string name="toast_thawing_enotes">正在解冻电子票据 (enotes)</string>
+    <!-- Toast shown when selecting a node fails -->
+    <string name="toast_failed_to_select_node">选择节点失败</string>
+    <!-- Toast shown when a new account was created -->
+    <string name="toast_new_account_created">已创建新账户</string>
+    <!-- Toast shown when switching to a different account -->
+    <string name="toast_account_selected">账户已切换至 #%1$d</string>
+    <!-- Toast shown when user attempts to interact with wallet before it is opened -->
+    <string name="toast_wallet_not_opened">钱包尚未打开</string>
+    <!-- Toast shown when user tries to activate proxy -->
+    <string name="toast_activating_proxy">正在启用代理</string>
+    <!-- Toast shown when proxy was activated -->
+    <string name="toast_proxy_activated">代理已启用</string>
+    <!-- Toast shown when proxy failed to activated -->
+    <string name="toast_failed_to_activate_proxy">代理启用失败</string>
+    <!-- Toast shown when user tries to deactivate proxy -->
+    <string name="toast_deactivating_proxy">正在停用代理</string>
+    <!-- Toast shown when proxy was deactivated -->
+    <string name="toast_proxy_deactivated">代理已停用</string>
+    <!-- Toast shown when proxy failed to deactivated -->
+    <string name="toast_failed_to_deactivate_proxy">代理停用失败</string>
+    <!-- Toast shown when user tries to activate proxy without specifying its address -->
+    <string name="toast_proxy_address_not_set">未设置代理地址</string>
+    <!-- Toast shown when user saves proxy settings -->
+    <string name="toast_proxy_saved">代理设置已保存</string>
+    <!-- Toast shown when user attempts to edit wallet before it is closed -->
+    <string name="toast_wallet_not_closed">请等待钱包关闭</string>
+    <!-- Toast shown when node is deleted -->
+    <string name="toast_node_deleted">节点已删除</string>
+    <!-- Toast shown on failing to delete node -->
+    <string name="toast_failed_to_delete_node">删除节点失败</string>
+    <!-- Toast shown when node is saved -->
+    <string name="toast_node_saved">节点已保存</string>
+    <!-- Toast shown on failing to save node -->
+    <string name="toast_failed_to_save_node">保存节点失败</string>
+    <!-- Toast shown when user tries to add node with duplicated name -->
+    <string name="toast_node_with_name_already_exists">已存在同名节点</string>
+    <!-- Toast shown when node is added -->
+    <string name="toast_node_added">节点已添加</string>
+    <!-- Toast shown on failing to add node -->
+    <string name="toast_failed_to_add_node">添加节点失败</string>
+    <!-- Toast shown when user tries to add/edit node without specifying its name -->
+    <string name="toast_enter_node_name">请输入节点名称</string>
+    <!-- Toast shown when user tries to add/edit node without specifying its address -->
+    <string name="toast_enter_node_address">请输入节点地址</string>
+    <!-- Toast shown when user tries to add/edit node without specifying its password while username is specified -->
+    <string name="toast_enter_node_password">请输入节点密码</string>
+    <!-- Toast shown when opening wallet fails due to missing node for the wallet's network -->
+    <string name="toast_no_node_for_network">未找到适用于网络 <xliff:g>%1$s</xliff:g> 的节点</string>
+
+    <!-- Foreground service notification header -->
+    <string name="service_notification_header">Monfluo 钱包服务正在运行</string>
+    <!-- Foreground service notification action for closing wallet -->
+    <string name="service_notification_close_wallet_action">关闭钱包</string>
+    <!-- Foreground service notification text when opening wallet -->
+    <string name="service_notification_description_opening_wallet">正在打开钱包</string>
+    <!-- Foreground service notification text when fetching blockchain height -->
+    <string name="service_notification_description_fetching_blockchain_height">正在获取区块高度</string>
+    <!-- Foreground service notification text when changing node -->
+    <string name="service_notification_description_changing_node">正在切换节点</string>
+    <!-- Transfer notification header -->
+    <string name="transfer_notification_header">已收到 <xliff:g>%1$s</xliff:g> <xliff:g>%2$s</xliff:g></string>
+    <!-- Transfer notification transaction id -->
+    <string name="transfer_notification_description_transaction_id">交易 ID：<xliff:g>%1$s</xliff:g></string>
+    <!-- Label in failed transactions used in list views -->
+    <string name="tx_list_failed_text">失败</string>
+    <!-- Button for creating wallet in onboarding activity -->
+    <string name="create_wallet">创建钱包</string>
+    <!-- Button for restoring wallet in onboarding activity -->
+    <string name="restore_wallet">恢复钱包</string>
+    <!-- Toast shown when failing to send transaction -->
+    <string name="toast_error_sending_tx">发送交易出错</string>
+    <!-- Toast shown when attempting to restore wallet from invalid seed -->
+    <string name="invalid_mnemonic_code">助记词无效</string>
+    <!-- Toast shown when confirm password field does not match password field -->
+    <string name="invalid_confirmed_password">两次输入的密码不一致</string>
+    <!-- Toast shown when something gets copied to clipboard -->
+    <string name="copied_to_clipboard">已复制到剪贴板</string>
+    <!-- Label for street mode setting toggle -->
+    <string name="street_mode">街头模式（隐藏余额）</string>
+    <!-- Label for manual fee selection setting toggle -->
+    <string name="option_allow_fee_override">手动选择手续费</string>
+    <!-- Label for enote management setting toggle -->
+    <string name="option_enable_enote_management">开启电子票据 (enote) 管理</string>
+    <!-- Label for multi-wallet mode setting toggle -->
+    <string name="enable_multi_wallet_mode">开启多钱包模式</string>
+    <!-- Label for multi-account mode setting toggle -->
+    <string name="enable_multi_account_mode">开启多账户模式</string>
+    <!-- Label for allowing copying secrets to clipboard setting toggle -->
+    <string name="allow_copying_secrets_to_clipboard">允许将私钥/助记词复制到剪贴板</string>
+    <!-- Label for showing transfer notifications setting toggle -->
+    <string name="show_transfer_notifications">显示转账通知</string>
+    <!-- Label for enabling address book setting toggle -->
+    <string name="enable_address_book">开启地址簿</string>
+    <!-- Label for developer mode setting toggle -->
+    <string name="developer_mode">开启开发者模式</string>
+    <!-- Label for showing icon on QR codes setting toggle -->
+    <string name="show_icon_on_qr_codes">在二维码上显示图标</string>
+    <!-- Label for auto rotating addresses setting toggle -->
+    <string name="auto_rotate_addresses">自动轮换地址</string>
+    <!-- Label for balance tap triggers street mode setting toggle -->
+    <string name="balance_tap_toggles_street_mode">点击余额切换街头模式</string>
+    <!-- Label for setting brightness to max when viewing QR codes setting toggle -->
+    <string name="max_brightness_qr_codes">查看二维码时自动调至最高亮度</string>
+    <!-- Label for forcing URI format for QR codes setting toggle -->
+    <string name="force_uri_format_qr_codes">强制二维码使用 URI 格式</string>
+    <!-- Label for secure flag setting toggle -->
+    <string name="enable_secure_flag">禁止截屏（防录屏）</string>
+    <!-- Label for SOCKS proxy setting -->
+    <string name="tor_switch_label">SOCKS 代理</string>
+    <!-- Placeholder for address field -->
+    <string name="example_address" translatable="false">48KqWkaWd8KcJKkakWfknJEo16scc8YkycfKpb8JYchiKJfukY1ompX9eQ9n3CfEBU1ADGj3P5FLAb731J2UghQt142LwHQ</string>
+    <!-- Placeholder for amount field -->
+    <string name="example_amount" translatable="false">0.00</string>
+    <!-- Send button that takes user to send activity when pressed -->
+    <string name="send">发送</string>
+    <!-- Header (spoiler) for showing more options in onboarding activity -->
+    <string name="more_options">更多选项</string>
+    <string name="recovery_phrase_optional_legacy">恢复助记词（Legacy 传统格式，可选）</string>
+    <string name="recovery_phrase_optional_polyseed">恢复助记词（Polyseed 格式，可选）</string>
+    <string name="restore_height_optional">恢复区块高度（可选）</string>
+    <string name="wallet_password_hint">钱包密码（可选）</string>
+    <string name="wallet_password_confirm_hint">确认钱包密码</string>
+    <string name="wallet_seed_offset_passphrase">助记词偏移密码/附加词（可选）</string>
+    <string name="wallet_name">钱包名称</string>
+    <string name="password">密码</string>
+    <string name="unlock">解锁</string>
+    <string name="enter_password">输入密码</string>
+    <string name="receive">接收</string>
+    <string name="sending_tx">正在发送交易…</string>
+    <string name="sent_tx">交易已发送！</string>
+    <string name="application_logo">应用图标</string>
+    <string name="settings">设置</string>
+    <string name="wallet">钱包</string>
+    <string name="network">网络</string>
+    <string name="about_monfluo_header">关于 Monfluo</string>
+    <string name="about_monfluo">
+Monfluo 是一款适用于 Android 的纯粹门罗币 (Monero) 钱包，由 acx 及社区共同开发。\n
+欢迎加入我们的 <a href="https://matrix.to/#/%23monfluo%3Amonero.social?via=monero.social">Matrix 聊天室</a> 或 <a href="https://smp6.simplex.im/g#YDL6oaJK3YOTlAtHKbC9zWB3U72QQw1v729HR3k_6Gs">SimpleX 群组</a> 保持联系。\n
+Git 代码仓库托管于 <a href="https://codeberg.org/Monfluo/monfluo-android">Codeberg</a>。\n
+Monfluo 属于自由开源软件，采用 GPLv3 许可证。
+    </string>
+    <string name="monfluo_build_header">构建信息</string>
+    <string name="monfluo_build_application_id">应用 ID</string>
+    <string name="monfluo_build_application_version">应用版本</string>
+    <string name="monfluo_build_monero_version">Monero 内核版本</string>
+    <string name="wallet_name_hint">我的门罗钱包</string>
+    <string name="tx_amount_no_prefix">%1$s XMR</string>
+    <string name="proxy_address_hint">127.0.0.1:9050</string>
+    <string name="node_button_text">节点：%1$s</string>
+    <string name="settings_save_proxy">保存并更新</string>
+    <string name="settings_build_version" translatable="false"><xliff:g>%1$s</xliff:g> (<xliff:g>%2$d</xliff:g>)</string>
+    <string name="global_index_text">%1$s</string>
+    <string name="outpoint_text">%1$s</string>
+    <string name="create_wallet_failed">创建钱包失败：%1$s</string>
+    <string name="freeze">冻结</string>
+    <string name="unfreeze">解冻</string>
+    <string name="done">完成</string>
+    <string name="delete">删除</string>
+    <string name="wallet_seed_label">恢复助记词</string>
+    <string name="wallet_seed_desc">掌握此恢复助记词的任何人都可以转走该钱包里的所有资产！</string>
+    <string name="wallet_seed_offset_legacy_seed_desc">正确恢复此钱包需要提供对应的助记词附加密码。</string>
+    <string name="wallet_seed_offset_polyseed_desc">恢复此钱包需要你的 Polyseed 附加密码。</string>
+    <string name="copy_secrets_warning">将钱包敏感信息复制到剪贴板非常危险，设备上的其他应用可能会读取剪贴板并窃取资产！</string>
+    <string name="wallet_keys_label">密钥 (Keys)</string>
+    <string name="wallet_restore_height_label">恢复区块高度</string>
+    <string name="wallet_adjusted_restore_height_label">调整后的恢复高度</string>
+    <string name="wallet_address">钱包地址</string>
+    <string name="slide_to_send">滑动发送</string>
+    <string name="display_advanced_wallet_creation_options">显示高级钱包创建选项</string>
+    <string name="generate_fresh_wallet_address">生成新钱包地址</string>
+    <string name="create_payment_qr_code">创建收款二维码</string>
+    <string name="copy_selected_wallet_address">复制选中的钱包地址</string>
+    <string name="copy_seed">复制钱包助记词</string>
+    <string name="copy_polyseed_offset_passphrase">复制 Polyseed 附加密码</string>
+    <string name="add_recipient_to_transaction">添加收款人</string>
+    <string name="copy_restore_height">复制钱包恢复高度</string>
+    <string name="copy_wallet_s_address">复制钱包地址</string>
+    <string name="copy_wallet_s_private_view_key">复制私有观察密钥 (Private View-Key)</string>
+    <string name="copy_wallet_s_public_view_key">复制公开观察密钥 (Public View-Key)</string>
+    <string name="copy_wallet_s_private_spend_key">复制私有支出密钥 (Private Spend-Key)</string>
+    <string name="copy_wallet_s_public_spend_key">复制公开支出密钥 (Public Spend-Key)</string>
+    <string name="seed_desc_polyseed">16 个单词（代替传统的 25 词）；安全性相同，但目前兼容性不如传统格式广泛。</string>
+    <string name="seed_desc_legacy">传统的 25 词助记词；所有门罗币钱包均支持。</string>
+    <string name="approve_the_transaction">发送交易</string>
+    <string name="sort_nodes">节点排序</string>
+    <string name="slide_to_send_transaction">滑动以发送交易</string>
+    <string name="service_description">钱包已打开</string>
+    <string name="synchronized_at_label">上次同步时间：%1$s</string>
+    <string name="wallet_error">钱包错误：%1$s</string>
+    <string name="node_synchronization_blocks_remaining">节点同步中：%1$s / %2$s（还剩 %3$s 个区块）</string>
+    <string name="wallet_synchronization_blocks_remaining">钱包同步中：%1$s / %2$s（还剩 %3$s 个区块）</string>
+    <string name="starting_wallet_synchronization">正在启动钱包同步…</string>
+    <!-- Label for seed type in onboarding activity -->
+    <string name="seed_type">助记词类型</string>
+    <!-- New wallet button -->
+    <string name="new_wallet">新建钱包</string>
+    <!-- Label for applying seed offset passphrase toggle in show secrets fragment -->
+    <string name="apply_seed_offset_passphrase">使用助记词附加密码</string>
+    <!-- Placeholder for seed offset passphrase -->
+    <string name="seed_offset_passphrase">助记词附加密码</string>
+    <!-- Header for public spend key -->
+    <string name="public_spend_key">公开支出密钥 (Public Spend Key)</string>
+    <!-- Header for private spend key -->
+    <string name="private_spend_key">私有支出密钥 (Private Spend Key)</string>
+    <!-- Header for public view key -->
+    <string name="public_view_key">公开观察密钥 (Public View Key)</string>
+    <!-- Header for private view key -->
+    <string name="private_view_key">私有观察密钥 (Private View Key)</string>
+    <!-- Coin label in the enote list view -->
+    <string name="coin">币种</string>
+    <!-- Coin public key in the enote list view -->
+    <string name="coin_public_key">公钥</string>
+    <!-- Coin global index in the enote list view -->
+    <string name="coin_global_index">全局索引</string>
+    <!-- Address label -->
+    <string name="address">地址</string>
+    <!-- Amount label -->
+    <string name="amount">金额</string>
+    <string name="transaction_type_received">已接收</string>
+    <string name="transaction_type_mined">已挖出</string>
+    <string name="transaction_type_sent">已发送</string>
+    <string name="transaction_unconfirmed">未确认</string>
+    <string name="transaction_confirming"><xliff:g>%1$s</xliff:g> 次确认</string>
+    <string name="transaction_confirmed">已确认</string>
+    <string name="loading_wallet_header">正在加载钱包…</string>
+    <string name="no_transactions_header">暂无交易记录</string>
+    <string name="no_transactions_description">你的钱包交易记录将在此处显示</string>
+    <string name="wallet_name_label">钱包名称</string>
+    <string name="account_name_label">账户名称</string>
+    <string name="unlocked_balance_label">可用余额</string>
+    <string name="locked_balance_label">待确认余额</string>
+    <string name="frozen_balance_label">冻结余额</string>
+    <string name="balance_locked">未确认</string>
+    <string name="balance_frozen">已冻结</string>
+    <string name="wallet_header">钱包</string>
+    <string name="wallet_change_password_header">修改密码</string>
+    <string name="enotes_header">电子票据 (Enotes)</string>
+    <string name="enotes_with_amount_header">电子票据 (<xliff:g>%1$d</xliff:g>)</string>
+    <string name="content_description_back">返回</string>
+    <string name="content_description_account">选择账户</string>
+    <string name="content_description_application_settings">应用设置</string>
+    <string name="content_description_enotes">电子票据</string>
+    <string name="account_label">#<xliff:g>%1$d</xliff:g> <xliff:g>%2$s</xliff:g></string>
+    <string name="address_label">#<xliff:g>%1$d</xliff:g> <xliff:g>%2$s</xliff:g></string>
+    <!-- Unit XMR -->
+    <string name="unit_xmr" translatable="false">XMR</string>
+    <!-- Unit milli XMR -->
+    <string name="unit_milli_xmr" translatable="false">mXMR</string>
+    <!-- Unit micro XMR -->
+    <string name="unit_micro_xmr" translatable="false">μXMR</string>
+    <!-- Unit nano XMR -->
+    <string name="unit_nano_xmr" translatable="false">nXMR</string>
+    <!-- Unit pico XMR -->
+    <string name="unit_pico_xmr" translatable="false">pXMR</string>
+    <!-- Monero network MAINNET -->
+    <string name="monero_network_mainnet" translatable="false">MAINNET</string>
+    <!-- Monero network STAGENET -->
+    <string name="monero_network_stagenet" translatable="false">STAGENET</string>
+    <!-- Monero network TESTNET -->
+    <string name="monero_network_testnet" translatable="false">TESTNET</string>
+    <string name="network_header">网络</string>
+    <string name="accounts_header">账户</string>
+    <string name="add_account_header">添加账户</string>
+    <string name="account_details_header">账户详情</string>
+    <string name="address_details_header">地址详情</string>
+    <string name="transaction_header">交易</string>
+    <string name="send_header">发送</string>
+    <string name="pending_transaction_header">待处理交易</string>
+    <string name="create_wallet_header">创建钱包</string>
+    <string name="wallet_secrets_header">钱包密钥与助记词</string>
+    <string name="receive_header">接收</string>
+    <string name="payment_request_header">收款请求</string>
+    <string name="nodes_header">节点</string>
+    <string name="add_node_header">添加节点</string>
+    <string name="node_details_header">节点详情</string>
+    <string name="wallet_details_header">钱包详情</string>
+    <string name="settings_header">设置</string>
+    <string name="settings_appearance_header">外观</string>
+    <string name="settings_features_header">功能</string>
+    <string name="settings_behaviour_header">行为</string>
+    <string name="settings_security_header">安全</string>
+    <string name="contacts_header">联系人</string>
+    <string name="add_contact_header">添加联系人</string>
+    <string name="contact_details_header">联系人详情</string>
+    <string name="activity_wallet_create_wallet_name_label">名称</string>
+    <string name="activity_wallet_create_wallet_password_label">密码</string>
+    <string name="activity_wallet_create_wallet_seed_label">恢复助记词</string>
+    <string name="activity_wallet_create_wallet_height_label">恢复区块高度</string>
+    <string name="activity_wallet_create_wallet_seed_offset_label">助记词附加密码</string>
+    <string name="activity_wallet_create_wallet_network_type_label">网络类型</string>
+    <string name="activity_wallet_create_wallet_encrypted_polyseed_toast">暂不支持已加密的 Polyseed</string>
+
+    <string name="activity_wallet_details_wallet_name_label">名称</string>
+    <string name="activity_home_wallet_name_content_description">钱包 - <xliff:g>%1$s</xliff:g></string>
+    <string name="activity_home_account_name_content_description">账户 - <xliff:g>%1$s</xliff:g></string>
+    <string name="recycler_view_item_wallet_edit_content_description">编辑钱包</string>
+    <string name="recycler_view_item_node_edit_content_description">编辑节点</string>
+    <string name="recycler_view_item_account_edit_content_description">编辑账户</string>
+    <string name="recycler_view_item_address_edit_content_description">编辑地址</string>
+    <string name="activity_payment_request_address_label">地址</string>
+    <string name="activity_payment_request_amount_requested_label">请求金额</string>
+    <string name="activity_payment_request_amount_requested_hint" translatable="false">0.00</string>
+    <string name="activity_payment_request_recipient_name_label">收款人名称</string>
+    <string name="activity_payment_request_recipient_name_hint">我自己</string>
+    <string name="activity_payment_request_transaction_description_label">交易备注</string>
+    <string name="activity_payment_request_transaction_description_hint">付给我自己的款项</string>
+    <string name="activity_send_selected_enotes_value_text">已选总额 %1$s XMR</string>
+    <string name="activity_send_fee_label">手续费</string>
+    <string name="activity_send_fee_default_label">默认</string>
+    <string name="activity_send_fee_medium_label">中</string>
+    <string name="activity_send_fee_high_label">高</string>
+    <string name="activity_send_description_label">备注</string>
+    <string name="activity_send_description_hint">交易备注（可选）</string>
+    <!-- Button for creating a transaction -->
+    <string name="activity_send_transaction_create">创建交易</string>
+    <string name="activity_send_camera_permission_denied_toast">无相机权限</string>
+    <string name="activity_send_address_invalid_toast">地址 #<xliff:g>%1$d</xliff:g> 无效</string>
+    <string name="activity_send_amount_invalid_toast">金额 #<xliff:g>%1$d</xliff:g> 无效</string>
+    <string name="activity_send_amount_invalid_uri_payment_toast">并非有效的支付 URI</string>
+    <string name="activity_send_transaction_create_failed_no_wallet_toast">无法创建交易 - 钱包尚未打开</string>
+    <string name="activity_send_transaction_create_failed">创建交易失败：%1$s</string>
+    <string name="activity_send_transaction_creating_toast">正在创建交易…</string>
+    <string name="recycler_view_item_transaction_destination_remove_content_description">从交易中移除此收款人</string>
+    <string name="recycler_view_item_transaction_destination_amount_label">金额</string>
+    <string name="recycler_view_item_transaction_destination_amount_with_position_label">金额 #<xliff:g>%1$d</xliff:g></string>
+    <string name="recycler_view_item_transaction_destination_address_label">地址</string>
+    <string name="recycler_view_item_transaction_destination_address_with_position_label">地址 #<xliff:g>%1$d</xliff:g></string>
+    <string name="recycler_view_item_transaction_destination_recipient_name_label">收款人名称</string>
+    <string name="recycler_view_item_transaction_destination_recipient_name_with_position_label">收款人名称 #<xliff:g>%1$d</xliff:g></string>
+    <string name="recycler_view_item_transaction_destination_recipient_name_hint">收款人名称（可选）</string>
+    <!-- Button for sending all available funds -->
+    <string name="recycler_view_item_transaction_destination_send_all_label">最大/全部</string>
+    <!-- Button shown in place of send all button after it is clicked to toggle it back -->
+    <string name="recycler_view_item_transaction_destination_send_all_undo_label">撤销</string>
+    <!-- Text used when creating a send all transaction in place of amount -->
+    <string name="recycler_view_item_transaction_destination_sending_all_text">发送全部余额</string>
+    <string name="recycler_view_item_transaction_destination_donate_label">捐赠给 Monfluo</string>
+    <string name="recycler_view_item_transaction_destination_donating_label">感谢您捐赠给 Monfluo！</string>
+    <string name="recycler_view_item_transaction_destination_address_book_description">从地址簿选择联系人</string>
+    <string name="recycler_view_item_transaction_destination_scan_content_description">扫描二维码读取收款地址</string>
+    <string name="recycler_view_item_transaction_pending_description_label">备注</string>
+    <string name="recycler_view_item_transaction_pending_amount_label">金额</string>
+    <string name="recycler_view_item_transaction_pending_amount_with_position_label">金额 #<xliff:g>%1$d</xliff:g></string>
+    <string name="recycler_view_item_transaction_pending_address_label">地址</string>
+    <string name="recycler_view_item_transaction_pending_address_with_position_label">地址 #<xliff:g>%1$d</xliff:g></string>
+    <string name="recycler_view_item_transaction_pending_address_resolved_from_label">解析自</string>
+    <string name="recycler_view_item_transaction_pending_summary_total_label">合计</string>
+    <string name="recycler_view_item_transaction_pending_summary_fee_label">手续费</string>
+    <string name="recycler_view_item_transaction_pending_summary_dust_label">零碎金额 (Dust)</string>
+    <string name="recycler_view_item_transaction_pending_summary_grand_total_label">总计扣除</string>
+    <string name="activity_wallet_settings_wallet_name_label">名称</string>
+    <string name="activity_wallet_settings_wallet_network_label">网络</string>
+    <string name="activity_wallet_settings_total_balance_label">总余额</string>
+    <!-- Button for displaying wallet secrets (seed, private keys, etc.) -->
+    <string name="activity_wallet_settings_display_wallet_secrets">显示钱包密钥与助记词</string>
+    <string name="activity_wallet_settings_change_password">修改密码</string>
+    <string name="activity_wallet_settings_close_wallet">关闭钱包</string>
+    <string name="activity_wallet_change_password_current_password_label">当前密码</string>
+    <string name="activity_wallet_change_password_current_password_hint">当前的钱包密码</string>
+    <string name="activity_wallet_change_password_new_password_label">新密码</string>
+    <string name="activity_wallet_change_password_new_password_hint">设置新的钱包密码</string>
+    <string name="activity_wallet_change_password_new_password_confirm_hint">再次确认新密码</string>
+    <string name="activity_wallet_change_password_save">保存</string>
+    <string name="activity_wallet_change_password_incorrect_current_password_toast">当前密码不正确</string>
+    <string name="activity_wallet_change_password_new_password_does_not_match_toast">两次输入的密码不一致</string>
+    <string name="activity_wallet_change_password_changing_password_toast">正在保存密码…</string>
+    <string name="activity_wallet_change_password_password_changed_toast">密码修改成功</string>
+    <string name="activity_account_add_name_label">名称</string>
+    <string name="activity_account_add_name_hint">我的账户</string>
+    <string name="activity_account_add_create_button">添加</string>
+    <string name="activity_account_details_name_label">名称</string>
+    <string name="activity_account_details_name_hint">我的账户</string>
+    <string name="activity_account_details_save_button">保存</string>
+    <string name="activity_account_list_create_button">添加账户</string>
+    <string name="activity_address_details_name_label">名称</string>
+    <string name="activity_address_details_name_hint">我的地址</string>
+    <string name="activity_address_details_save_button">保存</string>
+    <string name="activity_contact_list_create_button">添加联系人</string>
+    <string name="activity_contact_add_name_label">名称</string>
+    <string name="activity_contact_add_name_hint">联系人姓名</string>
+    <string name="activity_contact_add_address_label">地址</string>
+    <string name="activity_contact_add_address_hint">联系人地址</string>
+    <string name="activity_contact_add_create_button">添加</string>
+    <string name="activity_contact_add_toast_contact_created">联系人已创建</string>
+    <string name="activity_contact_add_toast_failed_to_create_contact">创建联系人失败</string>
+    <string name="activity_contact_details_name_label">名称</string>
+    <string name="activity_contact_details_name_hint">联系人姓名</string>
+    <string name="activity_contact_details_address_label">地址</string>
+    <string name="activity_contact_details_delete_button">删除</string>
+    <string name="activity_contact_details_save_button">保存</string>
+    <string name="activity_contact_details_toast_contact_deleted">联系人已删除</string>
+    <string name="activity_contact_details_toast_failed_to_delete_contact">删除联系人失败</string>
+    <string name="activity_contact_details_toast_contact_saved">联系人已保存</string>
+    <string name="activity_contact_details_toast_failed_to_save_contact">保存联系人失败</string>
+    <string name="activity_node_add_node_name_label">名称</string>
+    <string name="activity_node_add_node_name_placeholder">我的门罗节点</string>
+    <string name="activity_node_add_node_address_label">地址</string>
+    <string name="activity_node_add_node_address_placeholder" translatable="false">127.0.0.1:18081</string>
+    <string name="activity_node_add_node_daemon_trusted_label">可信节点 (Trusted daemon)</string>
+    <string name="activity_node_add_node_username_label">用户名</string>
+    <string name="activity_node_add_node_username_placeholder">用户名（可选）</string>
+    <string name="activity_node_add_node_password_label">密码</string>
+    <string name="activity_node_add_node_password_placeholder">密码（可选）</string>
+    <string name="activity_node_add_node_add_button">添加节点</string>
+    <string name="activity_node_add_node_network_type_label">网络类型</string>
+
+    <string name="activity_node_details_node_name_label">名称</string>
+    <string name="activity_node_details_node_name_placeholder">我的门罗节点</string>
+    <string name="activity_node_details_node_address_label">地址</string>
+    <string name="activity_node_details_node_address_placeholder" translatable="false">127.0.0.1:18081</string>
+    <string name="activity_node_details_node_daemon_trusted_label">可信节点 (Trusted daemon)</string>
+    <string name="activity_node_details_node_username_label">用户名</string>
+    <string name="activity_node_details_node_username_placeholder">用户名（可选）</string>
+    <string name="activity_node_details_node_password_label">密码</string>
+    <string name="activity_node_details_node_password_placeholder">密码（可选）</string>
+    <string name="activity_node_details_node_delete_button">删除节点</string>
+    <string name="activity_node_details_node_save_button">保存节点</string>
+    <string name="activity_node_details_node_network_type_label">网络类型</string>
+
+    <string name="activity_node_list_create_button">添加节点</string>
+    <string name="dialog_delete_node_title">删除节点</string>
+    <string name="dialog_delete_node_message">确定要删除此节点吗？</string>
+    <string name="dialog_delete_node_action_yes">是的，删除节点</string>
+    <string name="dialog_delete_node_action_no">取消</string>
+    <string name="dialog_delete_wallet_title">删除钱包</string>
+    <string name="dialog_delete_wallet_message">确定要删除钱包吗？此操作不可逆！如果您没有提前备份恢复助记词，您将永久失去钱包中的资金。</string>
+    <string name="dialog_delete_wallet_action_yes">是的，删除钱包</string>
+    <string name="dialog_delete_wallet_action_no">取消</string>
+    <string name="content_description_network_status_icon_opening_wallet">网络状态 - 正在打开钱包</string>
+    <string name="content_description_network_status_icon_starting_synchronization">网络状态 - 正在启动同步</string>
+    <string name="content_description_network_status_icon_synchronizing_node">网络状态 - 节点同步中</string>
+    <string name="content_description_network_status_icon_synchronizing_wallet">网络状态 - 钱包同步中</string>
+    <string name="content_description_network_status_icon_synchronized">网络状态 - 已同步</string>
+    <string name="content_description_network_status_icon_wallet_error">网络状态 - 钱包错误</string>
+    <string name="activity_network_node_status_header_waiting_for_wallet">等待钱包响应…</string>
+    <string name="activity_network_node_status_header_fetching_blockchain_data">正在获取区块高度…</string>
+    <string name="activity_network_node_status_header_node_is_synchronizing">节点正在同步…</string>
+    <string name="activity_network_node_status_description_node_is_synchronizing">%1$s / %2$s（还剩 %3$s 个区块）</string>
+    <string name="activity_network_node_status_header_node_is_synchronized">节点已同步</string>
+    <string name="activity_network_node_status_description_node_is_synchronized">区块高度：%1$s</string>
+    <string name="activity_network_node_last_updated_at">上次更新时间：%1$s</string>
+    <string name="activity_network_wallet_status_header_opening_wallet">正在打开钱包…</string>
+    <string name="activity_network_wallet_status_header_error">错误</string>
+    <string name="activity_network_wallet_status_header_starting_synchronization">正在启动同步</string>
+    <string name="activity_network_wallet_status_header_wallet_is_synchronizing">钱包正在同步…</string>
+    <string name="activity_network_wallet_status_description_wallet_is_synchronizing">%1$s / %2$s（还剩 %3$s 个区块）</string>
+    <string name="activity_network_wallet_status_header_wallet_is_synchronized">钱包已同步</string>
+    <string name="activity_network_wallet_status_description_wallet_is_synchronized">区块高度：%1$s</string>
+    <string name="activity_network_wallet_last_updated_at">上次更新时间：%1$s</string>
+    <string name="recycler_view_item_transaction_details_transaction_type_label">类型</string>
+    <string name="recycler_view_item_transaction_details_transaction_type_incoming">转入/收款</string>
+    <string name="recycler_view_item_transaction_details_transaction_type_coinbase">挖矿奖励</string>
+    <string name="recycler_view_item_transaction_details_transaction_type_outgoing">转出/付款</string>
+    <string name="recycler_view_item_transaction_details_transaction_description_label">备注</string>
+    <string name="recycler_view_item_transaction_details_transaction_description_hint">交易备注（可选）</string>
+    <string name="recycler_view_item_transaction_details_transaction_description_none">无</string>
+    <string name="recycler_view_item_transaction_details_amount_label">金额</string>
+    <string name="recycler_view_item_transaction_details_amount_with_position_label">金额 #<xliff:g>%1$d</xliff:g></string>
+    <string name="recycler_view_item_transaction_details_address_label">地址</string>
+    <string name="recycler_view_item_transaction_details_address_with_position_label">地址 #<xliff:g>%1$d</xliff:g></string>
+    <string name="recycler_view_item_transaction_details_total_label">合计</string>
+    <string name="recycler_view_item_transaction_details_fee_label">手续费</string>
+    <string name="recycler_view_item_transaction_details_grand_total_label">总计</string>
+    <string name="recycler_view_item_transaction_details_address_unavailable">不可用/隐藏</string>
+    <string name="recycler_view_item_transaction_details_transaction_hash_label">交易哈希 (Transaction ID)</string>
+    <string name="recycler_view_item_transaction_details_transaction_key_label">交易密钥 (Tx Key)</string>
+    <string name="recycler_view_item_transaction_details_transaction_key_unavailable">不可用</string>
+    <string name="recycler_view_item_transaction_details_date_label">日期</string>
+    <string name="recycler_view_item_transaction_details_confirmations_label">确认数</string>
+    <string name="recycler_view_item_transaction_details_confirmations_unconfirmed">未确认</string>
+    <string name="recycler_view_item_transaction_details_confirmations"><xliff:g>%1$s</xliff:g> 次确认</string>
+    <string name="recycler_view_item_transaction_details_block_label">区块高度</string>
+    <string name="recycler_view_item_transaction_details_block_unconfirmed">未确认</string>
+    <string name="recycler_view_item_transaction_details_block"><xliff:g>%1$s</xliff:g></string>
+</resources>
