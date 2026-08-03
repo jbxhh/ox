@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
@@ -15,6 +16,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import org.monfluo.wallet.R
 import org.monfluo.wallet.util.Constants
+import org.monfluo.wallet.util.Helper
 import org.monfluo.wallet.util.PreferenceUtils
 import org.monfluo.wallet.util.component.ActivityBase
 import kotlin.io.path.Path
@@ -70,6 +72,10 @@ class ActivityWalletDetails : ActivityBase() {
             val walletPath = viewModel.walletPath.value!!
             val newWalletName = walletNameEditText.text.toString()
             if (Path(walletPath).name != newWalletName) {
+                if (!Helper.isValidWalletName(newWalletName)) {
+                    Toast.makeText(this, getString(R.string.toast_invalid_wallet_name), Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
                 Path(walletPath).moveTo(Path(walletPath).resolveSibling(newWalletName))
                 Path("$walletPath.keys").moveTo(Path(walletPath).resolveSibling("$newWalletName.keys"))
                 PreferenceUtils.renameWalletNetworkType(this@ActivityWalletDetails, Path(walletPath).name, newWalletName)
