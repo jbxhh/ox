@@ -441,6 +441,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="dialog_delete_wallet_message">Are you sure that you want to delete your wallet? This action is irreversible and you will permanently lose your funds unless you have backed up your wallet.</string>
     <string name="dialog_delete_wallet_action_yes">Yes, delete wallet</string>
     <string name="dialog_delete_wallet_action_no">No</string>
+    <string name="toast_invalid_wallet_name">Wallet names cannot be empty, "." or ".." or contain "/" or "\\" characters.</string>
     <string name="content_description_network_status_icon_opening_wallet">Network status - opening wallet</string>
     <string name="content_description_network_status_icon_starting_synchronization">Network status - starting synchronization</string>
     <string name="content_description_network_status_icon_synchronizing_node">Network status - synchronizing node</string>
