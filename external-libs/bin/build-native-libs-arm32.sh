@@ -6,6 +6,7 @@ SCRIPT_DIR=$(dirname "$0")
 
 export ARCH=arm
 export HOST=arm-linux-androideabi
+export CLANG_TRIPLE=armv7a-linux-androideabi
 export OPENSSL_TARGET=android-arm
 export MONERO_TARGET=release-static-android-armv7-wallet_api
 

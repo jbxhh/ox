@@ -252,3 +252,5 @@ target_link_libraries(  monfluo
 
                        ${log-lib}
                        )
+
+set_target_properties(monfluo PROPERTIES LINK_FLAGS "-Wl,-Bsymbolic")
