@@ -27,6 +27,7 @@ import org.monfluo.wallet.android.activity.ActivityTransactionDetails
 import org.monfluo.wallet.android.data.Heights
 import org.monfluo.wallet.android.data.SynchronizationStatus
 import org.monfluo.wallet.android.model.MoneroNetworkType
+import org.monfluo.wallet.android.model.MoneroUnit
 import org.monfluo.wallet.android.model.PendingTransaction
 import org.monfluo.wallet.android.model.PendingTransactionDestination
 import org.monfluo.wallet.android.model.TransactionDestination
@@ -43,6 +44,7 @@ import org.monfluo.wallet.android.util.Constants.FOREGROUND_SERVICE_NOTIFICATION
 import org.monfluo.wallet.android.util.Constants.TRANSFERS_NOTIFICATION_CHANNEL
 import org.monfluo.wallet.android.util.Helper
 import org.monfluo.wallet.android.util.PreferenceUtils
+import org.monfluo.wallet.android.util.TextHelper
 import org.monfluo.wallet.lib.Monfluo
 import org.monfluo.wallet.lib.wallet.Daemon
 import org.monfluo.wallet.lib.wallet.WalletSyncObserver
@@ -906,9 +908,18 @@ class WalletService :
                 .setSmallIcon(R.drawable.monfluo_notification_icon)
                 .setOnlyAlertOnce(true)
                 .setWhen(firstSeenAt)
-                .setContentTitle(getString(R.string.transfer_notification_header, Wallet.getDisplayAmount(amount), getString(R.string.unit_xmr)))
-                .setContentText(getString(R.string.transfer_notification_description_transaction_id, txId))
-                .setProgress(Constants.CONFIRMATIONS, progress, false)
+                .setContentTitle(
+                    getString(
+                        R.string.transfer_notification_header,
+                        TextHelper.getDisplayAmount(amount, MoneroUnit.MONERO, PreferenceUtils.isHideNotificationContent(this)),
+                        getString(R.string.unit_xmr),
+                    ),
+                ).setContentText(
+                    getString(
+                        R.string.transfer_notification_description_transaction_id,
+                        if (PreferenceUtils.isHideNotificationContent(this)) "#".repeat(txId.length) else txId,
+                    ),
+                ).setProgress(Constants.CONFIRMATIONS, progress, false)
                 .setContentIntent(openTransactionActivityPendingIntent)
                 .setDeleteIntent(deleteNotificationBroadcastPendingIntent)
                 .build()

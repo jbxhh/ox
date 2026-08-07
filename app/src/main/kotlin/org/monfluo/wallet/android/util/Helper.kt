@@ -72,6 +72,13 @@ object Helper {
 
     fun isOpenaliasLike(string: String): Boolean = string.lowercase().replace('@', '.').matches(DOMAIN_REGEX)
 
+    fun isValidWalletName(name: String): Boolean {
+        if (name.isBlank()) return false
+        if (name.contains('/') || name.contains('\\')) return false
+        if (name == "." || name == "..") return false
+        return true
+    }
+
     fun getCameraPermission(
         context: Activity,
         launcher: ActivityResultLauncher<String?>,

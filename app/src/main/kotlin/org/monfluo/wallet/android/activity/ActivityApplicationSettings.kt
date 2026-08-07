@@ -46,6 +46,7 @@ class ActivityApplicationSettings : ActivityMonero() {
     private lateinit var allowFeeOverrideSwitch: SwitchCompat
     private lateinit var allowCopyingSecretsToClipboardSwitch: SwitchCompat
     private lateinit var enableSecureFlagSwitch: SwitchCompat
+    private lateinit var hideNotificationContentSwitch: SwitchCompat
     private lateinit var showTransferNotificationsSwitch: SwitchCompat
     private lateinit var showIconOnQrCodesSwitch: SwitchCompat
     private lateinit var autoRotateAddressesSwitch: SwitchCompat
@@ -83,6 +84,7 @@ class ActivityApplicationSettings : ActivityMonero() {
         maxBrightnessQrCodesSwitch = findViewById(R.id.max_brightness_qr_codes_switch)
         forceUriFormatQrCodesSwitch = findViewById(R.id.force_uri_format_qr_codes_switch)
         enableSecureFlagSwitch = findViewById(R.id.enable_secure_flag_switch)
+        hideNotificationContentSwitch = findViewById(R.id.hide_notification_content_switch)
         proxySwitch = findViewById(R.id.proxy_switch)
         proxySettingsLayout = findViewById(R.id.wallet_proxy_settings_layout)
         walletProxyAddressEditText = findViewById(R.id.wallet_proxy_address_edittext)
@@ -107,6 +109,7 @@ class ActivityApplicationSettings : ActivityMonero() {
         val isMaxBrightnessQrCodes = PreferenceUtils.isMaxBrightnessQrCodes(applicationContext)
         val isForceUriFormatQrCodes = PreferenceUtils.isForceUriFormatQrCodes(applicationContext)
         val isEnableSecureFlag = PreferenceUtils.isSecureFlagEnabled(applicationContext)
+        val isHideNotificationContent = PreferenceUtils.isHideNotificationContent(applicationContext)
         val isAddressBookEnabled = PreferenceUtils.isEnableAddressBook(applicationContext)
         val isDeveloperModeEnabled = PreferenceUtils.isDeveloperModeEnabled(applicationContext)
         val isUseProxy = PreferenceUtils.isUseProxy(applicationContext)
@@ -124,6 +127,7 @@ class ActivityApplicationSettings : ActivityMonero() {
         maxBrightnessQrCodesSwitch.isChecked = isMaxBrightnessQrCodes
         forceUriFormatQrCodesSwitch.isChecked = isForceUriFormatQrCodes
         enableSecureFlagSwitch.isChecked = isEnableSecureFlag
+        hideNotificationContentSwitch.isChecked = isHideNotificationContent
         enableAddressBookSwitch.isChecked = isAddressBookEnabled
         developerModeSwitch.isChecked = isDeveloperModeEnabled
         proxySwitch.isChecked = isUseProxy
@@ -207,6 +211,9 @@ class ActivityApplicationSettings : ActivityMonero() {
                 window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
                 Timber.d("Clearing FLAG_SECURE from window from settings")
             }
+        }
+        hideNotificationContentSwitch.setOnCheckedChangeListener { _: CompoundButton?, b: Boolean ->
+            PreferenceUtils.setHideNotificationContent(applicationContext, b)
         }
         proxySwitch.setOnCheckedChangeListener { _, b: Boolean ->
             PreferenceUtils.setUseProxy(applicationContext, b)

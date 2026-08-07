@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
@@ -68,6 +69,10 @@ class ActivityWalletDetails : ActivityBase() {
             val wallet = viewModel.wallet.value!!
             val newWalletName = walletNameEditText.text.toString()
             if (wallet != newWalletName) {
+                if (!Helper.isValidWalletName(newWalletName)) {
+                    Toast.makeText(this, getString(R.string.toast_invalid_wallet_name), Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
                 Monfluo.renameWallet(Helper.getWalletRoot(this).absolutePath, wallet, newWalletName)
                 PreferenceUtils.renameWalletNetworkType(this@ActivityWalletDetails, wallet, newWalletName)
             }

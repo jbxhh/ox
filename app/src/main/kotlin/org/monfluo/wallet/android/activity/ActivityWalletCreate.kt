@@ -297,10 +297,15 @@ class ActivityWalletCreate : ActivityBase() {
         walletSeed: String,
         restoreHeightText: String,
     ) {
+        val walletName = walletNameEditText.text.toString()
+        if (!Helper.isValidWalletName(walletName)) {
+            Toast.makeText(this, getString(R.string.toast_invalid_wallet_name), Toast.LENGTH_SHORT).show()
+            return
+        }
         lifecycleScope.launch(Dispatchers.IO) {
             viewModel.createOrImportWallet(
                 this@ActivityWalletCreate,
-                walletNameEditText.text.toString(),
+                walletName,
                 walletSeed,
                 restoreHeightText,
             )

@@ -1,0 +1,7 @@
+* Update Monero to v0.18.5.1
+* Implement setting for hiding sensitive notification content
+* Update SimpleX link
+* Fix 'copy adjusted restore height' button
+* Refactor build process
+* Refuse to create wallet with invalid names instead of crashing
+* Add Chinese translation

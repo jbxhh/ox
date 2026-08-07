@@ -32,6 +32,7 @@ object Constants {
     const val PREF_ENABLE_ADDRESS_BOOK = "pref_enable_address_book"
     const val PREF_ENABLE_DEVELOPER_MODE = "pref_enable_developer_mode"
     const val PREF_SECURE_FLAG_ENABLED = "pref_secure_flag_enabled"
+    const val PREF_HIDE_NOTIFICATION_CONTENT = "pref_hide_notification_content"
 
     const val URI_ARG_AMOUNT = "tx_amount"
     const val URI_ARG_AMOUNT2 = "amount"

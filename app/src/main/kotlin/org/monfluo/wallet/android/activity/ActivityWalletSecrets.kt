@@ -156,6 +156,9 @@ class ActivityWalletSecrets : ActivityMonero() {
         copyRestoreHeightImageButton.setOnClickListener {
             clipBoardCopy(this, "monero restore height", viewModel.restoreHeight.value!!.toString())
         }
+        copyAdjustedRestoreHeightImageButton.setOnClickListener {
+            clipBoardCopy(this, "monero adjusted restore height", viewModel.adjustedRestoreHeight.value!!.toString())
+        }
         copyWalletAddressImageButton.setOnClickListener {
             clipBoardCopy(this, "monero wallet address", viewModel.walletAddress.value!!)
         }
