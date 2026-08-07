@@ -20,3 +20,4 @@ done
 * Create a new release on Codeberg
 * Copy APKs to fdroid repo: `cp *.apk ~/fdroid/repo/`
 * Deploy new APKs to fdroid: `cd ~/fdroid && fdroid-deploy-monfluo`
+* Update website links to point to the new release

@@ -117,6 +117,8 @@
     <string name="force_uri_format_qr_codes">Force URI format for QR codes</string>
     <!-- Label for secure flag setting toggle -->
     <string name="enable_secure_flag">Prevent screenshots</string>
+    <!-- Label for hide notification content setting toggle -->
+    <string name="hide_notification_content">Hide notification content</string>
     <!-- Label for SOCKS proxy setting -->
     <string name="tor_switch_label">SOCKS Proxy</string>
     <!-- Placeholder for address field -->
@@ -147,7 +149,7 @@
     <string name="about_monfluo_header">About Monfluo</string>
     <string name="about_monfluo">
 Monfluo is a pure Monero wallet for Android developed by acx and community.\n
-Join our <a href="https://matrix.to/#/%23monfluo%3Amonero.social?via=monero.social">Matrix room</a> or <a href="https://simplex.chat/contact#/?v=2-7&amp;smp=smp%3A%2F%2F1OwYGt-yqOfe2IyVHhxz3ohqo3aCCMjtB-8wn4X_aoY%3D%40smp11.simplex.im%2FA89PUHNXaCYLa48cSAWH5k8orgG1ebbt%23%2F%3Fv%3D1-3%26dh%3DMCowBQYDK2VuAyEAVG3M3jjFAELlA2zJtOMq--p1V0yfN252oglNp4ZR1wM%253D%26srv%3D6ioorbm6i3yxmuoezrhjk6f6qgkc4syabh7m3so74xunb5nzr4pwgfqd.onion&amp;data=%7B%22groupLinkId%22%3A%22aSaW9b7I_yHrzvsstF-hYA%3D%3D%22%7D">SimpleX group</a> to keep in touch.\n
+Join our <a href="https://matrix.to/#/%23monfluo%3Amonero.social?via=monero.social">Matrix room</a> or <a href="https://smp6.simplex.im/g#YDL6oaJK3YOTlAtHKbC9zWB3U72QQw1v729HR3k_6Gs">SimpleX group</a> to keep in touch.\n
 Git repository is available on <a href="https://codeberg.org/Monfluo/monfluo-android">Codeberg</a>.\n
 Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     </string>
@@ -439,6 +441,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="dialog_delete_wallet_message">Are you sure that you want to delete your wallet? This action is irreversible and you will permanently lose your funds unless you have backed up your wallet.</string>
     <string name="dialog_delete_wallet_action_yes">Yes, delete wallet</string>
     <string name="dialog_delete_wallet_action_no">No</string>
+    <string name="toast_invalid_wallet_name">Wallet names cannot be empty, "." or ".." or contain "/" or "\\" characters.</string>
     <string name="content_description_network_status_icon_opening_wallet">Network status - opening wallet</string>
     <string name="content_description_network_status_icon_starting_synchronization">Network status - starting synchronization</string>
     <string name="content_description_network_status_icon_synchronizing_node">Network status - synchronizing node</string>
