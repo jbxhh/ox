@@ -117,6 +117,8 @@
     <string name="force_uri_format_qr_codes">强制二维码使用 URI 格式</string>
     <!-- Label for secure flag setting toggle -->
     <string name="enable_secure_flag">禁止截屏（防录屏）</string>
+    <!-- Label for hide notification content setting toggle -->
+    <string name="hide_notification_content">隐藏通知内容</string>
     <!-- Label for SOCKS proxy setting -->
     <string name="tor_switch_label">SOCKS 代理</string>
     <!-- Placeholder for address field -->
