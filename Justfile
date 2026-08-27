@@ -14,6 +14,8 @@ setup:
 create-changelog:
     ./bin/create-changelog.nu
 
+[group('common')]
+format: oxide-jni-format oxide-kotlin-format app-format
 
 [group('common')]
 clean: oxide-jni-clean oxide-kotlin-clean app-clean
@@ -24,6 +26,11 @@ test: oxide-jni-test oxide-kotlin-test app-test
 [group('common')]
 app: oxide-jni-build-android-arm64-release app-copy-native-libs-arm64-release app-build app-install app-kill app-run
 
+
+[group('oxide-jni')]
+[working-directory: 'monfluo-oxide-jni']
+oxide-jni-format:
+    cargo fmt
 
 [group('oxide-jni')]
 [working-directory: 'monfluo-oxide-jni']
@@ -74,6 +81,14 @@ oxide-jni-build-android-x86_64-release: (_oxide-jni-build "release" "x86_64")
 [group('oxide-jni')]
 oxide-jni-build-android-all-release: oxide-jni-build-android-arm32-release oxide-jni-build-android-arm64-release oxide-jni-build-android-x86_64-release
 
+
+[group('oxide-kotlin')]
+oxide-kotlin-lint:
+    ./gradlew :monfluo-oxide-kotlin:ktlintCheck
+
+[group('oxide-kotlin')]
+oxide-kotlin-format:
+    ./gradlew :monfluo-oxide-kotlin:ktlintFormat
 
 [group('oxide-kotlin')]
 oxide-kotlin-clean:

@@ -24,6 +24,7 @@ import org.monfluo.wallet.android.model.MoneroUnit
 import org.monfluo.wallet.android.model.Wallet
 import org.monfluo.wallet.android.service.wallet.State
 import org.monfluo.wallet.android.service.wallet.WalletService
+import org.monfluo.wallet.android.service.wallet.WalletWithData
 import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.Helper
 import org.monfluo.wallet.android.util.PreferenceUtils
@@ -31,8 +32,6 @@ import org.monfluo.wallet.android.util.TextHelper
 import org.monfluo.wallet.android.util.component.ActivityMonero
 import org.monfluo.wallet.lib.data.Balance
 import org.monfluo.wallet.lib.data.TransactionView
-import org.monfluo.wallet.lib.wallet.FinishedSyncing
-import org.monfluo.wallet.lib.wallet.WalletSyncState
 import timber.log.Timber
 import kotlin.math.max
 
@@ -298,10 +297,9 @@ class ActivityHome : ActivityMonero() {
     }
 
     override fun onNewWalletUpdated(
-        wallet: org.monfluo.wallet.lib.wallet.Wallet,
-        state: WalletSyncState,
+        walletWithData: WalletWithData,
     ) {
-        updateNewWallet(wallet, state)
+        updateNewWallet(walletWithData)
     }
 
     override fun onNewBlock(wallet: Wallet) {
@@ -320,16 +318,15 @@ class ActivityHome : ActivityMonero() {
     }
 
     private fun updateNewWallet(
-        wallet: org.monfluo.wallet.lib.wallet.Wallet,
-        state: WalletSyncState? = null,
+        walletWithData: WalletWithData,
     ) {
-        // TODO: turn FinishedSyncing into object and simplify comparison. Refactor Rust side also to correctly construct/reference object
+        val (wallet, data) = walletWithData
         val name = wallet.getName()
-        val isSynchronized = state != null && state::class == FinishedSyncing::class
+        val isSynchronized = data.syncCompleted
         val balance = wallet.getBalance()
         val transactions = wallet.getTransactionViews()
         viewModel.cardData.postValue(WalletCardData(name, isSynchronized, balance))
-        viewModel.transactions.postValue(wallet.getTransactionViews())
+        viewModel.transactions.postValue(transactions)
     }
 }
 

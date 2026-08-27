@@ -3,6 +3,7 @@ package org.monfluo.wallet.lib.wallet
 import org.monfluo.wallet.lib.data.AccountView
 import org.monfluo.wallet.lib.data.Balance
 import org.monfluo.wallet.lib.data.TransactionView
+import org.monfluo.wallet.lib.wallet.sync.WalletSyncObserver
 
 class Wallet(
     @Suppress("unused") private val _handle: Long,
@@ -10,6 +11,8 @@ class Wallet(
     var currentAccountIndex: Int = 0
 
     external fun getName(): String
+
+    external fun getCurrentHeight(): Int
 
     external fun sync(
         daemon: Daemon,

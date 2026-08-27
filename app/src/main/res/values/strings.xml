@@ -204,6 +204,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="node_synchronization_blocks_remaining">Synchronizing node: %1$s / %2$s (%3$s blocks remaining)</string>
     <string name="wallet_synchronization_blocks_remaining">Synchronizing wallet: %1$s / %2$s (%3$s blocks remaining)</string>
     <string name="starting_wallet_synchronization">Starting wallet synchronization…</string>
+    <string name="wallet_not_connected">Not connected</string>
     <!-- Label for seed type in onboarding activity -->
     <string name="seed_type">Seed type</string>
     <!-- New wallet button -->
@@ -457,6 +458,9 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="activity_network_node_last_updated_at">Last updated: %1$s</string>
     <string name="activity_network_wallet_status_header_opening_wallet">Opening wallet…</string>
     <string name="activity_network_wallet_status_header_error">Error</string>
+    <string name="activity_network_wallet_status_header_cancelled">Cancelled</string>
+    <string name="activity_network_wallet_status_header_not_synchronizing">Not synchronizing</string>
+    <string name="activity_network_wallet_status_header_preparing_synchronization">Preparing synchronization</string>
     <string name="activity_network_wallet_status_header_starting_synchronization">Starting synchronization</string>
     <string name="activity_network_wallet_status_header_wallet_is_synchronizing">Wallet is synchronizing…</string>
     <string name="activity_network_wallet_status_description_wallet_is_synchronizing">%1$s / %2$s (%3$s blocks remaining)</string>

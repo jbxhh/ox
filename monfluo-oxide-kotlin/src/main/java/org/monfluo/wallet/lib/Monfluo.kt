@@ -54,7 +54,10 @@ object Monfluo {
     ): Wallet
 
     external fun createDaemon(
-        url: String,
-        proxy: String?,
+        nodeName: String,
+        nodeAddress: String,
+        nodeUsername: String?,
+        nodePassword: String?,
+        nodeproxy: String?,
     ): Daemon
 }

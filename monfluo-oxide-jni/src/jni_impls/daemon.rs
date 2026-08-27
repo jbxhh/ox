@@ -9,12 +9,14 @@ pub fn fetch_node_info<'local>(
     mut env: EnvUnowned<'local>,
     daemon: JObject<'local>,
 ) -> JObject<'local> {
+    let cache = crate::java::get_cache();
+
     env.with_env(|env| {
         crate::RUNTIME.block_on(async {
             let handle = crate::java::get_handle(env, &daemon);
             let daemon = crate::bridge::from_java_handle::<MoneroDaemon<MonfluoTransport>>(handle);
             let node_info = daemon.node_info().await.unwrap();
-            let java_node_info = crate::java::new_node_info(env, node_info);
+            let java_node_info = crate::java::new_node_info(env, cache, node_info);
             Ok::<JObject, jni::errors::Error>(java_node_info)
         })
     })

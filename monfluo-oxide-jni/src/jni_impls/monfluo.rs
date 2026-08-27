@@ -8,6 +8,8 @@ use jni::{
 };
 use monfluo_oxide::transport::MonfluoTransport;
 
+use crate::java::JavaStringHelper;
+
 #[jni_mangle("org.monfluo.wallet.lib.Monfluo", "monfluoVersion")]
 pub fn monfluo_version<'local>(
     mut env: EnvUnowned<'local>,
@@ -31,13 +33,13 @@ pub fn list_wallets<'local>(
     env.with_env(|mut env| {
         crate::RUNTIME.block_on(async {
             let monfluo_directory = PathBuf::from_str(
-                &crate::java::JavaStringHelper::from_jstring(env, &monfluo_directory).to_str(),
+                &crate::java::JavaStringHelper::from_jstring(env, &monfluo_directory).to_cow_str(),
             )
             .unwrap();
             let wallets = monfluo_oxide::wallet::Wallet::list(monfluo_directory)
                 .await
                 .unwrap();
-            let list = crate::java::arraylist_new(&mut env);
+            let list = crate::java::arraylist_new(&mut env, cache);
             for wallet in wallets {
                 let wallet = env
                     .new_string(wallet)
@@ -60,11 +62,11 @@ pub fn delete_wallet<'local>(
     env.with_env(|env| {
         crate::RUNTIME.block_on(async {
             let monfluo_directory = PathBuf::from_str(
-                &crate::java::JavaStringHelper::from_jstring(env, &monfluo_directory).to_str(),
+                &crate::java::JavaStringHelper::from_jstring(env, &monfluo_directory).to_cow_str(),
             )
             .unwrap();
             let wallet_name = crate::java::JavaStringHelper::from_jstring(env, &wallet_name);
-            monfluo_oxide::wallet::Wallet::delete(monfluo_directory, &wallet_name.to_str())
+            monfluo_oxide::wallet::Wallet::delete(monfluo_directory, &wallet_name.to_cow_str())
                 .await
                 .unwrap();
             Ok::<(), jni::errors::Error>(())
@@ -88,7 +90,7 @@ pub fn create_wallet<'local>(
     env.with_env(|env| {
         crate::RUNTIME.block_on(async {
             let monfluo_directory = PathBuf::from_str(
-                &crate::java::JavaStringHelper::from_jstring(env, &monfluo_directory).to_str(),
+                &crate::java::JavaStringHelper::from_jstring(env, &monfluo_directory).to_cow_str(),
             )
             .unwrap();
             let wallet_name = crate::java::JavaStringHelper::from_jstring(env, &name);
@@ -110,11 +112,11 @@ pub fn create_wallet<'local>(
 
             monfluo_oxide::wallet::Wallet::create(
                 monfluo_directory,
-                &wallet_name.to_str(),
-                &password.to_str(),
+                &wallet_name.to_cow_str(),
+                &password.to_cow_str(),
                 seed,
                 None,
-                None,
+                0,
             )
             .await
             .unwrap();
@@ -141,7 +143,7 @@ pub fn restore_wallet<'local>(
     env.with_env(|env| {
         crate::RUNTIME.block_on(async {
             let monfluo_directory = PathBuf::from_str(
-                &crate::java::JavaStringHelper::from_jstring(env, &monfluo_directory).to_str(),
+                &crate::java::JavaStringHelper::from_jstring(env, &monfluo_directory).to_cow_str(),
             )
             .unwrap();
             let wallet_name = crate::java::JavaStringHelper::from_jstring(env, &name);
@@ -153,11 +155,11 @@ pub fn restore_wallet<'local>(
 
             monfluo_oxide::wallet::Wallet::create(
                 monfluo_directory,
-                &wallet_name.to_str(),
-                &password.to_str(),
+                &wallet_name.to_cow_str(),
+                &password.to_cow_str(),
                 seed,
                 None,
-                height,
+                height.unwrap_or(0),
             )
             .await
             .unwrap();
@@ -176,10 +178,12 @@ pub fn open_wallet<'local>(
     name: JString,
     password: JString,
 ) -> JObject<'local> {
+    let cache = crate::java::get_cache();
+
     env.with_env(|env| {
         crate::RUNTIME.block_on(async {
             let monfluo_directory = PathBuf::from_str(
-                &crate::java::JavaStringHelper::from_jstring(env, &monfluo_directory).to_str(),
+                &crate::java::JavaStringHelper::from_jstring(env, &monfluo_directory).to_cow_str(),
             )
             .unwrap();
             let wallet_name = crate::java::JavaStringHelper::from_jstring(env, &name);
@@ -187,13 +191,13 @@ pub fn open_wallet<'local>(
 
             let wallet = monfluo_oxide::wallet::Wallet::open(
                 monfluo_directory,
-                &wallet_name.to_str(),
-                &password.to_str(),
+                &wallet_name.to_cow_str(),
+                &password.to_cow_str(),
             )
             .await
             .unwrap();
             let wallet_handle = crate::bridge::into_java_handle(Arc::new(wallet));
-            let java_wallet = crate::java::new_wallet(env, wallet_handle);
+            let java_wallet = crate::java::new_wallet(env, cache, wallet_handle);
 
             Ok::<JObject, jni::errors::Error>(java_wallet)
         })
@@ -205,23 +209,48 @@ pub fn open_wallet<'local>(
 pub fn create_daemon<'local>(
     mut env: EnvUnowned<'local>,
     _class: JClass<'local>,
-    url: JString,
-    proxy: JString,
+    java_node_name: JString,
+    java_node_address: JString,
+    java_node_username: JString,
+    java_node_password: JString,
+    java_node_proxy: JString,
 ) {
+    let cache = crate::java::get_cache();
+
     env.with_env(|env| {
         crate::RUNTIME.block_on(async {
-            let url = crate::java::JavaStringHelper::from_jstring(env, &url);
-            let _proxy = if proxy.is_null() {
-                None
-            } else {
-                Some(crate::java::JavaStringHelper::from_jstring(env, &proxy))
-            };
+            let node_name = crate::java::JavaStringHelper::from_jstring(env, &java_node_name);
+            let node_address = crate::java::JavaStringHelper::from_jstring(env, &java_node_address);
+            let node_username =
+                crate::java::JavaStringHelper::from_nullable_jstring(env, &java_node_username);
+            let node_password =
+                crate::java::JavaStringHelper::from_nullable_jstring(env, &java_node_password);
+            let node_proxy =
+                crate::java::JavaStringHelper::from_nullable_jstring(env, &java_node_proxy);
 
-            let daemon = MonfluoTransport::new(url.to_str().into_owned(), None)
+            let daemon = MonfluoTransport::new(node_address.to_cow_str().into_owned(), None)
                 .await
                 .unwrap();
             let daemon_handle = crate::bridge::into_java_handle(Arc::new(daemon));
-            let java_daemon = crate::java::new_daemon(env, daemon_handle);
+            let java_daemon = crate::java::new_daemon(
+                env,
+                cache,
+                daemon_handle,
+                &node_name.to_cow_str(),
+                &node_address.to_cow_str(),
+                node_username
+                    .as_ref()
+                    .map(JavaStringHelper::to_cow_str)
+                    .as_deref(),
+                node_password
+                    .as_ref()
+                    .map(JavaStringHelper::to_cow_str)
+                    .as_deref(),
+                node_proxy
+                    .as_ref()
+                    .map(JavaStringHelper::to_cow_str)
+                    .as_deref(),
+            );
 
             Ok::<JObject, jni::errors::Error>(java_daemon)
         })
