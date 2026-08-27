@@ -28,6 +28,9 @@ pub use provides_decoys::*;
 mod provides_fee_rates;
 pub use provides_fee_rates::*;
 
+mod provides_node_info;
+pub use provides_node_info::*;
+
 /// An error from the interface.
 #[derive(Clone, PartialEq, Eq, Debug, thiserror::Error)]
 pub enum InterfaceError {

@@ -684,6 +684,41 @@ mod provides_fee_rates {
   }
 }
 
+mod provides_node_info {
+  use super::*;
+
+  impl<T: HttpTransport> ProvidesNodeInfo for MoneroDaemon<T> {
+    fn node_info(
+      &self,
+    ) -> impl Send + Future<Output = Result<NodeInfo, InterfaceError>> {
+      async move {
+        #[derive(Deserialize)]
+        struct NodeInfoResponse {
+            height: u32,
+            target_height: u32,
+            nettype: String,
+            status: String,
+        }
+
+        let res: NodeInfoResponse = self
+          .json_rpc_call_internal(
+            "get_info",
+            None,
+            0,
+          )
+          .await?;
+
+        Ok(NodeInfo {
+            height: res.height,
+            target_height: res.target_height,
+            nettype: res.nettype,
+            status: res.status,
+        })
+      }
+    }
+  }
+}
+
 /// A prelude of recommended imports to glob import.
 pub mod prelude {
   pub use monero_interface::prelude::*;
