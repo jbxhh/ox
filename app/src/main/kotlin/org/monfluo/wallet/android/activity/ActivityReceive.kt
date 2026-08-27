@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.adapter.AdapterAddress
 import org.monfluo.wallet.android.adapter.AdapterAddress.AdapterAddressListener
-import org.monfluo.wallet.android.model.Wallet
 import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.Helper.clipBoardCopy
@@ -76,7 +75,7 @@ class ActivityReceive : ActivityMonero() {
         }
         freshAddressImageView.setOnClickListener {
             walletService?.let { walletService ->
-                walletService.getNewWalletOrLog()?.let { wallet ->
+                walletService.getNewWalletOrLog()?.let { (wallet) ->
                     wallet.registerNewAddressForCurrentAccount()
                     wallet.store()
                     viewModel.refreshAddresses(wallet, true)
@@ -140,22 +139,15 @@ class ActivityReceive : ActivityMonero() {
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
-        walletService.getNewWalletOrLog()?.let { wallet ->
+        walletService.getNewWalletOrLog()?.let { (wallet) ->
             showUi()
             viewModel.refreshAddresses(wallet)
         }
     }
 
-    override fun onWalletUpdated(wallet: Wallet) {
-        // runOnUiThread {
-        //     showUi()
-        //     viewModel.refreshAddresses(wallet)
-        // }
-    }
-
     override fun onAddressGenerated() {
         runOnUiThread {
-            walletService?.getNewWalletOrLog()?.let { wallet ->
+            walletService?.getNewWalletOrLog()?.let { (wallet) ->
                 showUi()
                 viewModel.refreshAddresses(wallet, true)
             }
@@ -168,7 +160,7 @@ class ActivityReceive : ActivityMonero() {
         label: String,
     ) {
         runOnUiThread {
-            walletService?.getNewWalletOrLog()?.let { wallet ->
+            walletService?.getNewWalletOrLog()?.let { (wallet) ->
                 showUi()
                 viewModel.refreshAddresses(wallet, false)
             }
@@ -177,7 +169,7 @@ class ActivityReceive : ActivityMonero() {
 
     override fun onAccountSet(index: Int) {
         runOnUiThread {
-            walletService?.getNewWalletOrLog()?.let { wallet ->
+            walletService?.getNewWalletOrLog()?.let { (wallet) ->
                 showUi()
                 viewModel.refreshAddresses(wallet)
             }

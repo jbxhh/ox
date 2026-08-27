@@ -14,11 +14,16 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import org.monfluo.wallet.android.R
-import org.monfluo.wallet.android.model.Wallet
-import org.monfluo.wallet.android.model.WalletStatus
-import org.monfluo.wallet.android.service.wallet.State
 import org.monfluo.wallet.android.service.wallet.WalletService
+import org.monfluo.wallet.android.service.wallet.WalletSyncData
+import org.monfluo.wallet.android.service.wallet.WalletWithData
 import org.monfluo.wallet.android.util.component.ActivityMonero
+import org.monfluo.wallet.lib.wallet.sync.Cancelled
+import org.monfluo.wallet.lib.wallet.sync.Failed
+import org.monfluo.wallet.lib.wallet.sync.Finished
+import org.monfluo.wallet.lib.wallet.sync.Preparing
+import org.monfluo.wallet.lib.wallet.sync.Starting
+import org.monfluo.wallet.lib.wallet.sync.Syncing
 import java.text.NumberFormat
 import java.util.Date
 import kotlin.getValue
@@ -79,80 +84,86 @@ class ActivityNetwork : ActivityMonero() {
 
     private fun bindObservers() {
         viewModel.state.observe(this) { state ->
-            if (state != null) {
-                val (heights, initialWalletStatus, walletLastRefreshedAt, nodeLastRefreshedAt) = state
+            if (state == null) {
+                nodeStatusHeaderTextView.text = getString(R.string.activity_network_node_status_header_waiting_for_wallet)
+                nodeStatusProgressBar.isIndeterminate = true
+                nodeStatusDescriptionTextView.visibility = View.INVISIBLE
+                nodeStatusUpdatedAtTextView.visibility = View.INVISIBLE
 
-                if (heights.walletHeight == 0L) {
-                    nodeStatusHeaderTextView.text = getString(R.string.activity_network_node_status_header_waiting_for_wallet)
-                    nodeStatusProgressBar.isIndeterminate = true
-                    nodeStatusDescriptionTextView.visibility = View.INVISIBLE
-                    nodeStatusUpdatedAtTextView.visibility = View.INVISIBLE
+                walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_opening_wallet)
+                walletStatusProgressBar.isIndeterminate = true
+                walletStatusDescriptionTextView.visibility = View.INVISIBLE
+                walletStatusUpdatedAtTextView.visibility = View.INVISIBLE
 
-                    walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_opening_wallet)
-                    walletStatusProgressBar.isIndeterminate = true
-                    walletStatusDescriptionTextView.visibility = View.INVISIBLE
-                    walletStatusUpdatedAtTextView.visibility = View.INVISIBLE
+                return@observe
+            }
+
+            val lastNodeInfo = state.lastNodeInfo
+            if (lastNodeInfo != null) {
+                nodeStatusUpdatedAtTextView.text = getString(R.string.activity_network_node_last_updated_at, DateFormat.getInstance().format(Date(lastNodeInfo.timestamp)))
+                nodeStatusUpdatedAtTextView.visibility = View.VISIBLE
+                nodeStatusProgressBar.isIndeterminate = false
+                nodeStatusProgressBar.min = 0
+                nodeStatusProgressBar.max = lastNodeInfo.nodeInfo.targetHeight.takeIf { it != 0 } ?: lastNodeInfo.nodeInfo.height
+                nodeStatusProgressBar.progress = lastNodeInfo.nodeInfo.height
+                if (lastNodeInfo.nodeInfo.height < lastNodeInfo.nodeInfo.targetHeight) {
+                    nodeStatusHeaderTextView.text = getString(R.string.activity_network_node_status_header_node_is_synchronizing)
+                    nodeStatusDescriptionTextView.text =
+                        getString(
+                            R.string.activity_network_node_status_description_node_is_synchronizing,
+                            NumberFormat.getInstance().format(lastNodeInfo.nodeInfo.height - 1),
+                            NumberFormat.getInstance().format(lastNodeInfo.nodeInfo.targetHeight - 1),
+                            NumberFormat.getInstance().format(lastNodeInfo.nodeInfo.targetHeight - lastNodeInfo.nodeInfo.height),
+                        )
+                    nodeStatusDescriptionTextView.visibility = View.VISIBLE
                 } else {
-                    val walletDiff = heights.blockchainHeight - heights.walletHeight
-                    val nodeDiff = heights.blockchainTargetHeight - heights.blockchainHeight
+                    nodeStatusHeaderTextView.text = getString(R.string.activity_network_node_status_header_node_is_synchronized)
+                    nodeStatusDescriptionTextView.text =
+                        getString(
+                            R.string.activity_network_node_status_description_node_is_synchronized,
+                            NumberFormat.getInstance().format(lastNodeInfo.nodeInfo.height - 1),
+                        )
+                    nodeStatusDescriptionTextView.visibility = View.VISIBLE
+                }
+            } else {
+                nodeStatusHeaderTextView.text = getString(R.string.activity_network_node_status_header_fetching_blockchain_data)
+                nodeStatusProgressBar.isIndeterminate = true
+                nodeStatusDescriptionTextView.visibility = View.INVISIBLE
+                nodeStatusUpdatedAtTextView.visibility = View.INVISIBLE
+            }
 
-                    val walletDisplayHeight = NumberFormat.getInstance().format(heights.walletHeight - 1)
-                    val blockchainDisplayHeight = if (heights.blockchainHeight > 0) NumberFormat.getInstance().format(heights.blockchainHeight - 1) else "???"
-                    val targetDisplayHeight = if (heights.blockchainTargetHeight > 0) NumberFormat.getInstance().format(heights.blockchainTargetHeight - 1) else "???"
+            val lastSyncState = state.lastSyncState
+            if (lastSyncState != null) {
+                walletStatusUpdatedAtTextView.text = getString(R.string.activity_network_wallet_last_updated_at, DateFormat.getInstance().format(Date(lastSyncState.timestamp)))
+                walletStatusUpdatedAtTextView.visibility = View.VISIBLE
 
-                    val walletDiffDisplay = NumberFormat.getInstance().format(walletDiff)
-                    val nodeDiffDisplay = NumberFormat.getInstance().format(nodeDiff)
-
-                    if (nodeLastRefreshedAt != null) {
-                        nodeStatusUpdatedAtTextView.text = getString(R.string.activity_network_node_last_updated_at, DateFormat.getInstance().format(Date(nodeLastRefreshedAt)))
-                        nodeStatusUpdatedAtTextView.visibility = View.VISIBLE
-                    } else {
-                        nodeStatusUpdatedAtTextView.visibility = View.INVISIBLE
-                    }
-
-                    if (walletLastRefreshedAt != null) {
-                        walletStatusUpdatedAtTextView.text = getString(R.string.activity_network_wallet_last_updated_at, DateFormat.getInstance().format(Date(walletLastRefreshedAt)))
-                        walletStatusUpdatedAtTextView.visibility = View.VISIBLE
-                    } else {
-                        walletStatusUpdatedAtTextView.visibility = View.INVISIBLE
-                    }
-
-                    if (heights.blockchainHeight == 0L) {
-                        nodeStatusHeaderTextView.text = getString(R.string.activity_network_node_status_header_fetching_blockchain_data)
-                        nodeStatusProgressBar.isIndeterminate = true
-                        nodeStatusDescriptionTextView.visibility = View.INVISIBLE
-                    } else if (heights.blockchainHeight < heights.blockchainTargetHeight) {
-                        nodeStatusHeaderTextView.text = getString(R.string.activity_network_node_status_header_node_is_synchronizing)
-                        nodeStatusProgressBar.isIndeterminate = false
-                        nodeStatusProgressBar.max = heights.blockchainTargetHeight.toInt()
-                        nodeStatusProgressBar.progress = heights.blockchainHeight.toInt()
-                        nodeStatusDescriptionTextView.text =
-                            getString(
-                                R.string.activity_network_node_status_description_node_is_synchronizing,
-                                blockchainDisplayHeight,
-                                targetDisplayHeight,
-                                nodeDiffDisplay,
-                            )
-                        nodeStatusDescriptionTextView.visibility = View.VISIBLE
-                    } else {
-                        nodeStatusHeaderTextView.text = getString(R.string.activity_network_node_status_header_node_is_synchronized)
-                        nodeStatusProgressBar.isIndeterminate = false
-                        nodeStatusProgressBar.max = heights.blockchainTargetHeight.toInt()
-                        nodeStatusProgressBar.progress = heights.blockchainHeight.toInt()
-                        nodeStatusDescriptionTextView.text =
-                            getString(
-                                R.string.activity_network_node_status_description_node_is_synchronized,
-                                blockchainDisplayHeight,
-                            )
-                        nodeStatusDescriptionTextView.visibility = View.VISIBLE
-                    }
-
-                    if (initialWalletStatus != null && initialWalletStatus.status == WalletStatus.Critical) {
-                        walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_error)
+                when (lastSyncState) {
+                    is Preparing -> {
+                        walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_preparing_synchronization)
                         walletStatusProgressBar.isIndeterminate = true
-                        walletStatusDescriptionTextView.text = initialWalletStatus.error
+                        walletStatusDescriptionTextView.visibility = View.INVISIBLE
+                    }
+                    is Starting -> {
+                        walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_starting_synchronization)
+                        walletStatusProgressBar.isIndeterminate = true
+                        walletStatusDescriptionTextView.visibility = View.INVISIBLE
+                    }
+                    is Syncing -> {
+                        walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_wallet_is_synchronizing)
+                        walletStatusProgressBar.isIndeterminate = false
+                        walletStatusProgressBar.max = lastSyncState.targetHeight
+                        walletStatusProgressBar.min = state.initialSyncHeight
+                        walletStatusProgressBar.progress = lastSyncState.currentHeight
+                        walletStatusDescriptionTextView.text =
+                            getString(
+                                R.string.activity_network_wallet_status_description_wallet_is_synchronizing,
+                                NumberFormat.getInstance().format(lastSyncState.currentHeight),
+                                NumberFormat.getInstance().format(lastSyncState.targetHeight),
+                                NumberFormat.getInstance().format(lastSyncState.targetHeight - lastSyncState.currentHeight),
+                            )
                         walletStatusDescriptionTextView.visibility = View.VISIBLE
-                    } else if (heights.walletHeight == heights.blockchainHeight) {
+                    }
+                    is Finished -> {
                         walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_wallet_is_synchronized)
                         walletStatusProgressBar.isIndeterminate = false
                         walletStatusProgressBar.min = 0
@@ -161,59 +172,46 @@ class ActivityNetwork : ActivityMonero() {
                         walletStatusDescriptionTextView.text =
                             getString(
                                 R.string.activity_network_wallet_status_description_wallet_is_synchronized,
-                                walletDisplayHeight,
+                                NumberFormat.getInstance().format(lastSyncState.height),
                             )
                         walletStatusDescriptionTextView.visibility = View.VISIBLE
-                    } else if (heights.walletHeight > heights.walletBeginSyncHeight) {
-                        walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_wallet_is_synchronizing)
-                        walletStatusProgressBar.isIndeterminate = false
-                        walletStatusProgressBar.max = heights.blockchainHeight.toInt()
-                        walletStatusProgressBar.min = heights.walletBeginSyncHeight.toInt()
-                        walletStatusProgressBar.progress = heights.walletHeight.toInt()
-                        walletStatusDescriptionTextView.text =
-                            getString(
-                                R.string.activity_network_wallet_status_description_wallet_is_synchronizing,
-                                walletDisplayHeight,
-                                blockchainDisplayHeight,
-                                walletDiffDisplay,
-                            )
-                        walletStatusDescriptionTextView.visibility = View.VISIBLE
-                    } else {
-                        walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_starting_synchronization)
+                    }
+                    is Cancelled -> {
+                        walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_cancelled)
                         walletStatusProgressBar.isIndeterminate = true
+                        // TODO: description
+                        walletStatusDescriptionTextView.visibility = View.INVISIBLE
+                    }
+                    is Failed -> {
+                        walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_error)
+                        walletStatusProgressBar.isIndeterminate = true
+                        // TODO: description
                         walletStatusDescriptionTextView.visibility = View.INVISIBLE
                     }
                 }
+            } else {
+                walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_not_synchronizing)
+                walletStatusProgressBar.isIndeterminate = true
+                walletStatusDescriptionTextView.visibility = View.INVISIBLE
             }
         }
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
-        viewModel.state.postValue(walletService.getState())
-    }
-
-    override fun onWalletUpdated(wallet: Wallet) {
-        walletService?.let { walletService ->
-            viewModel.state.postValue(walletService.getState())
+        walletService.getNewWalletOrLog()?.let { wallet ->
+            updateState(wallet)
         }
     }
 
-    override fun onNewBlock(wallet: Wallet) {
-        walletService?.let { walletService ->
-            viewModel.state.postValue(walletService.getState())
-        }
+    override fun onNewWalletUpdated(walletWithData: WalletWithData) {
+        updateState(walletWithData)
     }
 
-    override fun onBlockchainAndTargetHeightsFetched(
-        blockchainHeight: Long,
-        targetHeight: Long,
-    ) {
-        walletService?.let { walletService ->
-            viewModel.state.postValue(walletService.getState())
-        }
+    private fun updateState(walletWithData: WalletWithData) {
+        viewModel.state.postValue(walletWithData.data)
     }
 }
 
 internal class NetworkActivityViewModel : ViewModel() {
-    val state: MutableLiveData<State> = MutableLiveData(null)
+    val state: MutableLiveData<WalletSyncData?> = MutableLiveData(null)
 }

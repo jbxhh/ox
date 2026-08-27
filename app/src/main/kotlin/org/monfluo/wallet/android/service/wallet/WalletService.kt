@@ -46,10 +46,18 @@ import org.monfluo.wallet.android.util.Helper
 import org.monfluo.wallet.android.util.PreferenceUtils
 import org.monfluo.wallet.android.util.TextHelper
 import org.monfluo.wallet.lib.Monfluo
+import org.monfluo.wallet.lib.data.NodeInfo
 import org.monfluo.wallet.lib.wallet.Daemon
-import org.monfluo.wallet.lib.wallet.WalletSyncObserver
-import org.monfluo.wallet.lib.wallet.WalletSyncState
+import org.monfluo.wallet.lib.wallet.sync.Cancelled
+import org.monfluo.wallet.lib.wallet.sync.Failed
+import org.monfluo.wallet.lib.wallet.sync.Finished
+import org.monfluo.wallet.lib.wallet.sync.Preparing
+import org.monfluo.wallet.lib.wallet.sync.Starting
+import org.monfluo.wallet.lib.wallet.sync.Syncing
+import org.monfluo.wallet.lib.wallet.sync.WalletSyncObserver
+import org.monfluo.wallet.lib.wallet.sync.WalletSyncState
 import timber.log.Timber
+import java.text.NumberFormat
 import java.time.Clock
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.Executors
@@ -84,7 +92,7 @@ class WalletService :
     private var walletNameRef: AtomicReference<String> = AtomicReference("")
     private var uninitWalletRef: AtomicReference<Wallet?> = AtomicReference(null)
     private var walletRef: AtomicReference<Wallet?> = AtomicReference(null)
-    private var newWalletRef: AtomicReference<NewWallet?> = AtomicReference(null)
+    private var newWalletRef: AtomicReference<WalletWithData?> = AtomicReference(null)
     private var pendingTransactionRef: AtomicReference<PendingTransaction?> = AtomicReference(null)
     private val observers = mutableSetOf<WalletServiceObserver>()
 
@@ -145,9 +153,9 @@ class WalletService :
                     Timber.e("WalletHandler received UNKNOWN(%d) command", commandType)
                 }
                 WalletServiceCommand.INIT_WALLET -> {
-                    val daemonAddress = data.getString(Constants.EXTRA_DAEMON_ADDRESS)!!
-                    val daemonUsername = data.getString(Constants.EXTRA_DAEMON_USERNAME)!!
-                    val daemonPassword = data.getString(Constants.EXTRA_DAEMON_PASSWORD)!!
+                    val daemonAddress = data.getString(Constants.EXTRA_NODE_ADDRESS)!!
+                    val daemonUsername = data.getString(Constants.EXTRA_NODE_USERNAME)!!
+                    val daemonPassword = data.getString(Constants.EXTRA_NODE_PASSWORD)!!
                     val daemonTrusted = data.getBoolean(Constants.EXTRA_DAEMON_TRUSTED, false)
                     val proxy = data.getString(Constants.EXTRA_PROXY)!!
                     handleInitWallet(daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
@@ -155,22 +163,22 @@ class WalletService :
                 WalletServiceCommand.OPEN_WALLET -> {
                     val wallet = data.getString(Constants.EXTRA_WALLET_NAME)!!
                     val walletPassword = data.getString(Constants.EXTRA_WALLET_PASSWORD)!!
-                    val daemonAddress = data.getString(Constants.EXTRA_DAEMON_ADDRESS)!!
-                    val daemonUsername = data.getString(Constants.EXTRA_DAEMON_USERNAME)!!
-                    val daemonPassword = data.getString(Constants.EXTRA_DAEMON_PASSWORD)!!
-                    val daemonTrusted = data.getBoolean(Constants.EXTRA_DAEMON_TRUSTED, false)
+                    val nodeName = data.getString(Constants.EXTRA_NODE_NAME)!!
+                    val nodeAddress = data.getString(Constants.EXTRA_NODE_ADDRESS)!!
+                    val daemonUsername = data.getString(Constants.EXTRA_NODE_USERNAME)!!
+                    val daemonPassword = data.getString(Constants.EXTRA_NODE_PASSWORD)!!
                     val proxy = data.getString(Constants.EXTRA_PROXY)!!
                     val networkTypeInt = data.getInt(Constants.EXTRA_WALLET_NETWORK_TYPE)
                     val networkType = MoneroNetworkType.fromInteger(networkTypeInt) ?: MoneroNetworkType.NetworkType_Mainnet
-                    handleOpenWallet(wallet, walletPassword, daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy, networkType)
+                    handleOpenWallet(wallet, walletPassword, nodeName, nodeAddress, daemonUsername, daemonPassword, proxy, networkType)
                 }
                 WalletServiceCommand.CLOSE_WALLET -> {
                     handleCloseWallet()
                 }
                 WalletServiceCommand.SET_DAEMON_ADDRESS -> {
-                    val daemonAddress = data.getString(Constants.EXTRA_DAEMON_ADDRESS)!!
-                    val daemonUsername = data.getString(Constants.EXTRA_DAEMON_USERNAME)!!
-                    val daemonPassword = data.getString(Constants.EXTRA_DAEMON_PASSWORD)!!
+                    val daemonAddress = data.getString(Constants.EXTRA_NODE_ADDRESS)!!
+                    val daemonUsername = data.getString(Constants.EXTRA_NODE_USERNAME)!!
+                    val daemonPassword = data.getString(Constants.EXTRA_NODE_PASSWORD)!!
                     val daemonTrusted = data.getBoolean(Constants.EXTRA_DAEMON_TRUSTED, false)
                     val proxy = data.getString(Constants.EXTRA_PROXY)!!
                     setDaemonAddress(daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
@@ -283,48 +291,73 @@ class WalletService :
         private fun handleOpenWallet(
             wallet: String,
             walletPassword: String,
-            daemonAddress: String,
-            daemonUsername: String,
-            daemonPassword: String,
-            daemonTrusted: Boolean,
-            proxy: String,
+            nodeName: String,
+            nodeAddress: String,
+            nodeUsername: String?,
+            nodePassword: String?,
+            nodeProxy: String,
             networkType: MoneroNetworkType,
         ) {
             val wallet = Monfluo.openWallet(Helper.getWalletRoot(this@WalletService).absolutePath, wallet, walletPassword)
-            newWalletRef.set(wallet)
+            val walletSyncData = WalletSyncData(null, wallet.getCurrentHeight())
+            val walletWithData = WalletWithData(wallet, walletSyncData)
+            newWalletRef.set(walletWithData)
             forEachObserver {
-                it.onNewWalletOpened(wallet)
+                it.onNewWalletOpened(walletWithData)
             }
-            val daemon = Monfluo.createDaemon(daemonAddress, null)
-            val nodeInfo = daemon.fetchNodeInfo()
+            updateSynchronizationStatusNotificationV2(walletWithData)
+            val daemon = Monfluo.createDaemon(nodeName, nodeAddress, nodeUsername, nodePassword, nodeProxy)
+            walletSyncData.daemon = daemon
+
             syncScheduledFuture =
                 syncExecutor.scheduleWithFixedDelay(
-                    {
-                        sync(wallet, daemon)
-                    },
+                    { sync(walletWithData) },
                     0,
-                    10,
+                    // TODO: should be a wallet setting
+                    15,
                     TimeUnit.SECONDS,
                 )
         }
 
         private fun sync(
-            wallet: NewWallet,
-            daemon: Daemon,
+            walletWithData: WalletWithData,
         ) {
+            val lastSyncState = walletWithData.data.lastSyncState
+            if (lastSyncState?.isTerminal == false) {
+                Timber.d("Not syncing because last sync state $lastSyncState is not terminal")
+                return
+            }
+
+            val daemon = walletWithData.data.daemon
+            if (daemon == null) {
+                Timber.w("Cannot sync because there is no daemon")
+                return
+            }
+
             Timber.i("Starting wallet sync")
-            wallet.sync(
+            walletWithData.wallet.sync(
                 daemon,
                 object : WalletSyncObserver {
                     override fun observe(state: WalletSyncState) {
                         Timber.i("Observed wallet sync state = $state")
+                        walletWithData.data.lastSyncState = state
+                        if (state.isTerminal) {
+                            walletWithData.data.lastTerminalSyncState = state
+                        }
+                        when (state) {
+                            is Starting -> walletWithData.data.lastNodeInfo = SyncNodeInfo(state.timestamp, state.nodeInfo)
+                            is Syncing -> walletWithData.data.latestHeight = state.currentHeight
+                            is Finished -> walletWithData.data.syncCompleted = true
+                            else -> {}
+                        }
+                        updateSynchronizationStatusNotificationV2(walletWithData)
                         forEachObserver {
-                            it.onNewWalletUpdated(wallet, state)
+                            it.onNewWalletUpdated(walletWithData)
                         }
                     }
                 },
             )
-            Timber.i("Wallet sync was completed")
+            Timber.i("Wallet sync started")
         }
 
         private fun preOpenWallet(
@@ -852,6 +885,31 @@ class WalletService :
         )
     }
 
+    private fun updateSynchronizationStatusNotificationV2(walletWithData: WalletWithData) {
+        val broadcastIntent = Intent(CLOSE_WALLET_ACTION)
+        val broadcastPendingIntent: PendingIntent =
+            PendingIntent.getBroadcast(application, 0, broadcastIntent, PendingIntent.FLAG_IMMUTABLE)
+
+        val nf = NumberFormat.getInstance()
+        val text: CharSequence =
+            when (val state = walletWithData.data.lastSyncState) {
+                null -> application.getString(R.string.wallet_not_connected)
+                is Preparing -> application.getString(R.string.starting_wallet_synchronization)
+                is Starting -> application.getString(R.string.starting_wallet_synchronization)
+                is Syncing -> application.getString(R.string.wallet_synchronization_blocks_remaining, nf.format(state.currentHeight), nf.format(state.targetHeight), nf.format(state.targetHeight - state.currentHeight))
+                is Finished -> application.getString(R.string.synchronized_at_label, nf.format(state.height))
+                is Cancelled -> "TODO: cancelled"
+                is Failed -> "TODO: failed"
+            }
+
+        showServiceNotification(
+            createServiceNotificationBuilder()
+                .setContentText(text)
+                .addAction(NotificationCompat.Action.Builder(R.drawable.monfluo, getText(R.string.service_notification_close_wallet_action), broadcastPendingIntent).build())
+                .build(),
+        )
+    }
+
     private fun removeNotification(notificationId: Int) {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(notificationId)
@@ -965,7 +1023,7 @@ class WalletService :
         }
     }
 
-    fun getNewWalletOrLog(): NewWallet? {
+    fun getNewWalletOrLog(): WalletWithData? {
         val wallet = this.newWalletRef.get()
         if (wallet != null) {
             return wallet
@@ -990,12 +1048,6 @@ class WalletService :
 
     fun getPendingTransaction(): PendingTransaction? = pendingTransactionRef.get()
 
-    fun setUninitWallet(
-        wallet: Wallet,
-    ) {
-        uninitWalletRef.set(wallet)
-    }
-
     fun getUninitWallet(): Wallet? = uninitWalletRef.get()
 
     // used by activities that CREATE wallets (and therefore have a wallet already opened but not initialized)
@@ -1010,9 +1062,9 @@ class WalletService :
         closeWallet()
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.INIT_WALLET.value()
-        message.data.putString(Constants.EXTRA_DAEMON_ADDRESS, daemonAddress)
-        message.data.putString(Constants.EXTRA_DAEMON_USERNAME, daemonUsername)
-        message.data.putString(Constants.EXTRA_DAEMON_PASSWORD, daemonPassword)
+        message.data.putString(Constants.EXTRA_NODE_ADDRESS, daemonAddress)
+        message.data.putString(Constants.EXTRA_NODE_USERNAME, daemonUsername)
+        message.data.putString(Constants.EXTRA_NODE_PASSWORD, daemonPassword)
         message.data.putBoolean(Constants.EXTRA_DAEMON_TRUSTED, daemonTrusted)
         message.data.putString(Constants.EXTRA_PROXY, proxy)
         handler.sendMessage(message)
@@ -1034,9 +1086,10 @@ class WalletService :
         message.arg1 = WalletServiceCommand.OPEN_WALLET.value()
         message.data.putString(Constants.EXTRA_WALLET_NAME, wallet)
         message.data.putString(Constants.EXTRA_WALLET_PASSWORD, walletPassword)
-        message.data.putString(Constants.EXTRA_DAEMON_ADDRESS, daemonAddress)
-        message.data.putString(Constants.EXTRA_DAEMON_USERNAME, daemonUsername)
-        message.data.putString(Constants.EXTRA_DAEMON_PASSWORD, daemonPassword)
+        message.data.putString(Constants.EXTRA_NODE_NAME, daemonAddress)
+        message.data.putString(Constants.EXTRA_NODE_ADDRESS, daemonAddress)
+        message.data.putString(Constants.EXTRA_NODE_USERNAME, daemonUsername)
+        message.data.putString(Constants.EXTRA_NODE_PASSWORD, daemonPassword)
         message.data.putBoolean(Constants.EXTRA_DAEMON_TRUSTED, daemonTrusted)
         message.data.putString(Constants.EXTRA_PROXY, proxy)
         message.data.putInt(Constants.EXTRA_WALLET_NETWORK_TYPE, networkType.value)
@@ -1050,11 +1103,8 @@ class WalletService :
     }
 
     fun closeNewWallet() {
-        val newWallet = newWalletRef.getAndSet(null)
-        if (newWallet != null) {
-            newWallet.store()
-            newWallet.close()
-        }
+        val newWalletWithData = newWalletRef.getAndSet(null)
+        newWalletWithData?.wallet?.close()
     }
 
     fun setDaemonAddress(
@@ -1066,9 +1116,9 @@ class WalletService :
     ) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.SET_DAEMON_ADDRESS.value()
-        message.data.putString(Constants.EXTRA_DAEMON_ADDRESS, daemonAddress)
-        message.data.putString(Constants.EXTRA_DAEMON_USERNAME, daemonUsername)
-        message.data.putString(Constants.EXTRA_DAEMON_PASSWORD, daemonPassword)
+        message.data.putString(Constants.EXTRA_NODE_ADDRESS, daemonAddress)
+        message.data.putString(Constants.EXTRA_NODE_USERNAME, daemonUsername)
+        message.data.putString(Constants.EXTRA_NODE_PASSWORD, daemonPassword)
         message.data.putBoolean(Constants.EXTRA_DAEMON_TRUSTED, daemonTrusted)
         message.data.putString(Constants.EXTRA_PROXY, proxy)
         handler.sendMessage(message)
@@ -1204,14 +1254,33 @@ class WalletService :
     }
 }
 
+data class SyncNodeInfo(
+    val timestamp: Long,
+    val nodeInfo: NodeInfo,
+)
+
+data class WalletSyncData(
+    var daemon: Daemon?,
+    var initialSyncHeight: Int,
+    var latestHeight: Int? = null,
+    var lastTerminalSyncState: WalletSyncState? = null,
+    var lastSyncState: WalletSyncState? = null,
+    var lastNodeInfo: SyncNodeInfo? = null,
+    var syncCompleted: Boolean = false,
+)
+
+data class WalletWithData(
+    val wallet: NewWallet,
+    val data: WalletSyncData,
+)
+
 interface WalletServiceObserver : LifecycleOwner {
-    fun onNewWalletOpened(wallet: NewWallet) {}
+    fun onNewWalletOpened(wallet: WalletWithData) {}
 
     fun onWalletUpdated(wallet: Wallet) {}
 
     fun onNewWalletUpdated(
-        wallet: NewWallet,
-        state: WalletSyncState,
+        walletWithData: WalletWithData,
     ) {}
 
     fun onNewBlock(wallet: Wallet) {}

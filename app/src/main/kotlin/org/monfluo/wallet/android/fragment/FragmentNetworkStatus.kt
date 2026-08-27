@@ -12,11 +12,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.activity.ActivityNetwork
-import org.monfluo.wallet.android.data.SynchronizationStatus
-import org.monfluo.wallet.android.model.Wallet
-import org.monfluo.wallet.android.service.wallet.State
 import org.monfluo.wallet.android.service.wallet.WalletService
+import org.monfluo.wallet.android.service.wallet.WalletSyncData
+import org.monfluo.wallet.android.service.wallet.WalletWithData
 import org.monfluo.wallet.android.util.component.FragmentMonero
+import org.monfluo.wallet.lib.wallet.sync.Cancelled
+import org.monfluo.wallet.lib.wallet.sync.Failed
+import org.monfluo.wallet.lib.wallet.sync.Finished
+import org.monfluo.wallet.lib.wallet.sync.Preparing
+import org.monfluo.wallet.lib.wallet.sync.Starting
+import org.monfluo.wallet.lib.wallet.sync.Syncing
 
 class FragmentNetworkStatus : FragmentMonero() {
     private val viewModel: FragmentNetworkStatusViewModel by viewModels()
@@ -49,15 +54,15 @@ class FragmentNetworkStatus : FragmentMonero() {
 
     private fun bindObservers() {
         viewModel.state.observe(viewLifecycleOwner) { state ->
-            val synchronizationStatus = SynchronizationStatus.from(state)
             val (drawable, contentDescriptionResource) =
-                when (synchronizationStatus) {
-                    SynchronizationStatus.OpeningWallet -> Pair(R.drawable.synchronization_status_starting, R.string.content_description_network_status_icon_opening_wallet)
-                    SynchronizationStatus.StartingSynchronization -> Pair(R.drawable.synchronization_status_warning, R.string.content_description_network_status_icon_starting_synchronization)
-                    is SynchronizationStatus.NodeSynchronization -> Pair(R.drawable.synchronization_status_in_progress, R.string.content_description_network_status_icon_synchronizing_node)
-                    is SynchronizationStatus.WalletSynchronization -> Pair(R.drawable.synchronization_status_in_progress, R.string.content_description_network_status_icon_synchronizing_wallet)
-                    is SynchronizationStatus.Synchronized -> Pair(R.drawable.synchronization_status_synced, R.string.content_description_network_status_icon_synchronized)
-                    is SynchronizationStatus.WalletError -> Pair(R.drawable.synchronization_status_error, R.string.content_description_network_status_icon_wallet_error)
+                when (state.lastSyncState) {
+                    is Preparing -> Pair(R.drawable.synchronization_status_warning, R.string.content_description_network_status_icon_starting_synchronization)
+                    is Starting -> Pair(R.drawable.synchronization_status_warning, R.string.content_description_network_status_icon_starting_synchronization)
+                    is Syncing -> Pair(R.drawable.synchronization_status_in_progress, R.string.content_description_network_status_icon_synchronizing_wallet)
+                    is Finished -> Pair(R.drawable.synchronization_status_synced, R.string.content_description_network_status_icon_synchronized)
+                    is Cancelled -> Pair(R.drawable.synchronization_status_error, R.string.content_description_network_status_icon_wallet_error)
+                    is Failed -> Pair(R.drawable.synchronization_status_error, R.string.content_description_network_status_icon_wallet_error)
+                    null -> Pair(R.drawable.synchronization_status_starting, R.string.content_description_network_status_icon_opening_wallet)
                 }
             val context = requireContext()
             networkStatusImageView.setImageDrawable(AppCompatResources.getDrawable(context, drawable))
@@ -66,29 +71,22 @@ class FragmentNetworkStatus : FragmentMonero() {
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
-        updateState(walletService)
-    }
-
-    override fun onWalletUpdated(wallet: Wallet) {
-        walletService?.let { walletService ->
-            updateState(walletService)
+        walletService.getNewWalletOrLog()?.let { wallet ->
+            updateState(wallet)
         }
     }
 
-    override fun onBlockchainAndTargetHeightsFetched(
-        blockchainHeight: Long,
-        targetHeight: Long,
+    override fun onNewWalletUpdated(
+        walletWithData: WalletWithData,
     ) {
-        walletService?.let { walletService ->
-            updateState(walletService)
-        }
+        updateState(walletWithData)
     }
 
-    private fun updateState(walletService: WalletService) {
-        viewModel.state.postValue(walletService.getState())
+    private fun updateState(walletWithData: WalletWithData) {
+        viewModel.state.postValue(walletWithData.data)
     }
 }
 
 internal class FragmentNetworkStatusViewModel : ViewModel() {
-    val state: MutableLiveData<State> = MutableLiveData()
+    val state: MutableLiveData<WalletSyncData> = MutableLiveData()
 }

@@ -1,31 +1,46 @@
+use std::panic::catch_unwind;
+
 use jni::{
-    Env, EnvUnowned,
+    EnvUnowned,
     errors::ThrowRuntimeExAndDefault,
     jni_mangle,
     objects::{JObject, JString},
-    sys::jint,
+    refs::Global,
+    sys::{jint, jlong},
+    vm::JavaVM,
 };
 use monfluo_oxide::{
     monero_daemon_rpc::MoneroDaemon,
     transport::MonfluoTransport,
     wallet::{Wallet, WalletSyncObserver},
 };
+use tracing::{debug, error, info};
 
-struct MonfluoJavaObserver<'a, 'local> {
-    env: &'a mut Env<'local>,
+struct MonfluoJavaObserver {
+    vm: JavaVM,
     cache: &'static crate::java::JniCache,
-    observer: &'a JObject<'local>,
+    observer: Global<JObject<'static>>,
 }
 
-impl<'a, 'local> WalletSyncObserver for &mut MonfluoJavaObserver<'a, 'local> {
-    async fn observe(&mut self, state: monfluo_oxide::wallet::WalletSyncState) {
-        let java_wallet_sync_state = crate::java::new_wallet_sync_state(self.env, state);
-        crate::java::wallet_sync_observer_observe(
-            self.env,
-            self.cache,
-            self.observer,
-            &java_wallet_sync_state,
-        );
+impl WalletSyncObserver for MonfluoJavaObserver {
+    fn observe(&mut self, state: monfluo_oxide::wallet::WalletSyncState) {
+        debug!("Notifying java observer about new wallet state: {state:?}");
+        let result = self.vm.attach_current_thread_for_scope(|env| {
+            debug!("Java VM attached for notifying java observer");
+            let java_wallet_sync_state = crate::java::new_wallet_sync_state(env, self.cache, state);
+            debug!("Java wallet sync state object created");
+            crate::java::wallet_sync_observer_observe(
+                env,
+                self.cache,
+                self.observer.as_obj(),
+                &java_wallet_sync_state,
+            );
+            debug!("Java observer notified");
+            Ok::<(), jni::errors::Error>(())
+        });
+        if let Err(e) = result {
+            error!("Failed to notify java observer: {e}");
+        }
     }
 }
 
@@ -44,17 +59,33 @@ pub fn get_name<'local>(mut env: EnvUnowned<'local>, wallet: JObject<'local>) ->
     .resolve::<ThrowRuntimeExAndDefault>()
 }
 
+#[jni_mangle("org.monfluo.wallet.lib.wallet.Wallet", "getCurrentHeight")]
+pub fn get_height<'local>(mut env: EnvUnowned<'local>, wallet: JObject<'local>) -> jint {
+    env.with_env(|env| {
+        crate::RUNTIME.block_on(async {
+            let handle = crate::java::get_handle(env, &wallet);
+            let wallet = crate::bridge::from_java_handle::<Wallet>(handle);
+            let height = wallet.state().height();
+
+            Ok::<jint, jni::errors::Error>(height.current.unwrap_or(0) as jint)
+        })
+    })
+    .resolve::<ThrowRuntimeExAndDefault>()
+}
+
 #[jni_mangle("org.monfluo.wallet.lib.wallet.Wallet", "getBalance")]
 pub fn get_balance<'local>(
     mut env: EnvUnowned<'local>,
     wallet: JObject<'local>,
 ) -> JObject<'local> {
+    let cache = crate::java::get_cache();
+
     env.with_env(|env| {
         crate::RUNTIME.block_on(async {
             let handle = crate::java::get_handle(env, &wallet);
             let wallet = crate::bridge::from_java_handle::<Wallet>(handle);
             let balance = wallet.balance_view();
-            let java_balance = crate::java::new_balance(env, balance);
+            let java_balance = crate::java::new_balance(env, cache, balance);
             Ok::<JObject, jni::errors::Error>(java_balance)
         })
     })
@@ -104,7 +135,7 @@ pub fn get_transaction_views<'local>(
 }
 
 #[jni_mangle("org.monfluo.wallet.lib.wallet.Wallet", "sync")]
-pub fn refresh<'local>(
+pub fn sync<'local>(
     mut env: EnvUnowned<'local>,
     wallet: JObject<'local>,
     daemon: JObject<'local>,
@@ -113,18 +144,23 @@ pub fn refresh<'local>(
     let cache = crate::java::get_cache();
 
     env.with_env(|env| {
+        let vm = env.get_java_vm().expect("Failed to get Java VM");
+        let global_observer = env
+            .new_global_ref(observer)
+            .expect("Failed to make a global ref of a java observer");
         crate::RUNTIME.block_on(async {
             let wallet_handle = crate::java::get_handle(env, &wallet);
             let wallet = crate::bridge::from_java_handle::<Wallet>(wallet_handle);
             let daemon_handle = crate::java::get_handle(env, &daemon);
             let daemon =
                 crate::bridge::from_java_handle::<MoneroDaemon<MonfluoTransport>>(daemon_handle);
-            let mut monfluo_java_observer = MonfluoJavaObserver {
-                env,
+
+            let monfluo_java_observer = MonfluoJavaObserver {
+                vm,
                 cache,
-                observer: &observer,
+                observer: global_observer,
             };
-            wallet.sync(daemon, &mut monfluo_java_observer).await;
+            wallet.sync(&crate::RUNTIME, daemon, monfluo_java_observer);
             Ok::<(), jni::errors::Error>(())
         })
     })
@@ -170,6 +206,7 @@ pub fn close<'local>(mut env: EnvUnowned<'local>, wallet: JObject<'local>) {
         crate::RUNTIME.block_on(async {
             let wallet_handle = crate::java::get_handle(env, &wallet);
             let wallet = crate::bridge::from_java_handle::<Wallet>(wallet_handle);
+            wallet.close().await;
             crate::bridge::drop(wallet);
             Ok::<(), jni::errors::Error>(())
         })
