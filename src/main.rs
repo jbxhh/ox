@@ -166,7 +166,7 @@ pub fn main() {
                 }
             };
 
-            RUNTIME.block_on(command::wallet::create::run(monfluo_directory, name, String::new(), seed, height));
+            RUNTIME.block_on(command::wallet::create::run(monfluo_directory, name, String::new(), seed, height.unwrap_or(0)));
         }
         Commands::Wallet {
             command: WalletCommands::Delete {

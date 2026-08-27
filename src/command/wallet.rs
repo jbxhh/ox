@@ -10,5 +10,7 @@ pub mod start;
 pub struct MonfluoObserver;
 
 impl WalletSyncObserver for MonfluoObserver {
-    async fn observe(&mut self, _state: WalletSyncState) {}
+    fn observe(&mut self, state: WalletSyncState) {
+        println!("Wallet state: {state:?}");
+    }
 }

@@ -4,9 +4,9 @@ version = 4
 
 [[package]]
 name = "aho-corasick"
-version = "1.1.4"
+version = "1.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ddd31a130427c27518df266943a5308ed92d4b226cc639f5a8f1002816174301"
+checksum = "c982642fa9e8606056828ee9a8505737230110bb1099153c79efe865c59d12ba"
 dependencies = [
  "memchr",
 ]
@@ -19,9 +19,9 @@ checksum = "683d7910e743518b0e34f1186f92494becacb047c7b6bf616c96772180fef923"
 
 [[package]]
 name = "android_system_properties"
-version = "0.1.5"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "819e7219dbd41043ac279b19830f2efc897156490d7fd6ea916720117ee66311"
+checksum = "ae221649c9976a6f6c56ae1facf410f3ddb33cc661c4b7b61020a912d4237fbc"
 dependencies = [
  "libc",
 ]
@@ -217,9 +217,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.4.0"
+version = "1.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5add81bb678e6cb321aff7fa0dc7689ad82b112dbc032cea19f91d6b8e3582b9"
+checksum = "0ad534f4357a5264cce5019c989cf66a4f0dc4e0d1b1d15f8aacec0ff7360273"
 dependencies = [
  "find-msvc-tools",
  "shlex",
@@ -252,9 +252,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.6.4"
+version = "4.6.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d91e0c145792ef73a6ad36d27c75ac09f1832222a3c209689d90f534685ee5b7"
+checksum = "473c7e07f409a8d772161724aa8db6a765a2532a70f9667eeb7b49d3d02fbdca"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -262,9 +262,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.6.2"
+version = "4.6.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f09628afdcc538b57f3c6341e9c8e9970f18e4a481690a64974d7023bd33548b"
+checksum = "7b48fea5a88e9ae728a2dcbedbfc0e730f7d60da42e1cb049a83c9fb8b789889"
 dependencies = [
  "anstream",
  "anstyle",
@@ -281,7 +281,7 @@ dependencies = [
  "heck",
  "proc-macro2",
  "quote",
- "syn 3.0.3",
+ "syn 3.0.4",
 ]
 
 [[package]]
@@ -434,9 +434,9 @@ dependencies = [
 
 [[package]]
 name = "darling"
-version = "0.23.0"
+version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "25ae13da2f202d56bd7f91c25fba009e7717a1e4a1cc98a76d844b65ae912e9d"
+checksum = "ed17f5901b6630b993ca003def43f2f8ef4014fc13b047b57aad617ff32bc2ec"
 dependencies = [
  "darling_core",
  "darling_macro",
@@ -444,26 +444,26 @@ dependencies = [
 
 [[package]]
 name = "darling_core"
-version = "0.23.0"
+version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9865a50f7c335f53564bb694ef660825eb8610e0a53d3e11bf1b0d3df31e03b0"
+checksum = "6837e2cf7485aaae18f86181d2f0e9a7ed297a025e220aeabf63fdebd3a2ddff"
 dependencies = [
  "ident_case",
  "proc-macro2",
  "quote",
  "strsim",
- "syn 2.0.119",
+ "syn 3.0.4",
 ]
 
 [[package]]
 name = "darling_macro"
-version = "0.23.0"
+version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac3984ec7bd6cfa798e62b4a642426a5be0e68f9401cfc2a01e3fa9ea2fcdb8d"
+checksum = "2ac7135c3ef02b2f7833bbeb1be5ba7f966dcde8a87c6b87f65a778d71a02785"
 dependencies = [
  "darling_core",
  "quote",
- "syn 2.0.119",
+ "syn 3.0.4",
 ]
 
 [[package]]
@@ -553,7 +553,7 @@ checksum = "c6232dd377dcc64799954cbd3a9bb882e9cdc1308ccd87b1c098f1fb2eaf82a8"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 3.0.3",
+ "syn 3.0.4",
 ]
 
 [[package]]
@@ -567,9 +567,9 @@ dependencies = [
 
 [[package]]
 name = "either"
-version = "1.17.0"
+version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e5e8f6c15a24b9a3ee5efec809ccd006d3b30e8b3bb63c39af737c7f87daa1d"
+checksum = "252afb9ae5eaa683babdc6a068b3f5726eb19e05070c731f9b2a23a7c3e8ed34"
 
 [[package]]
 name = "encoding_rs"
@@ -616,12 +616,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fast-srgb8"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd2e7510819d6fbf51a5545c8f922716ecfb14df168a3242f7d33e0239efe6a1"
-
-[[package]]
 name = "ff"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -650,9 +644,9 @@ dependencies = [
 
 [[package]]
 name = "find-msvc-tools"
-version = "0.1.9"
+version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
+checksum = "d45db016d36b838f563236e9193d0ee6ce38f3f68b6c94e914b4929c96bbb890"
 
 [[package]]
 name = "finl_unicode"
@@ -689,36 +683,36 @@ dependencies = [
 
 [[package]]
 name = "futures-channel"
-version = "0.3.33"
+version = "0.3.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "262590f4fe6afeb0bc83be1daa64e52657fe185690a958af7f3ad0e92085c5ae"
+checksum = "b1f9e3d69d39e4862ffed03ed071a76f9a13ba1d9109d355b0f0aa6b15e393c4"
 dependencies = [
  "futures-core",
 ]
 
 [[package]]
 name = "futures-core"
-version = "0.3.33"
+version = "0.3.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2cd50c473c80f6d7c3670a752354b8e569b1a7cbfdc0419ec88e5edad85e0dc7"
+checksum = "92d699e522242e69e3003b94ecc1f960f3a5e015aa7c5d7486e65ad01dd94f5e"
 
 [[package]]
 name = "futures-sink"
-version = "0.3.33"
+version = "0.3.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e34418ac499d6305c2fb5ad0ed2f6ac998c5f8ca209b4510f7f94242c647e307"
+checksum = "1944426bf7d03f1d14f708785e4b33efd750b36d48a157b836b3efc15ede8e1d"
 
 [[package]]
 name = "futures-task"
-version = "0.3.33"
+version = "0.3.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b231ed28831efb4a61a08580c4bc233ec56bc009f4cd8f52da2c3cb97df0c109"
+checksum = "cd417de3d1d015fc3bfd2b1ea46dfc7bab72ef86f1cc7cc9c78e728b34a6d1fd"
 
 [[package]]
 name = "futures-util"
-version = "0.3.33"
+version = "0.3.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a77a90a256fce34da66415271e30f94ee91c57b04b8a2c042d9cf3220179deaa"
+checksum = "0d50a92467f8ba5dd6e3ee5d4bd04d73ab2e4e1c44474a0674821dfce14b79bc"
 dependencies = [
  "futures-core",
  "futures-task",
@@ -947,9 +941,9 @@ dependencies = [
 
 [[package]]
 name = "icu_collections"
-version = "2.2.0"
+version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2984d1cd16c883d7935b9e07e44071dca8d917fd52ecc02c04d5fa0b5a3f191c"
+checksum = "fa68d21081c4a05d5a901a1c62add574c77048b6a1c67be3b50ce0b60d4ca513"
 dependencies = [
  "displaydoc",
  "potential_utf",
@@ -961,9 +955,9 @@ dependencies = [
 
 [[package]]
 name = "icu_locale_core"
-version = "2.2.0"
+version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "92219b62b3e2b4d88ac5119f8904c10f8f61bf7e95b640d25ba3075e6cac2c29"
+checksum = "d56e28588da92eee5c3201a6eff33fabdd49b62269c8938d4ff050ce4d900deb"
 dependencies = [
  "displaydoc",
  "litemap",
@@ -974,9 +968,9 @@ dependencies = [
 
 [[package]]
 name = "icu_normalizer"
-version = "2.2.0"
+version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c56e5ee99d6e3d33bd91c5d85458b6005a22140021cc324cea84dd0e72cff3b4"
+checksum = "12f9cf5f235641ed274641dd81c3f28d870e276763d0797aeeab72317b1c646f"
 dependencies = [
  "icu_collections",
  "icu_normalizer_data",
@@ -988,16 +982,17 @@ dependencies = [
 
 [[package]]
 name = "icu_normalizer_data"
-version = "2.2.0"
+version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da3be0ae77ea334f4da67c12f149704f19f81d1adf7c51cf482943e84a2bad38"
+checksum = "1563da1ed3e0b3bf3d74c9b85917ac9c56464d2f57242270c09c9e752f8021a0"
 
 [[package]]
 name = "icu_properties"
-version = "2.2.0"
+version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bee3b67d0ea5c2cca5003417989af8996f8604e34fb9ddf96208a033901e70de"
+checksum = "7e7ca276ad3145661a65914e6daf131ca5120cd3dcee8f8f3214b8875184a148"
 dependencies = [
+ "displaydoc",
  "icu_collections",
  "icu_locale_core",
  "icu_properties_data",
@@ -1008,15 +1003,15 @@ dependencies = [
 
 [[package]]
 name = "icu_properties_data"
-version = "2.2.0"
+version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e2bbb201e0c04f7b4b3e14382af113e17ba4f63e2c9d2ee626b720cbce54a14"
+checksum = "e590f038c1464a96894fd6d10127e90a8be4509f56ff7ecef851b15cee0b7caa"
 
 [[package]]
 name = "icu_provider"
-version = "2.2.0"
+version = "2.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "139c4cf31c8b5f33d7e199446eff9c1e02decfc2f0eec2c8d71f65befa45b421"
+checksum = "d27bbb9d3abbefac45d55f647c9de1d44aafcd1186eb91879afef17c396c3e73"
 dependencies = [
  "displaydoc",
  "icu_locale_core",
@@ -1075,22 +1070,22 @@ dependencies = [
 
 [[package]]
 name = "instability"
-version = "0.3.12"
+version = "0.3.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5eb2d60ef19920a3a9193c3e371f726ec1dafc045dac788d0fb3704272458971"
+checksum = "2bf84e73fa6f27f299dec58e13223cf70db80da872eb921d4f6138342a0eabc8"
 dependencies = [
  "darling",
  "indoc",
  "proc-macro2",
  "quote",
- "syn 2.0.119",
+ "syn 3.0.4",
 ]
 
 [[package]]
 name = "ipnet"
-version = "2.12.0"
+version = "2.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d98f6fed1fde3f8c21bc40a1abb88dd75e67924f9cffc3ef95607bad8017f8e2"
+checksum = "6a756c3fac73139e83f14c2d742155dd2b78d3ee56597b419a0579b7bdd6dd78"
 
 [[package]]
 name = "is_terminal_polyfill"
@@ -1115,9 +1110,9 @@ checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
 
 [[package]]
 name = "js-sys"
-version = "0.3.103"
+version = "0.3.104"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53b44bfcdb3f8d5837a46dae1ca9660a837176eee74a28b229bc626816589102"
+checksum = "0e0c1080212aad755ea003d18543e8768dd432c48819efd73a7bf1e39b7a5a3a"
 dependencies = [
  "cfg-if",
  "futures-util",
@@ -1132,7 +1127,7 @@ checksum = "bde5057d6143cc94e861d90f591b9303d6716c6b9602309150bd068853c10899"
 dependencies = [
  "hashbrown 0.16.1",
  "portable-atomic",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
 ]
 
 [[package]]
@@ -1170,18 +1165,18 @@ checksum = "b6d2cec3eae94f9f509c767b45932f1ada8350c4bdb85af2fcab4a3c14807981"
 
 [[package]]
 name = "libredox"
-version = "0.1.18"
+version = "0.1.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c943259e342f1e06ff2da7a83eabdfe7f92ce10262688dbf1895ff0b3e6e4652"
+checksum = "28d0a00925a9f930d679b6789b721e3a7f9ed110f41b86d2497caa780c3a070a"
 dependencies = [
  "libc",
 ]
 
 [[package]]
 name = "line-clipping"
-version = "0.3.7"
+version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f50e8f47623268b5407192d26876c4d7f89d686ca130fdc53bced4814cd29f8"
+checksum = "e752191d037c44ad111a8caa762921926658402f01cc1253f7bef2020ece4f5e"
 dependencies = [
  "bitflags 2.13.1",
 ]
@@ -1194,9 +1189,9 @@ checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
 
 [[package]]
 name = "litemap"
-version = "0.8.2"
+version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "92daf443525c4cce67b150400bc2316076100ce0b3686209eb8cf3c31612e6f0"
+checksum = "47d9d19d1d6efa0109d2f65ff4c85cddd50bd572e5a00127ab10987290bcefae"
 
 [[package]]
 name = "litrs"
@@ -1215,15 +1210,15 @@ dependencies = [
 
 [[package]]
 name = "log"
-version = "0.4.33"
+version = "0.4.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ceec5bc11778974d1bcb055b18002eba7f4b3518b6a0081b3af5f21666da9ad"
+checksum = "f9f8bd3e56ce4dfc153cf470fffbfa98c7620958b312ca5c3a4b8d5181fd13c6"
 
 [[package]]
 name = "lru"
-version = "0.18.1"
+version = "0.18.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b6180140927ee907000b0aa540091f6ea512ead4447c92b8fc35bc72788a5a6"
+checksum = "5d2f2f9b4ba7e6b24d95e7e899329d35be83bcded72c8540cdd5368932d1d90a"
 dependencies = [
  "hashbrown 0.17.1",
 ]
@@ -1305,33 +1300,33 @@ dependencies = [
 [[package]]
 name = "monero-address"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "monero-base58 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
  "monero-ed25519 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
  "monero-io 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
  "monero-primitives 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "zeroize",
 ]
 
 [[package]]
 name = "monero-address"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "monero-base58 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide)",
  "monero-ed25519 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide)",
  "monero-io 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide)",
  "monero-primitives 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide)",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "zeroize",
 ]
 
 [[package]]
 name = "monero-base58"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "monero-primitives 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
  "std-shims",
@@ -1340,7 +1335,7 @@ dependencies = [
 [[package]]
 name = "monero-base58"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "monero-primitives 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide)",
  "std-shims",
@@ -1349,7 +1344,7 @@ dependencies = [
 [[package]]
 name = "monero-borromean"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "curve25519-dalek",
  "monero-ed25519 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
@@ -1361,7 +1356,7 @@ dependencies = [
 [[package]]
 name = "monero-borromean"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "curve25519-dalek",
  "monero-ed25519 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide)",
@@ -1373,7 +1368,7 @@ dependencies = [
 [[package]]
 name = "monero-bulletproofs"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "curve25519-dalek",
  "monero-bulletproofs-generators 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
@@ -1382,14 +1377,14 @@ dependencies = [
  "monero-primitives 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
  "rand_core",
  "std-shims",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "zeroize",
 ]
 
 [[package]]
 name = "monero-bulletproofs"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "curve25519-dalek",
  "monero-bulletproofs-generators 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide)",
@@ -1398,14 +1393,14 @@ dependencies = [
  "monero-primitives 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide)",
  "rand_core",
  "std-shims",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "zeroize",
 ]
 
 [[package]]
 name = "monero-bulletproofs-generators"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "curve25519-dalek",
  "monero-ed25519 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
@@ -1417,7 +1412,7 @@ dependencies = [
 [[package]]
 name = "monero-bulletproofs-generators"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "curve25519-dalek",
  "monero-ed25519 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide)",
@@ -1429,7 +1424,7 @@ dependencies = [
 [[package]]
 name = "monero-clsag"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "curve25519-dalek",
  "group",
@@ -1439,14 +1434,14 @@ dependencies = [
  "rand_core",
  "std-shims",
  "subtle",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "zeroize",
 ]
 
 [[package]]
 name = "monero-clsag"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "curve25519-dalek",
  "group",
@@ -1456,14 +1451,14 @@ dependencies = [
  "rand_core",
  "std-shims",
  "subtle",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "zeroize",
 ]
 
 [[package]]
 name = "monero-daemon-rpc"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "hex",
  "monero-address 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
@@ -1478,7 +1473,7 @@ dependencies = [
 [[package]]
 name = "monero-ed25519"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "crypto-bigint",
  "curve25519-dalek",
@@ -1493,7 +1488,7 @@ dependencies = [
 [[package]]
 name = "monero-ed25519"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "crypto-bigint",
  "curve25519-dalek",
@@ -1508,12 +1503,12 @@ dependencies = [
 [[package]]
 name = "monero-epee"
 version = "0.2.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 
 [[package]]
 name = "monero-epee"
 version = "0.2.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 
 [[package]]
 name = "monero-epee-derive"
@@ -1531,31 +1526,31 @@ dependencies = [
 [[package]]
 name = "monero-interface"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "hex",
  "monero-oxide 0.1.4-alpha (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
  "std-shims",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "zeroize",
 ]
 
 [[package]]
 name = "monero-interface"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "hex",
  "monero-oxide 0.1.4-alpha (git+https://codeberg.org/Monfluo/monero-oxide)",
  "std-shims",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "zeroize",
 ]
 
 [[package]]
 name = "monero-io"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "std-shims",
 ]
@@ -1563,7 +1558,7 @@ dependencies = [
 [[package]]
 name = "monero-io"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "std-shims",
 ]
@@ -1571,33 +1566,33 @@ dependencies = [
 [[package]]
 name = "monero-mlsag"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "curve25519-dalek",
  "monero-ed25519 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
  "monero-io 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
  "std-shims",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "zeroize",
 ]
 
 [[package]]
 name = "monero-mlsag"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "curve25519-dalek",
  "monero-ed25519 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide)",
  "monero-io 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide)",
  "std-shims",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "zeroize",
 ]
 
 [[package]]
 name = "monero-oxide"
 version = "0.1.4-alpha"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "curve25519-dalek",
  "hex-literal",
@@ -1615,7 +1610,7 @@ dependencies = [
 [[package]]
 name = "monero-oxide"
 version = "0.1.4-alpha"
-source = "git+https://codeberg.org/Monfluo/monero-oxide#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "curve25519-dalek",
  "hex-literal",
@@ -1633,7 +1628,7 @@ dependencies = [
 [[package]]
 name = "monero-primitives"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "sha3",
 ]
@@ -1641,7 +1636,7 @@ dependencies = [
 [[package]]
 name = "monero-primitives"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "sha3",
 ]
@@ -1663,7 +1658,7 @@ dependencies = [
 [[package]]
 name = "monero-wallet"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "curve25519-dalek",
  "hex",
@@ -1677,14 +1672,14 @@ dependencies = [
  "rand_distr",
  "std-shims",
  "subtle",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "zeroize",
 ]
 
 [[package]]
 name = "monero-wallet"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monero-oxide#05703fa7f91d03b652b0211bd824ed908d2c36df"
+source = "git+https://codeberg.org/Monfluo/monero-oxide#f6b911c7b043d10c9f90657c828eb29c2f30880e"
 dependencies = [
  "curve25519-dalek",
  "hex",
@@ -1698,7 +1693,7 @@ dependencies = [
  "rand_distr",
  "std-shims",
  "subtle",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "zeroize",
 ]
 
@@ -1737,7 +1732,7 @@ dependencies = [
 [[package]]
 name = "monfluo-oxide"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monfluo-oxide#81c94943b45337a3af18c6718d4e233580e69400"
+source = "git+https://codeberg.org/Monfluo/monfluo-oxide#4c2b2ad80bc0dc8a8efa8fe37306dbed1dcfc712"
 dependencies = [
  "arc-swap",
  "bigdecimal",
@@ -1756,7 +1751,7 @@ dependencies = [
  "serde_json",
  "strum 0.27.2",
  "subtle",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "tokio",
  "tracing",
  "url",
@@ -1824,9 +1819,9 @@ dependencies = [
 
 [[package]]
 name = "num-integer"
-version = "0.1.46"
+version = "0.1.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7969661fd2958a5cb096e56c8e1ad0444ac2bbcd0061bd28660485a44879858f"
+checksum = "7ce2d95d4b3734dc35aa2f45e1aa22cd416814592a4f9d9205e11affd5b8e10b"
 dependencies = [
  "num-traits",
 ]
@@ -1879,26 +1874,35 @@ dependencies = [
 
 [[package]]
 name = "palette"
-version = "0.7.6"
+version = "0.7.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4cbf71184cc5ecc2e4e1baccdb21026c20e5fc3dcf63028a086131b3ab00b6e6"
+checksum = "ddeed8580d347d2abf3dcf06a5f0b3dc020258338526b277847cd4248a70fc64"
 dependencies = [
  "approx",
- "fast-srgb8",
  "libm",
  "palette_derive",
+ "palette_math",
 ]
 
 [[package]]
 name = "palette_derive"
-version = "0.7.6"
+version = "0.7.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5030daf005bface118c096f510ffb781fc28f9ab6a32ab224d8631be6851d30"
+checksum = "88537020289b719d81be994ccf1bbf4990f477e2f69ee52fe3e45f43a02e56be"
 dependencies = [
  "by_address",
  "proc-macro2",
  "quote",
  "syn 2.0.119",
+]
+
+[[package]]
+name = "palette_math"
+version = "0.7.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e6eb142958d64335fb0e345c5b9ead2ecd6fc438c307e9d7d3c4fd428dbaf12"
+dependencies = [
+ "libm",
 ]
 
 [[package]]
@@ -1955,9 +1959,9 @@ checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 
 [[package]]
 name = "pest"
-version = "2.8.8"
+version = "2.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7df728be843c7070fab6ab7c328c4e9e9d78e23bf749c0669c86ee7ebfa050a2"
+checksum = "5a07a60cc7a4d00c91f95c685609d1d2f79050e6804b70ebedd7650f0b839bcf"
 dependencies = [
  "memchr",
  "ucd-trie",
@@ -1965,9 +1969,9 @@ dependencies = [
 
 [[package]]
 name = "pest_derive"
-version = "2.8.8"
+version = "2.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e2dd6fc3b26b3462ee188aac870f5a41d398f1cd5e2408d16531bd71c9591fd"
+checksum = "b3a83744a5c8455b8b3e0dc5031362780a347c878bdd11584d1a8984228cc88d"
 dependencies = [
  "pest",
  "pest_generator",
@@ -1975,9 +1979,9 @@ dependencies = [
 
 [[package]]
 name = "pest_generator"
-version = "2.8.8"
+version = "2.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a7a9205cfb6f596a9e8b689c0a15f9ceb7a1aafae7aaf788150ac65b29975b6"
+checksum = "e0cd3451aa3de60d4b9a1e736885e4dea6b31617598026f12256ad566d63304a"
 dependencies = [
  "pest",
  "pest_meta",
@@ -1988,9 +1992,9 @@ dependencies = [
 
 [[package]]
 name = "pest_meta"
-version = "2.8.8"
+version = "2.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85abd351c0de1e8384fc791a0737111a350394937e92b956b743dac12429f57c"
+checksum = "e04d3a0849e241d7dfce834c83b1c5edc8622009e8dd51a12ba1927c32f05496"
 dependencies = [
  "pest",
 ]
@@ -2071,15 +2075,15 @@ dependencies = [
 
 [[package]]
 name = "portable-atomic"
-version = "1.14.0"
+version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d20d5497ef88037a52ff98267d066e7f11fcc5e99bbfbd58a42336193aacec3"
+checksum = "05c8b63e8d9609db387f0324918f81d68fe27748f084ef092fb35954d0539a85"
 
 [[package]]
 name = "potential_utf"
-version = "0.1.5"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0103b1cef7ec0cf76490e969665504990193874ea05c85ff9bab8b911d0a0564"
+checksum = "d83eb9bc6d8e5cf568e7a1101d60ee05e81ed50ea106026f3d18deeb046d7661"
 dependencies = [
  "zerovec",
 ]
@@ -2131,9 +2135,9 @@ checksum = "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf"
 
 [[package]]
 name = "rand"
-version = "0.8.7"
+version = "0.8.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22f6172bdec972074665ed81ed53b71da00bfc44b65a753cfde883ec4c702a1a"
+checksum = "e058c7de0b26af77780c769414d6257830bb240f3c38477dbc2c16e5f54d6d4c"
 dependencies = [
  "libc",
  "rand_chacha",
@@ -2201,7 +2205,7 @@ dependencies = [
  "palette",
  "serde",
  "strum 0.28.0",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "unicode-segmentation",
  "unicode-truncate",
  "unicode-width",
@@ -2287,7 +2291,7 @@ checksum = "a4e608c6638b9c18977b00b475ac1f28d14e84b27d8d42f70e0bf1e3dec127ac"
 dependencies = [
  "getrandom 0.2.17",
  "libredox",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
 ]
 
 [[package]]
@@ -2304,9 +2308,9 @@ dependencies = [
 
 [[package]]
 name = "regex-automata"
-version = "0.4.16"
+version = "0.4.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fcfdb36bda0c880c5931cdc7a2bcdc8ba4556847b9d912bca70bc94708711ad"
+checksum = "ad8553b9b26413251cbf30e620595c7a41b3887f03da04579c0e6b0d6a06b4b2"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -2489,7 +2493,7 @@ checksum = "e7a5d71263a5a7d47b41f6b3f06ba276f10cc18b0931f1799f710578e2309348"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 3.0.3",
+ "syn 3.0.4",
 ]
 
 [[package]]
@@ -2729,9 +2733,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "3.0.3"
+version = "3.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53e9bae58849f64dfa4f5d5ae372c8341f7305f82a3868709269343628b659a3"
+checksum = "e6275cddf4610d1775e6d1fe9469b2e77d0f39fd98fb7450901b821e0c53649f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2863,11 +2867,11 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "2.0.19"
+version = "2.0.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09a43598840e33d5b0331f38c5e30d13bb11c11210a4b58f0d9b18a5a5eefcd9"
+checksum = "ec86235f5fcc2a73650310756d2ac5b138a5780bbbdfae3eeccec992c435ba4f"
 dependencies = [
- "thiserror-impl 2.0.19",
+ "thiserror-impl 2.0.20",
 ]
 
 [[package]]
@@ -2883,13 +2887,13 @@ dependencies = [
 
 [[package]]
 name = "thiserror-impl"
-version = "2.0.19"
+version = "2.0.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43cbfe0cf76104d42a574802844187e84a305e531ed54455f11fbde0f10541cd"
+checksum = "bc04cd3e1236dd4a98afca4569f2deb3f120e5422a4023be2cb683f8486292af"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 3.0.3",
+ "syn 3.0.4",
 ]
 
 [[package]]
@@ -2903,9 +2907,9 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.54"
+version = "0.3.55"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e1d5e639ff6bab73cb6885cc7e7b1de96c3f32c68ec55f3952614bec1092244"
+checksum = "cdb87b95ec50ddfa440816d227a17b2ccbdda963a316a727fda0fc4334f7d134"
 dependencies = [
  "deranged",
  "libc",
@@ -2924,9 +2928,9 @@ checksum = "9e1c906769ad99c88eaa54e728060edef082f8e358ff32030cb7c7d315e81109"
 
 [[package]]
 name = "tinystr"
-version = "0.8.3"
+version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8323304221c2a851516f22236c5722a72eaa19749016521d6dff0824447d96d"
+checksum = "b1e27c91459209c2986af3dcf603a5a74a4368754ce37414f59acc971167f643"
 dependencies = [
  "displaydoc",
  "zerovec",
@@ -3128,9 +3132,9 @@ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 
 [[package]]
 name = "uuid"
-version = "1.24.0"
+version = "1.26.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf3923a6f5c4c6382e0b653c4117f48d631ea17f38ed86e2a828e6f7412f5239"
+checksum = "b5772d71c9be8a8a6ac2117d949c5b224c1b72241bb611d9a3012edcf8af7812"
 dependencies = [
  "atomic",
  "getrandom 0.4.3",
@@ -3185,9 +3189,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen"
-version = "0.2.126"
+version = "0.2.127"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4b067c0c11094aef6b7a801c1e34a26affafdf3d051dba08456b868789aaf9a4"
+checksum = "1b70935747edd64d89de3efa29d73789b806c15798f8e7dca4d8ac356b50ce70"
 dependencies = [
  "cfg-if",
  "once_cell",
@@ -3198,9 +3202,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-futures"
-version = "0.4.76"
+version = "0.4.77"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c62df1340f32221cb9c54d6a27b030e3dba64361d4a95bed55f9aacb44da291d"
+checksum = "6b7777d5cc23d0e91404e53ce2d5e8ec7acae3026b16233dba62cd3246457950"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
@@ -3208,9 +3212,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-macro"
-version = "0.2.126"
+version = "0.2.127"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "167ce5e579f6bcf889c4f7175a8a5a585de84e8ff93976ce393efa5f2837aab1"
+checksum = "77775f8f3f7217702089053b94958f8f54061a3f663417df76e19cbdcca29bc1"
 dependencies = [
  "quote",
  "wasm-bindgen-macro-support",
@@ -3218,9 +3222,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-macro-support"
-version = "0.2.126"
+version = "0.2.127"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3997c7839262f4ef12cf90b818d6340c18e80f263f1a94bf157d0ec4420380e"
+checksum = "e11d33f857dc2fb11b8bc75aee111aa9cbeb12cd9f25efd3d4c2a3dd4e235284"
 dependencies = [
  "bumpalo",
  "proc-macro2",
@@ -3231,18 +3235,18 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-shared"
-version = "0.2.126"
+version = "0.2.127"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc1b4cb0cc549fcf58d7dfc081778139b3d283a081644e833e84682ad71cea24"
+checksum = "7ef64dbcc55df09c7e5a46182d181c2cfa3e925f3da937ea764728b4bbb9dcbf"
 dependencies = [
  "unicode-ident",
 ]
 
 [[package]]
 name = "web-sys"
-version = "0.3.103"
+version = "0.3.104"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8622dcb61c0bcc9fffa6938bed81210af2da9a7e4a1a834b2e37a59b6dfb6141"
+checksum = "c435338968042f4f59a557f690a253676d47ce13ceb55d70100e7facf6620a30"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
@@ -3573,9 +3577,9 @@ checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
 
 [[package]]
 name = "writeable"
-version = "0.6.3"
+version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ffae5123b2d3fc086436f8834ae3ab053a283cfac8fe0a0b8eaae044768a4c4"
+checksum = "3ad82d2a33cdc9674dc7465672f271e096168fcdbe0f799d9e6db8c5892679dc"
 
 [[package]]
 name = "yoke"
@@ -3602,18 +3606,18 @@ dependencies = [
 
 [[package]]
 name = "zerocopy"
-version = "0.8.55"
+version = "0.8.56"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5a105cd7b140f6eeec8acff2ea38135d3cab283ada58540f629fe51e46696eb"
+checksum = "556764e583adb45a9f8d413c2a147fa7e8d821e48e12b14fd560b607998b75eb"
 dependencies = [
  "zerocopy-derive",
 ]
 
 [[package]]
 name = "zerocopy-derive"
-version = "0.8.55"
+version = "0.8.56"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0fe976fb70c78cd64cccfe3a6fc142244e8a77b70959b30faf9d0ac37ee228eb"
+checksum = "f2ab42fc20575779bd240faa45f94a74256f755c0fa9e89f0ede20d91d0cdfc1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3663,9 +3667,9 @@ dependencies = [
 
 [[package]]
 name = "zerotrie"
-version = "0.2.4"
+version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f9152d31db0792fa83f70fb2f83148effb5c1f5b8c7686c3459e361d9bc20bf"
+checksum = "4ea269c3bd32f0a32c321907a2ae912ba6f4649bb0fc764a15627e99a7095a3f"
 dependencies = [
  "displaydoc",
  "yoke",
@@ -3674,9 +3678,9 @@ dependencies = [
 
 [[package]]
 name = "zerovec"
-version = "0.11.6"
+version = "0.11.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90f911cbc359ab6af17377d242225f4d75119aec87ea711a880987b18cd7b239"
+checksum = "bb0464e17806c1d976d5cba29399c7f08e516e279e2ba493f63123b5fca67dd8"
 dependencies = [
  "yoke",
  "zerofrom",
@@ -3685,13 +3689,13 @@ dependencies = [
 
 [[package]]
 name = "zerovec-derive"
-version = "0.11.3"
+version = "0.11.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "625dc425cab0dca6dc3c3319506e6593dcb08a9f387ea3b284dbd52a92c40555"
+checksum = "34df6fc39dbd26ddc9c10e6a2984476e13acce22e64e4487636ef494369225da"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.119",
+ "syn 3.0.4",
 ]
 
 [[package]]

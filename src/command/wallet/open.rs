@@ -6,7 +6,7 @@ use monfluo_oxide::{
     wallet::{Daemon, Wallet},
 };
 
-use crate::command::wallet::MonfluoObserver;
+use crate::{RUNTIME, command::wallet::MonfluoObserver};
 
 pub async fn run(monfluo_directory: PathBuf, name: String, password: String) {
     match monfluo_oxide::wallet::Wallet::open(monfluo_directory, &name, &password).await {
@@ -44,7 +44,9 @@ async fn run_interactive(wallet: Arc<Wallet>) {
         } else if input == "refresh" {
             if let Some(daemon) = &daemon {
                 println!("Starting refresh");
-                wallet.clone().sync(daemon.clone(), MonfluoObserver).await;
+                wallet
+                    .clone()
+                    .sync(&RUNTIME, daemon.clone(), MonfluoObserver);
                 println!("Refreshed!");
             } else {
                 println!("Not connected!");
