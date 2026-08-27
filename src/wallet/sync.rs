@@ -1,47 +1,57 @@
-use std::sync::Arc;
+use std::sync::{Arc, atomic::AtomicBool};
 
 use monero_wallet::{
     Scanner,
     address::SubaddressIndex,
-    interface::{ProvidesBlockchainMeta, ProvidesUnvalidatedScannableBlocks, ScannableBlock},
+    interface::{InterfaceError, NodeInfo, ProvidesNodeInfo, ProvidesUnvalidatedScannableBlocks, ScannableBlock},
     transaction::Input,
 };
 use tracing::{debug, info};
 
-use crate::{
-    wallet::{Wallet, state::BlockIdentifier},
-};
+use crate::wallet::{Wallet, state::BlockIdentifier};
 
+// max amount of blocks we attempt to fetch at once
 const STEP: u32 = 1000;
+// how many accounts we register in the scanner
+// TODO: this should be a wallet setting, so that advanced users can override it to a higher value
 const ACCOUNTS: u32 = 100;
+// how many addresses we register per account in the scanner
+// TODO: this should be a wallet setting, so that advanced users can override it to a higher value
 const ADDRESSES: u32 = 1000;
 
+#[derive(Debug)]
+pub enum SyncError {
+    CouldNotFetchNodeInfo { error: InterfaceError },
+    NodeNotSynced { node_info: NodeInfo },
+    CouldNotFetchBlocks { error: InterfaceError },
+}
+
+#[derive(Debug)]
 pub enum WalletSyncState {
-    PreparingForSync,
-    StartingSync {
-        target_height: u32,
-    },
-    Syncing {
-        target_height: u32,
-    },
-    FinishedSync,
+    Preparing { timestamp: u64, current_height: u32 },
+    Starting { timestamp: u64, current_height: u32, target_height: u32, node_info: NodeInfo },
+    Syncing { timestamp: u64, current_height: u32, target_height: u32 },
+    Finished { timestamp: u64, height: u32 },
+    Cancelled { timestamp: u64 },
+    Failed { timestamp: u64, error: SyncError },
 }
 
 pub trait WalletSyncObserver {
-    fn observe(&mut self, state: WalletSyncState) -> impl Future<Output = ()>;
+    fn observe(&mut self, state: WalletSyncState);
 }
 
-pub async fn sync<O: WalletSyncObserver>(wallet: Arc<Wallet>, daemon: super::Daemon, mut observer: O) {
-    observer.observe(WalletSyncState::PreparingForSync).await;
+// TODO: chain reorgs are currently not handled at all
+pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: super::Daemon, mut observer: O, cancellation_token: Arc<AtomicBool>) {
     let mut state = (*wallet.state()).clone();
-    let wallet_height = state
-        .height()
-        .map(|wallet_height| {
-            wallet_height
-                .current
-                .unwrap_or(wallet_height.start.saturating_sub(1))
-        })
-        .unwrap_or(0);
+    let wallet_height = state.height();
+    let initial_height = wallet_height
+        .current
+        .unwrap_or(wallet_height.start.saturating_sub(1));
+    observer.observe(WalletSyncState::Preparing {
+        timestamp: current_timestamp(),
+        current_height: initial_height,
+    });
+
     let mut scanner = Scanner::new(wallet.view_pair());
     for account in 0..ACCOUNTS {
         let from_address = if account == 0 { 1 } else { 0 };
@@ -49,54 +59,101 @@ pub async fn sync<O: WalletSyncObserver>(wallet: Arc<Wallet>, daemon: super::Dae
             scanner.register_subaddress(SubaddressIndex::new(account, address).expect("failed to construct subbaddress index during sync when registering addresses in scanner"));
         }
     }
-    let target_height = daemon
-        .latest_block_number()
-        .await
-        .expect("Failed to fetch latest block number") as u32;
-    info!("Will be syncing from current wallet height {} to the latest block number {}", wallet_height, target_height);
+    let node_info = match daemon.node_info().await {
+        Ok(node_info) => node_info,
+        Err(e) => {
+            observer.observe(WalletSyncState::Failed {
+                timestamp: current_timestamp(),
+                error: SyncError::CouldNotFetchNodeInfo {
+                    error: e,
+                },
+            });
+            return;
+        }
+    };
+    let node_height = node_info.height;
+    let node_target_height = node_info.target_height;
+    if node_target_height != 0 && node_height != node_target_height {
+        observer.observe(WalletSyncState::Failed {
+            timestamp: current_timestamp(),
+            error: SyncError::NodeNotSynced {
+                node_info,
+            },
+        });
+        return;
+    }
+    let target_height = node_height - 1;
+    info!("Will be syncing from current wallet height {} to the latest block number {}", initial_height, target_height);
+    observer.observe(WalletSyncState::Starting {
+        timestamp: current_timestamp(),
+        current_height: initial_height,
+        target_height,
+        node_info,
+    });
 
-    observer.observe(WalletSyncState::StartingSync { target_height }).await;
+    let mut latest_synced_block = initial_height;
     let mut handle = Some(tokio::spawn({
         let daemon = daemon.clone();
         async move {
             daemon
-                .contiguous_scannable_blocks((wallet_height as usize + 1)..=(wallet_height + STEP).min(target_height) as usize)
+                .contiguous_scannable_blocks((initial_height as usize + 1)..=(initial_height + STEP).min(target_height) as usize)
                 .await
         }
     }));
 
     while let Some(current_handle) = handle.take() {
+        if cancellation_token.load(std::sync::atomic::Ordering::Relaxed) {
+            debug!("Sync cancelled");
+            observer.observe(WalletSyncState::Cancelled {
+                timestamp: current_timestamp(),
+            });
+        }
         debug!("Waiting on block fetching task..");
-        let blocks = current_handle
+        let blocks = match current_handle
             .await
             .expect("Failed to spawn block fetching task")
-            .expect("Failed to fetch blocks");
+        {
+            Ok(blocks) => blocks,
+            Err(e) => {
+                observer.observe(WalletSyncState::Failed {
+                    timestamp: current_timestamp(),
+                    error: SyncError::CouldNotFetchBlocks {
+                        error: e,
+                    },
+                });
+                return;
+            }
+        };
         if blocks.is_empty() {
             info!("Fetched 0 blocks, stopping sync");
             break;
-        } else {
-            let first_block_height = blocks
-                .first()
-                .expect("Failed to get first block after checking that blocks vec is not empty")
-                .block
-                .number() as u32;
-            let last_block_height = blocks
-                .last()
-                .expect("Failed to get last block after checking that blocks vec is not empty")
-                .block
-                .number() as u32;
-            info!("Fetched {} blocks with heights {}-{}", blocks.len(), first_block_height, last_block_height);
-            if last_block_height < target_height {
-                debug!("Last block height ({}) is less than target block height ({}), spawning new block fetching task", last_block_height, target_height);
-                handle = Some(tokio::spawn({
-                    let daemon = daemon.clone();
-                    async move {
-                        daemon
-                            .contiguous_scannable_blocks((last_block_height as usize + 1)..=(last_block_height + STEP).min(target_height) as usize)
-                            .await
-                    }
-                }));
-            }
+        }
+        observer.observe(WalletSyncState::Syncing {
+            timestamp: current_timestamp(),
+            current_height: latest_synced_block,
+            target_height,
+        });
+        let first_block_height = blocks
+            .first()
+            .expect("Failed to get first block after checking that blocks vec is not empty")
+            .block
+            .number() as u32;
+        let last_block_height = blocks
+            .last()
+            .expect("Failed to get last block after checking that blocks vec is not empty")
+            .block
+            .number() as u32;
+        info!("Fetched {} blocks with heights {}-{}", blocks.len(), first_block_height, last_block_height);
+        if last_block_height < target_height {
+            debug!("Last block height ({}) is less than target block height ({}), spawning new block fetching task", last_block_height, target_height);
+            handle = Some(tokio::spawn({
+                let daemon = daemon.clone();
+                async move {
+                    daemon
+                        .contiguous_scannable_blocks((last_block_height as usize + 1)..=(last_block_height + STEP).min(target_height) as usize)
+                        .await
+                }
+            }));
         }
 
         for block in blocks {
@@ -130,10 +187,16 @@ pub async fn sync<O: WalletSyncObserver>(wallet: Arc<Wallet>, daemon: super::Dae
                     if let Some(subaddress_index) = output.subaddress() {
                         let account = subaddress_index.account();
                         let address = subaddress_index.address();
-                        if state.tracked_addresses.get(&account).map_or(true, |&last_tracked_address| last_tracked_address <= address) {
+                        if state
+                            .tracked_addresses
+                            .get(&account)
+                            .map_or(true, |&last_tracked_address| last_tracked_address <= address)
+                        {
                             let new_last_tracked_address = address + 1;
                             info!("Updating last tracked address for account {} to {}", account, new_last_tracked_address);
-                            state.tracked_addresses.insert(account, new_last_tracked_address);
+                            state
+                                .tracked_addresses
+                                .insert(account, new_last_tracked_address);
                         }
                     }
                     state.add_transaction(transaction.clone(), *transaction_hash, BlockIdentifier::new(block_number, block_hash), block.block.header.timestamp);
@@ -160,6 +223,7 @@ pub async fn sync<O: WalletSyncObserver>(wallet: Arc<Wallet>, daemon: super::Dae
                     }
                 }
             }
+            latest_synced_block = block_number;
             state.set_current_height(Some(block_number));
         }
 
@@ -167,9 +231,23 @@ pub async fn sync<O: WalletSyncObserver>(wallet: Arc<Wallet>, daemon: super::Dae
         info!("Finished processing batch of blocks");
         wallet.store().await;
         debug!("Wallet stored after processing batch of blocks");
-        observer.observe(WalletSyncState::Syncing { target_height }).await;
+        observer.observe(WalletSyncState::Syncing {
+            timestamp: current_timestamp(),
+            current_height: latest_synced_block,
+            target_height,
+        });
     }
 
     info!("Finished syncing");
-    observer.observe(WalletSyncState::FinishedSync).await;
+    observer.observe(WalletSyncState::Finished {
+        timestamp: current_timestamp(),
+        height: latest_synced_block,
+    });
+}
+
+fn current_timestamp() -> u64 {
+    chrono::Local::now()
+        .timestamp_millis()
+        .try_into()
+        .expect("failed to convert current timestamp into u64")
 }

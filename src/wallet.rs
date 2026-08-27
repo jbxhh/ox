@@ -1,14 +1,17 @@
-pub mod view;
 mod atomic_fs;
 mod encryption;
 mod io;
 mod secrets;
 mod state;
 mod sync;
+pub mod view;
 
 use monero_wallet::transaction::Timelock;
-pub use sync::WalletSyncState;
 pub use sync::WalletSyncObserver;
+pub use sync::WalletSyncState;
+use tokio::runtime::Runtime;
+use tokio::sync::Mutex;
+use tokio::task::JoinHandle;
 
 use crate::transport::MonfluoTransport;
 use crate::wallet::secrets::WalletSecrets;
@@ -35,6 +38,7 @@ use std::collections::HashMap;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 use zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
 
 const WALLETS_DIRECTORY_FILE_NAME: &str = "wallets";
@@ -50,6 +54,13 @@ pub struct Wallet {
     secrets: WalletSecrets,
     #[zeroize(skip)]
     state: ArcSwap<WalletState>,
+    #[zeroize(skip)]
+    sync_handle: Mutex<Option<SyncHandle>>,
+}
+
+struct SyncHandle {
+    handle: JoinHandle<()>,
+    cancellation_token: Arc<AtomicBool>,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -77,7 +88,7 @@ pub enum WalletError {
 }
 
 impl Wallet {
-    pub async fn create<P: AsRef<Path>>(monfluo_directory: P, wallet_name: &str, password: &str, seed: Seed, birthday: Option<u64>, height: Option<u32>) -> Result<(), WalletError> {
+    pub async fn create<P: AsRef<Path>>(monfluo_directory: P, wallet_name: &str, password: &str, seed: Seed, birthday: Option<u64>, height: u32) -> Result<(), WalletError> {
         let key = seed.key();
         let spend_key = crate::util::bytes_to_scalar(&key).unwrap();
         let view_key = crate::util::bytes_to_scalar(&crate::crypto::spend_key_to_view_key(&key)).unwrap();
@@ -103,6 +114,7 @@ impl Wallet {
             path: wallet_dir_path,
             secrets,
             state,
+            sync_handle: Mutex::new(None),
         })
     }
 
@@ -157,11 +169,36 @@ impl Wallet {
             .and_then(|file_name| file_name.to_str())
     }
 
-    pub async fn sync<O: sync::WalletSyncObserver>(self: Arc<Self>, daemon: Daemon, observer: O) {
-        sync::sync(self, daemon, observer).await;
+    pub fn sync<O: sync::WalletSyncObserver + Send + 'static>(self: Arc<Self>, runtime: &Runtime, daemon: Daemon, observer: O) {
+        let wallet = self.clone();
+        let Ok(mut sync_state_guard) = self.sync_handle.try_lock() else {
+            panic!("TODO: return Err. Cannot take lock on a sync state guard");
+        };
+        if let Some(sync_state) = &mut *sync_state_guard
+            && !sync_state.handle.is_finished()
+        {
+            panic!("TODO: return Err. Sync is already in progress");
+        }
+        let cancellation_token = Arc::new(AtomicBool::new(false));
+        let handle = runtime.spawn(sync::sync(wallet, daemon, observer, cancellation_token.clone()));
+        *sync_state_guard = Some(SyncHandle {
+            handle,
+            cancellation_token,
+        })
     }
 
-    pub async fn close(self) {}
+    pub async fn close(&self) {
+        let Ok(mut sync_state_guard) = self.sync_handle.try_lock() else {
+            panic!("TODO: return Err. Cannot take lock on a sync state guard");
+        };
+        if let Some(sync_state) = sync_state_guard.take() {
+            sync_state
+                .cancellation_token
+                .store(true, std::sync::atomic::Ordering::Relaxed);
+            let _ = sync_state.handle.await;
+        }
+        self.store().await;
+    }
 
     pub async fn create_transaction(&self, address: &str, amount: u64, daemon: Daemon) -> SignableTransaction {
         let state = self.state.load();
@@ -172,7 +209,7 @@ impl Wallet {
             Zeroizing::new(array)
         };
         let output = state.outputs.last().unwrap();
-        let input: OutputWithDecoys = OutputWithDecoys::new(&mut *crate::get_rng_mut(), &*daemon, 16, state.height.unwrap().current.unwrap() as usize, output.inner.clone())
+        let input: OutputWithDecoys = OutputWithDecoys::new(&mut *crate::get_rng_mut(), &*daemon, 16, state.height.current.unwrap() as usize, output.inner.clone())
             .await
             .unwrap();
         let inputs: Vec<OutputWithDecoys> = vec![input];
@@ -200,7 +237,11 @@ impl Wallet {
         let mut last_account = None;
         self.state.rcu(|state| {
             let mut state = state.deref().clone();
-            let last_tracked_account = state.tracked_addresses.last_key_value().map(|(k, _v)| *k).expect("there are no tracked addresses");
+            let last_tracked_account = state
+                .tracked_addresses
+                .last_key_value()
+                .map(|(k, _v)| *k)
+                .expect("there are no tracked addresses");
             let new_account = last_tracked_account + 1;
             state.tracked_addresses.insert(new_account, 0);
             last_account = Some(new_account);
@@ -219,10 +260,8 @@ impl Wallet {
                     state.tracked_addresses.insert(account_index, new_address);
                     last_address = Some(new_address);
                     Arc::new(state)
-                },
-                None => {
-                    Arc::new(state)
-                },
+                }
+                None => Arc::new(state),
             }
         });
         last_address
@@ -242,7 +281,9 @@ impl Wallet {
             {
                 let amount = output.inner.commitment().amount;
                 total += amount;
-                if let Some(wallet_height) = state.height && let Some(height) = wallet_height.current && (output.inner.additional_timelock() == Timelock::None || matches!(output.inner.additional_timelock(), Timelock::Block(block) if block >= height as usize)) {
+                if let Some(height) = state.height().current
+                    && (output.inner.additional_timelock() == Timelock::None || matches!(output.inner.additional_timelock(), Timelock::Block(block) if block >= height as usize))
+                {
                     unlocked += amount;
                 } else {
                     pending += amount;
@@ -316,7 +357,7 @@ impl Wallet {
 
     pub fn transaction_views(&self) -> Vec<view::transaction::TransactionView> {
         let state = self.state.load();
-        let current_height = state.height.and_then(|wallet_height| wallet_height.current);
+        let current_height = state.height.current;
 
         let mut raw_transactions = state.transactions.clone();
         raw_transactions.sort_by_key(|raw_transaction| (raw_transaction.block_info.block.height, raw_transaction.hash));
@@ -448,7 +489,7 @@ mod tests {
         const WALLET_NAME: &str = "Monero Wallet";
         let monfluo_directory = tempfile::tempdir().expect("Failed to create tempdir");
         let seed = monero_wallet_util::seed::Seed::Original(crate::generate_seed(monero_wallet_util::seed::original::Language::English));
-        Wallet::create(monfluo_directory.path(), WALLET_NAME, "", seed.clone(), Some(1), Some(1))
+        Wallet::create(monfluo_directory.path(), WALLET_NAME, "", seed.clone(), Some(0), 0)
             .await
             .unwrap();
         let wallet = Wallet::open(monfluo_directory.path(), WALLET_NAME, "")

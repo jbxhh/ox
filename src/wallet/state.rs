@@ -77,7 +77,7 @@ impl WalletHeight {
 #[derive(Debug, Clone, Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
 pub struct WalletState {
     #[zeroize(skip)]
-    pub height: Option<WalletHeight>,
+    pub height: WalletHeight,
     #[zeroize(skip)]
     pub tracked_addresses: BTreeMap<u32, u32>,
     pub outputs: Vec<WalletOutputWrapper>,
@@ -98,11 +98,11 @@ pub struct WalletStateCache {
 }
 
 impl WalletState {
-    pub fn new(height: Option<u32>) -> Self {
+    pub fn new(height: u32) -> Self {
         let mut tracked_addresses = BTreeMap::new();
         tracked_addresses.insert(0, 0);
         Self {
-            height: height.map(WalletHeight::new),
+            height: WalletHeight::new(height),
             tracked_addresses,
             outputs: Vec::new(),
             transactions: Vec::new(),
@@ -135,7 +135,7 @@ impl WalletState {
         Ok(())
     }
 
-    pub fn height(&self) -> Option<WalletHeight> {
+    pub fn height(&self) -> WalletHeight {
         self.height
     }
 
@@ -148,9 +148,7 @@ impl WalletState {
     }
 
     pub fn set_current_height(&mut self, height: Option<u32>) {
-        if let Some(wallet_height) = self.height.as_mut() {
-            wallet_height.current = height;
-        }
+        self.height.current = height
     }
 
     pub fn add_output(&mut self, output: WalletOutput, spend_key: &Scalar) {
