@@ -12,7 +12,7 @@ pub(super) use monero_epee::{HEADER, VERSION, Type, Array};
 
 use crate::{
   InterfaceError, PrunedTransactionWithPrunableHash, UnvalidatedScannableBlock,
-  RingCtOutputInformation,
+  RingCtOutputInformation, MempoolTransaction,
 };
 
 struct EpeeError(OriginalEpeeError);
@@ -148,6 +148,22 @@ fn epee_32<'encoding, 'parent>(
   )
 }
 
+/// Read a string blob of concatenated 32-byte hashes into a `Vec<[u8; 32]>`.
+///
+/// The node serializes `KV_SERIALIZE_CONTAINER_POD_AS_BLOB` fields (such as
+/// `remaining_added_pool_txids` and `removed_pool_txids`) as a single string of packed hashes,
+/// not as an array of individually-encoded strings.
+#[expect(single_use_lifetimes, clippy::elidable_lifetime_names)]
+fn epee_32_blob<'encoding, 'parent>(
+  entry: EpeeEntry<'encoding, 'parent, &'encoding [u8]>,
+) -> Result<Vec<[u8; 32]>, EpeeError> {
+  let blob = entry.to_str().map_err(EpeeError)?.consume();
+  if !blob.len().is_multiple_of(32) {
+    Err(EpeeError(OriginalEpeeError::TypeError))?;
+  }
+  Ok(blob.chunks_exact(32).map(|chunk| chunk.try_into().expect("chunk of length 32")).collect())
+}
+
 /// Accumulate a set of outs from `get_outs.bin`.
 pub(super) fn accumulate_outs(
   epee: &[u8],
@@ -209,15 +225,49 @@ pub(super) fn accumulate_outs(
   Ok(())
 }
 
-/// Returns `None` if this methodology isn't applicable.
+/// The `pool_*` fields of a `get_blocks.bin` response.
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub(super) struct ExtractedMempool {
+  pub(super) incremental: bool,
+  pub(super) daemon_time: u64,
+  pub(super) added: Vec<MempoolTransaction>,
+  pub(super) remaining_added: Vec<[u8; 32]>,
+  pub(super) removed: Vec<[u8; 32]>,
+}
+
+impl ExtractedMempool {
+  pub(super) fn empty() -> Self {
+    Self {
+      incremental: false,
+      daemon_time: 0,
+      added: vec![],
+      remaining_added: vec![],
+      removed: vec![],
+    }
+  }
+}
+
+pub(super) struct ExtractedBlocksBin {
+  /// `Some` when the binary path applies; `None` when the caller should fall back.
+  pub(super) blocks: Option<Vec<UnvalidatedScannableBlock>>,
+  pub(super) mempool: ExtractedMempool,
+  /// The daemon's tip + 1, as reported by its `current_height` field.
+  pub(super) current_height: u64,
+  /// The height of the first block in this response, as reported by its `start_height` field.
+  pub(super) start_height: u64,
+}
+
 pub(super) fn extract_blocks_from_blocks_bin(
   blocks_bin: &[u8],
-) -> Result<Option<impl use<'_> + Iterator<Item = UnvalidatedScannableBlock>>, InterfaceError> {
+) -> Result<ExtractedBlocksBin, InterfaceError> {
   let mut epee = Epee::new(blocks_bin).map_err(EpeeError)?;
   let mut epee = epee.entry().map_err(EpeeError)?.fields().map_err(EpeeError)?;
 
   let mut res = vec![];
   let mut all_output_indexes = vec![];
+  let mut mempool = ExtractedMempool::empty();
+  let mut current_height = 0;
+  let mut start_height = 0;
   while let Some(epee) = epee.next() {
     let (key, value) = epee.map_err(EpeeError)?;
     match key.consume() {
@@ -288,7 +338,12 @@ pub(super) fn extract_blocks_from_blocks_bin(
                   if matches!(transaction, Transaction::V2 { proofs: Some(_), .. }) &&
                     (prunable_hash.is_none() || (prunable_hash == Some([0; 32])))
                   {
-                    return Ok(None);
+                    return Ok(ExtractedBlocksBin {
+                      blocks: None,
+                      mempool,
+                      current_height,
+                      start_height,
+                    });
                   }
 
                   let transaction =
@@ -343,6 +398,30 @@ pub(super) fn extract_blocks_from_blocks_bin(
           }
         }
       }
+      b"added_pool_txs" => {
+        let mut pool_txs = value.iterate().map_err(EpeeError)?;
+        while let Some(pool_tx) = pool_txs.next() {
+          mempool.added.push(parse_pool_tx(pool_tx.map_err(EpeeError)?)?);
+        }
+      }
+      b"remaining_added_pool_txids" => {
+        mempool.remaining_added = epee_32_blob(value)?;
+      }
+      b"removed_pool_txids" => {
+        mempool.removed = epee_32_blob(value)?;
+      }
+      b"pool_info_extent" => {
+        mempool.incremental = value.to_u8().map_err(EpeeError)? == 1;
+      }
+      b"daemon_time" => {
+        mempool.daemon_time = value.to_u64().map_err(EpeeError)?;
+      }
+      b"current_height" => {
+        current_height = value.to_u64().map_err(EpeeError)?;
+      }
+      b"start_height" => {
+        start_height = value.to_u64().map_err(EpeeError)?;
+      }
       _ => {}
     }
   }
@@ -389,7 +468,37 @@ pub(super) fn extract_blocks_from_blocks_bin(
     ))?;
   }
 
-  Ok(Some(result.into_iter()))
+  Ok(ExtractedBlocksBin { blocks: Some(result), mempool, current_height, start_height })
+}
+
+#[expect(single_use_lifetimes, clippy::elidable_lifetime_names)]
+fn parse_pool_tx<'encoding, 'parent>(
+  pool_tx: EpeeEntry<'encoding, 'parent, &'encoding [u8]>,
+) -> Result<MempoolTransaction, EpeeError> {
+  let mut fields = pool_tx.fields().map_err(EpeeError)?;
+  let mut tx_hash: Option<[u8; 32]> = None;
+  let mut tx_blob: Option<Vec<u8>> = None;
+  let mut double_spend_seen = None;
+  while let Some(field) = fields.next() {
+    let (key, value) = field.map_err(EpeeError)?;
+    match key.consume() {
+      b"tx_hash" => tx_hash = Some(epee_32(value)?),
+      b"tx_blob" => tx_blob = Some(value.to_str().map_err(EpeeError)?.consume().to_vec()),
+      b"double_spend_seen" => double_spend_seen = Some(value.to_bool().map_err(EpeeError)?),
+      _ => {}
+    }
+  }
+
+  let tx_hash = tx_hash.ok_or(OriginalEpeeError::InternalError).map_err(EpeeError)?;
+  let double_spend_seen =
+    double_spend_seen.ok_or(OriginalEpeeError::InternalError).map_err(EpeeError)?;
+  let tx_blob = tx_blob.unwrap_or_default();
+  let mut encoding = tx_blob.as_slice();
+  let transaction = Transaction::<Pruned>::read(&mut encoding)
+    .map_err(|_| OriginalEpeeError::InternalError)
+    .map_err(EpeeError)?;
+
+  Ok(MempoolTransaction { tx_hash, transaction, double_spend_seen })
 }
 
 pub(super) fn extract_output_indexes(epee: &[u8]) -> Result<Vec<u64>, InterfaceError> {

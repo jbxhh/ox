@@ -128,6 +128,100 @@ pub struct UnvalidatedScannableBlock {
   pub output_index_for_first_ringct_output: Option<u64>,
 }
 
+/// Mirrors the daemon's `requested_info` field for `get_blocks.bin`.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum RequestedInfo {
+  /// Only blocks.
+  BlocksOnly,
+  /// Blocks and the mempool.
+  BlocksAndMempool,
+  /// Only the mempool.
+  MempoolOnly,
+}
+
+impl RequestedInfo {
+  /// The wire value of `requested_info` (`0`, `1`, or `2`).
+  pub fn node_value(self) -> u8 {
+    match self {
+      RequestedInfo::BlocksOnly => 0,
+      RequestedInfo::BlocksAndMempool => 1,
+      RequestedInfo::MempoolOnly => 2,
+    }
+  }
+}
+
+/// How `get_blocks.bin` should locate the point after which to return blocks.
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub enum BlocksRequest {
+  /// Return blocks after this numeric height.
+  Height(u64),
+  /// Return blocks after the common ancestor of these hashes.
+  ///
+  /// The hashes are already in "short chain history" order: newest first, last ten sequential,
+  /// then doubling gaps, ending with genesis. Use [`BlocksRequest::from_hashes`] to build this.
+  Hashes(Vec<[u8; 32]>),
+}
+
+impl BlocksRequest {
+  /// Request blocks after the given height.
+  pub fn from_height(height: u64) -> Self {
+    Self::Height(height)
+  }
+
+  /// Request blocks after the common ancestor of a run of recent block hashes.
+  ///
+  /// `hashes` is oldest-first (tip last); it need not include genesis, which is supplied
+  /// separately. The result is a short chain history (see [`BlocksRequest::Hashes`]).
+  pub fn from_hashes(genesis: [u8; 32], hashes: &[[u8; 32]]) -> Self {
+    let mut ids = Vec::new();
+
+    let mut i = hashes.len();
+    let mut stride = 1;
+    while i > 0 {
+      ids.push(hashes[i - 1]);
+      i = i.saturating_sub(stride);
+      if ids.len() >= 10 {
+        stride = stride.saturating_mul(2);
+      }
+    }
+
+    ids.push(genesis);
+    Self::Hashes(ids)
+  }
+}
+
+/// A transaction returned inside `added_pool_txs` of a `get_blocks.bin` response.
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub struct MempoolTransaction {
+  /// The transaction's id, as reported by the daemon (`pool_tx_info.tx_hash`).
+  pub tx_hash: [u8; 32],
+  /// The transaction body, pruned if the request's `prune` flag was set.
+  pub transaction: Transaction<Pruned>,
+  /// Whether the daemon saw a double-spend for this transaction.
+  pub double_spend_seen: bool,
+}
+
+/// Blocks plus the mempool data returned by a single `get_blocks.bin` call.
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub struct UnvalidatedScannableBlocksWithMempool {
+  /// The blocks in this response.
+  pub blocks: Vec<UnvalidatedScannableBlock>,
+  /// The mempool transactions in this response.
+  pub mempool: Vec<MempoolTransaction>,
+  /// `remaining_added_pool_txids`. Only set by restricted daemons.
+  pub remaining_mempool_txids: Vec<[u8; 32]>,
+  /// `removed_pool_txids`, when `incremental` is set.
+  pub removed_mempool_txids: Vec<[u8; 32]>,
+  /// Feed back as `pool_info_since` to get incremental changes next time.
+  pub daemon_time: u64,
+  /// `true` for incremental changes, `false` for the full pool.
+  pub incremental: bool,
+  /// The daemon's tip + 1, as reported by its `current_height` field.
+  pub current_height: u64,
+  /// The height of the first block in this response, as reported by its `start_height` field.
+  pub start_height: u64,
+}
+
 /// Provides scannable blocks from an untrusted interface.
 ///
 /// This provides some of its methods yet

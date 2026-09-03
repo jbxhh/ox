@@ -51,6 +51,7 @@ pub mod prelude {
     InterfaceError, ProvidesBlockchainMeta, TransactionsError, ProvidesTransactions,
     PublishTransactionError, PublishTransaction, ProvidesBlockchain, ProvidesOutputs,
     ScannableBlock, ExpandToScannableBlock, ProvidesScannableBlocks, EvaluateUnlocked,
-    ProvidesDecoys, FeePriority, FeeRate, FeeError, ProvidesFeeRates,
+    ProvidesDecoys, FeePriority, FeeRate, FeeError, ProvidesFeeRates, RequestedInfo,
+    MempoolTransaction, UnvalidatedScannableBlocksWithMempool, BlocksRequest,
   };
 }

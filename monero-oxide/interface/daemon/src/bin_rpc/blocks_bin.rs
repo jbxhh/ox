@@ -10,9 +10,129 @@ use monero_interface::*;
 
 use crate::{MAX_RESPONSE_SIZE, HttpTransport, MoneroDaemon};
 
-use super::epee;
+use super::epee::{self, ExtractedBlocksBin};
+
+/// Write an EPEE varint (`value << 2 | size_mark`) into `buf`.
+fn write_epee_varint(buf: &mut Vec<u8>, value: usize) {
+  if value <= 63 {
+    #[expect(clippy::as_conversions, clippy::cast_possible_truncation)]
+    buf.push(((value << 2) | 0b00) as u8);
+  } else if value <= 16383 {
+    #[expect(clippy::as_conversions, clippy::cast_possible_truncation)]
+    buf.extend((((value << 2) | 0b01) as u16).to_le_bytes());
+  } else if value <= 1073741823 {
+    #[expect(clippy::as_conversions, clippy::cast_possible_truncation)]
+    buf.extend((((value << 2) | 0b10) as u32).to_le_bytes());
+  } else {
+    #[expect(clippy::as_conversions, clippy::cast_possible_truncation)]
+    buf.extend((((value << 2) | 0b11) as u64).to_le_bytes());
+  }
+}
 
 impl<T: HttpTransport> MoneroDaemon<T> {
+  fn get_blocks_request(
+    blocks_request: BlocksRequest,
+    requested_info: RequestedInfo,
+    pool_info_since: u64,
+    max_block_count: Option<u64>,
+  ) -> Vec<u8> {
+    let (start_height, block_ids) = match blocks_request {
+      BlocksRequest::Height(height) => (height, None),
+      BlocksRequest::Hashes(short_history) => (0, Some(short_history)),
+    };
+
+    let has_block_ids = block_ids.as_ref().is_some_and(|ids| !ids.is_empty());
+    let field_count = 4 + usize::from(has_block_ids) + usize::from(max_block_count.is_some());
+
+    let mut request = Vec::with_capacity(128);
+    request.extend(epee::HEADER);
+    request.push(epee::VERSION);
+    write_epee_varint(&mut request, field_count);
+
+    request.push(epee_key_len!("prune"));
+    request.extend("prune".as_bytes());
+    #[expect(clippy::as_conversions)]
+    request.push(epee::Type::Bool as u8);
+    request.push(1);
+
+    request.push(epee_key_len!("start_height"));
+    request.extend("start_height".as_bytes());
+    #[expect(clippy::as_conversions)]
+    request.push(epee::Type::Uint64 as u8);
+    request.extend(start_height.to_le_bytes());
+
+    request.push(epee_key_len!("requested_info"));
+    request.extend("requested_info".as_bytes());
+    #[expect(clippy::as_conversions)]
+    request.push(epee::Type::Uint8 as u8);
+    request.push(requested_info.node_value());
+
+    request.push(epee_key_len!("pool_info_since"));
+    request.extend("pool_info_since".as_bytes());
+    #[expect(clippy::as_conversions)]
+    request.push(epee::Type::Uint64 as u8);
+    request.extend(pool_info_since.to_le_bytes());
+
+    if let Some(ids) = &block_ids {
+      if !ids.is_empty() {
+        request.push(epee_key_len!("block_ids"));
+        request.extend("block_ids".as_bytes());
+        #[expect(clippy::as_conversions)]
+        request.push(epee::Type::String as u8);
+        write_epee_varint(&mut request, ids.len() * 32);
+        for id in ids {
+          request.extend(id);
+        }
+      }
+    }
+
+    if let Some(max_block_count) = max_block_count {
+      /*
+        This field was introduced in Monero 0.18.4.3, with the relevant pull request being
+        https://github.com/monero-project/monero/pull/9901. Older version of Monero will ignore
+        this field and return as many blocks as it wants in response to our request. Newer versions
+        of Monero won't waste our mutual bandwidth however.
+      */
+      request.push(epee_key_len!("max_block_count"));
+      request.extend("max_block_count".as_bytes());
+      #[expect(clippy::as_conversions)]
+      request.push(epee::Type::Uint64 as u8);
+      request.extend(max_block_count.to_le_bytes());
+    }
+
+    request
+  }
+
+  /// Make a single `get_blocks.bin` request.
+  ///
+  /// `blocks_request` selects how the daemon locates blocks (by numeric height or by a short
+  /// chain of known block hashes). `requested_info` selects blocks, the mempool, or both.
+  /// `pool_info_since` is ignored when `BlocksOnly`.
+  pub async fn get_blocks_bin(
+    &self,
+    blocks_request: BlocksRequest,
+    requested_info: RequestedInfo,
+    pool_info_since: u64,
+    max_block_count: Option<u64>,
+  ) -> Result<UnvalidatedScannableBlocksWithMempool, InterfaceError> {
+    let request =
+      Self::get_blocks_request(blocks_request, requested_info, pool_info_since, max_block_count);
+    let epee = self.bin_call("get_blocks.bin", request, MAX_RESPONSE_SIZE).await?;
+    let ExtractedBlocksBin { blocks, mempool, current_height, start_height } =
+      epee::extract_blocks_from_blocks_bin(&epee)?;
+
+    Ok(UnvalidatedScannableBlocksWithMempool {
+      blocks: blocks.unwrap_or_default(),
+      mempool: mempool.added,
+      remaining_mempool_txids: mempool.remaining_added,
+      removed_mempool_txids: mempool.removed,
+      daemon_time: mempool.daemon_time,
+      incremental: mempool.incremental,
+      current_height,
+      start_height,
+    })
+  }
+
   /// This MUST NOT be called with a start of `0`.
   ///
   /// This returns false if this methodology isn't applicable.
@@ -58,48 +178,19 @@ impl<T: HttpTransport> MoneroDaemon<T> {
       ))?
     };
 
-    let expected_request_header_len = 32;
-    let expected_request_len = expected_request_header_len + 8 + 25;
-    let mut request = Vec::with_capacity(expected_request_len);
-    request.extend(epee::HEADER);
-    request.push(epee::VERSION);
-    request.push(3 << 2);
-
-    request.push(epee_key_len!("prune"));
-    request.extend("prune".as_bytes());
-    #[expect(clippy::as_conversions)]
-    request.push(epee::Type::Bool as u8);
-    request.push(1);
-    request.push(epee_key_len!("start_height"));
-    request.extend("start_height".as_bytes());
-    #[expect(clippy::as_conversions)]
-    request.push(epee::Type::Uint64 as u8);
-    debug_assert_eq!(expected_request_header_len, request.len());
-
     while start <= end {
-      request.truncate(expected_request_header_len);
+      let request = Self::get_blocks_request(
+        BlocksRequest::Height(start),
+        RequestedInfo::BlocksOnly,
+        0,
+        Some(remaining_blocks),
+      );
 
-      request.extend(start.to_le_bytes());
-
-      /*
-        This field was introduced in Monero 0.18.4.3, with the relevant pull request being
-        https://github.com/monero-project/monero/pull/9901. Older version of Monero will ignore
-        this field and return as many blocks as it wants in response to our request. Newer versions
-        of Monero won't waste our mutual bandwidth however.
-      */
-      request.push(epee_key_len!("max_block_count"));
-      request.extend("max_block_count".as_bytes());
-      #[expect(clippy::as_conversions)]
-      request.push(epee::Type::Uint64 as u8);
-      request.extend(remaining_blocks.to_le_bytes());
-
-      debug_assert_eq!(expected_request_len, request.len());
-
-      let epee = self.bin_call("get_blocks.bin", request.clone(), MAX_RESPONSE_SIZE).await?;
+      let epee = self.bin_call("get_blocks.bin", request, MAX_RESPONSE_SIZE).await?;
 
       let blocks_received = {
         let mut blocks_received = 0;
-        let Some(blocks) = epee::extract_blocks_from_blocks_bin(&epee)? else {
+        let Some(blocks) = epee::extract_blocks_from_blocks_bin(&epee)?.blocks else {
           return Ok(false);
         };
         for block in blocks {
@@ -286,5 +377,71 @@ impl<T: HttpTransport> ProvidesUnvalidatedScannableBlocks for MoneroDaemon<T> {
       )
       .await
     }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  fn h(b: u8) -> [u8; 32] {
+    [b; 32]
+  }
+
+  fn hashes_of(bs: &[u8]) -> Vec<[u8; 32]> {
+    bs.iter().copied().map(h).collect()
+  }
+
+  #[test]
+  fn from_height() {
+    assert_eq!(BlocksRequest::from_height(42), BlocksRequest::Height(42));
+  }
+
+  #[test]
+  fn from_hashes_empty() {
+    assert_eq!(BlocksRequest::from_hashes(h(0x00), &[]), BlocksRequest::Hashes(vec![h(0x00)]));
+  }
+
+  #[test]
+  fn from_hashes_single() {
+    // One recent hash (the tip): tip first, then genesis.
+    assert_eq!(
+      BlocksRequest::from_hashes(h(0xff), &[h(0x01)]),
+      BlocksRequest::Hashes(vec![h(0x01), h(0xff)])
+    );
+  }
+
+  #[test]
+  fn from_hashes_few() {
+    // oldest-first: [0x01, 0x02, 0x03], tip = 0x03
+    assert_eq!(
+      BlocksRequest::from_hashes(h(0xff), &[h(0x01), h(0x02), h(0x03)]),
+      BlocksRequest::Hashes(vec![h(0x03), h(0x02), h(0x01), h(0xff)])
+    );
+  }
+
+  #[test]
+  fn from_hashes_uses_doubling_offsets() {
+    // 20 blocks, oldest-first; tip = 0x14. The first ten are sequential, then the stride doubles
+    // (offset 11 = 0x0a, offset 13 = 0x08, offset 17 = 0x04), ending with genesis.
+    assert_eq!(
+      BlocksRequest::from_hashes(h(0xff), &hashes_of(&(1 ..= 20).collect::<Vec<_>>())),
+      BlocksRequest::Hashes(vec![
+        h(0x14),
+        h(0x13),
+        h(0x12),
+        h(0x11),
+        h(0x10),
+        h(0x0f),
+        h(0x0e),
+        h(0x0d),
+        h(0x0c),
+        h(0x0b),
+        h(0x0a),
+        h(0x08),
+        h(0x04),
+        h(0xff)
+      ]),
+    );
   }
 }
