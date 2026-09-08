@@ -59,7 +59,7 @@ async fn run_interactive(wallet: Arc<Wallet>) {
                 let transaction = wallet
                     .create_transaction(address, atomic_units, daemon.clone())
                     .await;
-                let signed_transaction = wallet.sign_tranasction(transaction);
+                let signed_transaction = wallet.sign_tranasction(transaction).await;
                 wallet
                     .send_transaction(signed_transaction, daemon.clone())
                     .await;

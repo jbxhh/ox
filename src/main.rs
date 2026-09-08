@@ -158,14 +158,7 @@ pub fn main() {
                 name,
             },
         } => {
-            let seed = match seed {
-                Some(seed) => monfluo_oxide::seed::try_decode_seed(&seed, None, None).unwrap(),
-                None => {
-                    let seed = monfluo_oxide::generate_seed(monfluo_oxide::monero_wallet_util::seed::original::Language::English);
-                    monfluo_oxide::monero_wallet_util::seed::Seed::Original(seed)
-                }
-            };
-
+            let seed = seed.map(|seed| monfluo_oxide::seed::try_decode_seed(&seed, None, None).unwrap());
             RUNTIME.block_on(command::wallet::create::run(monfluo_directory, name, String::new(), seed, height.unwrap_or(0)));
         }
         Commands::Wallet {
