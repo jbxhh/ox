@@ -149,17 +149,18 @@ class ActivityNetwork : ActivityMonero() {
                         walletStatusDescriptionTextView.visibility = View.INVISIBLE
                     }
                     is Syncing -> {
+                        val targetHeight = max(state.lastNodeInfo!!.nodeInfo.height, lastSyncState.currentHeight)
                         walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_wallet_is_synchronizing)
                         walletStatusProgressBar.isIndeterminate = false
-                        walletStatusProgressBar.max = lastSyncState.targetHeight
+                        walletStatusProgressBar.max = targetHeight
                         walletStatusProgressBar.min = state.initialSyncHeight
                         walletStatusProgressBar.progress = lastSyncState.currentHeight
                         walletStatusDescriptionTextView.text =
                             getString(
                                 R.string.activity_network_wallet_status_description_wallet_is_synchronizing,
                                 NumberFormat.getInstance().format(lastSyncState.currentHeight),
-                                NumberFormat.getInstance().format(lastSyncState.targetHeight),
-                                NumberFormat.getInstance().format(lastSyncState.targetHeight - lastSyncState.currentHeight),
+                                NumberFormat.getInstance().format(targetHeight),
+                                NumberFormat.getInstance().format(targetHeight - lastSyncState.currentHeight),
                             )
                         walletStatusDescriptionTextView.visibility = View.VISIBLE
                     }

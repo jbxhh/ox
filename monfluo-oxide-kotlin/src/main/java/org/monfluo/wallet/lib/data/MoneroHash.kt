@@ -1,6 +1,6 @@
 package org.monfluo.wallet.lib.data
 
-data class TransactionHash(
+data class MoneroHash(
     val hash: ByteArray,
 ) {
     override fun toString(): String = hash.toHexString()
@@ -9,7 +9,7 @@ data class TransactionHash(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as TransactionHash
+        other as MoneroHash
 
         if (!hash.contentEquals(other.hash)) return false
 

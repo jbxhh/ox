@@ -183,11 +183,11 @@ class ActivityHome : ActivityMonero() {
                 if (multiAccountMode) {
                     accountNameTextView.visibility = View.VISIBLE
 
-                    walletService?.getWalletOrLog()?.let { wallet ->
-                        val accountName = wallet.getAccountLabel(wallet.getAccountIndex())
-                        accountNameTextView.text = accountName
-                        accountNameTextView.contentDescription = getString(R.string.activity_home_account_name_content_description, accountName)
-                    }
+//                    walletService?.getWalletOrLog()?.let { wallet ->
+//                        val accountName = wallet.getAccountLabel(wallet.getAccountIndex())
+//                        accountNameTextView.text = accountName
+//                        accountNameTextView.contentDescription = getString(R.string.activity_home_account_name_content_description, accountName)
+//                    }
                 } else {
                     accountNameTextView.visibility = View.INVISIBLE
                 }

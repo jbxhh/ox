@@ -1,12 +1,10 @@
-use std::panic::catch_unwind;
-
 use jni::{
     EnvUnowned,
     errors::ThrowRuntimeExAndDefault,
     jni_mangle,
     objects::{JObject, JString},
     refs::Global,
-    sys::{jint, jlong},
+    sys::jint,
     vm::JavaVM,
 };
 use monfluo_oxide::{
@@ -14,7 +12,7 @@ use monfluo_oxide::{
     transport::MonfluoTransport,
     wallet::{Wallet, WalletSyncObserver},
 };
-use tracing::{debug, error, info};
+use tracing::{debug, error};
 
 struct MonfluoJavaObserver {
     vm: JavaVM,
@@ -60,14 +58,14 @@ pub fn get_name<'local>(mut env: EnvUnowned<'local>, wallet: JObject<'local>) ->
 }
 
 #[jni_mangle("org.monfluo.wallet.lib.wallet.Wallet", "getCurrentHeight")]
-pub fn get_height<'local>(mut env: EnvUnowned<'local>, wallet: JObject<'local>) -> jint {
+pub fn get_current_height<'local>(mut env: EnvUnowned<'local>, wallet: JObject<'local>) -> jint {
     env.with_env(|env| {
         crate::RUNTIME.block_on(async {
             let handle = crate::java::get_handle(env, &wallet);
             let wallet = crate::bridge::from_java_handle::<Wallet>(handle);
-            let height = wallet.state().height();
+            let height = wallet.state().current_height();
 
-            Ok::<jint, jni::errors::Error>(height.current.unwrap_or(0) as jint)
+            Ok::<jint, jni::errors::Error>(height as jint)
         })
     })
     .resolve::<ThrowRuntimeExAndDefault>()

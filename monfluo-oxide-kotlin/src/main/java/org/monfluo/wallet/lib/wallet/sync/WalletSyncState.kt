@@ -18,7 +18,6 @@ data class Preparing(
 data class Starting(
     override val timestamp: Long,
     override val currentHeight: Int,
-    val targetHeight: Int,
     val nodeInfo: NodeInfo,
 ) : WalletSyncState {
     override val isTerminal: Boolean = false
@@ -27,7 +26,6 @@ data class Starting(
 data class Syncing(
     override val timestamp: Long,
     override val currentHeight: Int,
-    val targetHeight: Int,
 ) : WalletSyncState {
     override val isTerminal: Boolean = false
 }
