@@ -367,6 +367,11 @@ impl Scanner {
   pub fn scan(&mut self, block: ScannableBlock) -> Result<Timelocked, ScanError> {
     self.0.scan(block)
   }
+
+  /// Scan a single transaction.
+  pub fn scan_transaction(&self, output_index_for_first_ringct_output: u64, tx_hash: [u8; 32], tx: &Transaction<Pruned>) -> Result<Timelocked, ScanError> {
+    self.0.scan_transaction(output_index_for_first_ringct_output, tx_hash, tx)
+  }
 }
 
 /// A transaction scanner to find outputs received which are guaranteed to be spendable.
