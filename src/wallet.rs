@@ -13,9 +13,11 @@ use tokio::runtime::Runtime;
 use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 
+use crate::MoneroHash;
 use crate::transport::MonfluoTransport;
 use crate::wallet::secrets::WalletSecrets;
 use crate::wallet::state::{WalletOutputWrapper, WalletState};
+use crate::wallet::view::transaction::TransactionBlockInfoView;
 use crate::wallet::view::transaction::{TransactionViewInput, TransactionViewSpend};
 use arc_swap::ArcSwap;
 use chrono::NaiveDateTime;
@@ -88,12 +90,12 @@ pub enum WalletError {
 }
 
 impl Wallet {
-    pub async fn create<P: AsRef<Path>>(monfluo_directory: P, wallet_name: &str, password: &str, seed: Seed, birthday: Option<u64>, height: u32) -> Result<(), WalletError> {
+    pub async fn create<P: AsRef<Path>>(monfluo_directory: P, network: Network, wallet_name: &str, password: &str, seed: Seed, restore_height: u32) -> Result<(), WalletError> {
         let key = seed.key();
         let spend_key = crate::util::bytes_to_scalar(&key).unwrap();
         let view_key = crate::util::bytes_to_scalar(&crate::crypto::spend_key_to_view_key(&key)).unwrap();
-        let secrets = WalletSecrets::new(spend_key, view_key, 0, birthday.unwrap_or(0));
-        let state = WalletState::new(height);
+        let secrets = WalletSecrets::new(spend_key, view_key, network, restore_height);
+        let state = WalletState::new(restore_height);
         let wallet_dir_path = Self::get_wallet_directory(monfluo_directory, wallet_name)?;
         tokio::fs::create_dir_all(&wallet_dir_path).await?;
         let secrets_file_path = wallet_dir_path.join(WALLET_SECRETS_FILE_NAME);
@@ -108,7 +110,11 @@ impl Wallet {
         let secrets_file_path = wallet_dir_path.join(WALLET_SECRETS_FILE_NAME);
         let state_file_path = wallet_dir_path.join(WALLET_DATA_FILE_NAME);
         let secrets = WalletSecrets::load(&secrets_file_path, password).await?;
-        let state = ArcSwap::new(Arc::new(WalletState::load(&state_file_path, password).await.unwrap()));
+        let state = ArcSwap::new(Arc::new(
+            WalletState::load(&state_file_path, password)
+                .await
+                .expect("Failed to load wallet state"),
+        ));
 
         Ok(Self {
             path: wallet_dir_path,
@@ -132,8 +138,8 @@ impl Wallet {
         };
 
         let mut wallets = Vec::new();
-        while let next_entry = directories.next_entry().await {
-            match next_entry {
+        loop {
+            match directories.next_entry().await {
                 Ok(Some(wallet_directory)) => {
                     if let Some(wallet) = wallet_directory.file_name().to_str() {
                         wallets.push(wallet.to_owned());
@@ -205,11 +211,11 @@ impl Wallet {
         let rct_type: RctType = RctType::ClsagBulletproofPlus;
         let outgoing_view_key: Zeroizing<[u8; 32]> = {
             let mut array: [u8; 32] = [0; 32];
-            crate::get_rng_mut().fill_bytes(&mut array);
+            crate::get_rng_mut().await.fill_bytes(&mut array);
             Zeroizing::new(array)
         };
         let output = state.outputs.last().unwrap();
-        let input: OutputWithDecoys = OutputWithDecoys::new(&mut *crate::get_rng_mut(), &*daemon, 16, state.height.current.unwrap() as usize, output.inner.clone())
+        let input: OutputWithDecoys = OutputWithDecoys::new(&mut *crate::get_rng_mut().await, &*daemon, 16, state.current_height() as usize, output.inner.clone())
             .await
             .unwrap();
         let inputs: Vec<OutputWithDecoys> = vec![input];
@@ -223,9 +229,9 @@ impl Wallet {
         SignableTransaction::new(rct_type, outgoing_view_key, inputs, payments, change, data, fee_rate).unwrap()
     }
 
-    pub fn sign_tranasction(&self, transaction: SignableTransaction) -> Transaction {
+    pub async fn sign_tranasction(&self, transaction: SignableTransaction) -> Transaction {
         transaction
-            .sign(&mut *crate::get_rng_mut(), self.secrets.spend_key())
+            .sign(&mut *crate::get_rng_mut().await, self.secrets.spend_key())
             .unwrap()
     }
 
@@ -273,17 +279,14 @@ impl Wallet {
         let mut unlocked = 0;
         let mut pending = 0;
         for output in state.outputs.iter() {
-            if state
+            if !state
                 .cache
                 .key_image_to_spend_transaction_input
-                .get(&output.cached_key_image)
-                .is_none()
+                .contains_key(&output.cached_key_image)
             {
                 let amount = output.inner.commitment().amount;
                 total += amount;
-                if let Some(height) = state.height().current
-                    && (output.inner.additional_timelock() == Timelock::None || matches!(output.inner.additional_timelock(), Timelock::Block(block) if block >= height as usize))
-                {
+                if output.inner.additional_timelock() == Timelock::None || matches!(output.inner.additional_timelock(), Timelock::Block(block) if block >= state.current_height() as usize) {
                     unlocked += amount;
                 } else {
                     pending += amount;
@@ -357,13 +360,21 @@ impl Wallet {
 
     pub fn transaction_views(&self) -> Vec<view::transaction::TransactionView> {
         let state = self.state.load();
-        let current_height = state.height.current;
+        let current_height = state.current_height();
 
-        let mut raw_transactions = state.transactions.clone();
-        raw_transactions.sort_by_key(|raw_transaction| (raw_transaction.block_info.block.height, raw_transaction.hash));
+        let mut raw_transactions = state.transactions.values().collect::<Vec<_>>();
+        raw_transactions.sort_by_key(|raw_transaction| {
+            (
+                raw_transaction
+                    .block_info
+                    .as_ref()
+                    .map(|block_info| block_info.timestamp),
+                raw_transaction.hash,
+            )
+        });
 
-        let mut wallet_inputs = HashMap::<[u8; 32], Vec<&WalletOutputWrapper>>::new();
-        let mut wallet_outputs = HashMap::<[u8; 32], Vec<&WalletOutputWrapper>>::new();
+        let mut wallet_inputs = HashMap::<MoneroHash, Vec<&WalletOutputWrapper>>::new();
+        let mut wallet_outputs = HashMap::<MoneroHash, Vec<&WalletOutputWrapper>>::new();
 
         for output in state.outputs.iter() {
             wallet_inputs
@@ -407,9 +418,21 @@ impl Wallet {
 
                 view::transaction::TransactionView {
                     transaction_hash: raw_transaction.hash,
-                    timestamp: raw_transaction.block_info.timestamp,
+                    timestamp: raw_transaction
+                        .block_info
+                        .as_ref()
+                        .map_or(raw_transaction.first_seen_timestamp, |block_info| block_info.timestamp),
                     fee: raw_transaction.inner.fee(),
-                    confirmations: current_height.map_or(0, |current_height| current_height.saturating_sub(raw_transaction.block_info.block.height)),
+                    confirmations: raw_transaction
+                        .block_info
+                        .as_ref()
+                        .map_or(0, |block_info| current_height.saturating_sub(block_info.block.height - 1)),
+                    block_info: raw_transaction
+                        .block_info
+                        .map(|block_info| TransactionBlockInfoView {
+                            block_height: block_info.block.height,
+                            block_hash: block_info.block.hash,
+                        }),
                     inputs,
                     spends,
                 }
@@ -488,8 +511,8 @@ mod tests {
     async fn create_and_open_wallet() {
         const WALLET_NAME: &str = "Monero Wallet";
         let monfluo_directory = tempfile::tempdir().expect("Failed to create tempdir");
-        let seed = monero_wallet_util::seed::Seed::Original(crate::generate_seed(monero_wallet_util::seed::original::Language::English));
-        Wallet::create(monfluo_directory.path(), WALLET_NAME, "", seed.clone(), Some(0), 0)
+        let seed = monero_wallet_util::seed::Seed::Original(crate::generate_seed(monero_wallet_util::seed::original::Language::English).await);
+        Wallet::create(monfluo_directory.path(), Network::Stagenet, WALLET_NAME, "", seed.clone(), 0)
             .await
             .unwrap();
         let wallet = Wallet::open(monfluo_directory.path(), WALLET_NAME, "")

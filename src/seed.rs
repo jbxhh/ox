@@ -37,7 +37,7 @@ pub fn try_decode_original_seed(words: Zeroizing<String>) -> Option<monero_walle
             return Some(seed);
         }
     }
-    return None;
+    None
 }
 
 pub fn try_decode_original_seed_with_language(words: Zeroizing<String>, language: monero_wallet_util::seed::original::Language) -> Option<monero_wallet_util::seed::original::Seed> {
@@ -50,7 +50,7 @@ pub fn try_decode_polyseed(words: Zeroizing<String>) -> Option<monero_wallet_uti
             return Some(seed);
         }
     }
-    return None;
+    None
 }
 
 pub fn try_decode_polyseed_with_language(words: Zeroizing<String>, language: monero_wallet_util::seed::polyseed::Language) -> Option<monero_wallet_util::seed::polyseed::Polyseed> {

@@ -1,8 +1,10 @@
 use std::path::Path;
 
-use monero_wallet::ed25519::Scalar;
+use monero_wallet::{address::Network, ed25519::Scalar};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
+
+use crate::util::HexFormatted;
 
 #[derive(Debug, thiserror::Error)]
 pub enum SecretsError {
@@ -18,18 +20,19 @@ pub struct WalletSecrets {
     #[serde(serialize_with = "serialize_scalar")]
     #[serde(deserialize_with = "deserialize_scalar")]
     view_key: Zeroizing<Scalar>,
-    // 0 mainnet 1 stagenet 2 testnet
-    network: u8,
-    birthday: u64,
+    #[serde(serialize_with = "serialize_network")]
+    #[serde(deserialize_with = "deserialize_network")]
+    network: Network,
+    restore_height: u32,
 }
 
 impl WalletSecrets {
-    pub fn new(spend_key: Zeroizing<Scalar>, view_key: Zeroizing<Scalar>, network: u8, birthday: u64) -> Self {
+    pub fn new(spend_key: Zeroizing<Scalar>, view_key: Zeroizing<Scalar>, network: Network, restore_height: u32) -> Self {
         Self {
             spend_key,
             view_key,
             network,
-            birthday,
+            restore_height,
         }
     }
 
@@ -53,6 +56,14 @@ impl WalletSecrets {
     pub fn view_key(&self) -> &Zeroizing<Scalar> {
         &self.view_key
     }
+
+    pub fn network(&self) -> Network {
+        self.network
+    }
+
+    pub fn restore_height(&self) -> u32 {
+        self.restore_height
+    }
 }
 
 fn serialize_scalar<S>(value: &Zeroizing<Scalar>, serializer: S) -> Result<S::Ok, S::Error>
@@ -60,7 +71,7 @@ where
     S: Serializer,
 {
     let bytes: Zeroizing<[u8; 32]> = Zeroizing::new(From::from(**value));
-    let hex: Zeroizing<String> = crate::util::bytes_to_hex(&*bytes);
+    let hex: Zeroizing<String> = Zeroizing::new(HexFormatted::borrowed(&*bytes).to_string());
     serializer.serialize_str(&hex)
 }
 
@@ -77,4 +88,24 @@ where
             .unwrap(),
     ));
     Ok(scalar)
+}
+
+fn serialize_network<S>(value: &Network, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    serializer.serialize_u8(*value as u8)
+}
+
+fn deserialize_network<'de, D>(deserializer: D) -> Result<Network, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let tag = u8::deserialize(deserializer)?;
+    match tag {
+        0 => Ok(Network::Mainnet),
+        1 => Ok(Network::Stagenet),
+        2 => Ok(Network::Testnet),
+        _ => unreachable!("Bad network tag"),
+    }
 }

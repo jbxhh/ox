@@ -1,22 +1,72 @@
-use std::ops::Div;
+use std::{
+    borrow::Cow,
+    fmt::{Debug, Display, Write},
+    ops::{Deref, Div},
+};
 
 use bigdecimal::{BigDecimal, FromPrimitive};
-use monero_wallet::ed25519::Scalar;
+use monero_wallet::{address::SubaddressIndex, ed25519::Scalar};
 use zeroize::Zeroizing;
+
+pub struct HexFormatted<'slice>(pub Cow<'slice, [u8]>);
+
+impl<'slice> Display for HexFormatted<'slice> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        const MASK: u8 = 0x0f;
+
+        let mut print_4_bits = |bits: u8| match bits {
+            0..=9 => f.write_char((b'0' + bits) as char),
+            10..=15 => f.write_char((b'a' + bits - 10) as char),
+            _ => unreachable!(),
+        };
+
+        for &byte in self.0.deref() {
+            let high = (byte >> 4) & MASK;
+            let low = byte & MASK;
+            print_4_bits(high)?;
+            print_4_bits(low)?;
+        }
+
+        Ok(())
+    }
+}
+
+impl<'slice> Debug for HexFormatted<'slice> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("HexFormatted")
+            .field(&self.to_string())
+            .finish()
+    }
+}
+
+impl<'slice> HexFormatted<'slice> {
+    pub fn borrowed(bytes: &'slice [u8]) -> Self {
+        Self(Cow::Borrowed(bytes))
+    }
+}
+
+pub struct SubaddressIndexDisplay(pub Option<SubaddressIndex>);
+
+impl Display for SubaddressIndexDisplay {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let (account, address) = match self.0 {
+            Some(subaddress_index) => (subaddress_index.account(), subaddress_index.address()),
+            None => (0, 0),
+        };
+
+        write!(f, "{}", account)?;
+        f.write_char('/')?;
+        write!(f, "{}", address)?;
+
+        Ok(())
+    }
+}
 
 pub fn bytes_to_scalar(bytes: &[u8; 32]) -> Option<Zeroizing<Scalar>> {
     curve25519_dalek::Scalar::from_canonical_bytes(*bytes)
         .into_option()
         .map(Scalar::from)
         .map(Zeroizing::new)
-}
-
-pub fn bytes_to_hex(key: &[u8]) -> Zeroizing<String> {
-    Zeroizing::new(
-        key.iter()
-            .map(|b| format!("{:02x?}", b))
-            .collect::<String>(),
-    )
 }
 
 pub fn hex_to_bytes(hex: &str) -> Option<Zeroizing<Vec<u8>>> {
@@ -49,7 +99,7 @@ mod tests {
     #[test]
     fn test_hex_roundtrip_32_bytes() {
         let original: Vec<u8> = (0..32).collect();
-        let hex_string = bytes_to_hex(&original);
+        let hex_string = HexFormatted::borrowed(&original).to_string();
         let recovered = hex_to_bytes(&hex_string).unwrap();
         assert_eq!(original.as_slice(), recovered.as_slice());
     }
@@ -57,7 +107,7 @@ mod tests {
     #[test]
     fn test_hex_roundtrip_random_32_bytes() {
         let original: Vec<u8> = vec![0x1a, 0x2b, 0x3c, 0x4d, 0x5e, 0x6f, 0x70, 0x81, 0x92, 0xa3, 0xb4, 0xc5, 0xd6, 0xe7, 0xf8, 0x09, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00];
-        let hex_string = bytes_to_hex(&original);
+        let hex_string = HexFormatted::borrowed(&original).to_string();
         let recovered = hex_to_bytes(&hex_string).unwrap();
         assert_eq!(original.as_slice(), recovered.as_slice());
     }
