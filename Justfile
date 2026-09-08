@@ -21,7 +21,7 @@ format: oxide-jni-format oxide-kotlin-format app-format
 clean: oxide-jni-clean oxide-kotlin-clean app-clean
 
 [group('common')]
-test: oxide-jni-test oxide-kotlin-test app-test
+test: oxide-jni-test oxide-jni-build oxide-kotlin-test app-test
 
 [group('common')]
 app: oxide-jni-build-android-arm64-release app-copy-native-libs-arm64-release app-build app-install app-kill app-run
@@ -183,6 +183,10 @@ app-run:
 [group('app')]
 app-logcat:
     adb shell run-as org.monfluo.wallet.android.debug logcat
+
+[group('app')]
+app-logcat-debug:
+    adb shell run-as org.monfluo.wallet.android.debug logcat *:D
 
 [group('app')]
 app-logcat-release:

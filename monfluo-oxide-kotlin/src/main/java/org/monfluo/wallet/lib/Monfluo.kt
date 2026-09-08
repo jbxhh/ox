@@ -1,5 +1,6 @@
 package org.monfluo.wallet.lib
 
+import org.monfluo.wallet.lib.data.Network
 import org.monfluo.wallet.lib.seed.Seed
 import org.monfluo.wallet.lib.seed.SeedLanguage
 import org.monfluo.wallet.lib.wallet.Daemon
@@ -23,6 +24,7 @@ object Monfluo {
 
     external fun createWallet(
         monfluoDirectory: String,
+        network: Network,
         name: String,
         password: String,
         seedLanguage: SeedLanguage,
@@ -31,6 +33,7 @@ object Monfluo {
 
     external fun <L : SeedLanguage> restoreWallet(
         monfluoDirectory: String,
+        network: Network,
         name: String,
         password: String,
         seed: Seed<L>,
@@ -40,6 +43,7 @@ object Monfluo {
 
     external fun restoreWalletFromKeys(
         monfluoDirectory: String,
+        network: Network,
         name: String,
         password: String,
         privateSpendKey: String,
@@ -58,6 +62,6 @@ object Monfluo {
         nodeAddress: String,
         nodeUsername: String?,
         nodePassword: String?,
-        nodeproxy: String?,
+        nodeProxy: String?,
     ): Daemon
 }

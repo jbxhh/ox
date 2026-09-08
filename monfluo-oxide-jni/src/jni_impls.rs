@@ -2,6 +2,7 @@ use jni::{
     sys::{JNI_VERSION_1_6, jint},
     vm::JavaVM,
 };
+use tracing::error;
 use tracing_subscriber::prelude::*;
 
 pub mod daemon;
@@ -15,9 +16,10 @@ pub extern "system" fn JNI_OnLoad(
     _reserved: *mut std::ffi::c_void,
 ) -> jint {
     init_tracing();
+    handle_panics();
     let jvm = unsafe { JavaVM::from_raw(sys_jvm) };
-    jvm.with_top_local_frame(|mut env| {
-        crate::java::init_cache(&mut env);
+    jvm.with_top_local_frame(|env| {
+        crate::java::init_cache(env);
         Ok::<(), jni::errors::Error>(())
     })
     .expect("Failed to init java cache");
@@ -38,4 +40,16 @@ fn init_tracing() {
     {
         registry.init();
     }
+}
+
+fn handle_panics() {
+    let default_panic = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        default_panic(info);
+        error!(
+            "Panic at {:?}, payload as str: {:?}",
+            info.location(),
+            info.payload_as_str()
+        );
+    }));
 }

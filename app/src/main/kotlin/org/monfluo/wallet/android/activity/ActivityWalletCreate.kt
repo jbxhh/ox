@@ -36,6 +36,7 @@ import org.monfluo.wallet.android.util.SimpleTextWatcher
 import org.monfluo.wallet.android.util.TextHelper
 import org.monfluo.wallet.android.util.component.ActivityBase
 import org.monfluo.wallet.lib.Monfluo
+import org.monfluo.wallet.lib.data.Network
 import org.monfluo.wallet.lib.seed.MoneroSeed
 import org.monfluo.wallet.lib.seed.MoneroSeedLanguage
 import org.monfluo.wallet.lib.seed.Polyseed
@@ -434,7 +435,7 @@ internal class CreateWalletViewModel : ViewModel() {
                 }
                 return
             }
-            Monfluo.restoreWallet(Helper.getWalletRoot(activity).absolutePath, walletName, password, seed, null, restoreHeightText.toIntOrNull())
+            Monfluo.restoreWallet(Helper.getWalletRoot(activity).absolutePath, Network.MAINNET, walletName, password, seed, null, restoreHeightText.toIntOrNull())
 
             activity.runOnUiThread {
                 Toast
@@ -445,7 +446,7 @@ internal class CreateWalletViewModel : ViewModel() {
                     ).show()
             }
         } else {
-            Monfluo.createWallet(Helper.getWalletRoot(activity).absolutePath, walletName, password, MoneroSeedLanguage.English, "")
+            Monfluo.createWallet(Helper.getWalletRoot(activity).absolutePath, Network.MAINNET, walletName, password, MoneroSeedLanguage.English, "")
 
             activity.runOnUiThread {
                 Toast

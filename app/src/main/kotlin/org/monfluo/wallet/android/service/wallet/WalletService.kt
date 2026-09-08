@@ -66,6 +66,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.math.max
 import org.monfluo.wallet.lib.wallet.Wallet as NewWallet
 
 class WalletService :
@@ -896,7 +897,15 @@ class WalletService :
                 null -> application.getString(R.string.wallet_not_connected)
                 is Preparing -> application.getString(R.string.starting_wallet_synchronization)
                 is Starting -> application.getString(R.string.starting_wallet_synchronization)
-                is Syncing -> application.getString(R.string.wallet_synchronization_blocks_remaining, nf.format(state.currentHeight), nf.format(state.targetHeight), nf.format(state.targetHeight - state.currentHeight))
+                is Syncing -> {
+                    val targetHeight =
+                        max(
+                            walletWithData.data.lastNodeInfo!!
+                                .nodeInfo.height,
+                            state.currentHeight,
+                        )
+                    application.getString(R.string.wallet_synchronization_blocks_remaining, nf.format(state.currentHeight), nf.format(targetHeight), nf.format(targetHeight - state.currentHeight))
+                }
                 is Finished -> application.getString(R.string.synchronized_at_label, nf.format(state.height))
                 is Cancelled -> "TODO: cancelled"
                 is Failed -> "TODO: failed"

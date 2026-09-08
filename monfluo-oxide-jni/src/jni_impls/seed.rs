@@ -73,9 +73,9 @@ pub fn get_words_monero<'local>(
 ) -> JObject<'local> {
     let cache = crate::java::get_cache();
 
-    env.with_env(|mut env| {
-        let list = crate::java::arraylist_new(&mut env, cache);
-        let enum_name = crate::java::enum_name(&mut env, cache, &object);
+    env.with_env(|env| {
+        let list = crate::java::arraylist_new(env, cache);
+        let enum_name = crate::java::enum_name(env, cache, &object);
         let enum_name = crate::java::JavaStringHelper::from_jstring(env, &enum_name);
         let words = monfluo_oxide::monero_wallet_util::seed::original::Language::from_str(
             &enum_name.to_cow_str(),
@@ -87,7 +87,7 @@ pub fn get_words_monero<'local>(
             let word = env
                 .new_string(word)
                 .expect("Failed to create java string for a monero language word");
-            crate::java::list_add(&mut env, cache, &list, &JObject::from(word));
+            crate::java::list_add(env, cache, &list, &JObject::from(word));
         }
 
         Ok::<JObject<'local>, jni::errors::Error>(list)
@@ -102,9 +102,9 @@ pub fn get_words_polyseed<'local>(
 ) -> JObject<'local> {
     let cache = crate::java::get_cache();
 
-    env.with_env(|mut env| {
-        let list = crate::java::arraylist_new(&mut env, cache);
-        let enum_name = crate::java::enum_name(&mut env, cache, &object);
+    env.with_env(|env| {
+        let list = crate::java::arraylist_new(env, cache);
+        let enum_name = crate::java::enum_name(env, cache, &object);
         let enum_name = crate::java::JavaStringHelper::from_jstring(env, &enum_name);
         let words = monfluo_oxide::monero_wallet_util::seed::polyseed::Language::from_str(
             &enum_name.to_cow_str(),
@@ -116,7 +116,7 @@ pub fn get_words_polyseed<'local>(
             let word = env
                 .new_string(word)
                 .expect("Failed to create java string for a polyseed language word");
-            crate::java::list_add(&mut env, cache, &list, &JObject::from(word));
+            crate::java::list_add(env, cache, &list, &JObject::from(word));
         }
 
         Ok::<JObject<'local>, jni::errors::Error>(list)

@@ -16,82 +16,86 @@ use jni::{
 mod constants {
     use const_format::concatcp as concat;
 
-    pub const CLASSJ__java_lang_Object: &'static str = "java/lang/Object";
-    pub const CLASSJ__java_lang_String: &'static str = "java/lang/String";
-    pub const CLASSJ__java_lang_Number: &'static str = "java/lang/Number";
-    pub const CLASS__java_lang_Number__METHOD__intValue0: &'static str = "intValue";
-    pub const CLASS__java_lang_Number__METHOD__intValue0__SIGNATURE: &'static str = "()I";
-    pub const CLASS__java_lang_Enum: &'static str = "java/lang/Enum";
-    pub const CLASS__java_lang_Enum__METHOD__name0: &'static str = "name";
-    pub const CLASS__java_lang_Enum__METHOD__name0__SIGNATURE: &'static str = concat!("()L", CLASSJ__java_lang_String, ";");
+    pub const CLASSJ__java_lang_Object: &str = "java/lang/Object";
+    pub const CLASSJ__java_lang_String: &str = "java/lang/String";
+    pub const CLASSJ__java_lang_Number: &str = "java/lang/Number";
+    pub const CLASS__java_lang_Number__METHOD__intValue0: & str = "intValue";
+    pub const CLASS__java_lang_Number__METHOD__intValue0__SIGNATURE: &str = "()I";
+    pub const CLASS__java_lang_Enum: &str = "java/lang/Enum";
+    pub const CLASS__java_lang_Enum__METHOD__name0: &str = "name";
+    pub const CLASS__java_lang_Enum__METHOD__name0__SIGNATURE: &str = concat!("()L", CLASSJ__java_lang_String, ";");
     
-    pub const CLASSJ__java_util_List: &'static str = "java/util/List";
-    pub const CLASS__java_util_List__METHOD__add1: &'static str = "add";
-    pub const CLASS__java_util_List__METHOD__add1__SIGNATURE: &'static str = concat!("(L", CLASSJ__java_lang_Object, ";)Z");
-    pub const CLASS__java_util_ArrayList: &'static str = "java.util.ArrayList";
-    pub const CLASS__java_util_ArrayList__METHOD__init0__SIGNATURE: &'static str = "()V";
+    pub const CLASSJ__java_util_List: &str = "java/util/List";
+    pub const CLASS__java_util_List__METHOD__add1: &str = "add";
+    pub const CLASS__java_util_List__METHOD__add1__SIGNATURE: &str = concat!("(L", CLASSJ__java_lang_Object, ";)Z");
+    pub const CLASS__java_util_ArrayList: &str = "java.util.ArrayList";
+    pub const CLASS__java_util_ArrayList__METHOD__init0__SIGNATURE: &str = "()V";
     
-    pub const CLASSJ__org_monfluo_wallet_lib_seed_SeedLanguge: &'static str = "org/monfluo/wallet/lib/seed/SeedLanguage";
-    pub const CLASS__org_monfluo_wallet_lib_seed_Seed: &'static str = "org/monfluo/wallet/lib/seed/Seed";
-    pub const CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getMnemonic0: &'static str = "getMnemonic";
-    pub const CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getMnemonic0__SIGNATURE: &'static str = concat!("()L", CLASSJ__java_lang_String, ";");
-    pub const CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getLanguage0: &'static str = "getLanguage";
-    pub const CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getLanguage0__SIGNATURE: &'static str = concat!("()L", CLASSJ__org_monfluo_wallet_lib_seed_SeedLanguge, ";");
-    pub const CLASS__org_monfluo_wallet_lib_seed_MoneroSeedLanguage: &'static str = "org.monfluo.wallet.lib.seed.MoneroSeedLanguage";
-    pub const CLASSJ__org_monfluo_wallet_lib_seed_MoneroSeedLanguage: &'static str = "org/monfluo/wallet/lib/seed/MoneroSeedLanguage";
-    pub const CLASS__org_monfluo_wallet_lib_seed_MoneroSeed: &'static str = "org.monfluo.wallet.lib.seed.MoneroSeed";
-    pub const CLASS__org_monfluo_wallet_lib_seed_MoneroSeed__METHOD__init2__SIGNATURE: &'static str = concat!("(L", CLASSJ__java_lang_String, ";L", CLASSJ__org_monfluo_wallet_lib_seed_MoneroSeedLanguage, ";)V");
-    pub const CLASS__org_monfluo_wallet_lib_seed_PolyseedLanguage: &'static str = "org.monfluo.wallet.lib.seed.PolyseedLanguage";
-    pub const CLASSJ__org_monfluo_wallet_lib_seed_PolyseedLanguage: &'static str = "org/monfluo/wallet/lib/seed/PolyseedLanguage";
-    pub const CLASS__org_monfluo_wallet_lib_seed_Polyseed: &'static str = "org.monfluo.wallet.lib.seed.Polyseed";
-    pub const CLASS__org_monfluo_wallet_lib_seed_Polyseed__METHOD__init2__SIGNATURE: &'static str = concat!("(L", CLASSJ__java_lang_String, ";L", CLASSJ__org_monfluo_wallet_lib_seed_PolyseedLanguage, ";)V");
+    pub const CLASSJ__org_monfluo_wallet_lib_seed_SeedLanguge: &str = "org/monfluo/wallet/lib/seed/SeedLanguage";
+    pub const CLASS__org_monfluo_wallet_lib_seed_Seed: &str = "org/monfluo/wallet/lib/seed/Seed";
+    pub const CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getMnemonic0: &str = "getMnemonic";
+    pub const CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getMnemonic0__SIGNATURE: &str = concat!("()L", CLASSJ__java_lang_String, ";");
+    pub const CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getLanguage0: &str = "getLanguage";
+    pub const CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getLanguage0__SIGNATURE: &str = concat!("()L", CLASSJ__org_monfluo_wallet_lib_seed_SeedLanguge, ";");
+    pub const CLASS__org_monfluo_wallet_lib_seed_MoneroSeedLanguage: &str = "org.monfluo.wallet.lib.seed.MoneroSeedLanguage";
+    pub const CLASSJ__org_monfluo_wallet_lib_seed_MoneroSeedLanguage: &str = "org/monfluo/wallet/lib/seed/MoneroSeedLanguage";
+    pub const CLASS__org_monfluo_wallet_lib_seed_MoneroSeed: &str = "org.monfluo.wallet.lib.seed.MoneroSeed";
+    pub const CLASS__org_monfluo_wallet_lib_seed_MoneroSeed__METHOD__init2__SIGNATURE: &str = concat!("(L", CLASSJ__java_lang_String, ";L", CLASSJ__org_monfluo_wallet_lib_seed_MoneroSeedLanguage, ";)V");
+    pub const CLASS__org_monfluo_wallet_lib_seed_PolyseedLanguage: &str = "org.monfluo.wallet.lib.seed.PolyseedLanguage";
+    pub const CLASSJ__org_monfluo_wallet_lib_seed_PolyseedLanguage: &str = "org/monfluo/wallet/lib/seed/PolyseedLanguage";
+    pub const CLASS__org_monfluo_wallet_lib_seed_Polyseed: &str = "org.monfluo.wallet.lib.seed.Polyseed";
+    pub const CLASS__org_monfluo_wallet_lib_seed_Polyseed__METHOD__init2__SIGNATURE: &str = concat!("(L", CLASSJ__java_lang_String, ";L", CLASSJ__org_monfluo_wallet_lib_seed_PolyseedLanguage, ";)V");
     
-    pub const CLASS__org_monfluo_wallet_lib_wallet_Wallet: &'static str = "org.monfluo.wallet.lib.wallet.Wallet";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_Wallet__METHOD__init1__SIGNATURE: &'static str = "(J)V";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_Daemon: &'static str = "org.monfluo.wallet.lib.wallet.Daemon";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_Daemon__METHOD__init6__SIGNATURE: &'static str = concat!("(JL", CLASSJ__java_lang_String, ";L", CLASSJ__java_lang_String, ";L", CLASSJ__java_lang_String, ";L", CLASSJ__java_lang_String, ";L", CLASSJ__java_lang_String, ";)V");
+    pub const CLASS__org_monfluo_wallet_lib_wallet_Wallet: &str = "org.monfluo.wallet.lib.wallet.Wallet";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_Wallet__METHOD__init1__SIGNATURE: &str = "(J)V";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_Daemon: &str = "org.monfluo.wallet.lib.wallet.Daemon";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_Daemon__METHOD__init6__SIGNATURE: &str = concat!("(JL", CLASSJ__java_lang_String, ";L", CLASSJ__java_lang_String, ";L", CLASSJ__java_lang_String, ";L", CLASSJ__java_lang_String, ";L", CLASSJ__java_lang_String, ";)V");
 
-    pub const CLASSJ__org_monfluo_wallet_lib_wallet_sync_WalletSyncObserver: &'static str = "org/monfluo/wallet/lib/wallet/sync/WalletSyncObserver";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncObserver__METHOD__observe1: &'static str = "observe";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncObserver__METHOD__observe1__SIGNATURE: &'static str = concat!("(L", CLASSJ__org_monfluo_wallet_lib_wallet_sync_WalletSyncState, ";)V");
-    pub const CLASSJ__org_monfluo_wallet_lib_wallet_sync_WalletSyncError: &'static str = "org/monfluo/wallet/lib/wallet/sync/WalletSyncError";
-    pub const CLASSJ__org_monfluo_wallet_lib_wallet_sync_WalletSyncState: &'static str = "org/monfluo/wallet/lib/wallet/sync/WalletSyncState";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Preparing: &'static str = "org.monfluo.wallet.lib.wallet.sync.Preparing";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Preparing__METHOD__init2__SIGNATURE: &'static str = "(JI)V";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Starting: &'static str = "org.monfluo.wallet.lib.wallet.sync.Starting";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Starting__METHOD__init4__SIGNATURE: &'static str = concat!("(JIIL", CLASSJ__org_monfluo_wallet_lib_data_NodeInfo, ";)V");
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Syncing: &'static str = "org.monfluo.wallet.lib.wallet.sync.Syncing";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Syncing__METHOD__init3__SIGNATURE: &'static str = "(JII)V";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Finished: &'static str = "org.monfluo.wallet.lib.wallet.sync.Finished";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Finished__METHOD__init2__SIGNATURE: &'static str = "(JI)V";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Cancelled: &'static str = "org.monfluo.wallet.lib.wallet.sync.Cancelled";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Cancelled__METHOD__init1__SIGNATURE: &'static str = "(J)V";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Failed: &'static str = "org.monfluo.wallet.lib.wallet.sync.Failed";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Failed__METHOD__init2__SIGNATURE: &'static str = concat!("(JL", CLASSJ__org_monfluo_wallet_lib_wallet_sync_WalletSyncError, ";)V");
+    pub const CLASSJ__org_monfluo_wallet_lib_wallet_sync_WalletSyncObserver: &str = "org/monfluo/wallet/lib/wallet/sync/WalletSyncObserver";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncObserver__METHOD__observe1: &str = "observe";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncObserver__METHOD__observe1__SIGNATURE: &str = concat!("(L", CLASSJ__org_monfluo_wallet_lib_wallet_sync_WalletSyncState, ";)V");
+    pub const CLASSJ__org_monfluo_wallet_lib_wallet_sync_WalletSyncError: &str = "org/monfluo/wallet/lib/wallet/sync/WalletSyncError";
+    pub const CLASSJ__org_monfluo_wallet_lib_wallet_sync_WalletSyncState: &str = "org/monfluo/wallet/lib/wallet/sync/WalletSyncState";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Preparing: &str = "org.monfluo.wallet.lib.wallet.sync.Preparing";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Preparing__METHOD__init2__SIGNATURE: &str = "(JI)V";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Starting: &str = "org.monfluo.wallet.lib.wallet.sync.Starting";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Starting__METHOD__init3__SIGNATURE: &str = concat!("(JIL", CLASSJ__org_monfluo_wallet_lib_data_NodeInfo, ";)V");
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Syncing: &str = "org.monfluo.wallet.lib.wallet.sync.Syncing";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Syncing__METHOD__init2__SIGNATURE: &str = "(JI)V";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Finished: &str = "org.monfluo.wallet.lib.wallet.sync.Finished";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Finished__METHOD__init2__SIGNATURE: &str = "(JI)V";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Cancelled: &str = "org.monfluo.wallet.lib.wallet.sync.Cancelled";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Cancelled__METHOD__init1__SIGNATURE: &str = "(J)V";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Failed: &str = "org.monfluo.wallet.lib.wallet.sync.Failed";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Failed__METHOD__init2__SIGNATURE: &str = concat!("(JL", CLASSJ__org_monfluo_wallet_lib_wallet_sync_WalletSyncError, ";)V");
 
-    pub const CLASS__org_monfluo_wallet_lib_data_Balance: &'static str = "org.monfluo.wallet.lib.data.Balance";
-    pub const CLASS__org_monfluo_wallet_lib_data_Balance__METHOD__init4__SIGNATURE: &'static str = "(JJJJ)V";
-    pub const CLASS__org_monfluo_wallet_lib_data_AccountView: &'static str = "org.monfluo.wallet.lib.data.AccountView";
-    pub const CLASS__org_monfluo_wallet_lib_data_AccountView__METHOD__init2__SIGNATURE: &'static str = concat!("(IL", CLASSJ__java_util_List, ";)V");
-    pub const CLASS__org_monfluo_wallet_lib_data_AddressView: &'static str = "org.monfluo.wallet.lib.data.AddressView";
-    pub const CLASS__org_monfluo_wallet_lib_data_AddressView__METHOD__init5__SIGNATURE: &'static str = concat!("(IIL", CLASSJ__java_lang_String, ";ZJ)V");
-    pub const CLASS__org_monfluo_wallet_lib_data_TransactionHash: &'static str = "org.monfluo.wallet.lib.data.TransactionHash";
-    pub const CLASSJ__org_monfluo_wallet_lib_data_TransactionHash: &'static str = "org/monfluo/wallet/lib/data/TransactionHash";
-    pub const CLASS__org_monfluo_wallet_lib_data_TransactionHash__METHOD__init1__SIGNATURE: &'static str = concat!("([B)V");
-    pub const CLASS__org_monfluo_wallet_lib_data_TransactionViewInput: &'static str = "org.monfluo.wallet.lib.data.TransactionViewInput";
-    pub const CLASS__org_monfluo_wallet_lib_data_TransactionViewInput__METHOD__init2__SIGNATURE: &'static str = concat!("(L", CLASSJ__java_lang_String, ";J)V");
-    pub const CLASS__org_monfluo_wallet_lib_data_TransactionViewSpend: &'static str = "org.monfluo.wallet.lib.data.TransactionViewSpend";
-    pub const CLASS__org_monfluo_wallet_lib_data_TransactionViewSpend__METHOD__init1__SIGNATURE: &'static str = "(J)V";
-    pub const CLASS__org_monfluo_wallet_lib_data_TransactionView: &'static str = "org.monfluo.wallet.lib.data.TransactionView";
-    pub const CLASS__org_monfluo_wallet_lib_data_TransactionView__METHOD__init6__SIGNATURE: &'static str = concat!("(L", CLASSJ__org_monfluo_wallet_lib_data_TransactionHash, ";JJIL", CLASSJ__java_util_List, ";L", CLASSJ__java_util_List, ";)V");
+    pub const CLASS__org_monfluo_wallet_lib_data_Balance: &str = "org.monfluo.wallet.lib.data.Balance";
+    pub const CLASS__org_monfluo_wallet_lib_data_Balance__METHOD__init4__SIGNATURE: &str = "(JJJJ)V";
+    pub const CLASS__org_monfluo_wallet_lib_data_AccountView: &str = "org.monfluo.wallet.lib.data.AccountView";
+    pub const CLASS__org_monfluo_wallet_lib_data_AccountView__METHOD__init2__SIGNATURE: &str = concat!("(IL", CLASSJ__java_util_List, ";)V");
+    pub const CLASS__org_monfluo_wallet_lib_data_AddressView: &str = "org.monfluo.wallet.lib.data.AddressView";
+    pub const CLASS__org_monfluo_wallet_lib_data_AddressView__METHOD__init5__SIGNATURE: &str = concat!("(IIL", CLASSJ__java_lang_String, ";ZJ)V");
+    pub const CLASS__org_monfluo_wallet_lib_data_MoneroHash: &str = "org.monfluo.wallet.lib.data.MoneroHash";
+    pub const CLASSJ__org_monfluo_wallet_lib_data_MoneroHash: &str = "org/monfluo/wallet/lib/data/MoneroHash";
+    pub const CLASS__org_monfluo_wallet_lib_data_MoneroHash__METHOD__init1__SIGNATURE: &str = concat!("([B)V");
+    pub const CLASS__org_monfluo_wallet_lib_data_TransactionBlockInfo: &str = "org.monfluo.wallet.lib.data.TransactionBlockInfo";
+    pub const CLASSJ__org_monfluo_wallet_lib_data_TransactionBlockInfo: &str = "org/monfluo/wallet/lib/data/TransactionBlockInfo";
+    pub const CLASS__org_monfluo_wallet_lib_data_TransactionBlockInfo__METHOD__init2__SIGNATURE: &str = concat!("(IL", CLASSJ__org_monfluo_wallet_lib_data_MoneroHash, ";)V");
+    pub const CLASS__org_monfluo_wallet_lib_data_TransactionViewInput: &str = "org.monfluo.wallet.lib.data.TransactionViewInput";
+    pub const CLASS__org_monfluo_wallet_lib_data_TransactionViewInput__METHOD__init2__SIGNATURE: &str = concat!("(L", CLASSJ__java_lang_String, ";J)V");
+    pub const CLASS__org_monfluo_wallet_lib_data_TransactionViewSpend: &str = "org.monfluo.wallet.lib.data.TransactionViewSpend";
+    pub const CLASS__org_monfluo_wallet_lib_data_TransactionViewSpend__METHOD__init1__SIGNATURE: &str = "(J)V";
+    pub const CLASS__org_monfluo_wallet_lib_data_TransactionView: &str = "org.monfluo.wallet.lib.data.TransactionView";
+    pub const CLASS__org_monfluo_wallet_lib_data_TransactionView__METHOD__init7__SIGNATURE: &str = concat!("(L", CLASSJ__org_monfluo_wallet_lib_data_MoneroHash, ";JJIL", CLASSJ__org_monfluo_wallet_lib_data_TransactionBlockInfo, ";L", CLASSJ__java_util_List, ";L", CLASSJ__java_util_List, ";)V");
 
-    pub const CLASS__org_monfluo_wallet_lib_data_NodeInfo: &'static str = "org.monfluo.wallet.lib.data.NodeInfo";
-    pub const CLASSJ__org_monfluo_wallet_lib_data_NodeInfo: &'static str = "org/monfluo/wallet/lib/data/NodeInfo";
-    pub const CLASS__org_monfluo_wallet_lib_data_NodeInfo__METHOD__init2__SIGNATURE: &'static str = "(II)V";
+    pub const CLASS__org_monfluo_wallet_lib_data_NodeInfo: &str = "org.monfluo.wallet.lib.data.NodeInfo";
+    pub const CLASSJ__org_monfluo_wallet_lib_data_NodeInfo: &str = "org/monfluo/wallet/lib/data/NodeInfo";
+    pub const CLASS__org_monfluo_wallet_lib_data_NodeInfo__METHOD__init2__SIGNATURE: &str = "(II)V";
 }
 
 use constants::*;
 use monfluo_oxide::{
+    MoneroHash,
     monero_wallet::interface::NodeInfo,
     wallet::{
         WalletSyncState,
@@ -99,13 +103,16 @@ use monfluo_oxide::{
             account::AccountView,
             address::AddressView,
             balance::BalanceView,
-            transaction::{TransactionView, TransactionViewInput, TransactionViewSpend},
+            transaction::{
+                TransactionBlockInfoView, TransactionView, TransactionViewInput,
+                TransactionViewSpend,
+            },
         },
     },
 };
 use zeroize::Zeroizing;
 
-pub const HANDLE_FIELD_NAME: &'static str = "_handle";
+pub const HANDLE_FIELD_NAME: &str = "_handle";
 
 #[rustfmt::skip]
 pub struct JniCache {
@@ -117,11 +124,12 @@ pub struct JniCache {
     pub class__org_monfluo_wallet_lib_seed_Seed__method__getMnemonic0: JMethodID,
     pub class__org_monfluo_wallet_lib_seed_Seed__method__getLanguage0: JMethodID,
     pub class__org_monfluo_wallet_lib_data_Balance: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_data_AccountView: Global<JClass<'static>>,
     pub class__org_monfluo_wallet_lib_data_AddressView: Global<JClass<'static>>,
     pub class__org_monfluo_wallet_lib_data_NodeInfo: Global<JClass<'static>>,
-    pub class__org_monfluo_wallet_lib_data_TransactionHash: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_data_MoneroHash: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_data_TransactionBlockInfo: Global<JClass<'static>>,
     pub class__org_monfluo_wallet_lib_data_TransactionViewInput: Global<JClass<'static>>,
-    pub class__org_monfluo_wallet_lib_data_AccountView: Global<JClass<'static>>,
     pub class__org_monfluo_wallet_lib_data_TransactionViewSpend: Global<JClass<'static>>,
     pub class__org_monfluo_wallet_lib_data_TransactionView: Global<JClass<'static>>,
     pub class__org_monfluo_wallet_lib_seed_MoneroSeedLanguage: Global<JClass<'static>>,
@@ -366,7 +374,8 @@ pub fn init_cache<'local>(env: &mut Env<'local>) {
     let class__org_monfluo_wallet_lib_data_AccountView = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_AccountView);
     let class__org_monfluo_wallet_lib_data_AddressView = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_AddressView);
     let class__org_monfluo_wallet_lib_data_NodeInfo = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_NodeInfo);
-    let class__org_monfluo_wallet_lib_data_TransactionHash = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_TransactionHash);
+    let class__org_monfluo_wallet_lib_data_MoneroHash = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_MoneroHash);
+    let class__org_monfluo_wallet_lib_data_TransactionBlockInfo = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_TransactionBlockInfo);
     let class__org_monfluo_wallet_lib_data_TransactionViewInput = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_TransactionViewInput);
     let class__org_monfluo_wallet_lib_data_TransactionViewSpend = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_TransactionViewSpend);
     let class__org_monfluo_wallet_lib_data_TransactionView = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_TransactionView);
@@ -398,7 +407,8 @@ pub fn init_cache<'local>(env: &mut Env<'local>) {
             class__org_monfluo_wallet_lib_data_AccountView,
             class__org_monfluo_wallet_lib_data_AddressView,
             class__org_monfluo_wallet_lib_data_NodeInfo,
-            class__org_monfluo_wallet_lib_data_TransactionHash,
+            class__org_monfluo_wallet_lib_data_MoneroHash,
+            class__org_monfluo_wallet_lib_data_TransactionBlockInfo,
             class__org_monfluo_wallet_lib_data_TransactionViewInput,
             class__org_monfluo_wallet_lib_data_TransactionViewSpend,
             class__org_monfluo_wallet_lib_data_TransactionView,
@@ -503,7 +513,7 @@ pub fn list_add<'local>(
         list,
         class__java_util_List__method__add1,
         bool,
-        &[JValue::Object(&object).as_jni()]
+        &[JValue::Object(object).as_jni()]
     )
 }
 
@@ -688,7 +698,6 @@ pub fn new_wallet_sync_state<'local>(
         WalletSyncState::Starting {
             timestamp,
             current_height,
-            target_height,
             node_info,
         } => {
             let java_node_info = new_node_info(env, cache, node_info);
@@ -696,11 +705,10 @@ pub fn new_wallet_sync_state<'local>(
                 env,
                 cache,
                 class__org_monfluo_wallet_lib_wallet_sync_Starting,
-                CLASS__org_monfluo_wallet_lib_wallet_sync_Starting__METHOD__init4__SIGNATURE,
+                CLASS__org_monfluo_wallet_lib_wallet_sync_Starting__METHOD__init3__SIGNATURE,
                 &[
                     JValue::Long(timestamp as jlong),
                     JValue::Int(current_height as jint),
-                    JValue::Int(target_height as jint),
                     JValue::Object(&java_node_info),
                 ]
             )
@@ -708,17 +716,15 @@ pub fn new_wallet_sync_state<'local>(
         WalletSyncState::Syncing {
             timestamp,
             current_height,
-            target_height,
         } => {
             create_new_object!(
                 env,
                 cache,
                 class__org_monfluo_wallet_lib_wallet_sync_Syncing,
-                CLASS__org_monfluo_wallet_lib_wallet_sync_Syncing__METHOD__init3__SIGNATURE,
+                CLASS__org_monfluo_wallet_lib_wallet_sync_Syncing__METHOD__init2__SIGNATURE,
                 &[
                     JValue::Long(timestamp as jlong),
                     JValue::Int(current_height as jint),
-                    JValue::Int(target_height as jint)
                 ]
             )
         }
@@ -759,7 +765,7 @@ pub fn wallet_sync_observer_observe<'local>(
         observer,
         class__org_monfluo_wallet_lib_wallet_WalletSyncObserver__method__observe1,
         unit,
-        &[JValue::Object(&state).as_jni()]
+        &[JValue::Object(state).as_jni()]
     );
 }
 
@@ -865,21 +871,44 @@ pub fn new_node_info<'local>(
     )
 }
 
-pub fn new_transaction_hash<'local>(
+pub fn new_monero_hash<'local>(
     env: &mut Env<'local>,
     cache: &'static JniCache,
-    transaction_hash: &[u8; 32],
+    monero_hash: &MoneroHash,
 ) -> JObject<'local> {
     // SAFETY: u8 and i8 have the same size and alignment
-    let transaction_hash: &[i8; 32] = unsafe { std::mem::transmute(transaction_hash) };
+    let transaction_hash: &[i8; 32] = unsafe { std::mem::transmute(monero_hash) };
     let java_array = env.new_byte_array(32).unwrap();
     java_array.set_region(env, 0, transaction_hash).unwrap();
     create_new_object!(
         env,
         cache,
-        class__org_monfluo_wallet_lib_data_TransactionHash,
-        CLASS__org_monfluo_wallet_lib_data_TransactionHash__METHOD__init1__SIGNATURE,
+        class__org_monfluo_wallet_lib_data_MoneroHash,
+        CLASS__org_monfluo_wallet_lib_data_MoneroHash__METHOD__init1__SIGNATURE,
         &[JValue::Object(&java_array)]
+    )
+}
+
+pub fn new_transaction_block_info<'local>(
+    env: &mut Env<'local>,
+    cache: &'static JniCache,
+    transaction_block_info: &TransactionBlockInfoView,
+) -> JObject<'local> {
+    let TransactionBlockInfoView {
+        block_height,
+        block_hash,
+    } = transaction_block_info;
+    let java_block_height = *block_height as jint;
+    let java_block_hash = new_monero_hash(env, cache, block_hash);
+    create_new_object!(
+        env,
+        cache,
+        class__org_monfluo_wallet_lib_data_TransactionBlockInfo,
+        CLASS__org_monfluo_wallet_lib_data_TransactionBlockInfo__METHOD__init2__SIGNATURE,
+        &[
+            JValue::Int(java_block_height),
+            JValue::Object(&java_block_hash)
+        ]
     )
 }
 
@@ -927,12 +956,17 @@ pub fn new_transaction_view<'local>(
         fee,
         inputs,
         confirmations,
+        block_info,
         spends,
     } = transaction_view;
-    let java_transaction_hash = new_transaction_hash(env, cache, transaction_hash);
+    let java_transaction_hash = new_monero_hash(env, cache, transaction_hash);
     let java_timestamp = *timestamp as jlong;
     let java_fee = *fee as jlong;
     let java_confirmations = *confirmations as jint;
+    let java_block_info = block_info
+        .as_ref()
+        .map(|block_info| new_transaction_block_info(env, cache, block_info))
+        .unwrap_or(JObject::null());
     let java_inputs = arraylist_new(env, cache);
     for input in inputs {
         let java_input = new_transaction_view_input(env, cache, input);
@@ -947,12 +981,13 @@ pub fn new_transaction_view<'local>(
         env,
         cache,
         class__org_monfluo_wallet_lib_data_TransactionView,
-        CLASS__org_monfluo_wallet_lib_data_TransactionView__METHOD__init6__SIGNATURE,
+        CLASS__org_monfluo_wallet_lib_data_TransactionView__METHOD__init7__SIGNATURE,
         &[
             JValue::Object(&java_transaction_hash),
             JValue::Long(java_timestamp),
             JValue::Long(java_fee),
             JValue::Int(java_confirmations),
+            JValue::Object(&java_block_info),
             JValue::Object(&java_inputs),
             JValue::Object(&java_spends),
         ]

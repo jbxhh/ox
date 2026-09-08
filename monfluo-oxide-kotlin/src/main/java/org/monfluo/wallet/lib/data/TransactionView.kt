@@ -3,10 +3,11 @@ package org.monfluo.wallet.lib.data
 import kotlin.math.absoluteValue
 
 data class TransactionView(
-    val transactionHash: TransactionHash,
+    val transactionHash: MoneroHash,
     val timestamp: Long,
     val fee: Long,
     val confirmations: Int,
+    val blockInfo: TransactionBlockInfo?,
     val inputs: List<TransactionViewInput>,
     val spends: List<TransactionViewSpend>,
 ) {
