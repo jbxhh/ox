@@ -14,7 +14,9 @@ class TextHelperTest {
         unit: MoneroUnit,
         expected: String,
     ) {
-        assertEquals(expected, TextHelper.getDisplayAmount(amount, unit, false))
+        val displayAmount = TextHelper.getDisplayAmount(amount, unit, false)
+        assertEquals(expected, displayAmount)
+        assertEquals(amount, TextHelper.parseAmountToAtomicUnits(displayAmount, unit))
     }
 
     @ParameterizedTest

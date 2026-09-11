@@ -27,10 +27,10 @@ import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanIntentResult
 import com.journeyapps.barcodescanner.ScanOptions
 import org.monfluo.wallet.android.R
-import org.monfluo.wallet.android.activity.ActivityTransactionPending
 import org.monfluo.wallet.android.adapter.AdapterTransactionDestination
 import org.monfluo.wallet.android.livedata.combineLiveDatas
 import org.monfluo.wallet.android.model.Contact
+import org.monfluo.wallet.android.model.MoneroUnit
 import org.monfluo.wallet.android.model.PendingTransaction
 import org.monfluo.wallet.android.model.TransactionDestinationRaw
 import org.monfluo.wallet.android.model.TransactionDestinationWithAmount
@@ -39,8 +39,10 @@ import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.Helper
 import org.monfluo.wallet.android.util.PreferenceUtils
+import org.monfluo.wallet.android.util.TextHelper
 import org.monfluo.wallet.android.util.UriPayment
 import org.monfluo.wallet.android.util.component.ActivityMonero
+import org.monfluo.wallet.lib.data.TransactionView
 import timber.log.Timber
 import kotlin.math.max
 
@@ -204,44 +206,46 @@ class ActivitySend : ActivityMonero() {
                 Toast.makeText(this, getString(R.string.activity_send_transaction_create_failed_no_wallet_toast), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            val wallet = walletService.getWallet()
-            if (wallet == null) {
+            val walletWithData = walletService.getNewWalletOrLog()
+            if (walletWithData == null) {
                 Toast.makeText(this, getString(R.string.activity_send_transaction_create_failed_no_wallet_toast), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+            val (wallet) = walletWithData
 
-            if (viewModel.enableAddressBook.value!!) {
-                var recipientSaved = false
-                for (transactionDestination in adapterTransactionDestination.getTransactionDestinations()) {
-                    val recipientName = transactionDestination.recipientName.takeIf { !it.isBlank() }
-                    val address = transactionDestination.value
-                    if (recipientName != null) {
-                        if (wallet.getContacts().any { it.address == address }) {
-                            Timber.i("Skipping saving recipient $recipientName because address $address is already in address book")
-                        } else {
-                            if (wallet.addContact(Contact(recipientName, address))) {
-                                Timber.i("Saved recipient $recipientName with address $address")
-                                recipientSaved = true
-                            } else {
-                                Timber.w("Failed to save recipient $recipientName with address $address")
-                            }
-                        }
-                    }
-                }
-                if (recipientSaved) {
-                    Timber.i("Storing and updating wallet after saving recipient(s)")
-                    wallet.store()
-                    wallet.update()
-                }
-            }
+//            if (viewModel.enableAddressBook.value!!) {
+//                var recipientSaved = false
+//                for (transactionDestination in adapterTransactionDestination.getTransactionDestinations()) {
+//                    val recipientName = transactionDestination.recipientName.takeIf { !it.isBlank() }
+//                    val address = transactionDestination.value
+//                    if (recipientName != null) {
+//                        if (wallet.getContacts().any { it.address == address }) {
+//                            Timber.i("Skipping saving recipient $recipientName because address $address is already in address book")
+//                        } else {
+//                            if (wallet.addContact(Contact(recipientName, address))) {
+//                                Timber.i("Saved recipient $recipientName with address $address")
+//                                recipientSaved = true
+//                            } else {
+//                                Timber.w("Failed to save recipient $recipientName with address $address")
+//                            }
+//                        }
+//                    }
+//                }
+//                if (recipientSaved) {
+//                    Timber.i("Storing and updating wallet after saving recipient(s)")
+//                    wallet.store()
+//                    wallet.update()
+//                }
+//            }
 
             val sendAll = adapterTransactionDestination.getSendAll().value!!
             val feePriority = viewModel.priority.value!!
             val enotes = viewModel.enotes.value
-            val nettype = wallet.nettype()
+            val nettype = 0 // wallet.nettype()
             val description = transactionDescriptionEditText.getText().toString().takeIf { !it.isBlank() }
 
             if (sendAll) {
+                // TODO: support sweep transactions
                 val address = parseTransactionDestinationAddressOrWarn(adapterTransactionDestination.getTransactionDestinations()[0].value, 1, nettype) ?: return@setOnClickListener
                 enabled.value = false
                 Toast.makeText(this, getString(R.string.activity_send_transaction_creating_toast), Toast.LENGTH_SHORT).show()
@@ -372,14 +376,10 @@ class ActivitySend : ActivityMonero() {
         updateEnotesLabel(wallet)
     }
 
-    override fun onTransactionCreated(pendingTransaction: PendingTransaction) {
+    override fun onTransactionCreated(transaction: TransactionView) {
         runOnUiThread {
             enabled.value = true
-            if (pendingTransaction.status == PendingTransaction.Status.Status_Ok) {
-                startActivityToSendPendingTransaction.launch(Intent(this, ActivityTransactionPending::class.java))
-            } else {
-                Toast.makeText(this, getString(R.string.activity_send_transaction_create_failed, pendingTransaction.getErrorString() ?: ""), Toast.LENGTH_SHORT).show()
-            }
+            startActivityToSendPendingTransaction.launch(Intent(this, ActivityTransactionPending::class.java))
         }
     }
 
@@ -428,10 +428,10 @@ class ActivitySend : ActivityMonero() {
         position: Int,
         nettype: Int,
     ): String? {
-        if (!Helper.isOpenaliasLike(address) && !Wallet.isAddressValid(address, nettype)) {
-            Toast.makeText(this, getString(R.string.activity_send_address_invalid_toast, position), Toast.LENGTH_SHORT).show()
-            return null
-        }
+//        if (!Helper.isOpenaliasLike(address) && !Wallet.isAddressValid(address, nettype)) {
+//            Toast.makeText(this, getString(R.string.activity_send_address_invalid_toast, position), Toast.LENGTH_SHORT).show()
+//            return null
+//        }
         return address
     }
 
@@ -439,7 +439,7 @@ class ActivitySend : ActivityMonero() {
         amountRaw: String,
         position: Int,
     ): Long? {
-        val amount = Wallet.getAmountFromString(amountRaw)
+        val amount = TextHelper.parseAmountToAtomicUnits(amountRaw, MoneroUnit.MONERO)
         if (amount == null || amount == 0L) {
             Toast.makeText(this, getString(R.string.activity_send_amount_invalid_toast, position), Toast.LENGTH_SHORT).show()
             return null

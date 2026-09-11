@@ -69,13 +69,13 @@ pub fn polyseed_from_mnemonic<'local>(
 #[jni_mangle("org.monfluo.wallet.lib.seed.MoneroSeedLanguage", "getWords")]
 pub fn get_words_monero<'local>(
     mut env: EnvUnowned<'local>,
-    object: JObject<'local>,
+    java_monero_seed_language: JObject<'local>,
 ) -> JObject<'local> {
     let cache = crate::java::get_cache();
 
     env.with_env(|env| {
-        let list = crate::java::arraylist_new(env, cache);
-        let enum_name = crate::java::enum_name(env, cache, &object);
+        let list = crate::java::new_arraylist(env, cache);
+        let enum_name = crate::java::enum_name(env, cache, &java_monero_seed_language);
         let enum_name = crate::java::JavaStringHelper::from_jstring(env, &enum_name);
         let words = monfluo_oxide::monero_wallet_util::seed::original::Language::from_str(
             &enum_name.to_cow_str(),
@@ -98,13 +98,13 @@ pub fn get_words_monero<'local>(
 #[jni_mangle("org.monfluo.wallet.lib.seed.PolyseedLanguage", "getWords")]
 pub fn get_words_polyseed<'local>(
     mut env: EnvUnowned<'local>,
-    object: JObject<'local>,
+    java_polyseed_language: JObject<'local>,
 ) -> JObject<'local> {
     let cache = crate::java::get_cache();
 
     env.with_env(|env| {
-        let list = crate::java::arraylist_new(env, cache);
-        let enum_name = crate::java::enum_name(env, cache, &object);
+        let list = crate::java::new_arraylist(env, cache);
+        let enum_name = crate::java::enum_name(env, cache, &java_polyseed_language);
         let enum_name = crate::java::JavaStringHelper::from_jstring(env, &enum_name);
         let words = monfluo_oxide::monero_wallet_util::seed::polyseed::Language::from_str(
             &enum_name.to_cow_str(),

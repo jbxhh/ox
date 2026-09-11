@@ -25,20 +25,21 @@ pub fn monfluo_version<'local>(
 pub fn list_wallets<'local>(
     mut env: EnvUnowned<'local>,
     _class: JClass<'local>,
-    monfluo_directory: JString,
+    java_monfluo_directory: JString,
 ) -> JObject<'local> {
     let cache = crate::java::get_cache();
 
     env.with_env(|env| {
         crate::RUNTIME.block_on(async {
             let monfluo_directory = PathBuf::from_str(
-                &crate::java::JavaStringHelper::from_jstring(env, &monfluo_directory).to_cow_str(),
+                &crate::java::JavaStringHelper::from_jstring(env, &java_monfluo_directory)
+                    .to_cow_str(),
             )
             .unwrap();
             let wallets = monfluo_oxide::wallet::Wallet::list(monfluo_directory)
                 .await
                 .unwrap();
-            let list = crate::java::arraylist_new(env, cache);
+            let list = crate::java::new_arraylist(env, cache);
             for wallet in wallets {
                 let wallet = env
                     .new_string(wallet)
@@ -55,16 +56,17 @@ pub fn list_wallets<'local>(
 pub fn delete_wallet<'local>(
     mut env: EnvUnowned<'local>,
     _class: JClass<'local>,
-    monfluo_directory: JString,
-    wallet_name: JString,
+    java_monfluo_directory: JString,
+    java_wallet_name: JString,
 ) {
     env.with_env(|env| {
         crate::RUNTIME.block_on(async {
             let monfluo_directory = PathBuf::from_str(
-                &crate::java::JavaStringHelper::from_jstring(env, &monfluo_directory).to_cow_str(),
+                &crate::java::JavaStringHelper::from_jstring(env, &java_monfluo_directory)
+                    .to_cow_str(),
             )
             .unwrap();
-            let wallet_name = crate::java::JavaStringHelper::from_jstring(env, &wallet_name);
+            let wallet_name = crate::java::JavaStringHelper::from_jstring(env, &java_wallet_name);
             monfluo_oxide::wallet::Wallet::delete(monfluo_directory, &wallet_name.to_cow_str())
                 .await
                 .unwrap();
@@ -78,25 +80,26 @@ pub fn delete_wallet<'local>(
 pub fn create_wallet<'local>(
     mut env: EnvUnowned<'local>,
     _class: JClass<'local>,
-    monfluo_directory: JString,
+    java_monfluo_directory: JString,
     _java_network: JObject,
-    name: JString,
-    password: JString,
-    seed_language: JObject<'local>,
-    _seed_offset: JString,
+    java_name: JString,
+    java_password: JString,
+    java_seed_language: JObject<'local>,
+    _java_seed_offset: JString,
 ) {
     let cache = crate::java::get_cache();
 
     env.with_env(|env| {
         crate::RUNTIME.block_on(async {
             let monfluo_directory = PathBuf::from_str(
-                &crate::java::JavaStringHelper::from_jstring(env, &monfluo_directory).to_cow_str(),
+                &crate::java::JavaStringHelper::from_jstring(env, &java_monfluo_directory)
+                    .to_cow_str(),
             )
             .unwrap();
-            let wallet_name = crate::java::JavaStringHelper::from_jstring(env, &name);
-            let password = crate::java::JavaStringHelper::from_jstring(env, &password);
+            let wallet_name = crate::java::JavaStringHelper::from_jstring(env, &java_name);
+            let password = crate::java::JavaStringHelper::from_jstring(env, &java_password);
 
-            let seed_type = crate::java::from_java_seed_language(env, cache, &seed_language);
+            let seed_type = crate::java::from_java_seed_language(env, cache, &java_seed_language);
             let seed = match seed_type {
                 monfluo_oxide::monero_wallet_util::seed::SeedType::Original(language) => {
                     monfluo_oxide::monero_wallet_util::seed::Seed::Original(
@@ -131,27 +134,28 @@ pub fn create_wallet<'local>(
 pub fn restore_wallet<'local>(
     mut env: EnvUnowned<'local>,
     _class: JClass<'local>,
-    monfluo_directory: JString,
+    java_monfluo_directory: JString,
     _java_network: JObject,
-    name: JString,
-    password: JString,
-    seed: JObject<'local>,
-    _seed_offset: JString,
-    height: JObject<'local>,
+    java_name: JString,
+    java_password: JString,
+    java_seed: JObject<'local>,
+    _java_seed_offset: JString,
+    java_height: JObject<'local>,
 ) {
     let cache = crate::java::get_cache();
 
     env.with_env(|env| {
         crate::RUNTIME.block_on(async {
             let monfluo_directory = PathBuf::from_str(
-                &crate::java::JavaStringHelper::from_jstring(env, &monfluo_directory).to_cow_str(),
+                &crate::java::JavaStringHelper::from_jstring(env, &java_monfluo_directory)
+                    .to_cow_str(),
             )
             .unwrap();
-            let wallet_name = crate::java::JavaStringHelper::from_jstring(env, &name);
-            let password = crate::java::JavaStringHelper::from_jstring(env, &password);
+            let wallet_name = crate::java::JavaStringHelper::from_jstring(env, &java_name);
+            let password = crate::java::JavaStringHelper::from_jstring(env, &java_password);
 
-            let seed = crate::java::from_java_seed(env, cache, &seed);
-            let height = crate::java::from_java_number_int_value(env, cache, &height);
+            let seed = crate::java::from_java_seed(env, cache, &java_seed);
+            let height = crate::java::from_java_number_int_value(env, cache, &java_height);
 
             monfluo_oxide::wallet::Wallet::create(
                 monfluo_directory,
@@ -174,20 +178,21 @@ pub fn restore_wallet<'local>(
 pub fn open_wallet<'local>(
     mut env: EnvUnowned<'local>,
     _class: JClass<'local>,
-    monfluo_directory: JString,
-    name: JString,
-    password: JString,
+    java_monfluo_directory: JString,
+    java_name: JString,
+    java_password: JString,
 ) -> JObject<'local> {
     let cache = crate::java::get_cache();
 
     env.with_env(|env| {
         crate::RUNTIME.block_on(async {
             let monfluo_directory = PathBuf::from_str(
-                &crate::java::JavaStringHelper::from_jstring(env, &monfluo_directory).to_cow_str(),
+                &crate::java::JavaStringHelper::from_jstring(env, &java_monfluo_directory)
+                    .to_cow_str(),
             )
             .expect("Failed to convert java monfluo directory to PathBuf");
-            let wallet_name = crate::java::JavaStringHelper::from_jstring(env, &name);
-            let password = crate::java::JavaStringHelper::from_jstring(env, &password);
+            let wallet_name = crate::java::JavaStringHelper::from_jstring(env, &java_name);
+            let password = crate::java::JavaStringHelper::from_jstring(env, &java_password);
 
             let wallet = monfluo_oxide::wallet::Wallet::open(
                 monfluo_directory,

@@ -29,7 +29,6 @@ import org.monfluo.wallet.android.data.SynchronizationStatus
 import org.monfluo.wallet.android.model.MoneroNetworkType
 import org.monfluo.wallet.android.model.MoneroUnit
 import org.monfluo.wallet.android.model.PendingTransaction
-import org.monfluo.wallet.android.model.PendingTransactionDestination
 import org.monfluo.wallet.android.model.TransactionDestination
 import org.monfluo.wallet.android.model.TransactionDestinationResolved
 import org.monfluo.wallet.android.model.TransactionDestinationWithAmount
@@ -46,7 +45,11 @@ import org.monfluo.wallet.android.util.Helper
 import org.monfluo.wallet.android.util.PreferenceUtils
 import org.monfluo.wallet.android.util.TextHelper
 import org.monfluo.wallet.lib.Monfluo
+import org.monfluo.wallet.lib.data.Address
+import org.monfluo.wallet.lib.data.FeePriority
 import org.monfluo.wallet.lib.data.NodeInfo
+import org.monfluo.wallet.lib.data.Payment
+import org.monfluo.wallet.lib.data.TransactionView
 import org.monfluo.wallet.lib.wallet.Daemon
 import org.monfluo.wallet.lib.wallet.sync.Cancelled
 import org.monfluo.wallet.lib.wallet.sync.Failed
@@ -94,7 +97,7 @@ class WalletService :
     private var uninitWalletRef: AtomicReference<Wallet?> = AtomicReference(null)
     private var walletRef: AtomicReference<Wallet?> = AtomicReference(null)
     private var newWalletRef: AtomicReference<WalletWithData?> = AtomicReference(null)
-    private var pendingTransactionRef: AtomicReference<PendingTransaction?> = AtomicReference(null)
+    private var pendingTransactionRef: AtomicReference<TransactionView?> = AtomicReference(null)
     private val observers = mutableSetOf<WalletServiceObserver>()
 
     // Executor for the wallet's sync thread
@@ -499,59 +502,41 @@ class WalletService :
             selectedEnotes: ArrayList<String>?,
             transactionDescription: String?,
         ) {
-            val wallet = getWalletOrThrow()
-            val destinationResolved = resolveDestination(TransactionDestination(destination))
-            val pendingTransactionHandle = wallet.createSweepTransaction(destinationResolved.address, "", 0, priority.ordinal, wallet.getAccountIndex(), selectedEnotes ?: ArrayList())
-            val pendingTransaction = PendingTransaction(pendingTransactionHandle, PendingTransactionDestination.Sweep(destinationResolved), transactionDescription)
-            disposePendingTransaction(newPendingTransaction = pendingTransaction)
-            forEachObserver {
-                it.onTransactionCreated(pendingTransaction)
-            }
+            throw RuntimeException("TODO: sweep transactions not supported")
+//            val wallet = getWalletOrThrow()
+//            val destinationResolved = resolveDestination(TransactionDestination(destination))
+//            val pendingTransactionHandle = wallet.createSweepTransaction(destinationResolved.address, "", 0, priority.ordinal, wallet.getAccountIndex(), selectedEnotes ?: ArrayList())
+//            val pendingTransaction = PendingTransaction(pendingTransactionHandle, PendingTransactionDestination.Sweep(destinationResolved), transactionDescription)
+//            disposePendingTransaction(newPendingTransaction = pendingTransaction)
+//            forEachObserver {
+//                it.onTransactionCreated(pendingTransaction)
+//            }
         }
 
         private fun handleCreateTransaction(
             destinationAndAmounts: List<TransactionDestinationWithAmount>,
-            priority: PendingTransaction.Priority,
-            selectedEnotes: ArrayList<String>?,
-            transactionDescription: String?,
+            _priority: PendingTransaction.Priority,
+            _selectedEnotes: ArrayList<String>?,
+            _transactionDescription: String?,
         ) {
-            val wallet = getWalletOrThrow()
-            val destinationsResolved = destinationAndAmounts.map { resolveDestination(it.withoutAmount()).withAmount(it.amount) }
-            val destinations = destinationsResolved.map { it.address }
-            val amounts = destinationsResolved.map { it.amount }.toLongArray()
-            val pendingTransactionHandle =
-                wallet.createTransactionMultDestJ(
-                    destinations,
-                    "",
-                    amounts,
-                    0,
-                    priority.ordinal,
-                    wallet.getAccountIndex(),
-                    selectedEnotes ?: ArrayList(),
-                )
-            val pendingTransaction = PendingTransaction(pendingTransactionHandle, PendingTransactionDestination.Default(destinationsResolved), transactionDescription)
-            disposePendingTransaction(newPendingTransaction = pendingTransaction)
+            val (wallet, data) = getNewWalletOrLog()!!
+            val daemon = data.daemon!!
+            val transaction = wallet.createAndSignTransaction(daemon, destinationAndAmounts.map { Payment(Address.fromString(it.value)!!, it.amount) }, FeePriority.NORMAL)
+            this@WalletService.pendingTransactionRef.set(transaction)
             forEachObserver {
-                it.onTransactionCreated(pendingTransaction)
+                it.onTransactionCreated(transaction)
             }
         }
 
-        private fun handleSendPendingTransaction(pendingTransaction: PendingTransaction) {
-            val txid = pendingTransaction.txid().getOrNull(0)
-            val description = pendingTransaction.description
-            val success = pendingTransaction.commit("", false)
-            if (!success) {
-                Timber.e("Failed to send transaction: ${pendingTransaction.getErrorString()}")
-            }
-            getWalletOrLog()?.let { wallet ->
-                if (txid != null && description != null) {
-                    wallet.setUserNote(txid, description)
-                    Timber.i("Set note for txid $txid to $description")
-                }
-                wallet.store()
-            }
+        private fun handleSendPendingTransaction(transaction: TransactionView) {
+            val (wallet, data) = getNewWalletOrLog()!!
+            val daemon = data.daemon!!
+            wallet.sendTransaction(daemon, transaction.transactionHash)
+//            wallet.setUserNote(txid, description)
+//            Timber.i("Set note for txid $txid to $description")
+            wallet.store()
             forEachObserver {
-                it.onTransactionSent(pendingTransaction, success)
+                it.onTransactionSent(transaction, true)
             }
         }
 
@@ -687,7 +672,6 @@ class WalletService :
 
     override fun onDestroy() {
         Timber.d("Wallet Service is being destroyed")
-        disposePendingTransaction()
         closeWallet()
         closeNewWallet()
         syncScheduledFuture?.cancel(false)
@@ -1043,19 +1027,7 @@ class WalletService :
         }
     }
 
-    private fun disposePendingTransaction(newPendingTransaction: PendingTransaction? = null) {
-        val pendingTransaction = pendingTransactionRef.getAndSet(newPendingTransaction)
-        if (pendingTransaction != null) {
-            val wallet = getWallet()
-            if (wallet != null) {
-                wallet.disposeTransaction(pendingTransaction)
-            } else {
-                Timber.e("Could not dispose of a transaction because there is no wallet")
-            }
-        }
-    }
-
-    fun getPendingTransaction(): PendingTransaction? = pendingTransactionRef.get()
+    fun getPendingTransaction(): TransactionView? = pendingTransactionRef.get()
 
     fun getUninitWallet(): Wallet? = uninitWalletRef.get()
 
@@ -1169,10 +1141,10 @@ class WalletService :
         handler.sendMessage(message)
     }
 
-    fun sendTransaction(pendingTransaction: PendingTransaction) {
+    fun sendTransaction(pendingTransaction: TransactionView) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.SEND_TX.value()
-        message.data.putLong(Constants.EXTRA_PENDING_TRANSACTION, pendingTransaction.handle)
+        message.data.putString(Constants.EXTRA_TRANSACTION_ID, pendingTransaction.transactionHash.toString())
         handler.sendMessage(message)
     }
 
@@ -1309,10 +1281,10 @@ interface WalletServiceObserver : LifecycleOwner {
         label: String,
     ) {}
 
-    fun onTransactionCreated(pendingTransaction: PendingTransaction) {}
+    fun onTransactionCreated(transaction: TransactionView) {}
 
     fun onTransactionSent(
-        pendingTransaction: PendingTransaction,
+        pendingTransaction: TransactionView,
         success: Boolean,
     ) {}
 

@@ -7,17 +7,16 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.model.MoneroUnit
-import org.monfluo.wallet.android.model.PendingTransaction
-import org.monfluo.wallet.android.model.PendingTransactionDestination
 import org.monfluo.wallet.android.model.TransactionDestinationResolvedFrom
 import org.monfluo.wallet.android.util.TextHelper
+import org.monfluo.wallet.lib.data.TransactionView
 
 private const val VIEW_TYPE_HEADER: Int = 0
 private const val VIEW_TYPE_TRANSFER: Int = 1
 private const val VIEW_TYPE_FOOTER: Int = 2
 
 class AdapterTransactionPending(
-    private var pendingTransaction: PendingTransaction? = null,
+    private var pendingTransaction: TransactionView? = null,
 ) : RecyclerView.Adapter<AdapterTransactionPending.ViewHolder>() {
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -44,7 +43,7 @@ class AdapterTransactionPending(
     }
 
     override fun getItemViewType(position: Int): Int {
-        val transactionHasDescription = pendingTransaction?.description != null
+        val transactionHasDescription = false // pendingTransaction?.description != null
         val itemCount = getItemCount()
         return if (transactionHasDescription && position == 0) {
             VIEW_TYPE_HEADER
@@ -56,12 +55,16 @@ class AdapterTransactionPending(
     }
 
     override fun getItemCount(): Int {
-        val transactionDescriptionCount = if (pendingTransaction?.description != null) 1 else 0
-        return when (val destination = pendingTransaction?.destination) {
-            null -> 0
-            is PendingTransactionDestination.Default -> destination.value.size + 1 + transactionDescriptionCount
-            is PendingTransactionDestination.Sweep -> 2 + transactionDescriptionCount
+//        val transactionDescriptionCount = if (pendingTransaction?.description != null) 1 else 0
+//        return when (val destination = pendingTransaction?.destination) {
+//            null -> 0
+//            is PendingTransactionDestination.Default -> destination.value.size + 1 + transactionDescriptionCount
+//            is PendingTransactionDestination.Sweep -> 2 + transactionDescriptionCount
+//        }
+        if (pendingTransaction == null) {
+            return 0
         }
+        return 1 + (pendingTransaction?.spends?.size ?: 0)
     }
 
     override fun onBindViewHolder(
@@ -69,39 +72,28 @@ class AdapterTransactionPending(
         position: Int,
     ) {
         val pendingTransaction = pendingTransaction!!
-        val transactionDescriptionCount = if (pendingTransaction.description != null) 1 else 0
+        val transactionDescriptionCount = 0 // if (pendingTransaction.description != null) 1 else 0
         when (viewHolder) {
             is HeaderViewHolder -> {
-                viewHolder.bind(pendingTransaction.description!!)
+                TODO()
+//                viewHolder.bind(pendingTransaction.description!!)
             }
             is TransferViewHolder -> {
                 val adjustedPosition = position - transactionDescriptionCount
-                when (val destination = pendingTransaction.destination) {
-                    is PendingTransactionDestination.Default -> {
-                        val value = destination.value[adjustedPosition]
-                        val single = destination.value.size == 1
-                        viewHolder.bind(value.amount, value.address, value.resolvedFrom, adjustedPosition, single)
-                    }
-                    is PendingTransactionDestination.Sweep -> {
-                        viewHolder.bind(pendingTransaction.getAmount(), destination.value.address, destination.value.resolvedFrom, adjustedPosition, true)
-                    }
-                }
+                val value = pendingTransaction.spends[adjustedPosition]
+                val single = pendingTransaction.spends.size == 1
+                viewHolder.bind(value.amount, value.address!!, null, adjustedPosition, single)
             }
             is FooterViewHolder -> {
-                val amount = pendingTransaction.getAmount()
-                val fee = pendingTransaction.getFee()
-                val dust = pendingTransaction.getDust()
-                val single =
-                    when (val destination = pendingTransaction.destination) {
-                        is PendingTransactionDestination.Default -> destination.value.size == 1
-                        is PendingTransactionDestination.Sweep -> true
-                    }
-                viewHolder.bind(amount, fee, dust, single)
+                val amount = pendingTransaction.amount
+                val fee = pendingTransaction.fee
+                val single = pendingTransaction.spends.size == 1
+                viewHolder.bind(amount, fee, single)
             }
         }
     }
 
-    fun setPendingTransaction(pendingTransaction: PendingTransaction) {
+    fun setPendingTransaction(pendingTransaction: TransactionView) {
         this.pendingTransaction = pendingTransaction
         notifyDataSetChanged()
     }
@@ -172,14 +164,11 @@ class AdapterTransactionPending(
         private val totalLabelTextView: TextView = itemView.findViewById(R.id.total_label_textview)
         private val totalTextView: TextView = itemView.findViewById(R.id.total_textview)
         private val feeTextView: TextView = itemView.findViewById(R.id.fee_textview)
-        private val dustLabelTextView: TextView = itemView.findViewById(R.id.dust_label_textview)
-        private val dustTextView: TextView = itemView.findViewById(R.id.dust_textview)
         private val grandTotalTextView: TextView = itemView.findViewById(R.id.grand_total_textview)
 
         fun bind(
             totalAmount: Long,
             feeAmount: Long,
-            dustAmount: Long,
             single: Boolean,
         ) {
             if (single) {
@@ -191,14 +180,6 @@ class AdapterTransactionPending(
                 totalTextView.setText(TextHelper.formatUnlockedBalance(itemView.context, totalAmount, MoneroUnit.MONERO, false, 0))
             }
             feeTextView.setText(TextHelper.formatUnlockedBalance(itemView.context, feeAmount, MoneroUnit.MONERO, false, 0))
-            if (dustAmount > 0) {
-                dustLabelTextView.visibility = View.VISIBLE
-                dustTextView.visibility = View.VISIBLE
-                dustTextView.setText(TextHelper.formatUnlockedBalance(itemView.context, dustAmount, MoneroUnit.MONERO, false, 0))
-            } else {
-                dustLabelTextView.visibility = View.GONE
-                dustTextView.visibility = View.GONE
-            }
             grandTotalTextView.setText(TextHelper.formatUnlockedBalance(itemView.context, totalAmount + feeAmount, MoneroUnit.MONERO, false, 0))
         }
     }

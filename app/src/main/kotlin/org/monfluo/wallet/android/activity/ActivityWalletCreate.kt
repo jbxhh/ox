@@ -435,7 +435,7 @@ internal class CreateWalletViewModel : ViewModel() {
                 }
                 return
             }
-            Monfluo.restoreWallet(Helper.getWalletRoot(activity).absolutePath, Network.MAINNET, walletName, password, seed, null, restoreHeightText.toIntOrNull())
+            Monfluo.restoreWallet(Helper.getWalletRoot(activity).absolutePath, Network.Mainnet, walletName, password, seed, null, restoreHeightText.toIntOrNull())
 
             activity.runOnUiThread {
                 Toast
@@ -446,7 +446,7 @@ internal class CreateWalletViewModel : ViewModel() {
                     ).show()
             }
         } else {
-            Monfluo.createWallet(Helper.getWalletRoot(activity).absolutePath, Network.MAINNET, walletName, password, MoneroSeedLanguage.English, "")
+            Monfluo.createWallet(Helper.getWalletRoot(activity).absolutePath, Network.Mainnet, walletName, password, MoneroSeedLanguage.English, "")
 
             activity.runOnUiThread {
                 Toast

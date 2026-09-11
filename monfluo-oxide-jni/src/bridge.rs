@@ -12,11 +12,13 @@ pub fn into_java_handle<T>(arc: Arc<T>) -> usize {
 }
 
 pub fn from_java_handle<T: 'static>(handle: usize) -> Arc<T> {
-    try_from_java_handle(handle).expect(&format!(
-        "Could not construct {:?} from java handle {}",
-        TypeId::of::<T>(),
-        handle
-    ))
+    try_from_java_handle(handle).unwrap_or_else(|| {
+        panic!(
+            "Could not construct {:?} from java handle {}",
+            TypeId::of::<T>(),
+            handle
+        )
+    })
 }
 
 pub fn try_from_java_handle<T>(handle: usize) -> Option<Arc<T>> {
