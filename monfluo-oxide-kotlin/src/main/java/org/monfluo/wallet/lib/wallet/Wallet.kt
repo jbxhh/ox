@@ -2,6 +2,9 @@ package org.monfluo.wallet.lib.wallet
 
 import org.monfluo.wallet.lib.data.AccountView
 import org.monfluo.wallet.lib.data.Balance
+import org.monfluo.wallet.lib.data.FeePriority
+import org.monfluo.wallet.lib.data.MoneroBytes
+import org.monfluo.wallet.lib.data.Payment
 import org.monfluo.wallet.lib.data.TransactionView
 import org.monfluo.wallet.lib.wallet.sync.WalletSyncObserver
 
@@ -34,6 +37,17 @@ class Wallet(
     external fun registerNewAddress(account: Int): Int
 
     fun registerNewAddressForCurrentAccount(): Int = registerNewAddress(currentAccountIndex)
+
+    external fun createAndSignTransaction(
+        daemon: Daemon,
+        payments: List<Payment>,
+        feePriority: FeePriority,
+    ): TransactionView
+
+    external fun sendTransaction(
+        daemon: Daemon,
+        transactionHash: MoneroBytes,
+    )
 
     external fun store()
 

@@ -14,9 +14,9 @@ import com.ncorti.slidetoact.SlideToActView
 import com.ncorti.slidetoact.SlideToActView.OnSlideCompleteListener
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.adapter.AdapterTransactionPending
-import org.monfluo.wallet.android.model.PendingTransaction
 import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.util.component.ActivityMonero
+import org.monfluo.wallet.lib.data.TransactionView
 import timber.log.Timber
 import kotlin.math.max
 
@@ -26,7 +26,7 @@ class ActivityTransactionPending : ActivityMonero() {
         const val RESULT_NO_PENDING_TRANSACTION: Int = 2
     }
 
-    private lateinit var pendingTransaction: PendingTransaction
+    private lateinit var pendingTransaction: TransactionView
 
     private lateinit var layoutView: View
     private lateinit var backImageView: ImageView
@@ -99,7 +99,7 @@ class ActivityTransactionPending : ActivityMonero() {
     }
 
     override fun onTransactionSent(
-        pendingTransaction: PendingTransaction,
+        pendingTransaction: TransactionView,
         success: Boolean,
     ) {
         runOnUiThread {

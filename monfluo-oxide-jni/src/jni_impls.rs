@@ -5,6 +5,7 @@ use jni::{
 use tracing::error;
 use tracing_subscriber::prelude::*;
 
+pub mod address;
 pub mod daemon;
 pub mod monfluo;
 pub mod seed;

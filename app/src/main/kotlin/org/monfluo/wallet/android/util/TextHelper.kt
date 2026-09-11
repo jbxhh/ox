@@ -19,6 +19,11 @@ private const val ADDRESS_CHUNK_LENGTH = 6
 private val HIGHLIGHTED_ADDRESS_CHUNKS = setOf(0, 2, -1, -3)
 
 object TextHelper {
+    fun parseAmountToAtomicUnits(
+        string: String,
+        unit: MoneroUnit,
+    ): Long? = BigDecimal(string).scaleByPowerOfTen(unit.decimals).longValueExact()
+
     private fun <S : Spannable> tryMonospaceize(
         spannable: S,
         start: Int = 0,
