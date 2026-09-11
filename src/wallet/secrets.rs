@@ -4,7 +4,7 @@ use monero_wallet::{address::Network, ed25519::Scalar};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
 
-use crate::util::HexFormatted;
+use crate::{MoneroBytes, util::HexFormatted};
 
 #[derive(Debug, thiserror::Error)]
 pub enum SecretsError {
@@ -70,7 +70,7 @@ fn serialize_scalar<S>(value: &Zeroizing<Scalar>, serializer: S) -> Result<S::Ok
 where
     S: Serializer,
 {
-    let bytes: Zeroizing<[u8; 32]> = Zeroizing::new(From::from(**value));
+    let bytes: Zeroizing<MoneroBytes> = Zeroizing::new(From::from(**value));
     let hex: Zeroizing<String> = Zeroizing::new(HexFormatted::borrowed(&*bytes).to_string());
     serializer.serialize_str(&hex)
 }
@@ -81,7 +81,7 @@ where
 {
     let hex: Zeroizing<String> = Zeroizing::new(String::deserialize(deserializer)?);
     let bytes: Zeroizing<Vec<u8>> = crate::util::hex_to_bytes(&hex).unwrap();
-    let bytes: Zeroizing<[u8; 32]> = Zeroizing::new((&**bytes).try_into().unwrap());
+    let bytes: Zeroizing<MoneroBytes> = Zeroizing::new((&**bytes).try_into().unwrap());
     let scalar: Zeroizing<Scalar> = Zeroizing::new(Scalar::from(
         curve25519_dalek::Scalar::from_canonical_bytes(*bytes)
             .into_option()

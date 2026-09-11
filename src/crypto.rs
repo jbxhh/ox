@@ -10,7 +10,9 @@ use monero_wallet::{
 use subtle::ConstantTimeEq;
 use zeroize::Zeroizing;
 
-fn sc_reduce32(s: &mut [u8; 32]) {
+use crate::MoneroBytes;
+
+fn sc_reduce32(s: &mut MoneroBytes) {
     let mut s0: i64 = 2097151 & load_3(&s[0..]) as i64;
     let mut s1: i64 = 2097151 & (load_4(&s[2..]) >> 5) as i64;
     let mut s2: i64 = 2097151 & (load_3(&s[5..]) >> 2) as i64;
@@ -210,7 +212,7 @@ fn load_4(in_bytes: &[u8]) -> u64 {
     result
 }
 
-pub fn spend_key_to_view_key(spend: &[u8; 32]) -> Zeroizing<[u8; 32]> {
+pub fn spend_key_to_view_key(spend: &MoneroBytes) -> Zeroizing<MoneroBytes> {
     let mut key2keccaked = monero_wallet::primitives::keccak256(spend);
     sc_reduce32(&mut key2keccaked);
     Zeroizing::new(key2keccaked)

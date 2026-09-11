@@ -9,10 +9,10 @@ tokio = "1.49.0"
 
 [dependencies]
 monero-wallet-util = { git = "https://codeberg.org/Monfluo/monero-wallet-util.git", branch = "monfluo", features = ["strum"] }
-monero-wallet = { git = "https://codeberg.org/Monfluo/monero-oxide.git", branch = "monfluo" }
+monero-wallet = { git = "https://codeberg.org/Monfluo/monero-oxide.git", branch = "monfluo", features = ["strum"] }
 monero-daemon-rpc = { git = "https://codeberg.org/Monfluo/monero-oxide.git", branch = "monfluo", features = ["skip-transaction-hash-validation"] }
 # monero-wallet-util = { path = "../monero-wallet-util/util", features = ["strum"] }
-# monero-wallet = { path = "../monero-oxide/monero-oxide/wallet" }
+# monero-wallet = { path = "../monero-oxide/monero-oxide/wallet", features = ["strum"] }
 # monero-daemon-rpc = { path = "../monero-oxide/monero-oxide/interface/daemon", features = ["skip-transaction-hash-validation"] }
 tokio = { workspace = true, features = ["fs", "io-util", "sync", "time"] }
 thiserror = "2.0.18"

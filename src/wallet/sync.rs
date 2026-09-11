@@ -14,12 +14,12 @@ use monero_wallet::{
 use tracing::{debug, info, warn};
 
 use crate::{
-    MoneroHash,
+    MoneroBytes, current_timestamp,
     transport::MonfluoTransport,
     util::{HexFormatted, SubaddressIndexDisplay},
     wallet::{
         Wallet,
-        state::{BlockIdentifier, Blockchain, TransactionBlockInfo, WalletState},
+        state::{BlockIdentifier, Blockchain, TransactionBlockInfo, TransactionWrapper, WalletState},
     },
 };
 
@@ -71,7 +71,7 @@ async fn fetch_blocks(daemon: Arc<MoneroDaemon<MonfluoTransport>>, blocks_reques
         .await
 }
 
-fn process_scan_result(state: &mut WalletState, spend_key: &Scalar, transaction_block_info: Option<TransactionBlockInfo>, first_seen_timestamp: u64, timelocked: Timelocked, transactions: HashMap<MoneroHash, Transaction<Pruned>>) {
+fn process_scan_result(state: &mut WalletState, spend_key: &Scalar, transaction_block_info: Option<TransactionBlockInfo>, first_seen_timestamp: u64, timelocked: Timelocked, transactions: HashMap<MoneroBytes, Transaction<Pruned>>) {
     let outputs = timelocked.ignore_additional_timelock();
     if !outputs.is_empty() {
         info!("Found {} outputs", outputs.len());
@@ -99,18 +99,20 @@ fn process_scan_result(state: &mut WalletState, spend_key: &Scalar, transaction_
                     }
                 }
             }
-            state.add_transaction(transaction.clone(), transaction_hash, transaction_block_info, first_seen_timestamp);
+            let transaction_wrapper = TransactionWrapper::new(transaction.clone(), transaction_hash, transaction_block_info, first_seen_timestamp, None);
+            state.add_transaction(transaction_wrapper);
             state.add_output(output, spend_key);
         }
     }
 }
 
-fn process_transaction(state: &mut WalletState, transaction_block_info: Option<TransactionBlockInfo>, first_seen_timestamp: u64, transaction_hash: MoneroHash, transaction: &Transaction<Pruned>) {
-    let (_, relevant_inputs) = state.add_transaction_if_spends_output(transaction.clone(), transaction_hash, transaction_block_info, first_seen_timestamp);
+fn process_transaction(state: &mut WalletState, transaction_block_info: Option<TransactionBlockInfo>, first_seen_timestamp: u64, transaction_hash: MoneroBytes, transaction: &Transaction<Pruned>) {
+    let transaction_wrapper = TransactionWrapper::new(transaction.clone(), transaction_hash, transaction_block_info, first_seen_timestamp, None);
+    let relevant_inputs = state.add_transaction_if_spends_output(transaction_wrapper);
     for input_index in relevant_inputs.keys().copied() {
         let Input::ToKey {
             ..
-        } = transaction.prefix().inputs[input_index]
+        } = transaction.prefix().inputs[input_index as usize]
         else {
             panic!("Wallet returned bad relevant input index {input_index} for transaction {}", HexFormatted::borrowed(&transaction_hash));
         };
@@ -167,7 +169,7 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
     let mut latest_synced_block = wallet_initial_height;
     let mut handle = {
         let blocks_request = make_blocks_request(network, &mut state.blockchain);
-        let task = tokio::spawn(fetch_blocks(daemon.clone(), blocks_request, state.last_sync_daemon_time.unwrap_or(0)));
+        let task = tokio::spawn(fetch_blocks(daemon.clone(), blocks_request, state.cache.last_sync_daemon_time.unwrap_or(0)));
         Some(task)
     };
     while let Some(current_handle) = handle.take() {
@@ -303,13 +305,16 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
         // Process mempool
         if !incremental {
             debug!("Daemon mempool is non incremental, clearing local mempool");
-            state.mempool_transactions.clear();
+            state.cache.mempool_transactions.clear();
         } else {
             debug!("Daemon mempool is incremental");
         }
         debug!("{} transactions were removed from local mempool", removed_mempool_txids.len());
         for removed_mempool_txid in removed_mempool_txids {
-            state.mempool_transactions.remove(&removed_mempool_txid);
+            state
+                .cache
+                .mempool_transactions
+                .remove(&removed_mempool_txid);
         }
         debug!("{} transactions in daemon mempool", mempool.len());
         for mempool_transaction in mempool {
@@ -332,14 +337,15 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
             process_scan_result(&mut state, wallet.secrets.spend_key(), None, mempool_transaction_timestamp, timelocked, transactions);
             process_transaction(&mut state, None, mempool_transaction_timestamp, transaction_hash, &transaction);
             state
+                .cache
                 .mempool_transactions
                 .insert(transaction_hash, transaction);
         }
-        debug!("{} transactions in local mempool", state.mempool_transactions.len());
+        debug!("{} transactions in local mempool", state.cache.mempool_transactions.len());
         debug!("{} remaining mempool transactions", remaining_mempool_txids.len());
         // TODO: fetch and process remaining_mempool_txids
 
-        state.last_sync_daemon_time = Some(daemon_time);
+        state.cache.last_sync_daemon_time = Some(daemon_time);
         wallet.update_state(state.clone());
         info!("Finished processing batch of blocks");
         wallet.store().await;
@@ -355,11 +361,4 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
         timestamp: current_timestamp(),
         height: latest_synced_block,
     });
-}
-
-fn current_timestamp() -> u64 {
-    chrono::Local::now()
-        .timestamp_millis()
-        .try_into()
-        .expect("failed to convert current timestamp into u64")
 }

@@ -6,6 +6,9 @@ mod state;
 mod sync;
 pub mod view;
 
+use monero_wallet::send::SendError;
+use monero_wallet::transaction::NotPruned;
+use monero_wallet::transaction::PotentiallyPruned;
 use monero_wallet::transaction::Timelock;
 pub use sync::WalletSyncObserver;
 pub use sync::WalletSyncState;
@@ -13,9 +16,12 @@ use tokio::runtime::Runtime;
 use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 
-use crate::MoneroHash;
+use crate::MoneroBytes;
 use crate::transport::MonfluoTransport;
 use crate::wallet::secrets::WalletSecrets;
+pub use crate::wallet::state::OutgoingPayment;
+pub use crate::wallet::state::OutgoingTransfer;
+pub use crate::wallet::state::TransactionWrapper;
 use crate::wallet::state::{WalletOutputWrapper, WalletState};
 use crate::wallet::view::transaction::TransactionBlockInfoView;
 use crate::wallet::view::transaction::{TransactionViewInput, TransactionViewSpend};
@@ -24,7 +30,6 @@ use chrono::NaiveDateTime;
 use curve25519_dalek::constants::ED25519_BASEPOINT_TABLE;
 use monero_daemon_rpc::MoneroDaemon;
 use monero_wallet::OutputWithDecoys;
-use monero_wallet::address::Address;
 use monero_wallet::ed25519::Point;
 use monero_wallet::interface::{FeeRate, ProvidesUnvalidatedFeeRates, PublishTransaction};
 use monero_wallet::ringct::RctType;
@@ -84,9 +89,15 @@ pub enum WalletError {
     #[error("Bad wallet name: {0}")]
     BadWalletName(String),
     #[error("Bad spend key")]
-    BadSpendKey(Zeroizing<[u8; 32]>),
+    BadSpendKey(Zeroizing<MoneroBytes>),
     #[error("Bad view key")]
-    BadViewKey(Zeroizing<[u8; 32]>),
+    BadViewKey(Zeroizing<MoneroBytes>),
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct Payment {
+    pub address: MoneroAddress,
+    pub amount: u64,
 }
 
 impl Wallet {
@@ -206,27 +217,89 @@ impl Wallet {
         self.store().await;
     }
 
-    pub async fn create_transaction(&self, address: &str, amount: u64, daemon: Daemon) -> SignableTransaction {
+    pub async fn create_transaction(&self, daemon: Daemon, payments: Vec<Payment>) -> (SignableTransaction, OutgoingTransfer) {
         let state = self.state.load();
         let rct_type: RctType = RctType::ClsagBulletproofPlus;
-        let outgoing_view_key: Zeroizing<[u8; 32]> = {
-            let mut array: [u8; 32] = [0; 32];
-            crate::get_rng_mut().await.fill_bytes(&mut array);
-            Zeroizing::new(array)
-        };
-        let output = state.outputs.last().unwrap();
-        let input: OutputWithDecoys = OutputWithDecoys::new(&mut *crate::get_rng_mut().await, &*daemon, 16, state.current_height() as usize, output.inner.clone())
-            .await
-            .unwrap();
-        let inputs: Vec<OutputWithDecoys> = vec![input];
-        let payments: Vec<(monero_wallet::address::Address<_>, u64)> = vec![(Address::from_str(Network::Mainnet, address).unwrap(), amount)];
-        let change: Change = Change::new(self.view_pair(), None);
-        let data: Vec<Vec<u8>> = vec![];
         let fee_rate: FeeRate = daemon
             .fee_rate(monero_wallet::interface::FeePriority::Normal)
             .await
             .unwrap();
-        SignableTransaction::new(rct_type, outgoing_view_key, inputs, payments, change, data, fee_rate).unwrap()
+        let outgoing_view_key: Zeroizing<MoneroBytes> = {
+            let mut array: MoneroBytes = [0; 32];
+            crate::get_rng_mut().await.fill_bytes(&mut array);
+            Zeroizing::new(array)
+        };
+        let mut available_wallet_outputs_iter = {
+            let mut available_wallet_outputs = state
+                .outputs
+                .values()
+                // TODO: also filter out immature enotes
+                .filter(|output| {
+                    !state
+                        .cache
+                        .key_image_to_spend_transaction_input
+                        .contains_key(&output.cached_key_image)
+                })
+                .collect::<Vec<_>>();
+            // TODO: this will select lowest-amount enotes first, is this the strategy we want to use?
+            available_wallet_outputs.sort_by_key(|output| output.inner.commitment().amount);
+            available_wallet_outputs.into_iter()
+        };
+        let payments_sum = payments.iter().map(|payment| payment.amount).sum::<u64>();
+        let mut inputs_sum = 0;
+        let mut inputs = Vec::new();
+        while inputs_sum < payments_sum
+            && let Some(available_wallet_output) = available_wallet_outputs_iter.next()
+        {
+            let input: OutputWithDecoys = OutputWithDecoys::new(&mut *crate::get_rng_mut().await, &*daemon, 16, state.current_height() as usize, available_wallet_output.inner.clone())
+                .await
+                .unwrap();
+            inputs_sum += input.commitment().amount;
+            inputs.push(input);
+        }
+        let change: Change = Change::new(self.view_pair(), None);
+        let data: Vec<Vec<u8>> = vec![];
+        let outgoing_transfer = OutgoingTransfer {
+            outgoing_view_key: *outgoing_view_key,
+            payments: payments
+                .iter()
+                .map(|payment| OutgoingPayment {
+                    address: payment.address.to_string(),
+                    amount: payment.amount,
+                })
+                .collect::<Vec<_>>(),
+        };
+        let raw_payments = payments
+            .into_iter()
+            .map(|payment| (payment.address, payment.amount))
+            .collect::<Vec<_>>();
+        loop {
+            match SignableTransaction::new(rct_type, outgoing_view_key.clone(), inputs.clone(), raw_payments.clone(), change.clone(), data.clone(), fee_rate) {
+                Ok(signable_transaction) => return (signable_transaction, outgoing_transfer),
+                Err(SendError::NotEnoughFunds {
+                    inputs: _,
+                    outputs: needed_amount,
+                    necessary_fee: _,
+                }) => {
+                    while inputs_sum < needed_amount
+                        && let Some(available_wallet_output) = available_wallet_outputs_iter.next()
+                    {
+                        let input: OutputWithDecoys = OutputWithDecoys::new(&mut *crate::get_rng_mut().await, &*daemon, 16, state.current_height() as usize, available_wallet_output.inner.clone())
+                            .await
+                            .unwrap();
+                        inputs.push(input);
+                    }
+                    if inputs_sum < needed_amount {
+                        // TODO: return error instead of panicking
+                        panic!("Not enough funds to create transaction. Available funds: {}, required funds: {}", inputs_sum, needed_amount);
+                    }
+                }
+                Err(e) => {
+                    // TODO: return error instead of panicking
+                    panic!("Failed to create transaction: {e:?}");
+                }
+            }
+        }
     }
 
     pub async fn sign_tranasction(&self, transaction: SignableTransaction) -> Transaction {
@@ -235,8 +308,17 @@ impl Wallet {
             .unwrap()
     }
 
-    pub async fn send_transaction(&self, transaction: Transaction, daemon: Daemon) {
-        daemon.publish_transaction(&transaction).await.unwrap();
+    pub async fn send_transaction(&self, daemon: Daemon, transaction: TransactionWrapper<NotPruned>) {
+        daemon
+            .publish_transaction(&transaction.inner)
+            .await
+            .unwrap();
+        let transaction = transaction.prune();
+        self.state.rcu(|state| {
+            let mut state = state.deref().clone();
+            state.add_transaction(transaction.clone());
+            Arc::new(state)
+        });
     }
 
     pub fn register_new_account(&self) -> u32 {
@@ -278,7 +360,7 @@ impl Wallet {
         let mut total = 0;
         let mut unlocked = 0;
         let mut pending = 0;
-        for output in state.outputs.iter() {
+        for output in state.outputs.values() {
             if !state
                 .cache
                 .key_image_to_spend_transaction_input
@@ -334,7 +416,7 @@ impl Wallet {
         let mut used: bool = false;
         let mut amount: u64 = 0;
 
-        for output in state.outputs.iter() {
+        for output in state.outputs.values() {
             if output.inner.subaddress() == subaddres_index {
                 used = true;
                 if !state
@@ -360,8 +442,6 @@ impl Wallet {
 
     pub fn transaction_views(&self) -> Vec<view::transaction::TransactionView> {
         let state = self.state.load();
-        let current_height = state.current_height();
-
         let mut raw_transactions = state.transactions.values().collect::<Vec<_>>();
         raw_transactions.sort_by_key(|raw_transaction| {
             (
@@ -372,11 +452,21 @@ impl Wallet {
                 raw_transaction.hash,
             )
         });
+        self.transaction_views_of(raw_transactions)
+    }
 
-        let mut wallet_inputs = HashMap::<MoneroHash, Vec<&WalletOutputWrapper>>::new();
-        let mut wallet_outputs = HashMap::<MoneroHash, Vec<&WalletOutputWrapper>>::new();
+    pub fn transaction_view_of<P: PotentiallyPruned>(&self, raw_transaction: &TransactionWrapper<P>) -> view::transaction::TransactionView {
+        self.transaction_views_of(vec![raw_transaction]).remove(0)
+    }
 
-        for output in state.outputs.iter() {
+    pub fn transaction_views_of<P: PotentiallyPruned>(&self, raw_transactions: Vec<&TransactionWrapper<P>>) -> Vec<view::transaction::TransactionView> {
+        let state = self.state.load();
+        let current_height = state.current_height();
+
+        let mut wallet_inputs = HashMap::<MoneroBytes, Vec<&WalletOutputWrapper>>::new();
+        let mut wallet_outputs = HashMap::<MoneroBytes, Vec<&WalletOutputWrapper>>::new();
+
+        for output in state.outputs.values() {
             wallet_inputs
                 .entry(output.inner.transaction())
                 .or_default()
@@ -406,15 +496,31 @@ impl Wallet {
                     })
                     .collect();
 
-                let spends = wallet_outputs
-                    .get(&raw_transaction.hash)
-                    .map(Vec::as_slice)
-                    .unwrap_or_default()
-                    .iter()
-                    .map(|wallet_output| TransactionViewSpend {
-                        amount: wallet_output.inner.commitment().amount,
+                let spends = raw_transaction
+                    .outgoing_transfer
+                    .as_ref()
+                    .map(|outgoing_transfer| {
+                        outgoing_transfer
+                            .payments
+                            .iter()
+                            .map(|outgoing_payment| TransactionViewSpend {
+                                address: Some(outgoing_payment.address.clone()),
+                                amount: outgoing_payment.amount,
+                            })
+                            .collect::<Vec<_>>()
                     })
-                    .collect();
+                    .unwrap_or_else(|| {
+                        wallet_outputs
+                            .get(&raw_transaction.hash)
+                            .map(Vec::as_slice)
+                            .unwrap_or_default()
+                            .iter()
+                            .map(|wallet_output| TransactionViewSpend {
+                                address: None,
+                                amount: wallet_output.inner.commitment().amount,
+                            })
+                            .collect()
+                    });
 
                 view::transaction::TransactionView {
                     transaction_hash: raw_transaction.hash,
@@ -435,6 +541,10 @@ impl Wallet {
                         }),
                     inputs,
                     spends,
+                    outgoing_view_key: raw_transaction
+                        .outgoing_transfer
+                        .as_ref()
+                        .map(|outgoing_transfer| outgoing_transfer.outgoing_view_key),
                 }
             })
             .collect()
@@ -448,11 +558,11 @@ impl Wallet {
         self.state.store(Arc::new(state));
     }
 
-    pub fn spend_key(&self) -> Zeroizing<[u8; 32]> {
+    pub fn spend_key(&self) -> Zeroizing<MoneroBytes> {
         Zeroizing::new(From::from(**self.secrets.spend_key()))
     }
 
-    pub fn view_key(&self) -> Zeroizing<[u8; 32]> {
+    pub fn view_key(&self) -> Zeroizing<MoneroBytes> {
         Zeroizing::new(From::from(**self.secrets.view_key()))
     }
 

@@ -8,6 +8,8 @@ use bigdecimal::{BigDecimal, FromPrimitive};
 use monero_wallet::{address::SubaddressIndex, ed25519::Scalar};
 use zeroize::Zeroizing;
 
+use crate::MoneroBytes;
+
 pub struct HexFormatted<'slice>(pub Cow<'slice, [u8]>);
 
 impl<'slice> Display for HexFormatted<'slice> {
@@ -62,7 +64,7 @@ impl Display for SubaddressIndexDisplay {
     }
 }
 
-pub fn bytes_to_scalar(bytes: &[u8; 32]) -> Option<Zeroizing<Scalar>> {
+pub fn bytes_to_scalar(bytes: &MoneroBytes) -> Option<Zeroizing<Scalar>> {
     curve25519_dalek::Scalar::from_canonical_bytes(*bytes)
         .into_option()
         .map(Scalar::from)
