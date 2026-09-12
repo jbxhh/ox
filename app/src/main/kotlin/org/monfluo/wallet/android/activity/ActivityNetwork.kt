@@ -18,12 +18,7 @@ import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.service.wallet.WalletSyncData
 import org.monfluo.wallet.android.service.wallet.WalletWithData
 import org.monfluo.wallet.android.util.component.ActivityMonero
-import org.monfluo.wallet.lib.wallet.sync.Cancelled
-import org.monfluo.wallet.lib.wallet.sync.Failed
-import org.monfluo.wallet.lib.wallet.sync.Finished
-import org.monfluo.wallet.lib.wallet.sync.Preparing
-import org.monfluo.wallet.lib.wallet.sync.Starting
-import org.monfluo.wallet.lib.wallet.sync.Syncing
+import org.monfluo.wallet.lib.wallet.sync.WalletSyncState
 import java.text.NumberFormat
 import java.util.Date
 import kotlin.getValue
@@ -132,39 +127,35 @@ class ActivityNetwork : ActivityMonero() {
                 nodeStatusUpdatedAtTextView.visibility = View.INVISIBLE
             }
 
-            val lastSyncState = state.lastSyncState
-            if (lastSyncState != null) {
-                walletStatusUpdatedAtTextView.text = getString(R.string.activity_network_wallet_last_updated_at, DateFormat.getInstance().format(Date(lastSyncState.timestamp)))
+            val adjustedLastSyncState = state.getAdjustedLastSyncState()
+            if (adjustedLastSyncState != null) {
+                walletStatusUpdatedAtTextView.text = getString(R.string.activity_network_wallet_last_updated_at, DateFormat.getInstance().format(Date(adjustedLastSyncState.timestamp)))
                 walletStatusUpdatedAtTextView.visibility = View.VISIBLE
 
-                when (lastSyncState) {
-                    is Preparing -> {
+                when (adjustedLastSyncState) {
+                    is WalletSyncState.Preparing -> {
                         walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_preparing_synchronization)
                         walletStatusProgressBar.isIndeterminate = true
                         walletStatusDescriptionTextView.visibility = View.INVISIBLE
                     }
-                    is Starting -> {
-                        walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_starting_synchronization)
-                        walletStatusProgressBar.isIndeterminate = true
-                        walletStatusDescriptionTextView.visibility = View.INVISIBLE
-                    }
-                    is Syncing -> {
-                        val targetHeight = max(state.lastNodeInfo!!.nodeInfo.height, lastSyncState.currentHeight)
+                    is WalletSyncState.Starting, is WalletSyncState.Syncing -> {
+                        val currentHeight = adjustedLastSyncState.currentHeight!!
+                        val targetHeight = max(state.lastNodeInfo!!.nodeInfo.height - 1, currentHeight)
                         walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_wallet_is_synchronizing)
                         walletStatusProgressBar.isIndeterminate = false
                         walletStatusProgressBar.max = targetHeight
                         walletStatusProgressBar.min = state.initialSyncHeight
-                        walletStatusProgressBar.progress = lastSyncState.currentHeight
+                        walletStatusProgressBar.progress = currentHeight
                         walletStatusDescriptionTextView.text =
                             getString(
                                 R.string.activity_network_wallet_status_description_wallet_is_synchronizing,
-                                NumberFormat.getInstance().format(lastSyncState.currentHeight),
+                                NumberFormat.getInstance().format(currentHeight),
                                 NumberFormat.getInstance().format(targetHeight),
-                                NumberFormat.getInstance().format(targetHeight - lastSyncState.currentHeight),
+                                NumberFormat.getInstance().format(targetHeight - currentHeight),
                             )
                         walletStatusDescriptionTextView.visibility = View.VISIBLE
                     }
-                    is Finished -> {
+                    is WalletSyncState.Finished -> {
                         walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_wallet_is_synchronized)
                         walletStatusProgressBar.isIndeterminate = false
                         walletStatusProgressBar.min = 0
@@ -173,21 +164,20 @@ class ActivityNetwork : ActivityMonero() {
                         walletStatusDescriptionTextView.text =
                             getString(
                                 R.string.activity_network_wallet_status_description_wallet_is_synchronized,
-                                NumberFormat.getInstance().format(lastSyncState.height),
+                                NumberFormat.getInstance().format(adjustedLastSyncState.height),
                             )
                         walletStatusDescriptionTextView.visibility = View.VISIBLE
                     }
-                    is Cancelled -> {
+                    is WalletSyncState.Cancelled -> {
                         walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_cancelled)
                         walletStatusProgressBar.isIndeterminate = true
-                        // TODO: description
                         walletStatusDescriptionTextView.visibility = View.INVISIBLE
                     }
-                    is Failed -> {
+                    is WalletSyncState.Failed -> {
                         walletStatusHeaderTextView.text = getString(R.string.activity_network_wallet_status_header_error)
                         walletStatusProgressBar.isIndeterminate = true
-                        // TODO: description
-                        walletStatusDescriptionTextView.visibility = View.INVISIBLE
+                        walletStatusDescriptionTextView.text = adjustedLastSyncState.error.toString()
+                        walletStatusDescriptionTextView.visibility = View.VISIBLE
                     }
                 }
             } else {

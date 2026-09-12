@@ -104,19 +104,32 @@ mod constants {
     pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncObserver__METHOD__observe1: &str = "observe";
     pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncObserver__METHOD__observe1__SIGNATURE: &str = concat!(java_args!(java_class!(CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncState)), JAVA_VOID);
     pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncError: &str = "org.monfluo.wallet.lib.wallet.sync.WalletSyncError";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorCouldNotFetchNodeInfo: &str = "org.monfluo.wallet.lib.wallet.sync.WalletSyncError$CouldNotFetchNodeInfo";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorCouldNotFetchNodeInfo__METHOD__init1__SIGNATURE: &str = java_constructor!(java_class!(CLASS__org_monfluo_wallet_lib_wallet_sync_InterfaceError));
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorNodeNotSynced: &str = "org.monfluo.wallet.lib.wallet.sync.WalletSyncError$NodeNotSynced";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorNodeNotSynced__METHOD__init1__SIGNATURE: &str = java_constructor!(java_class!(CLASS__org_monfluo_wallet_lib_data_NodeInfo));
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorCouldNotFetchBlocks: &str = "org.monfluo.wallet.lib.wallet.sync.WalletSyncError$CouldNotFetchBlocks";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorCouldNotFetchBlocks__METHOD__init1__SIGNATURE: &str = java_constructor!(java_class!(CLASS__org_monfluo_wallet_lib_wallet_sync_InterfaceError));
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_InterfaceError: &str = "org.monfluo.wallet.lib.wallet.sync.InterfaceError";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInternalError: &str = "org.monfluo.wallet.lib.wallet.sync.InterfaceError$InternalError";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInternalError__METHOD__init1__SIGNATURE: &str = java_constructor!(java_class!(CLASS__java_lang_String));
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInterfaceErrorInner: &str = "org.monfluo.wallet.lib.wallet.sync.InterfaceError$InterfaceErrorInner";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInterfaceErrorInner__METHOD__init1__SIGNATURE: &str = java_constructor!(java_class!(CLASS__java_lang_String));
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInvalidInterface: &str = "org.monfluo.wallet.lib.wallet.sync.InterfaceError$InvalidInterface";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInvalidInterface__METHOD__init1__SIGNATURE: &str = java_constructor!(java_class!(CLASS__java_lang_String));
     pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncState: &str = "org.monfluo.wallet.lib.wallet.sync.WalletSyncState";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Preparing: &str = "org.monfluo.wallet.lib.wallet.sync.Preparing";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Preparing__METHOD__init2__SIGNATURE: &str = java_constructor!(JAVA_LONG, JAVA_INT);
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Starting: &str = "org.monfluo.wallet.lib.wallet.sync.Starting";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Starting__METHOD__init3__SIGNATURE: &str = java_constructor!(JAVA_LONG, JAVA_INT, java_class!(CLASS__org_monfluo_wallet_lib_data_NodeInfo));
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Syncing: &str = "org.monfluo.wallet.lib.wallet.sync.Syncing";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Syncing__METHOD__init2__SIGNATURE: &str = java_constructor!(JAVA_LONG, JAVA_INT);
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Finished: &str = "org.monfluo.wallet.lib.wallet.sync.Finished";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Finished__METHOD__init2__SIGNATURE: &str = java_constructor!(JAVA_LONG, JAVA_INT);
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Cancelled: &str = "org.monfluo.wallet.lib.wallet.sync.Cancelled";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Cancelled__METHOD__init1__SIGNATURE: &str = java_constructor!(JAVA_LONG);
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Failed: &str = "org.monfluo.wallet.lib.wallet.sync.Failed";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_Failed__METHOD__init2__SIGNATURE: &str = java_constructor!(JAVA_LONG, java_class!(CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncError));
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStatePreparing: &str = "org.monfluo.wallet.lib.wallet.sync.WalletSyncState$Preparing";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStatePreparing__METHOD__init2__SIGNATURE: &str = java_constructor!(JAVA_LONG, JAVA_INT);
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateStarting: &str = "org.monfluo.wallet.lib.wallet.sync.WalletSyncState$Starting";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateStarting__METHOD__init3__SIGNATURE: &str = java_constructor!(JAVA_LONG, JAVA_INT, java_class!(CLASS__org_monfluo_wallet_lib_data_NodeInfo));
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateSyncing: &str = "org.monfluo.wallet.lib.wallet.sync.WalletSyncState$Syncing";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateSyncing__METHOD__init2__SIGNATURE: &str = java_constructor!(JAVA_LONG, JAVA_INT);
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateFinished: &str = "org.monfluo.wallet.lib.wallet.sync.WalletSyncState$Finished";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateFinished__METHOD__init2__SIGNATURE: &str = java_constructor!(JAVA_LONG, JAVA_INT);
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateCancelled: &str = "org.monfluo.wallet.lib.wallet.sync.WalletSyncState$Cancelled";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateCancelled__METHOD__init1__SIGNATURE: &str = java_constructor!(JAVA_LONG);
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateFailed: &str = "org.monfluo.wallet.lib.wallet.sync.WalletSyncState$Failed";
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateFailed__METHOD__init2__SIGNATURE: &str = java_constructor!(JAVA_LONG, java_class!(CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncError));
 
     pub const CLASS__org_monfluo_wallet_lib_data_Network: &str = "org.monfluo.wallet.lib.data.Network";
     pub const CLASS__org_monfluo_wallet_lib_data_Address: &str = "org.monfluo.wallet.lib.data.Address";
@@ -161,10 +174,10 @@ use monfluo_oxide::{
     MoneroBytes,
     monero_wallet::{
         address::{MoneroAddress, Network},
-        interface::NodeInfo,
+        interface::{InterfaceError, NodeInfo},
     },
     wallet::{
-        Payment, WalletSyncState,
+        Payment, SyncError, WalletSyncState,
         view::{
             account::AccountView,
             address::AddressView,
@@ -688,12 +701,20 @@ pub struct JniCache {
     pub class__org_monfluo_wallet_lib_seed_Polyseed: Global<JClass<'static>>,
     pub class__org_monfluo_wallet_lib_wallet_Wallet: Global<JClass<'static>>,
     pub class__org_monfluo_wallet_lib_wallet_Daemon: Global<JClass<'static>>,
-    pub class__org_monfluo_wallet_lib_wallet_sync_Preparing: Global<JClass<'static>>,
-    pub class__org_monfluo_wallet_lib_wallet_sync_Starting: Global<JClass<'static>>,
-    pub class__org_monfluo_wallet_lib_wallet_sync_Syncing: Global<JClass<'static>>,
-    pub class__org_monfluo_wallet_lib_wallet_sync_Finished: Global<JClass<'static>>,
-    pub class__org_monfluo_wallet_lib_wallet_sync_Cancelled: Global<JClass<'static>>,
-    pub class__org_monfluo_wallet_lib_wallet_sync_Failed: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorCouldNotFetchNodeInfo: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorNodeNotSynced: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorCouldNotFetchBlocks: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_wallet_sync_WalletSyncError: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_wallet_sync_InterfaceError: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInternalError: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInterfaceErrorInner: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInvalidInterface: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStatePreparing: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateStarting: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateSyncing: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateFinished: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateCancelled: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateFailed: Global<JClass<'static>>,
     pub field_signature__long: RuntimeFieldSignature,
     pub field_signature__byte_array: RuntimeFieldSignature,
     pub field_signature__java_lang_String: RuntimeFieldSignature,
@@ -749,12 +770,20 @@ pub fn init_cache<'env>(env: &mut Env<'env>) {
     let class__org_monfluo_wallet_lib_seed_Polyseed = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_seed_Polyseed);
     let class__org_monfluo_wallet_lib_wallet_Wallet = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_Wallet);
     let class__org_monfluo_wallet_lib_wallet_Daemon = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_Daemon);
-    let class__org_monfluo_wallet_lib_wallet_sync_Preparing = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_Preparing);
-    let class__org_monfluo_wallet_lib_wallet_sync_Starting = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_Starting);
-    let class__org_monfluo_wallet_lib_wallet_sync_Syncing = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_Syncing);
-    let class__org_monfluo_wallet_lib_wallet_sync_Finished = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_Finished);
-    let class__org_monfluo_wallet_lib_wallet_sync_Cancelled = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_Cancelled);
-    let class__org_monfluo_wallet_lib_wallet_sync_Failed = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_Failed);
+    let class__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorCouldNotFetchNodeInfo = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorCouldNotFetchNodeInfo);
+    let class__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorNodeNotSynced = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorNodeNotSynced);
+    let class__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorCouldNotFetchBlocks = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorCouldNotFetchBlocks);
+    let class__org_monfluo_wallet_lib_wallet_sync_WalletSyncError = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncError);
+    let class__org_monfluo_wallet_lib_wallet_sync_InterfaceError = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_InterfaceError);
+    let class__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInternalError = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInternalError);
+    let class__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInterfaceErrorInner = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInterfaceErrorInner);
+    let class__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInvalidInterface = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInvalidInterface);
+    let class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStatePreparing = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStatePreparing);
+    let class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateStarting = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateStarting);
+    let class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateSyncing = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateSyncing);
+    let class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateFinished = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateFinished);
+    let class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateCancelled = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateCancelled);
+    let class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateFailed = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateFailed);
 
     let field_signature__long = create_runtime_field_signature!(env, FIELD_SIGNATURE__LONG);
     let field_signature__byte_array = create_runtime_field_signature!(env, FIELD_SIGNATURE__BYTE_ARRAY);
@@ -804,12 +833,20 @@ pub fn init_cache<'env>(env: &mut Env<'env>) {
             class__org_monfluo_wallet_lib_seed_Polyseed,
             class__org_monfluo_wallet_lib_wallet_Wallet,
             class__org_monfluo_wallet_lib_wallet_Daemon,
-            class__org_monfluo_wallet_lib_wallet_sync_Preparing,
-            class__org_monfluo_wallet_lib_wallet_sync_Starting,
-            class__org_monfluo_wallet_lib_wallet_sync_Syncing,
-            class__org_monfluo_wallet_lib_wallet_sync_Finished,
-            class__org_monfluo_wallet_lib_wallet_sync_Cancelled,
-            class__org_monfluo_wallet_lib_wallet_sync_Failed,
+            class__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorCouldNotFetchNodeInfo,
+            class__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorNodeNotSynced,
+            class__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorCouldNotFetchBlocks,
+            class__org_monfluo_wallet_lib_wallet_sync_WalletSyncError,
+            class__org_monfluo_wallet_lib_wallet_sync_InterfaceError,
+            class__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInternalError,
+            class__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInterfaceErrorInner,
+            class__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInvalidInterface,
+            class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStatePreparing,
+            class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateStarting,
+            class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateSyncing,
+            class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateFinished,
+            class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateCancelled,
+            class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateFailed,
 
             field_signature__long,
             field_signature__byte_array,
@@ -1207,8 +1244,8 @@ pub fn new_wallet_sync_state<'env>(
             create_new_object!(
                 env,
                 cache,
-                class__org_monfluo_wallet_lib_wallet_sync_Preparing,
-                CLASS__org_monfluo_wallet_lib_wallet_sync_Preparing__METHOD__init2__SIGNATURE,
+                class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStatePreparing,
+                CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStatePreparing__METHOD__init2__SIGNATURE,
                 &[
                     JValue::Long(java_timestamp),
                     JValue::Int(java_current_height)
@@ -1226,8 +1263,8 @@ pub fn new_wallet_sync_state<'env>(
             create_new_object!(
                 env,
                 cache,
-                class__org_monfluo_wallet_lib_wallet_sync_Starting,
-                CLASS__org_monfluo_wallet_lib_wallet_sync_Starting__METHOD__init3__SIGNATURE,
+                class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateStarting,
+                CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateStarting__METHOD__init3__SIGNATURE,
                 &[
                     JValue::Long(java_timestamp),
                     JValue::Int(java_current_height),
@@ -1244,8 +1281,8 @@ pub fn new_wallet_sync_state<'env>(
             create_new_object!(
                 env,
                 cache,
-                class__org_monfluo_wallet_lib_wallet_sync_Syncing,
-                CLASS__org_monfluo_wallet_lib_wallet_sync_Syncing__METHOD__init2__SIGNATURE,
+                class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateSyncing,
+                CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateSyncing__METHOD__init2__SIGNATURE,
                 &[
                     JValue::Long(java_timestamp),
                     JValue::Int(java_current_height),
@@ -1258,8 +1295,8 @@ pub fn new_wallet_sync_state<'env>(
             create_new_object!(
                 env,
                 cache,
-                class__org_monfluo_wallet_lib_wallet_sync_Finished,
-                CLASS__org_monfluo_wallet_lib_wallet_sync_Finished__METHOD__init2__SIGNATURE,
+                class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateFinished,
+                CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateFinished__METHOD__init2__SIGNATURE,
                 &[JValue::Long(java_timestamp), JValue::Int(java_height)]
             )
         }
@@ -1268,15 +1305,100 @@ pub fn new_wallet_sync_state<'env>(
             create_new_object!(
                 env,
                 cache,
-                class__org_monfluo_wallet_lib_wallet_sync_Cancelled,
-                CLASS__org_monfluo_wallet_lib_wallet_sync_Cancelled__METHOD__init1__SIGNATURE,
-                &[JValue::Long(java_timestamp),]
+                class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateCancelled,
+                CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateCancelled__METHOD__init1__SIGNATURE,
+                &[JValue::Long(java_timestamp)]
             )
         }
-        WalletSyncState::Failed {
-            timestamp: _,
-            error: _,
-        } => todo!(),
+        WalletSyncState::Failed { timestamp, error } => {
+            let java_timestamp = timestamp as jlong;
+            let java_error = new_sync_error(env, cache, &error);
+            create_new_object!(
+                env,
+                cache,
+                class__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateFailed,
+                CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateFailed__METHOD__init2__SIGNATURE,
+                &[JValue::Long(java_timestamp), JValue::Object(&java_error)]
+            )
+        }
+    }
+}
+
+pub fn new_sync_error<'env>(
+    env: &mut Env<'env>,
+    cache: &JniCache,
+    sync_error: &SyncError,
+) -> JObject<'env> {
+    match sync_error {
+        SyncError::CouldNotFetchNodeInfo { error } => {
+            let java_interface_eror = new_interface_error(env, cache, error);
+            create_new_object!(
+                env,
+                cache,
+                class__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorCouldNotFetchNodeInfo,
+                CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorCouldNotFetchNodeInfo__METHOD__init1__SIGNATURE,
+                &[JValue::Object(&java_interface_eror)]
+            )
+        }
+        SyncError::NodeNotSynced { node_info } => {
+            let java_node_info = new_node_info(env, cache, node_info);
+            create_new_object!(
+                env,
+                cache,
+                class__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorNodeNotSynced,
+                CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorNodeNotSynced__METHOD__init1__SIGNATURE,
+                &[JValue::Object(&java_node_info)]
+            )
+        }
+        SyncError::CouldNotFetchBlocks { error } => {
+            let java_interface_eror = new_interface_error(env, cache, error);
+            create_new_object!(
+                env,
+                cache,
+                class__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorCouldNotFetchBlocks,
+                CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncErrorCouldNotFetchBlocks__METHOD__init1__SIGNATURE,
+                &[JValue::Object(&java_interface_eror)]
+            )
+        }
+    }
+}
+
+pub fn new_interface_error<'env>(
+    env: &mut Env<'env>,
+    cache: &JniCache,
+    interface_error: &InterfaceError,
+) -> JObject<'env> {
+    match interface_error {
+        InterfaceError::InternalError(error_message) => {
+            let java_error_message = create_new_string!(env, error_message);
+            create_new_object!(
+                env,
+                cache,
+                class__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInternalError,
+                CLASS__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInternalError__METHOD__init1__SIGNATURE,
+                &[JValue::Object(&java_error_message)]
+            )
+        }
+        InterfaceError::InterfaceError(error_message) => {
+            let java_error_message = create_new_string!(env, error_message);
+            create_new_object!(
+                env,
+                cache,
+                class__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInterfaceErrorInner,
+                CLASS__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInterfaceErrorInner__METHOD__init1__SIGNATURE,
+                &[JValue::Object(&java_error_message)]
+            )
+        }
+        InterfaceError::InvalidInterface(error_message) => {
+            let java_error_message = create_new_string!(env, error_message);
+            create_new_object!(
+                env,
+                cache,
+                class__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInvalidInterface,
+                CLASS__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInvalidInterface__METHOD__init1__SIGNATURE,
+                &[JValue::Object(&java_error_message)]
+            )
+        }
     }
 }
 

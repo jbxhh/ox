@@ -51,12 +51,6 @@ import org.monfluo.wallet.lib.data.NodeInfo
 import org.monfluo.wallet.lib.data.Payment
 import org.monfluo.wallet.lib.data.TransactionView
 import org.monfluo.wallet.lib.wallet.Daemon
-import org.monfluo.wallet.lib.wallet.sync.Cancelled
-import org.monfluo.wallet.lib.wallet.sync.Failed
-import org.monfluo.wallet.lib.wallet.sync.Finished
-import org.monfluo.wallet.lib.wallet.sync.Preparing
-import org.monfluo.wallet.lib.wallet.sync.Starting
-import org.monfluo.wallet.lib.wallet.sync.Syncing
 import org.monfluo.wallet.lib.wallet.sync.WalletSyncObserver
 import org.monfluo.wallet.lib.wallet.sync.WalletSyncState
 import timber.log.Timber
@@ -349,9 +343,9 @@ class WalletService :
                             walletWithData.data.lastTerminalSyncState = state
                         }
                         when (state) {
-                            is Starting -> walletWithData.data.lastNodeInfo = SyncNodeInfo(state.timestamp, state.nodeInfo)
-                            is Syncing -> walletWithData.data.latestHeight = state.currentHeight
-                            is Finished -> walletWithData.data.syncCompleted = true
+                            is WalletSyncState.Starting -> walletWithData.data.lastNodeInfo = SyncNodeInfo(state.timestamp, state.nodeInfo)
+                            is WalletSyncState.Syncing -> walletWithData.data.latestHeight = state.currentHeight
+                            is WalletSyncState.Finished -> walletWithData.data.syncCompleted = true
                             else -> {}
                         }
                         updateSynchronizationStatusNotificationV2(walletWithData)
@@ -877,22 +871,22 @@ class WalletService :
 
         val nf = NumberFormat.getInstance()
         val text: CharSequence =
-            when (val state = walletWithData.data.lastSyncState) {
+            when (val state = walletWithData.data.getAdjustedLastSyncState()) {
                 null -> application.getString(R.string.wallet_not_connected)
-                is Preparing -> application.getString(R.string.starting_wallet_synchronization)
-                is Starting -> application.getString(R.string.starting_wallet_synchronization)
-                is Syncing -> {
+                is WalletSyncState.Preparing -> application.getString(R.string.starting_wallet_synchronization)
+                is WalletSyncState.Syncing, is WalletSyncState.Starting -> {
+                    val currentHeight = state.currentHeight!!
                     val targetHeight =
                         max(
                             walletWithData.data.lastNodeInfo!!
-                                .nodeInfo.height,
-                            state.currentHeight,
+                                .nodeInfo.height - 1,
+                            currentHeight,
                         )
-                    application.getString(R.string.wallet_synchronization_blocks_remaining, nf.format(state.currentHeight), nf.format(targetHeight), nf.format(targetHeight - state.currentHeight))
+                    application.getString(R.string.wallet_synchronization_blocks_remaining, nf.format(state.currentHeight), nf.format(targetHeight), nf.format(targetHeight - currentHeight))
                 }
-                is Finished -> application.getString(R.string.synchronized_at_label, nf.format(state.height))
-                is Cancelled -> "TODO: cancelled"
-                is Failed -> "TODO: failed"
+                is WalletSyncState.Finished -> application.getString(R.string.synchronized_at_label, nf.format(state.height))
+                is WalletSyncState.Cancelled -> application.getString(R.string.sync_cancelled)
+                is WalletSyncState.Failed -> application.getString(R.string.wallet_error, state.error.toString())
             }
 
         showServiceNotification(
@@ -1248,7 +1242,14 @@ data class WalletSyncData(
     var lastSyncState: WalletSyncState? = null,
     var lastNodeInfo: SyncNodeInfo? = null,
     var syncCompleted: Boolean = false,
-)
+) {
+    fun getAdjustedLastSyncState(): WalletSyncState? {
+        val lastSyncState = this.lastSyncState ?: return null
+        if (lastSyncState !is WalletSyncState.Preparing) return lastSyncState
+        val lastTerminalSyncState = this.lastTerminalSyncState ?: return lastSyncState
+        return if (lastTerminalSyncState is WalletSyncState.Finished || lastTerminalSyncState is WalletSyncState.Failed) lastTerminalSyncState else lastSyncState
+    }
+}
 
 data class WalletWithData(
     val wallet: NewWallet,

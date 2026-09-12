@@ -200,6 +200,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="slide_to_send_transaction">Slide to send transaction</string>
     <string name="service_description">Wallet is open</string>
     <string name="synchronized_at_label">Synchronized at %1$s</string>
+    <string name="sync_cancelled">Synchronized cancelled</string>
     <string name="wallet_error">Wallet error: %1$s</string>
     <string name="node_synchronization_blocks_remaining">Synchronizing node: %1$s / %2$s (%3$s blocks remaining)</string>
     <string name="wallet_synchronization_blocks_remaining">Synchronizing wallet: %1$s / %2$s (%3$s blocks remaining)</string>
