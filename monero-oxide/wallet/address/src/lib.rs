@@ -185,6 +185,10 @@ const MONERO_TESTNET_BYTES: AddressBytes = match AddressBytes::new(53, 54, 63, 1
 
 /// The network this address is for.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Zeroize)]
+#[cfg_attr(
+  feature = "strum",
+  derive(strum_macros::Display, strum_macros::EnumString, strum_macros::VariantArray)
+)]
 pub enum Network {
   /// A mainnet address.
   Mainnet,

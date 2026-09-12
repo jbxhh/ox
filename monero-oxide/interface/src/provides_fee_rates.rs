@@ -12,6 +12,10 @@ use crate::InterfaceError;
 ///
 /// Higher-priority transactions will be included in blocks earlier.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Zeroize)]
+#[cfg_attr(
+  feature = "strum",
+  derive(strum_macros::Display, strum_macros::EnumString)
+)]
 pub enum FeePriority {
   /// The `Unimportant` priority, as defined by Monero.
   Unimportant,

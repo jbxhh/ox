@@ -76,4 +76,5 @@ std = [
 ]
 compile-time-generators = ["curve25519-dalek/precomputed-tables", "monero-oxide/compile-time-generators"]
 multisig = ["std", "transcript", "frost", "monero-clsag/multisig"]
+strum = ["monero-address/strum"]
 default = ["std", "compile-time-generators"]

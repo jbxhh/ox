@@ -25,6 +25,9 @@ monero-ed25519 = { path = "../../ed25519", default-features = false }
 monero-primitives = { path = "../../primitives", default-features = false }
 monero-base58 = { path = "../base58", default-features = false }
 
+strum = { version = "0.27.2", optional = true }
+strum_macros = { version = "0.27.2", optional = true }
+
 [dev-dependencies]
 rand_core = { version = "0.6", default-features = false, features = ["std"] }
 
@@ -46,3 +49,4 @@ std = [
   "monero-base58/std",
 ]
 default = ["std"]
+strum = ["dep:strum", "dep:strum_macros"]

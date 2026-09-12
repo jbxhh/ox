@@ -25,6 +25,9 @@ hex = { version = "0.4", default-features = false, features = ["alloc"] }
 
 monero-oxide = { path = "..", default-features = false }
 
+strum = { version = "0.27.2", optional = true }
+strum_macros = { version = "0.27.2", optional = true }
+
 [features]
 std = [
   "std-shims/std",
@@ -37,3 +40,4 @@ std = [
   "monero-oxide/std",
 ]
 default = ["std"]
+strum = ["dep:strum", "dep:strum_macros"]
