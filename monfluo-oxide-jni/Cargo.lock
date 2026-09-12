@@ -1290,7 +1290,7 @@ dependencies = [
 [[package]]
 name = "monfluo-oxide"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monfluo-oxide#5ab2cde83d80b824d8e52fbc0c54a2e043ca3754"
+source = "git+https://codeberg.org/Monfluo/monfluo-oxide#bde6efca596be7eff14ce34179673f041b7d2dcf"
 dependencies = [
  "arc-swap",
  "bigdecimal",

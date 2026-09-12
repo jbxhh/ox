@@ -16,12 +16,7 @@ import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.service.wallet.WalletSyncData
 import org.monfluo.wallet.android.service.wallet.WalletWithData
 import org.monfluo.wallet.android.util.component.FragmentMonero
-import org.monfluo.wallet.lib.wallet.sync.Cancelled
-import org.monfluo.wallet.lib.wallet.sync.Failed
-import org.monfluo.wallet.lib.wallet.sync.Finished
-import org.monfluo.wallet.lib.wallet.sync.Preparing
-import org.monfluo.wallet.lib.wallet.sync.Starting
-import org.monfluo.wallet.lib.wallet.sync.Syncing
+import org.monfluo.wallet.lib.wallet.sync.WalletSyncState
 
 class FragmentNetworkStatus : FragmentMonero() {
     private val viewModel: FragmentNetworkStatusViewModel by viewModels()
@@ -54,15 +49,15 @@ class FragmentNetworkStatus : FragmentMonero() {
 
     private fun bindObservers() {
         viewModel.state.observe(viewLifecycleOwner) { state ->
+            val adjustedLastSyncState = state.getAdjustedLastSyncState()
             val (drawable, contentDescriptionResource) =
-                when (state.lastSyncState) {
-                    is Preparing -> Pair(R.drawable.synchronization_status_warning, R.string.content_description_network_status_icon_starting_synchronization)
-                    is Starting -> Pair(R.drawable.synchronization_status_warning, R.string.content_description_network_status_icon_starting_synchronization)
-                    is Syncing -> Pair(R.drawable.synchronization_status_in_progress, R.string.content_description_network_status_icon_synchronizing_wallet)
-                    is Finished -> Pair(R.drawable.synchronization_status_synced, R.string.content_description_network_status_icon_synchronized)
-                    is Cancelled -> Pair(R.drawable.synchronization_status_error, R.string.content_description_network_status_icon_wallet_error)
-                    is Failed -> Pair(R.drawable.synchronization_status_error, R.string.content_description_network_status_icon_wallet_error)
+                when (adjustedLastSyncState) {
                     null -> Pair(R.drawable.synchronization_status_starting, R.string.content_description_network_status_icon_opening_wallet)
+                    is WalletSyncState.Preparing -> Pair(R.drawable.synchronization_status_warning, R.string.content_description_network_status_icon_starting_synchronization)
+                    is WalletSyncState.Starting, is WalletSyncState.Syncing -> Pair(R.drawable.synchronization_status_in_progress, R.string.content_description_network_status_icon_synchronizing_wallet)
+                    is WalletSyncState.Finished -> Pair(R.drawable.synchronization_status_synced, R.string.content_description_network_status_icon_synchronized)
+                    is WalletSyncState.Cancelled -> Pair(R.drawable.synchronization_status_error, R.string.content_description_network_status_icon_wallet_error)
+                    is WalletSyncState.Failed -> Pair(R.drawable.synchronization_status_error, R.string.content_description_network_status_icon_wallet_error)
                 }
             val context = requireContext()
             networkStatusImageView.setImageDrawable(AppCompatResources.getDrawable(context, drawable))
