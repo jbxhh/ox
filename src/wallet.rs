@@ -10,6 +10,7 @@ use monero_wallet::send::SendError;
 use monero_wallet::transaction::NotPruned;
 use monero_wallet::transaction::PotentiallyPruned;
 use monero_wallet::transaction::Timelock;
+pub use sync::SyncError;
 pub use sync::WalletSyncObserver;
 pub use sync::WalletSyncState;
 use tokio::runtime::Runtime;
