@@ -584,6 +584,29 @@ impl<P: PotentiallyPruned> Transaction<P> {
       }
     }
   }
+
+  /// Return the fee paid by this transaction.
+  pub fn fee(&self) -> u64 {
+    match self {
+      Transaction::V1 { prefix, .. } => {
+        let amount_in: u64 = prefix
+          .inputs
+          .iter()
+          .filter_map(|input| match input {
+            Input::Gen(_) => None,
+            Input::ToKey { amount: Some(a), .. } => Some(*a),
+            Input::ToKey { amount: None, .. } => None,
+          })
+          .sum();
+        let amount_out: u64 = prefix.outputs.iter().filter_map(|o| o.amount).sum();
+        amount_in - amount_out
+      }
+      Transaction::V2 { proofs, .. } => match proofs {
+        Some(proofs) => proofs.base().fee,
+        None => 0,
+      },
+    }
+  }
 }
 
 impl Transaction<NotPruned> {
@@ -719,27 +742,6 @@ impl Transaction<NotPruned> {
 }
 
 impl Transaction<Pruned> {
-  /// Return the fee paid by this transaction.
-  pub fn fee(&self) -> u64 {
-    match self {
-      Transaction::V1 { prefix, .. } => {
-        let amount_in: u64 = prefix.inputs.iter().filter_map(|input| match input {
-          Input::Gen(_) => None,
-          Input::ToKey { amount: Some(a), .. } => Some(*a),
-          Input::ToKey { amount: None, .. } => None,
-        }).sum();
-        let amount_out: u64 = prefix.outputs.iter().filter_map(|o| o.amount).sum();
-        amount_in - amount_out
-      }
-      Transaction::V2 { proofs, .. } => {
-        match proofs {
-          Some(proofs) => proofs.base.fee,
-          None => 0,
-        }
-      }
-    }
-  }
-
   /// Return the hash of the pruned transaction.
   ///
   /// This requires the transaction be version 2 and the hash of the pruned data be provided. If
