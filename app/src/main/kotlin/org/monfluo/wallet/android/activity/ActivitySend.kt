@@ -31,7 +31,6 @@ import org.monfluo.wallet.android.adapter.AdapterTransactionDestination
 import org.monfluo.wallet.android.livedata.combineLiveDatas
 import org.monfluo.wallet.android.model.Contact
 import org.monfluo.wallet.android.model.MoneroUnit
-import org.monfluo.wallet.android.model.PendingTransaction
 import org.monfluo.wallet.android.model.TransactionDestinationRaw
 import org.monfluo.wallet.android.model.TransactionDestinationWithAmount
 import org.monfluo.wallet.android.model.Wallet
@@ -42,6 +41,7 @@ import org.monfluo.wallet.android.util.PreferenceUtils
 import org.monfluo.wallet.android.util.TextHelper
 import org.monfluo.wallet.android.util.UriPayment
 import org.monfluo.wallet.android.util.component.ActivityMonero
+import org.monfluo.wallet.lib.data.FeePriority
 import org.monfluo.wallet.lib.data.TransactionView
 import timber.log.Timber
 import kotlin.math.max
@@ -187,17 +187,17 @@ class ActivitySend : ActivityMonero() {
         }
         val selectedRadioButtonId =
             when (viewModel.priority.value!!) {
-                PendingTransaction.Priority.Priority_Default -> R.id.default_fee_radiobutton
-                PendingTransaction.Priority.Priority_Medium -> R.id.default_fee_radiobutton
-                PendingTransaction.Priority.Priority_High -> R.id.default_fee_radiobutton
+                FeePriority.Normal -> R.id.default_fee_radiobutton
+                FeePriority.Elevated -> R.id.default_fee_radiobutton
+                FeePriority.Priority -> R.id.default_fee_radiobutton
                 else -> R.id.default_fee_radiobutton
             }
         transactionFeeRadioGroup.check(selectedRadioButtonId)
         transactionFeeRadioGroup.setOnCheckedChangeListener { _: RadioGroup?, i: Int ->
             when (i) {
-                R.id.default_fee_radiobutton -> viewModel.priority.value = PendingTransaction.Priority.Priority_Default
-                R.id.medium_fee_radiobutton -> viewModel.priority.value = PendingTransaction.Priority.Priority_Medium
-                R.id.high_fee_radiobutton -> viewModel.priority.value = PendingTransaction.Priority.Priority_High
+                R.id.default_fee_radiobutton -> viewModel.priority.value = FeePriority.Normal
+                R.id.medium_fee_radiobutton -> viewModel.priority.value = FeePriority.Elevated
+                R.id.high_fee_radiobutton -> viewModel.priority.value = FeePriority.Priority
             }
         }
         createButton.setOnClickListener {
@@ -245,7 +245,6 @@ class ActivitySend : ActivityMonero() {
             val description = transactionDescriptionEditText.getText().toString().takeIf { !it.isBlank() }
 
             if (sendAll) {
-                // TODO: support sweep transactions
                 val address = parseTransactionDestinationAddressOrWarn(adapterTransactionDestination.getTransactionDestinations()[0].value, 1, nettype) ?: return@setOnClickListener
                 enabled.value = false
                 Toast.makeText(this, getString(R.string.activity_send_transaction_creating_toast), Toast.LENGTH_SHORT).show()
@@ -459,7 +458,7 @@ class SendViewModel : ViewModel() {
 
     val enotes = MutableLiveData<List<String>?>(null)
     val enotesValue = MutableLiveData<Long?>(null)
-    var priority = MutableLiveData(PendingTransaction.Priority.Priority_Default)
+    var priority = MutableLiveData(FeePriority.Normal)
     val multiAccountMode = MutableLiveData(false)
     val allowFeeOverride = MutableLiveData(false)
     val enableAddressBook = MutableLiveData(false)

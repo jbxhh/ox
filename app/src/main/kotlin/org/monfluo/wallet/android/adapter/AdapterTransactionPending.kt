@@ -64,7 +64,7 @@ class AdapterTransactionPending(
         if (pendingTransaction == null) {
             return 0
         }
-        return 1 + (pendingTransaction?.spends?.size ?: 0)
+        return 1 + (pendingTransaction?.nonChangeSpends?.size ?: 0)
     }
 
     override fun onBindViewHolder(
@@ -80,14 +80,14 @@ class AdapterTransactionPending(
             }
             is TransferViewHolder -> {
                 val adjustedPosition = position - transactionDescriptionCount
-                val value = pendingTransaction.spends[adjustedPosition]
-                val single = pendingTransaction.spends.size == 1
+                val value = pendingTransaction.nonChangeSpends[adjustedPosition]
+                val single = pendingTransaction.nonChangeSpends.size == 1
                 viewHolder.bind(value.amount, value.address!!, null, adjustedPosition, single)
             }
             is FooterViewHolder -> {
-                val amount = pendingTransaction.amount
+                val amount = pendingTransaction.nonChangeSpendAmount
                 val fee = pendingTransaction.fee
-                val single = pendingTransaction.spends.size == 1
+                val single = pendingTransaction.nonChangeSpends.size == 1
                 viewHolder.bind(amount, fee, single)
             }
         }

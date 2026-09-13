@@ -132,6 +132,7 @@ mod constants {
     pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateFailed__METHOD__init2__SIGNATURE: &str = java_constructor!(JAVA_LONG, java_class!(CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncError));
 
     pub const CLASS__org_monfluo_wallet_lib_data_Network: &str = "org.monfluo.wallet.lib.data.Network";
+    pub const CLASS__org_monfluo_wallet_lib_data_FeePriority: &str = "org.monfluo.wallet.lib.data.FeePriority";
     pub const CLASS__org_monfluo_wallet_lib_data_Address: &str = "org.monfluo.wallet.lib.data.Address";
     pub const CLASS__org_monfluo_wallet_lib_data_Address__METHOD__init2__SIGNATURE: &str = java_constructor!(java_class!(CLASS__java_lang_String), java_class!(CLASS__org_monfluo_wallet_lib_data_Network));
     pub const CLASS__org_monfluo_wallet_lib_data_Address__FIELD__value: &str = "value";
@@ -153,7 +154,8 @@ mod constants {
     pub const CLASS__org_monfluo_wallet_lib_data_TransactionViewInput: &str = "org.monfluo.wallet.lib.data.TransactionViewInput";
     pub const CLASS__org_monfluo_wallet_lib_data_TransactionViewInput__METHOD__init2__SIGNATURE: &str = java_constructor!(java_class!(CLASS__java_lang_String), JAVA_LONG);
     pub const CLASS__org_monfluo_wallet_lib_data_TransactionViewSpend: &str = "org.monfluo.wallet.lib.data.TransactionViewSpend";
-    pub const CLASS__org_monfluo_wallet_lib_data_TransactionViewSpend__METHOD__init2__SIGNATURE: &str = java_constructor!(java_class!(CLASS__java_lang_String), JAVA_LONG);
+    pub const CLASS__org_monfluo_wallet_lib_data_TransactionViewSpend__METHOD__init3__SIGNATURE: &str = java_constructor!(java_class!(CLASS__java_lang_String), JAVA_LONG, java_class!(CLASS__org_monfluo_wallet_lib_data_TransactionViewSpendType));
+    pub const CLASS__org_monfluo_wallet_lib_data_TransactionViewSpendType: &str = "org.monfluo.wallet.lib.data.TransactionViewSpendType";
     pub const CLASS__org_monfluo_wallet_lib_data_TransactionView: &str = "org.monfluo.wallet.lib.data.TransactionView";
     pub const CLASS__org_monfluo_wallet_lib_data_TransactionView__METHOD__init8__SIGNATURE: &str = java_constructor!(java_class!(CLASS__org_monfluo_wallet_lib_data_MoneroBytes), JAVA_LONG, JAVA_LONG, JAVA_INT, java_class!(CLASS__org_monfluo_wallet_lib_data_TransactionBlockInfo), java_class!(CLASS__java_util_List), java_class!(CLASS__java_util_List), java_class!(CLASS__org_monfluo_wallet_lib_data_MoneroBytes));
 
@@ -166,6 +168,8 @@ mod constants {
     pub const FIELD_SIGNATURE__org_monfluo_wallet_lib_seed_MoneroSeedLanguage: &str = java_class!(CLASS__org_monfluo_wallet_lib_seed_MoneroSeedLanguage);
     pub const FIELD_SIGNATURE__org_monfluo_wallet_lib_seed_PolyseedLanguage: &str = java_class!(CLASS__org_monfluo_wallet_lib_seed_MoneroSeedLanguage);
     pub const FIELD_SIGNATURE__org_monfluo_wallet_lib_data_Network: &str = java_class!(CLASS__org_monfluo_wallet_lib_data_Network);
+    pub const FIELD_SIGNATURE__org_monfluo_wallet_lib_data_FeePriority: &str = java_class!(CLASS__org_monfluo_wallet_lib_data_FeePriority);
+    pub const FIELD_SIGNATURE__org_monfluo_wallet_lib_data_TransactionViewSpendType: &str = java_class!(CLASS__org_monfluo_wallet_lib_data_TransactionViewSpendType);
     pub const FIELD_SIGNATURE__org_monfluo_wallet_lib_data_Address: &str = java_class!(CLASS__org_monfluo_wallet_lib_data_Address);
 }
 
@@ -174,7 +178,7 @@ use monfluo_oxide::{
     MoneroBytes,
     monero_wallet::{
         address::{MoneroAddress, Network},
-        interface::{InterfaceError, NodeInfo},
+        interface::{FeePriority, InterfaceError, NodeInfo},
     },
     wallet::{
         Payment, SyncError, WalletSyncState,
@@ -184,7 +188,7 @@ use monfluo_oxide::{
             balance::BalanceView,
             transaction::{
                 TransactionBlockInfoView, TransactionView, TransactionViewInput,
-                TransactionViewSpend,
+                TransactionViewSpend, TransactionViewSpendType,
             },
         },
     },
@@ -684,6 +688,7 @@ pub struct JniCache {
     pub class__org_monfluo_wallet_lib_seed_Seed__method__getMnemonic0: JMethodID,
     pub class__org_monfluo_wallet_lib_seed_Seed__method__getLanguage0: JMethodID,
     pub class__org_monfluo_wallet_lib_data_Network: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_data_FeePriority: Global<JClass<'static>>,
     pub class__org_monfluo_wallet_lib_data_Address: Global<JClass<'static>>,
     pub class__org_monfluo_wallet_lib_data_Balance: Global<JClass<'static>>,
     pub class__org_monfluo_wallet_lib_data_AccountView: Global<JClass<'static>>,
@@ -694,6 +699,7 @@ pub struct JniCache {
     pub class__org_monfluo_wallet_lib_data_TransactionBlockInfo: Global<JClass<'static>>,
     pub class__org_monfluo_wallet_lib_data_TransactionViewInput: Global<JClass<'static>>,
     pub class__org_monfluo_wallet_lib_data_TransactionViewSpend: Global<JClass<'static>>,
+    pub class__org_monfluo_wallet_lib_data_TransactionViewSpendType: Global<JClass<'static>>,
     pub class__org_monfluo_wallet_lib_data_TransactionView: Global<JClass<'static>>,
     pub class__org_monfluo_wallet_lib_seed_MoneroSeedLanguage: Global<JClass<'static>>,
     pub class__org_monfluo_wallet_lib_seed_MoneroSeed: Global<JClass<'static>>,
@@ -721,6 +727,8 @@ pub struct JniCache {
     pub field_signature__org_monfluo_wallet_lib_seed_MoneroSeedLanguage: RuntimeFieldSignature,
     pub field_signature__org_monfluo_wallet_lib_seed_PolyseedLanguage: RuntimeFieldSignature,
     pub field_signature__org_monfluo_wallet_lib_data_Network: RuntimeFieldSignature,
+    pub field_signature__org_monfluo_wallet_lib_data_FeePriority: RuntimeFieldSignature,
+    pub field_signature__org_monfluo_wallet_lib_data_TransactionViewSpendType: RuntimeFieldSignature,
     pub field_signature__org_monfluo_wallet_lib_data_Address: RuntimeFieldSignature,
     pub field__handle: JNIString,
     pub class__org_monfluo_wallet_lib_data_Address__field__value: JNIString,
@@ -753,6 +761,7 @@ pub fn init_cache<'env>(env: &mut Env<'env>) {
     let class__java_util_ArrayList = load_class_as_global!(env, CLASS__java_util_ArrayList);
     let class__java_util_Iterator = load_class_as_global!(env, CLASS__java_util_Iterator);
     let class__org_monfluo_wallet_lib_data_Network = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_Network);
+    let class__org_monfluo_wallet_lib_data_FeePriority = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_FeePriority);
     let class__org_monfluo_wallet_lib_data_Address = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_Address);
     let class__org_monfluo_wallet_lib_data_Balance = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_Balance);
     let class__org_monfluo_wallet_lib_data_AccountView = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_AccountView);
@@ -763,6 +772,7 @@ pub fn init_cache<'env>(env: &mut Env<'env>) {
     let class__org_monfluo_wallet_lib_data_TransactionBlockInfo = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_TransactionBlockInfo);
     let class__org_monfluo_wallet_lib_data_TransactionViewInput = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_TransactionViewInput);
     let class__org_monfluo_wallet_lib_data_TransactionViewSpend = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_TransactionViewSpend);
+    let class__org_monfluo_wallet_lib_data_TransactionViewSpendType = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_TransactionViewSpendType);
     let class__org_monfluo_wallet_lib_data_TransactionView = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_TransactionView);
     let class__org_monfluo_wallet_lib_seed_MoneroSeedLanguage = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_seed_MoneroSeedLanguage);
     let class__org_monfluo_wallet_lib_seed_MoneroSeed = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_seed_MoneroSeed);
@@ -791,6 +801,8 @@ pub fn init_cache<'env>(env: &mut Env<'env>) {
     let field_signature__org_monfluo_wallet_lib_seed_MoneroSeedLanguage = create_runtime_field_signature!(env, FIELD_SIGNATURE__org_monfluo_wallet_lib_seed_MoneroSeedLanguage);
     let field_signature__org_monfluo_wallet_lib_seed_PolyseedLanguage = create_runtime_field_signature!(env, FIELD_SIGNATURE__org_monfluo_wallet_lib_seed_PolyseedLanguage);
     let field_signature__org_monfluo_wallet_lib_data_Network = create_runtime_field_signature!(env, FIELD_SIGNATURE__org_monfluo_wallet_lib_data_Network);
+    let field_signature__org_monfluo_wallet_lib_data_FeePriority = create_runtime_field_signature!(env, FIELD_SIGNATURE__org_monfluo_wallet_lib_data_FeePriority);
+    let field_signature__org_monfluo_wallet_lib_data_TransactionViewSpendType = create_runtime_field_signature!(env, FIELD_SIGNATURE__org_monfluo_wallet_lib_data_TransactionViewSpendType);
     let field_signature__org_monfluo_wallet_lib_data_Address = create_runtime_field_signature!(env, FIELD_SIGNATURE__org_monfluo_wallet_lib_data_Address);
 
     let field__handle = JNIString::new(FIELD__HANDLE);
@@ -816,6 +828,7 @@ pub fn init_cache<'env>(env: &mut Env<'env>) {
             class__java_util_Iterator,
 
             class__org_monfluo_wallet_lib_data_Network,
+            class__org_monfluo_wallet_lib_data_FeePriority,
             class__org_monfluo_wallet_lib_data_Address,
             class__org_monfluo_wallet_lib_data_Balance,
             class__org_monfluo_wallet_lib_data_AccountView,
@@ -826,6 +839,7 @@ pub fn init_cache<'env>(env: &mut Env<'env>) {
             class__org_monfluo_wallet_lib_data_TransactionBlockInfo,
             class__org_monfluo_wallet_lib_data_TransactionViewInput,
             class__org_monfluo_wallet_lib_data_TransactionViewSpend,
+            class__org_monfluo_wallet_lib_data_TransactionViewSpendType,
             class__org_monfluo_wallet_lib_data_TransactionView,
             class__org_monfluo_wallet_lib_seed_MoneroSeedLanguage,
             class__org_monfluo_wallet_lib_seed_MoneroSeed,
@@ -854,6 +868,8 @@ pub fn init_cache<'env>(env: &mut Env<'env>) {
             field_signature__org_monfluo_wallet_lib_seed_MoneroSeedLanguage,
             field_signature__org_monfluo_wallet_lib_seed_PolyseedLanguage,
             field_signature__org_monfluo_wallet_lib_data_Network,
+            field_signature__org_monfluo_wallet_lib_data_FeePriority,
+            field_signature__org_monfluo_wallet_lib_data_TransactionViewSpendType,
             field_signature__org_monfluo_wallet_lib_data_Address,
 
             field__handle,
@@ -1063,6 +1079,27 @@ pub fn from_java_network<'env>(
     java_network: &JObject<'env>,
 ) -> Network {
     from_java_enum_using_from_str(env, cache, java_network)
+}
+
+pub fn from_java_fee_priority<'env>(
+    env: &mut Env<'env>,
+    cache: &JniCache,
+    java_fee_priority: &JObject<'env>,
+) -> FeePriority {
+    from_java_enum_using_from_str(env, cache, java_fee_priority)
+}
+
+pub fn to_java_transaction_view_spend_type<'env>(
+    env: &mut Env<'env>,
+    cache: &JniCache,
+    transaction_view_spend_type: TransactionViewSpendType,
+) -> JObject<'env> {
+    to_java_enum_using_debug(
+        env,
+        transaction_view_spend_type,
+        &cache.class__org_monfluo_wallet_lib_data_TransactionViewSpendType,
+        &cache.field_signature__org_monfluo_wallet_lib_data_TransactionViewSpendType,
+    )
 }
 
 pub fn new_address<'env>(
@@ -1636,17 +1673,26 @@ pub fn new_transaction_view_spend<'env>(
     cache: &JniCache,
     transaction_view_spend: &TransactionViewSpend,
 ) -> JObject<'env> {
-    let TransactionViewSpend { address, amount } = transaction_view_spend;
+    let TransactionViewSpend {
+        address,
+        amount,
+        r#type,
+    } = transaction_view_spend;
     let java_address = address
         .as_ref()
         .map_or(JString::null(), |address| create_new_string!(env, address));
     let java_amount = *amount as jlong;
+    let java_transaction_view_spend_type = to_java_transaction_view_spend_type(env, cache, *r#type);
     create_new_object!(
         env,
         cache,
         class__org_monfluo_wallet_lib_data_TransactionViewSpend,
-        CLASS__org_monfluo_wallet_lib_data_TransactionViewSpend__METHOD__init2__SIGNATURE,
-        &[JValue::Object(&java_address), JValue::Long(java_amount)]
+        CLASS__org_monfluo_wallet_lib_data_TransactionViewSpend__METHOD__init3__SIGNATURE,
+        &[
+            JValue::Object(&java_address),
+            JValue::Long(java_amount),
+            JValue::Object(&java_transaction_view_spend_type)
+        ]
     )
 }
 

@@ -28,7 +28,6 @@ import org.monfluo.wallet.android.data.Heights
 import org.monfluo.wallet.android.data.SynchronizationStatus
 import org.monfluo.wallet.android.model.MoneroNetworkType
 import org.monfluo.wallet.android.model.MoneroUnit
-import org.monfluo.wallet.android.model.PendingTransaction
 import org.monfluo.wallet.android.model.TransactionDestination
 import org.monfluo.wallet.android.model.TransactionDestinationResolved
 import org.monfluo.wallet.android.model.TransactionDestinationWithAmount
@@ -202,11 +201,11 @@ class WalletService :
                     Timber.d("Received message to create a sweep transaction")
                     val transactionDestination = data.getString(Constants.EXTRA_TRANSACTION_DESTINATION)!!
                     val transactionPriority =
-                        PendingTransaction.Priority.fromInteger(
+                        FeePriority.fromInt(
                             message.data.getInt(
                                 Constants.EXTRA_TRANSACTION_PRIORITY,
                             ),
-                        )!!
+                        )
                     val selectedEnotes =
                         message.data.getStringArrayList(
                             Constants.EXTRA_TRANSACTION_SELECTED_ENOTES,
@@ -221,11 +220,11 @@ class WalletService :
                             Constants.EXTRA_TRANSACTION_DESTINATIONS,
                         )!!
                     val transactionPriority =
-                        PendingTransaction.Priority.fromInteger(
+                        FeePriority.fromInt(
                             message.data.getInt(
                                 Constants.EXTRA_TRANSACTION_PRIORITY,
                             ),
-                        )!!
+                        )
                     val selectedEnotes =
                         message.data.getStringArrayList(
                             Constants.EXTRA_TRANSACTION_SELECTED_ENOTES,
@@ -492,30 +491,28 @@ class WalletService :
 
         private fun handleCreateSweepTransaction(
             destination: String,
-            priority: PendingTransaction.Priority,
-            selectedEnotes: ArrayList<String>?,
-            transactionDescription: String?,
-        ) {
-            throw RuntimeException("TODO: sweep transactions not supported")
-//            val wallet = getWalletOrThrow()
-//            val destinationResolved = resolveDestination(TransactionDestination(destination))
-//            val pendingTransactionHandle = wallet.createSweepTransaction(destinationResolved.address, "", 0, priority.ordinal, wallet.getAccountIndex(), selectedEnotes ?: ArrayList())
-//            val pendingTransaction = PendingTransaction(pendingTransactionHandle, PendingTransactionDestination.Sweep(destinationResolved), transactionDescription)
-//            disposePendingTransaction(newPendingTransaction = pendingTransaction)
-//            forEachObserver {
-//                it.onTransactionCreated(pendingTransaction)
-//            }
-        }
-
-        private fun handleCreateTransaction(
-            destinationAndAmounts: List<TransactionDestinationWithAmount>,
-            _priority: PendingTransaction.Priority,
+            priority: FeePriority,
             _selectedEnotes: ArrayList<String>?,
             _transactionDescription: String?,
         ) {
             val (wallet, data) = getNewWalletOrLog()!!
             val daemon = data.daemon!!
-            val transaction = wallet.createAndSignTransaction(daemon, destinationAndAmounts.map { Payment(Address.fromString(it.value)!!, it.amount) }, FeePriority.NORMAL)
+            val transaction = wallet.createAndSignSweepTransaction(daemon, Address.fromString(destination)!!, priority)
+            this@WalletService.pendingTransactionRef.set(transaction)
+            forEachObserver {
+                it.onTransactionCreated(transaction)
+            }
+        }
+
+        private fun handleCreateTransaction(
+            destinationAndAmounts: List<TransactionDestinationWithAmount>,
+            priority: FeePriority,
+            _selectedEnotes: ArrayList<String>?,
+            _transactionDescription: String?,
+        ) {
+            val (wallet, data) = getNewWalletOrLog()!!
+            val daemon = data.daemon!!
+            val transaction = wallet.createAndSignTransaction(daemon, destinationAndAmounts.map { Payment(Address.fromString(it.value)!!, it.amount) }, priority)
             this@WalletService.pendingTransactionRef.set(transaction)
             forEachObserver {
                 it.onTransactionCreated(transaction)
@@ -531,6 +528,7 @@ class WalletService :
             wallet.store()
             forEachObserver {
                 it.onTransactionSent(transaction, true)
+                it.onNewWalletUpdated(WalletWithData(wallet, data))
             }
         }
 
@@ -1144,7 +1142,7 @@ class WalletService :
 
     fun createSweepTransaction(
         destination: String,
-        priority: PendingTransaction.Priority,
+        priority: FeePriority,
         selectedEnotes: List<String>?,
         description: String?,
     ) {
@@ -1152,7 +1150,7 @@ class WalletService :
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.CREATE_SWEEP_TX.value()
         message.data.putString(Constants.EXTRA_TRANSACTION_DESTINATION, destination)
-        message.data.putInt(Constants.EXTRA_TRANSACTION_PRIORITY, priority.value)
+        message.data.putInt(Constants.EXTRA_TRANSACTION_PRIORITY, priority.ordinal)
         selectedEnotes?.let {
             message.data.putStringArrayList(Constants.EXTRA_TRANSACTION_SELECTED_ENOTES, ArrayList(it))
         }
@@ -1164,7 +1162,7 @@ class WalletService :
 
     fun createTransaction(
         destinations: List<TransactionDestinationWithAmount>,
-        priority: PendingTransaction.Priority,
+        priority: FeePriority,
         selectedEnotes: List<String>?,
         description: String?,
     ) {
@@ -1172,7 +1170,7 @@ class WalletService :
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.CREATE_TX.value()
         message.data.putParcelableArrayList(Constants.EXTRA_TRANSACTION_DESTINATIONS, ArrayList(destinations))
-        message.data.putInt(Constants.EXTRA_TRANSACTION_PRIORITY, priority.value)
+        message.data.putInt(Constants.EXTRA_TRANSACTION_PRIORITY, priority.ordinal)
         selectedEnotes?.let {
             message.data.putStringArrayList(Constants.EXTRA_TRANSACTION_SELECTED_ENOTES, ArrayList(it))
         }

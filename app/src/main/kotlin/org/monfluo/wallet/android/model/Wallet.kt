@@ -329,8 +329,6 @@ class Wallet(
 
     private external fun createSweepUnmixableTransactionJ(): Long
 
-    external fun disposeTransaction(pendingTransaction: PendingTransaction)
-
     private external fun getHistoryJ(): Long
 
     private external fun setListenerJ(listener: WalletListener?): Long

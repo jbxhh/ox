@@ -14,9 +14,9 @@ import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.model.MoneroUnit
 import org.monfluo.wallet.android.util.TextHelper
+import org.monfluo.wallet.lib.data.TransactionDirection
 import org.monfluo.wallet.lib.data.TransactionView
 import java.util.Date
-import kotlin.math.absoluteValue
 
 private const val VIEW_TYPE_ITEM: Int = 0
 
@@ -165,7 +165,8 @@ class AdapterTransactionInfo(
                 confirmationsTextView.setTypeface(null, Typeface.NORMAL)
             }
 
-            amountTextView.text = TextHelper.formatUnlockedBalance(itemView.context, transaction.amount.absoluteValue, MoneroUnit.MONERO, streetMode, Typeface.NORMAL)
+            val amount = if (transaction.direction == TransactionDirection.SPEND) (transaction.inputAmount - transaction.spendAmount - transaction.fee) else transaction.inputAmount
+            amountTextView.text = TextHelper.formatUnlockedBalance(itemView.context, amount, MoneroUnit.MONERO, streetMode, Typeface.NORMAL)
             val formattedDateTime = DateFormat.getInstance().format(Date(transaction.timestamp * 1000))
             txDateTimeTextView.text = if (streetMode) "#".repeat(formattedDateTime.length) else formattedDateTime
             itemView.setOnClickListener { _ -> listener.onClickTransaction(transaction) }

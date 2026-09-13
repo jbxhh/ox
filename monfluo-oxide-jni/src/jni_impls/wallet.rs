@@ -77,7 +77,7 @@ pub fn get_current_height<'local>(
         crate::RUNTIME.block_on(async {
             let handle = crate::java::get_handle(env, cache, &java_wallet);
             let wallet = crate::bridge::from_java_handle::<Wallet>(handle);
-            let height = wallet.state().current_height();
+            let height = wallet.current_height().await;
 
             Ok::<jint, jni::errors::Error>(height as jint)
         })
@@ -96,7 +96,7 @@ pub fn get_balance<'local>(
         crate::RUNTIME.block_on(async {
             let handle = crate::java::get_handle(env, cache, &java_wallet);
             let wallet = crate::bridge::from_java_handle::<Wallet>(handle);
-            let balance = wallet.balance_view();
+            let balance = wallet.balance_view().await;
             let java_balance = crate::java::new_balance(env, cache, &balance);
             Ok::<JObject, jni::errors::Error>(java_balance)
         })
@@ -116,7 +116,7 @@ pub fn get_account_view<'local>(
         crate::RUNTIME.block_on(async {
             let wallet_handle = crate::java::get_handle(env, cache, &java_wallet);
             let wallet = crate::bridge::from_java_handle::<Wallet>(wallet_handle);
-            let account_view = wallet.account_view(java_account_index as u32);
+            let account_view = wallet.account_view(java_account_index as u32).await;
             let java_account_view = crate::java::new_account_view(env, cache, &account_view);
             Ok::<JObject, jni::errors::Error>(java_account_view)
         })
@@ -136,7 +136,7 @@ pub fn get_transaction_views<'local>(
         crate::RUNTIME.block_on(async {
             let wallet_handle = crate::java::get_handle(env, cache, &java_wallet);
             let wallet = crate::bridge::from_java_handle::<Wallet>(wallet_handle);
-            let transaction_views = wallet.transaction_views();
+            let transaction_views = wallet.transaction_views().await;
             let java_transactions_view =
                 crate::java::new_transaction_views(env, cache, &transaction_views);
 
@@ -192,14 +192,7 @@ pub fn register_new_address<'local>(
             let wallet_handle = crate::java::get_handle(env, cache, &java_wallet);
             let wallet = crate::bridge::from_java_handle::<Wallet>(wallet_handle);
             let account_index = java_account_index as u32;
-            let new_address = wallet
-                .register_new_address(account_index)
-                .unwrap_or_else(|| {
-                    panic!(
-                        "failed to register new address for account {}",
-                        account_index
-                    )
-                });
+            let new_address = wallet.register_new_address(account_index).await;
             Ok::<jint, jni::errors::Error>(new_address as i32)
         })
     })
@@ -212,7 +205,7 @@ pub fn create_and_sign_transaction<'local>(
     java_wallet: JObject<'local>,
     java_daemon: JObject<'local>,
     java_payments: JObject<'local>,
-    _java_fee_prioprity: JObject<'local>,
+    java_fee_priority: JObject<'local>,
 ) -> JObject<'local> {
     let cache = crate::java::get_cache();
 
@@ -227,10 +220,12 @@ pub fn create_and_sign_transaction<'local>(
                 .into_iter()
                 .map(|java_payment| crate::java::from_java_payment(env, cache, &java_payment))
                 .collect::<Vec<_>>();
-            let (transaction, outgoing_transfer) =
-                wallet.create_transaction(daemon, payments).await;
+            let fee_priority = crate::java::from_java_fee_priority(env, cache, &java_fee_priority);
+            let (transaction, outgoing_transfer) = wallet
+                .create_transaction(daemon, payments, fee_priority)
+                .await;
             let transaction = wallet.sign_tranasction(transaction).await;
-            let first_seen_timestamp = monfluo_oxide::current_timestamp() / 1000;
+            let first_seen_timestamp = monfluo_oxide::current_timestamp_seconds();
             let pending_transaction = TransactionWrapper {
                 inner: transaction.clone(),
                 hash: transaction.hash(),
@@ -238,7 +233,55 @@ pub fn create_and_sign_transaction<'local>(
                 first_seen_timestamp,
                 outgoing_transfer: Some(outgoing_transfer.clone()),
             };
-            let transaction_view = wallet.transaction_view_of(&pending_transaction);
+            let transaction_view = wallet
+                .create_transaction_view_of(&pending_transaction)
+                .await;
+            *PENDING_TRANSACTION.lock().await = Some(pending_transaction);
+            let java_transaction_view =
+                crate::java::new_transaction_view(env, cache, &transaction_view);
+            Ok::<JObject<'local>, jni::errors::Error>(java_transaction_view)
+        })
+    })
+    .resolve::<ThrowRuntimeExAndDefault>()
+}
+
+#[jni_mangle(
+    "org.monfluo.wallet.lib.wallet.Wallet",
+    "createAndSignSweepTransaction"
+)]
+pub fn create_and_sign_sweep_transaction<'local>(
+    mut env: EnvUnowned<'local>,
+    java_wallet: JObject<'local>,
+    java_daemon: JObject<'local>,
+    java_address: JObject<'local>,
+    java_fee_priority: JObject<'local>,
+) -> JObject<'local> {
+    let cache = crate::java::get_cache();
+
+    env.with_env(|env| {
+        crate::RUNTIME.block_on(async {
+            let wallet_handle = crate::java::get_handle(env, cache, &java_wallet);
+            let wallet = crate::bridge::from_java_handle::<Wallet>(wallet_handle);
+            let daemon_handle = crate::java::get_handle(env, cache, &java_daemon);
+            let daemon =
+                crate::bridge::from_java_handle::<MoneroDaemon<MonfluoTransport>>(daemon_handle);
+            let address = crate::java::from_java_address(env, cache, &java_address);
+            let fee_priority = crate::java::from_java_fee_priority(env, cache, &java_fee_priority);
+            let (transaction, outgoing_transfer) = wallet
+                .create_sweep_transaction(daemon, address, fee_priority)
+                .await;
+            let transaction = wallet.sign_tranasction(transaction).await;
+            let first_seen_timestamp = monfluo_oxide::current_timestamp_seconds();
+            let pending_transaction = TransactionWrapper {
+                inner: transaction.clone(),
+                hash: transaction.hash(),
+                block_info: None,
+                first_seen_timestamp,
+                outgoing_transfer: Some(outgoing_transfer.clone()),
+            };
+            let transaction_view = wallet
+                .create_transaction_view_of(&pending_transaction)
+                .await;
             *PENDING_TRANSACTION.lock().await = Some(pending_transaction);
             let java_transaction_view =
                 crate::java::new_transaction_view(env, cache, &transaction_view);

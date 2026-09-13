@@ -248,19 +248,17 @@ class AdapterTransactionDestination(
             when (sendAll) {
                 SendAll.UNSELECTED -> {
                     transactionDestinationAmountSendAllButton.setText(transactionDestinationSendAllLabel)
-                    // transactionDestinationAmountSendAllButton.setEnabled(enabled)
-                    transactionDestinationAmountSendAllButton.setEnabled(false)
-//                    transactionDestinationAmountSendAllButton.setOnClickListener {
-//                        listener.onSendAllClicked()
-//                    }
+                    transactionDestinationAmountSendAllButton.setEnabled(enabled)
+                    transactionDestinationAmountSendAllButton.setOnClickListener {
+                        listener.onSendAllClicked()
+                    }
                 }
                 SendAll.SELECTED -> {
                     transactionDestinationAmountSendAllButton.setText(transactionDestinationSendAllUndoLabel)
-                    // transactionDestinationAmountSendAllButton.setEnabled(enabled)
-                    transactionDestinationAmountSendAllButton.setEnabled(false)
-//                    transactionDestinationAmountSendAllButton.setOnClickListener {
-//                        listener.onSendAllClicked()
-//                    }
+                    transactionDestinationAmountSendAllButton.setEnabled(enabled)
+                    transactionDestinationAmountSendAllButton.setOnClickListener {
+                        listener.onSendAllClicked()
+                    }
                 }
                 SendAll.UNAVAILABLE -> {
                     transactionDestinationAmountSendAllButton.setText(transactionDestinationSendAllLabel)
