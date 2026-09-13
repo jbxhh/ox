@@ -1,6 +1,7 @@
 package org.monfluo.wallet.lib.wallet
 
 import org.monfluo.wallet.lib.data.AccountView
+import org.monfluo.wallet.lib.data.Address
 import org.monfluo.wallet.lib.data.Balance
 import org.monfluo.wallet.lib.data.FeePriority
 import org.monfluo.wallet.lib.data.MoneroBytes
@@ -41,6 +42,12 @@ class Wallet(
     external fun createAndSignTransaction(
         daemon: Daemon,
         payments: List<Payment>,
+        feePriority: FeePriority,
+    ): TransactionView
+
+    external fun createAndSignSweepTransaction(
+        daemon: Daemon,
+        address: Address,
         feePriority: FeePriority,
     ): TransactionView
 
