@@ -5,31 +5,21 @@ use std::{
 
 use monero_daemon_rpc::MoneroDaemon;
 use monero_wallet::{
-    Scanner, Timelocked,
-    address::{Network, SubaddressIndex},
-    ed25519::Scalar,
+    address::Network,
     interface::{BlocksRequest, InterfaceError, MempoolTransaction, NodeInfo, ProvidesNodeInfo, ScannableBlock, UnvalidatedScannableBlocksWithMempool},
-    transaction::{Input, Pruned, Transaction},
 };
 use tracing::{debug, info, warn};
 
 use crate::{
-    MoneroBytes, current_timestamp,
+    current_timestamp_millis,
     transport::MonfluoTransport,
-    util::{HexFormatted, SubaddressIndexDisplay},
+    util::HexFormatted,
     wallet::{
-        Wallet,
-        state::{BlockIdentifier, Blockchain, TransactionBlockInfo, TransactionWrapper, WalletState},
+        TransactionWrapper, Wallet,
+        scan::{create_scanner, process_scan_result, process_transaction},
+        state::{BlockIdentifier, Blockchain, TransactionBlockInfo},
     },
 };
-
-// how many accounts we register in the scanner
-// TODO: this should be a wallet setting, so that advanced users can override it to a higher value
-const ACCOUNTS: u32 = 100;
-// how many addresses we register per account in the scanner
-// TODO: this should be a wallet setting, so that advanced users can override it to a higher value
-const ADDRESSES: u32 = 1000;
-
 #[derive(Debug)]
 pub enum SyncError {
     CouldNotFetchNodeInfo { error: InterfaceError },
@@ -51,8 +41,8 @@ pub trait WalletSyncObserver {
     fn observe(&mut self, state: WalletSyncState);
 }
 
-fn make_blocks_request(network: Network, blockchain: &mut Blockchain) -> BlocksRequest {
-    let hashes = blockchain.as_sorted_slice();
+fn make_blocks_request(network: Network, blockchain: &Blockchain) -> BlocksRequest {
+    let hashes = blockchain.hashes();
     if hashes.is_empty() {
         return BlocksRequest::from_height(blockchain.start_block_number() as u64);
     }
@@ -71,76 +61,20 @@ async fn fetch_blocks(daemon: Arc<MoneroDaemon<MonfluoTransport>>, blocks_reques
         .await
 }
 
-fn process_scan_result(state: &mut WalletState, spend_key: &Scalar, transaction_block_info: Option<TransactionBlockInfo>, first_seen_timestamp: u64, timelocked: Timelocked, transactions: HashMap<MoneroBytes, Transaction<Pruned>>) {
-    let outputs = timelocked.ignore_additional_timelock();
-    if !outputs.is_empty() {
-        info!("Found {} outputs", outputs.len());
-        for output in outputs {
-            let transaction_hash = output.transaction();
-            let transaction = transactions
-                .get(&transaction_hash)
-                .expect("Could not find transaction of a wallet output");
-            info!("Found output with relative id {} to address {} and amount {} in transaction {}", output.index_on_blockchain(), SubaddressIndexDisplay(output.subaddress()), output.commitment().amount, HexFormatted::borrowed(&transaction_hash));
-            if let Some(subaddress_index) = output.subaddress() {
-                let account = subaddress_index.account();
-                let address = subaddress_index.address();
-                let new_last_tracked_address = address + 1;
-                match state.tracked_addresses.entry(account) {
-                    std::collections::btree_map::Entry::Vacant(vacant_entry) => {
-                        vacant_entry.insert(new_last_tracked_address);
-                        info!("Set last tracked address for account {} to {}", account, new_last_tracked_address);
-                    }
-                    std::collections::btree_map::Entry::Occupied(mut occupied_entry) => {
-                        let current_last_tracked_address = *occupied_entry.get();
-                        if new_last_tracked_address > current_last_tracked_address {
-                            occupied_entry.insert(new_last_tracked_address);
-                            info!("Updated last tracked address for account {} to {}", account, new_last_tracked_address);
-                        }
-                    }
-                }
-            }
-            let transaction_wrapper = TransactionWrapper::new(transaction.clone(), transaction_hash, transaction_block_info, first_seen_timestamp, None);
-            state.add_transaction(transaction_wrapper);
-            state.add_output(output, spend_key);
-        }
-    }
-}
-
-fn process_transaction(state: &mut WalletState, transaction_block_info: Option<TransactionBlockInfo>, first_seen_timestamp: u64, transaction_hash: MoneroBytes, transaction: &Transaction<Pruned>) {
-    let transaction_wrapper = TransactionWrapper::new(transaction.clone(), transaction_hash, transaction_block_info, first_seen_timestamp, None);
-    let relevant_inputs = state.add_transaction_if_spends_output(transaction_wrapper);
-    for input_index in relevant_inputs.keys().copied() {
-        let Input::ToKey {
-            ..
-        } = transaction.prefix().inputs[input_index as usize]
-        else {
-            panic!("Wallet returned bad relevant input index {input_index} for transaction {}", HexFormatted::borrowed(&transaction_hash));
-        };
-        info!("Found a spend in transaction {}", HexFormatted::borrowed(&transaction_hash));
-    }
-}
-
 pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: super::Daemon, mut observer: O, cancellation_token: Arc<AtomicBool>) {
-    let mut state = (*wallet.state()).clone();
-    let wallet_initial_height = state.current_height();
+    let wallet_initial_height = wallet.read_state().await.current_height();
     let network = wallet.secrets.network();
     observer.observe(WalletSyncState::Preparing {
-        timestamp: current_timestamp(),
-        current_height: state.current_height(),
+        timestamp: current_timestamp_millis(),
+        current_height: wallet_initial_height,
     });
 
-    let mut scanner = Scanner::new(wallet.view_pair());
-    for account in 0..ACCOUNTS {
-        let from_address = if account == 0 { 1 } else { 0 };
-        for address in from_address..=ADDRESSES {
-            scanner.register_subaddress(SubaddressIndex::new(account, address).expect("failed to construct subbaddress index during sync when registering addresses in scanner"));
-        }
-    }
+    let mut scanner = create_scanner(&*wallet.read_state().await, &wallet);
     let node_info = match daemon.node_info().await {
         Ok(node_info) => node_info,
         Err(e) => {
             observer.observe(WalletSyncState::Failed {
-                timestamp: current_timestamp(),
+                timestamp: current_timestamp_millis(),
                 error: SyncError::CouldNotFetchNodeInfo {
                     error: e,
                 },
@@ -152,7 +86,7 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
     let node_target_height = node_info.target_height;
     if node_target_height != 0 && node_height != node_target_height {
         observer.observe(WalletSyncState::Failed {
-            timestamp: current_timestamp(),
+            timestamp: current_timestamp_millis(),
             error: SyncError::NodeNotSynced {
                 node_info,
             },
@@ -161,14 +95,15 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
     }
     info!("Will be syncing from current wallet height {}", wallet_initial_height);
     observer.observe(WalletSyncState::Starting {
-        timestamp: current_timestamp(),
+        timestamp: current_timestamp_millis(),
         current_height: wallet_initial_height,
         node_info,
     });
 
     let mut latest_synced_block = wallet_initial_height;
     let mut handle = {
-        let blocks_request = make_blocks_request(network, &mut state.blockchain);
+        let state = wallet.read_state().await;
+        let blocks_request = make_blocks_request(network, &state.blockchain);
         let task = tokio::spawn(fetch_blocks(daemon.clone(), blocks_request, state.cache.last_sync_daemon_time.unwrap_or(0)));
         Some(task)
     };
@@ -176,7 +111,7 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
         if cancellation_token.load(std::sync::atomic::Ordering::Relaxed) {
             debug!("Sync cancelled");
             observer.observe(WalletSyncState::Cancelled {
-                timestamp: current_timestamp(),
+                timestamp: current_timestamp_millis(),
             });
             return;
         }
@@ -188,7 +123,7 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
             Ok(blocks) => blocks,
             Err(e) => {
                 observer.observe(WalletSyncState::Failed {
-                    timestamp: current_timestamp(),
+                    timestamp: current_timestamp_millis(),
                     error: SyncError::CouldNotFetchBlocks {
                         error: e,
                     },
@@ -196,7 +131,7 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
                 return;
             }
         };
-        let sync_timestamp = current_timestamp();
+        let sync_timestamp = current_timestamp_millis();
         observer.observe(WalletSyncState::Syncing {
             timestamp: sync_timestamp,
             current_height: latest_synced_block,
@@ -214,6 +149,7 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
         } = blocks_with_mempool;
 
         // Process blocks
+        let mut state = wallet.write_state().await;
         if blocks.is_empty() {
             info!("Fetched 0 blocks, stopping sync");
         } else {
@@ -246,7 +182,7 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
                     fast_forwarded_blockchain.push(block.block.hash());
                 }
                 handle = {
-                    let blocks_request = make_blocks_request(network, &mut fast_forwarded_blockchain);
+                    let blocks_request = make_blocks_request(network, &fast_forwarded_blockchain);
                     let task = tokio::spawn(fetch_blocks(daemon.clone(), blocks_request, daemon_time));
                     Some(task)
                 };
@@ -281,20 +217,25 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
                     .block
                     .transactions
                     .iter()
-                    .copied()
-                    .zip(block.transactions.iter().cloned())
+                    .zip(block.transactions.iter())
+                    .map(|(transaction_hash, transaction)| {
+                        (
+                            *transaction_hash,
+                            TransactionWrapper {
+                                inner: transaction.clone(),
+                                hash: *transaction_hash,
+                                block_info: transaction_block_info,
+                                first_seen_timestamp: block_timestamp,
+                                outgoing_transfer: None,
+                            },
+                        )
+                    })
                     .collect::<HashMap<_, _>>();
 
                 let timelocked = scanner.scan(block.clone()).expect("Failed to scan a block");
-                process_scan_result(&mut state, wallet.secrets.spend_key(), transaction_block_info, block_timestamp, timelocked, transactions);
-                for (transaction_hash, transaction) in block
-                    .block
-                    .transactions
-                    .iter()
-                    .copied()
-                    .zip(block.transactions.iter())
-                {
-                    process_transaction(&mut state, transaction_block_info, block_timestamp, transaction_hash, transaction);
+                process_scan_result(&mut state, wallet.secrets.spend_key(), timelocked, transactions.clone());
+                for transaction in transactions.into_values() {
+                    process_transaction(&mut state, transaction);
                 }
 
                 latest_synced_block = block_number;
@@ -330,12 +271,19 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
                     continue;
                 }
             };
-            let transactions = [(transaction_hash, transaction.clone())]
+            let mempool_transaction_timestamp = sync_timestamp / 1000;
+            let transaction_wrapper = TransactionWrapper {
+                inner: transaction.clone(),
+                hash: transaction_hash,
+                block_info: None,
+                first_seen_timestamp: mempool_transaction_timestamp,
+                outgoing_transfer: None,
+            };
+            let transactions = [(transaction_hash, transaction_wrapper.clone())]
                 .into_iter()
                 .collect();
-            let mempool_transaction_timestamp = sync_timestamp / 1000;
-            process_scan_result(&mut state, wallet.secrets.spend_key(), None, mempool_transaction_timestamp, timelocked, transactions);
-            process_transaction(&mut state, None, mempool_transaction_timestamp, transaction_hash, &transaction);
+            process_scan_result(&mut state, wallet.secrets.spend_key(), timelocked, transactions);
+            process_transaction(&mut state, transaction_wrapper);
             state
                 .cache
                 .mempool_transactions
@@ -346,19 +294,19 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
         // TODO: fetch and process remaining_mempool_txids
 
         state.cache.last_sync_daemon_time = Some(daemon_time);
-        wallet.update_state(state.clone());
+        drop(state);
         info!("Finished processing batch of blocks");
         wallet.store().await;
         debug!("Wallet stored after processing batch of blocks");
         observer.observe(WalletSyncState::Syncing {
-            timestamp: current_timestamp(),
+            timestamp: current_timestamp_millis(),
             current_height: latest_synced_block,
         });
     }
 
     info!("Finished syncing");
     observer.observe(WalletSyncState::Finished {
-        timestamp: current_timestamp(),
+        timestamp: current_timestamp_millis(),
         height: latest_synced_block,
     });
 }

@@ -7,7 +7,6 @@ use monero_wallet::{
     WalletOutput,
     ed25519::{CompressedPoint, Point, Scalar},
 };
-use subtle::ConstantTimeEq;
 use zeroize::Zeroizing;
 
 use crate::MoneroBytes;
@@ -224,7 +223,7 @@ pub fn key_image_of_output(output: &WalletOutput, sender_spend_key: &Scalar) -> 
 
 fn key_image_of_output_inner(output: &WalletOutput, sender_spend_key: &Scalar) -> Option<CompressedPoint> {
     let input_key = Zeroizing::new((*sender_spend_key).into() + output.key_offset().into());
-    if bool::from(!(input_key.deref() * ED25519_BASEPOINT_TABLE).ct_eq(&output.key().into())) {
+    if !(input_key.deref() * ED25519_BASEPOINT_TABLE).eq(&output.key().into()) {
         return None;
     }
     let key_image = Point::from(input_key.deref() * Point::biased_hash(output.key().compress().to_bytes()).into());

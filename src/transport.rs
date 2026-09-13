@@ -11,6 +11,8 @@ use zeroize::Zeroizing;
 
 use monero_daemon_rpc::{HttpTransport, MoneroDaemon, prelude::InterfaceError};
 
+use crate::util::HexFormatted;
+
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(30);
 
 #[derive(Clone, Debug)]
@@ -175,7 +177,7 @@ impl MonfluoTransport {
                         *cnonce += 1;
 
                         let mut ctx = AuthContext::new_post::<_, _, _, &[u8]>(username.as_str(), password.as_str(), route, None);
-                        ctx.set_custom_cnonce(hex::encode(cnonce.to_le_bytes()));
+                        ctx.set_custom_cnonce(HexFormatted::borrowed(&cnonce.to_le_bytes()).to_string());
 
                         let auth_header = challenge
                             .respond(&ctx)

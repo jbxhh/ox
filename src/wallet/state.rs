@@ -1,7 +1,4 @@
-use std::{
-    collections::{BTreeMap, HashMap, VecDeque},
-    path::Path,
-};
+use std::{collections::HashMap, path::Path};
 
 use monero_wallet::{
     WalletOutput,
@@ -22,14 +19,14 @@ pub enum Error {}
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Blockchain {
     start_block_number: u32,
-    hashes: VecDeque<MoneroBytes>,
+    hashes: Vec<MoneroBytes>,
 }
 
 impl Blockchain {
-    pub fn new(start_block_number: u32, hashes: &[MoneroBytes]) -> Self {
+    pub fn new(start_block_number: u32, hashes: Vec<MoneroBytes>) -> Self {
         Self {
             start_block_number,
-            hashes: hashes.iter().copied().collect(),
+            hashes,
         }
     }
 
@@ -38,25 +35,55 @@ impl Blockchain {
     }
 
     pub fn last(&self) -> Option<&MoneroBytes> {
-        self.hashes.back()
+        self.hashes.last()
     }
 
     pub fn push(&mut self, hash: MoneroBytes) {
-        self.hashes.push_back(hash);
+        self.hashes.push(hash);
     }
 
-    pub fn truncate(&mut self, size: usize) {
-        if size == 0 {
-            return;
-        }
-        while self.hashes.len() > size {
-            let _ = self.hashes.pop_front();
-            self.start_block_number += 1;
+    pub fn hashes(&self) -> &[MoneroBytes] {
+        &self.hashes
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TrackedAddresses {
+    // index = account index, value = last generated address index for that account
+    tracked_addresses: Vec<u32>,
+}
+
+impl TrackedAddresses {
+    pub fn new() -> Self {
+        Self {
+            tracked_addresses: vec![0],
         }
     }
 
-    pub fn as_sorted_slice(&mut self) -> &[MoneroBytes] {
-        self.hashes.make_contiguous()
+    pub fn addresses(&self) -> &Vec<u32> {
+        &self.tracked_addresses
+    }
+
+    pub fn register_new_account(&mut self) -> u32 {
+        self.tracked_addresses.push(0);
+        (self.tracked_addresses.len() - 1) as u32
+    }
+
+    pub fn increment_last_tracked_address(&mut self, account: u32) -> u32 {
+        while self.tracked_addresses.len() < account as usize {
+            self.tracked_addresses.push(0);
+        }
+        self.tracked_addresses[account as usize] += 1;
+        self.tracked_addresses[account as usize]
+    }
+
+    pub fn set_last_tracked_address(&mut self, account: u32, address: u32) {
+        while self.tracked_addresses.len() < account as usize {
+            self.tracked_addresses.push(0);
+        }
+        if self.tracked_addresses[account as usize] < address {
+            self.tracked_addresses[account as usize] = address;
+        }
     }
 }
 
@@ -92,9 +119,16 @@ pub struct OutgoingTransfer {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum OutgoingPaymentType {
+    Payment,
+    Change,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OutgoingPayment {
     pub address: String,
     pub amount: u64,
+    pub r#type: OutgoingPaymentType,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -171,6 +205,22 @@ impl WalletOutputWrapper {
             transaction_index: self.inner.index_in_transaction(),
         }
     }
+
+    pub fn is_locked(&self, block_height: u32, current_height: u32, current_timestamp_seconds: u64) -> bool {
+        if current_height < block_height + crate::CONFIRMATIONS - 1 {
+            return true;
+        }
+        match self.inner.additional_timelock() {
+            monero_wallet::transaction::Timelock::None => false,
+            monero_wallet::transaction::Timelock::Block(block_height) => (current_height as usize) < block_height,
+            monero_wallet::transaction::Timelock::Time(timelock_timestamp_seconds) => current_timestamp_seconds < timelock_timestamp_seconds,
+        }
+    }
+
+    pub fn is_frozen(&self) -> bool {
+        // TODO: impement freezing/thawing enotes
+        false
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
@@ -178,7 +228,7 @@ pub struct WalletState {
     #[zeroize(skip)]
     pub blockchain: Blockchain,
     #[zeroize(skip)]
-    pub tracked_addresses: BTreeMap<u32, u32>,
+    pub addresses: TrackedAddresses,
     #[serde(serialize_with = "serde_utils::serialize_hashmap_as_vec")]
     #[serde(deserialize_with = "serde_utils::deserialize_hashmap_as_vec")]
     #[zeroize(skip)]
@@ -207,11 +257,9 @@ pub struct WalletStateCache {
 
 impl WalletState {
     pub fn new(restore_height: u32) -> Self {
-        let mut tracked_addresses = BTreeMap::new();
-        tracked_addresses.insert(0, 0);
         Self {
-            blockchain: Blockchain::new(restore_height, &[]),
-            tracked_addresses,
+            blockchain: Blockchain::new(restore_height, vec![]),
+            addresses: TrackedAddresses::new(),
             outputs: HashMap::new(),
             transactions: HashMap::new(),
             cache: Default::default(),
@@ -251,8 +299,8 @@ impl WalletState {
         self.blockchain.start_block_number + (self.blockchain.hashes.len() as u32).saturating_sub(1)
     }
 
-    pub fn tracked_addresses(&self) -> &BTreeMap<u32, u32> {
-        &self.tracked_addresses
+    pub fn account_addresses(&self) -> &TrackedAddresses {
+        &self.addresses
     }
 
     pub fn outputs(&self) -> &HashMap<WalletOutputId, WalletOutputWrapper> {
@@ -327,6 +375,30 @@ impl WalletState {
         }
 
         relevant_inputs
+    }
+
+    pub(crate) fn find_available_wallet_outputs(&self) -> Vec<&WalletOutputWrapper> {
+        let current_height = self.current_height();
+        let current_timestamp_seconds = crate::current_timestamp_seconds();
+        let mut available_wallet_outputs = self
+            .outputs
+            .values()
+            .filter(|output| {
+                self.transactions[&output.inner.transaction()]
+                    .block_info
+                    .is_some_and(|block_info| !output.is_locked(block_info.block.height, current_height, current_timestamp_seconds))
+            })
+            .filter(|output| !output.is_frozen())
+            .filter(|output| {
+                !self
+                    .cache
+                    .key_image_to_spend_transaction_input
+                    .contains_key(&output.cached_key_image)
+            })
+            .collect::<Vec<_>>();
+        // TODO: this will select lowest-amount enotes first, is this the strategy we want to use?
+        available_wallet_outputs.sort_by_key(|output| output.inner.commitment().amount);
+        available_wallet_outputs
     }
 }
 

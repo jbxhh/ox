@@ -27,6 +27,8 @@ pub const STAGENET_GENESIS_BLOCK_HASH_BYTES: MoneroBytes = [118, 238, 60, 201, 1
 pub const TESTNET_GENESIS_BLOCK_HASH: &str = "48ca7cd3c8de5b6a4d53d2861fbdaedca141553559f9be9520068053cda8430b";
 pub const TESTNET_GENESIS_BLOCK_HASH_BYTES: MoneroBytes = [72, 202, 124, 211, 200, 222, 91, 106, 77, 83, 210, 134, 31, 189, 174, 220, 161, 65, 85, 53, 89, 249, 190, 149, 32, 6, 128, 83, 205, 168, 67, 11];
 
+pub const CONFIRMATIONS: u32 = 10;
+
 static RNG: LazyLock<RwLock<ChaCha20Rng>> = LazyLock::new(|| RwLock::new(ChaCha20Rng::from_entropy()));
 
 async fn get_rng_mut<'a>() -> RwLockWriteGuard<'a, ChaCha20Rng> {
@@ -41,11 +43,15 @@ pub async fn generate_polyseed(lang: monero_wallet_util::seed::polyseed::Languag
     monero_wallet_util::seed::polyseed::Polyseed::new(&mut *get_rng_mut().await, lang)
 }
 
-pub fn current_timestamp() -> u64 {
+pub fn current_timestamp_millis() -> u64 {
     chrono::Local::now()
         .timestamp_millis()
         .try_into()
         .expect("failed to convert current timestamp into u64")
+}
+
+pub fn current_timestamp_seconds() -> u64 {
+    current_timestamp_millis() / 1000
 }
 
 #[cfg(test)]

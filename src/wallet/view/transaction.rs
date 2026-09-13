@@ -24,8 +24,17 @@ pub struct TransactionViewInput {
     pub amount: u64,
 }
 
+#[derive(Debug, Clone, Copy, Default)]
+pub enum TransactionViewSpendType {
+    Payment,
+    Change,
+    #[default]
+    Unknown,
+}
+
 #[derive(Debug, Clone)]
 pub struct TransactionViewSpend {
     pub address: Option<String>,
     pub amount: u64,
+    pub r#type: TransactionViewSpendType,
 }
