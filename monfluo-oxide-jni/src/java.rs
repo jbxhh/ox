@@ -64,6 +64,8 @@ mod constants {
     pub const CLASS__java_lang_Number: &str = "java.lang.Number";
     pub const CLASS__java_lang_Number__METHOD__intValue0: & str = "intValue";
     pub const CLASS__java_lang_Number__METHOD__intValue0__SIGNATURE: &str = concat!(java_args!(), JAVA_INT);
+    pub const CLASS__java_lang_Integer: &str = "java.lang.Integer";
+    pub const CLASS__java_lang_Integer__METHOD__init1__SIGNATURE: &str = java_constructor!(JAVA_INT);
     pub const CLASS__java_lang_Enum: &str = "java.lang.Enum";
     pub const CLASS__java_lang_Enum__METHOD__name0: &str = "name";
     pub const CLASS__java_lang_Enum__METHOD__name0__SIGNATURE: &str = concat!(java_args!(), java_class!(CLASS__java_lang_String));
@@ -119,7 +121,7 @@ mod constants {
     pub const CLASS__org_monfluo_wallet_lib_wallet_sync_InterfaceErrorInvalidInterface__METHOD__init1__SIGNATURE: &str = java_constructor!(java_class!(CLASS__java_lang_String));
     pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncState: &str = "org.monfluo.wallet.lib.wallet.sync.WalletSyncState";
     pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStatePreparing: &str = "org.monfluo.wallet.lib.wallet.sync.WalletSyncState$Preparing";
-    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStatePreparing__METHOD__init2__SIGNATURE: &str = java_constructor!(JAVA_LONG, JAVA_INT);
+    pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStatePreparing__METHOD__init2__SIGNATURE: &str = java_constructor!(JAVA_LONG, java_class!(CLASS__java_lang_Integer));
     pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateStarting: &str = "org.monfluo.wallet.lib.wallet.sync.WalletSyncState$Starting";
     pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateStarting__METHOD__init3__SIGNATURE: &str = java_constructor!(JAVA_LONG, JAVA_INT, java_class!(CLASS__org_monfluo_wallet_lib_data_NodeInfo));
     pub const CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStateSyncing: &str = "org.monfluo.wallet.lib.wallet.sync.WalletSyncState$Syncing";
@@ -682,6 +684,7 @@ pub struct JniCache {
     pub class__java_util_List__method__add1: JMethodID,
     pub class__java_util_Iterator__method__hasNext0: JMethodID,
     pub class__java_util_Iterator__method__next0: JMethodID,
+    pub class__java_lang_Integer: Global<JClass<'static>>,
     pub class__java_util_ArrayList: Global<JClass<'static>>,
     pub class__java_util_Iterator: Global<JClass<'static>>,
     pub class__org_monfluo_wallet_lib_wallet_WalletSyncObserver__method__observe1: JMethodID,
@@ -758,6 +761,7 @@ pub fn init_cache<'env>(env: &mut Env<'env>) {
     let class__org_monfluo_wallet_lib_seed_Seed__method__getMnemonic0 = find_method!(env, CLASS__org_monfluo_wallet_lib_seed_Seed, CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getMnemonic0, CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getMnemonic0__SIGNATURE);
     let class__org_monfluo_wallet_lib_seed_Seed__method__getLanguage0 = find_method!(env, CLASS__org_monfluo_wallet_lib_seed_Seed, CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getLanguage0, CLASS__org_monfluo_wallet_lib_seed_Seed__METHOD__getLanguage0__SIGNATURE);
 
+    let class__java_lang_Integer = load_class_as_global!(env, CLASS__java_lang_Integer);
     let class__java_util_ArrayList = load_class_as_global!(env, CLASS__java_util_ArrayList);
     let class__java_util_Iterator = load_class_as_global!(env, CLASS__java_util_Iterator);
     let class__org_monfluo_wallet_lib_data_Network = load_class_as_global!(env, CLASS__org_monfluo_wallet_lib_data_Network);
@@ -823,7 +827,8 @@ pub fn init_cache<'env>(env: &mut Env<'env>) {
             class__org_monfluo_wallet_lib_wallet_WalletSyncObserver__method__observe1,
             class__org_monfluo_wallet_lib_seed_Seed__method__getMnemonic0,
             class__org_monfluo_wallet_lib_seed_Seed__method__getLanguage0,
-            
+
+            class__java_lang_Integer,
             class__java_util_ArrayList,
             class__java_util_Iterator,
 
@@ -971,6 +976,17 @@ pub fn from_java_number_int_value<'env>(
         i32,
         &[]
     ))
+}
+
+pub fn new_integer<'env>(env: &mut Env<'env>, cache: &JniCache, integer: i32) -> JObject<'env> {
+    let java_integer = integer as jint;
+    create_new_object!(
+        env,
+        cache,
+        class__java_lang_Integer,
+        CLASS__java_lang_Integer__METHOD__init1__SIGNATURE,
+        &[JValue::Int(java_integer)]
+    )
 }
 
 pub fn new_arraylist<'env>(env: &mut Env<'env>, cache: &JniCache) -> JObject<'env> {
@@ -1277,7 +1293,9 @@ pub fn new_wallet_sync_state<'env>(
             current_height,
         } => {
             let java_timestamp = timestamp as jlong;
-            let java_current_height = current_height as jint;
+            let java_current_height = current_height.map_or(JObject::null(), |current_height| {
+                new_integer(env, cache, current_height as i32)
+            });
             create_new_object!(
                 env,
                 cache,
@@ -1285,7 +1303,7 @@ pub fn new_wallet_sync_state<'env>(
                 CLASS__org_monfluo_wallet_lib_wallet_sync_WalletSyncStatePreparing__METHOD__init2__SIGNATURE,
                 &[
                     JValue::Long(java_timestamp),
-                    JValue::Int(java_current_height)
+                    JValue::Object(&java_current_height)
                 ]
             )
         }

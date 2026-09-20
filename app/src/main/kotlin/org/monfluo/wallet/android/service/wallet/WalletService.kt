@@ -296,7 +296,7 @@ class WalletService :
             networkType: MoneroNetworkType,
         ) {
             val wallet = Monfluo.openWallet(Helper.getWalletRoot(this@WalletService).absolutePath, wallet, walletPassword)
-            val walletSyncData = WalletSyncData(null, wallet.getCurrentHeight())
+            val walletSyncData = WalletSyncData(null, wallet.getCurrentHeight() ?: 0)
             val walletWithData = WalletWithData(wallet, walletSyncData)
             newWalletRef.set(walletWithData)
             forEachObserver {

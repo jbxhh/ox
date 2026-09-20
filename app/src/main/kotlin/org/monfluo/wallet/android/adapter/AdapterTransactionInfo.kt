@@ -167,7 +167,7 @@ class AdapterTransactionInfo(
 
             val amount = if (transaction.direction == TransactionDirection.SPEND) (transaction.inputAmount - transaction.spendAmount - transaction.fee) else transaction.inputAmount
             amountTextView.text = TextHelper.formatUnlockedBalance(itemView.context, amount, MoneroUnit.MONERO, streetMode, Typeface.NORMAL)
-            val formattedDateTime = DateFormat.getInstance().format(Date(transaction.timestamp * 1000))
+            val formattedDateTime = DateFormat.getInstance().format(Date(transaction.timestamp))
             txDateTimeTextView.text = if (streetMode) "#".repeat(formattedDateTime.length) else formattedDateTime
             itemView.setOnClickListener { _ -> listener.onClickTransaction(transaction) }
         }

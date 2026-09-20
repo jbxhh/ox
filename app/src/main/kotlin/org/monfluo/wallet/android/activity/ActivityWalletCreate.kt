@@ -171,7 +171,6 @@ class ActivityWalletCreate : ActivityBase() {
             object : SimpleTextWatcher() {
                 override fun afterTextChanged(editable: Editable) {
                     val text = editable.toString()
-                    colorSeed(editable, PolyseedLanguage.getWords(PolyseedLanguage.English))
                     viewModel.seed.value = text
                     if (text.isEmpty()) {
                         createWalletButton.setText(R.string.create_wallet)
@@ -262,6 +261,7 @@ class ActivityWalletCreate : ActivityBase() {
                 walletSeedOffsetLabelTextView.visibility = View.GONE
                 walletSeedOffsetPassphraseEditText.visibility = View.GONE
             }
+            colorSeed(walletSeedEditText.editableText, seedType)
         }
 
         viewModel.networkType.observe(this) { networkType ->
@@ -330,8 +330,13 @@ class ActivityWalletCreate : ActivityBase() {
 
     private fun colorSeed(
         editable: Editable,
-        validWords: Set<String>,
+        seedType: SeedType,
     ) {
+        val validWords =
+            when (seedType) {
+                SeedType.MONERO -> MoneroSeedLanguage.getWords(MoneroSeedLanguage.English)
+                SeedType.POLYSEED -> PolyseedLanguage.getWords(PolyseedLanguage.English)
+            }
         editable.getSpans(0, editable.length + 1, ForegroundColorSpan::class.java).forEach {
             editable.removeSpan(it)
         }

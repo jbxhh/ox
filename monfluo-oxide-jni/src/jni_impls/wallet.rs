@@ -70,7 +70,7 @@ pub fn get_name<'local>(
 pub fn get_current_height<'local>(
     mut env: EnvUnowned<'local>,
     java_wallet: JObject<'local>,
-) -> jint {
+) -> JObject<'local> {
     let cache = crate::java::get_cache();
 
     env.with_env(|env| {
@@ -78,8 +78,11 @@ pub fn get_current_height<'local>(
             let handle = crate::java::get_handle(env, cache, &java_wallet);
             let wallet = crate::bridge::from_java_handle::<Wallet>(handle);
             let height = wallet.current_height().await;
+            let java_height = height.map_or(JObject::null(), |height| {
+                crate::java::new_integer(env, cache, height as i32)
+            });
 
-            Ok::<jint, jni::errors::Error>(height as jint)
+            Ok::<JObject<'local>, jni::errors::Error>(java_height)
         })
     })
     .resolve::<ThrowRuntimeExAndDefault>()
@@ -225,7 +228,7 @@ pub fn create_and_sign_transaction<'local>(
                 .create_transaction(daemon, payments, fee_priority)
                 .await;
             let transaction = wallet.sign_tranasction(transaction).await;
-            let first_seen_timestamp = monfluo_oxide::current_timestamp_seconds();
+            let first_seen_timestamp = monfluo_oxide::current_timestamp();
             let pending_transaction = TransactionWrapper {
                 inner: transaction.clone(),
                 hash: transaction.hash(),
@@ -271,7 +274,7 @@ pub fn create_and_sign_sweep_transaction<'local>(
                 .create_sweep_transaction(daemon, address, fee_priority)
                 .await;
             let transaction = wallet.sign_tranasction(transaction).await;
-            let first_seen_timestamp = monfluo_oxide::current_timestamp_seconds();
+            let first_seen_timestamp = monfluo_oxide::current_timestamp();
             let pending_transaction = TransactionWrapper {
                 inner: transaction.clone(),
                 hash: transaction.hash(),
