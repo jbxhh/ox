@@ -245,8 +245,6 @@
                     android:layout_marginTop="@dimen/padding_mini"
                     android:background="@drawable/edittext_background"
                     android:hint="@string/recovery_phrase_optional_polyseed"
-                    android:inputType="textMultiLine"
-                    android:lines="5"
                     android:maxLines="5" />
 
                 <TextView

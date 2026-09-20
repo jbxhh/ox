@@ -16,7 +16,7 @@ class Wallet(
 
     external fun getName(): String
 
-    external fun getCurrentHeight(): Int
+    external fun getCurrentHeight(): Int?
 
     external fun sync(
         daemon: Daemon,

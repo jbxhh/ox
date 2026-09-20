@@ -9,7 +9,7 @@ sealed interface WalletSyncState {
 
     data class Preparing(
         override val timestamp: Long,
-        override val currentHeight: Int,
+        override val currentHeight: Int?,
     ) : WalletSyncState {
         override val isTerminal: Boolean = false
     }

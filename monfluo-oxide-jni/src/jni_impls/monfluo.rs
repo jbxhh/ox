@@ -100,16 +100,19 @@ pub fn create_wallet<'local>(
             let password = crate::java::JavaStringHelper::from_jstring(env, &java_password);
 
             let seed_type = crate::java::from_java_seed_language(env, cache, &java_seed_language);
-            let seed = match seed_type {
+            let (seed, birthday) = match seed_type {
                 monfluo_oxide::monero_wallet_util::seed::SeedType::Original(language) => {
-                    monfluo_oxide::monero_wallet_util::seed::Seed::Original(
+                    let seed = monfluo_oxide::monero_wallet_util::seed::Seed::Original(
                         monfluo_oxide::generate_seed(language).await,
-                    )
+                    );
+                    let birthday = monfluo_oxide::current_timestamp();
+                    (seed, birthday)
                 }
                 monfluo_oxide::monero_wallet_util::seed::SeedType::Polyseed(language) => {
-                    monfluo_oxide::monero_wallet_util::seed::Seed::Polyseed(
-                        monfluo_oxide::generate_polyseed(language).await,
-                    )
+                    let polyseed = monfluo_oxide::generate_polyseed(language).await;
+                    let birthday = polyseed.birthday() * 1000;
+                    let seed = monfluo_oxide::monero_wallet_util::seed::Seed::Polyseed(polyseed);
+                    (seed, birthday)
                 }
             };
 
@@ -119,7 +122,8 @@ pub fn create_wallet<'local>(
                 &wallet_name.to_cow_str(),
                 &password.to_cow_str(),
                 seed,
-                0,
+                None,
+                birthday,
             )
             .await
             .unwrap();
@@ -156,6 +160,14 @@ pub fn restore_wallet<'local>(
 
             let seed = crate::java::from_java_seed(env, cache, &java_seed);
             let height = crate::java::from_java_number_int_value(env, cache, &java_height);
+            let birthday = match &seed {
+                monfluo_oxide::monero_wallet_util::seed::Seed::Original(_seed) => {
+                    monfluo_oxide::current_timestamp()
+                }
+                monfluo_oxide::monero_wallet_util::seed::Seed::Polyseed(polyseed) => {
+                    polyseed.birthday() * 1000
+                }
+            };
 
             monfluo_oxide::wallet::Wallet::create(
                 monfluo_directory,
@@ -163,7 +175,8 @@ pub fn restore_wallet<'local>(
                 &wallet_name.to_cow_str(),
                 &password.to_cow_str(),
                 seed,
-                height.unwrap_or(0) as u32,
+                height.map(|height| height as u32),
+                birthday,
             )
             .await
             .unwrap();

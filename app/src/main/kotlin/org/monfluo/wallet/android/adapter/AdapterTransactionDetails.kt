@@ -12,7 +12,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.model.MoneroUnit
@@ -342,7 +341,7 @@ class AdapterTransactionDetails(
                 Helper.clipBoardCopy(itemView.context, "transaction hash", transactionHash)
                 return@setOnLongClickListener true
             }
-            val date = DateFormat.getInstance().format(Date(transaction.timestamp * 1000))
+            val date = DateFormat.getInstance().format(Date(transaction.timestamp))
             dateTextView.text = date
             dateTextView.setOnLongClickListener {
                 Helper.clipBoardCopy(itemView.context, "transaction date", date)
