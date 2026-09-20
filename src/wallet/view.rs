@@ -21,7 +21,7 @@ use crate::{
 
 pub fn balance_view(state: &WalletState) -> balance::BalanceView {
     let current_height = state.current_height();
-    let current_timestamp_seconds = crate::current_timestamp_seconds();
+    let current_timestamp = crate::current_timestamp();
     let mut total = 0;
     let mut unlocked = 0;
     let mut pending = 0;
@@ -39,7 +39,10 @@ pub fn balance_view(state: &WalletState) -> balance::BalanceView {
         total += amount;
         if output.is_frozen() {
             frozen += amount;
-        } else if block_height.is_none_or(|block_height| output.is_locked(block_height, current_height, current_timestamp_seconds)) {
+        } else if block_height
+            .zip(current_height)
+            .is_none_or(|(block_height, current_height)| output.is_locked(block_height, current_height, current_timestamp))
+        {
             pending += amount;
         } else {
             unlocked += amount;
@@ -192,7 +195,8 @@ pub fn transaction_views_of<P: PotentiallyPruned>(state: &WalletState, wallet: &
                 confirmations: raw_transaction
                     .block_info
                     .as_ref()
-                    .map_or(0, |block_info| current_height.saturating_sub(block_info.block.height - 1)),
+                    .zip(current_height)
+                    .map_or(0, |(block_info, current_height)| current_height.saturating_sub(block_info.block.height - 1)),
                 block_info: raw_transaction
                     .block_info
                     .map(|block_info| TransactionBlockInfoView {

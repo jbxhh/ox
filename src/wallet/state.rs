@@ -206,14 +206,14 @@ impl WalletOutputWrapper {
         }
     }
 
-    pub fn is_locked(&self, block_height: u32, current_height: u32, current_timestamp_seconds: u64) -> bool {
+    pub fn is_locked(&self, block_height: u32, current_height: u32, current_timestamp: u64) -> bool {
         if current_height < block_height + crate::CONFIRMATIONS - 1 {
             return true;
         }
         match self.inner.additional_timelock() {
             monero_wallet::transaction::Timelock::None => false,
             monero_wallet::transaction::Timelock::Block(block_height) => (current_height as usize) < block_height,
-            monero_wallet::transaction::Timelock::Time(timelock_timestamp_seconds) => current_timestamp_seconds < timelock_timestamp_seconds,
+            monero_wallet::transaction::Timelock::Time(timelock_timestamp_seconds) => current_timestamp < timelock_timestamp_seconds * 1000,
         }
     }
 
@@ -226,7 +226,7 @@ impl WalletOutputWrapper {
 #[derive(Debug, Clone, Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
 pub struct WalletState {
     #[zeroize(skip)]
-    pub blockchain: Blockchain,
+    pub blockchain: Option<Blockchain>,
     #[zeroize(skip)]
     pub addresses: TrackedAddresses,
     #[serde(serialize_with = "serde_utils::serialize_hashmap_as_vec")]
@@ -256,9 +256,9 @@ pub struct WalletStateCache {
 }
 
 impl WalletState {
-    pub fn new(restore_height: u32) -> Self {
+    pub fn new() -> Self {
         Self {
-            blockchain: Blockchain::new(restore_height, vec![]),
+            blockchain: None,
             addresses: TrackedAddresses::new(),
             outputs: HashMap::new(),
             transactions: HashMap::new(),
@@ -295,8 +295,10 @@ impl WalletState {
         Ok(())
     }
 
-    pub fn current_height(&self) -> u32 {
-        self.blockchain.start_block_number + (self.blockchain.hashes.len() as u32).saturating_sub(1)
+    pub fn current_height(&self) -> Option<u32> {
+        self.blockchain
+            .as_ref()
+            .map(|blockchain| blockchain.start_block_number + (blockchain.hashes.len() as u32).saturating_sub(1))
     }
 
     pub fn account_addresses(&self) -> &TrackedAddresses {
@@ -379,14 +381,15 @@ impl WalletState {
 
     pub(crate) fn find_available_wallet_outputs(&self) -> Vec<&WalletOutputWrapper> {
         let current_height = self.current_height();
-        let current_timestamp_seconds = crate::current_timestamp_seconds();
+        let current_timestamp = crate::current_timestamp();
         let mut available_wallet_outputs = self
             .outputs
             .values()
             .filter(|output| {
                 self.transactions[&output.inner.transaction()]
                     .block_info
-                    .is_some_and(|block_info| !output.is_locked(block_info.block.height, current_height, current_timestamp_seconds))
+                    .zip(current_height)
+                    .is_some_and(|(block_info, current_height)| !output.is_locked(block_info.block.height, current_height, current_timestamp))
             })
             .filter(|output| !output.is_frozen())
             .filter(|output| {

@@ -106,12 +106,12 @@ pub struct Payment {
 }
 
 impl Wallet {
-    pub async fn create<P: AsRef<Path>>(monfluo_directory: P, network: Network, wallet_name: &str, password: &str, seed: Seed, restore_height: u32) -> Result<(), WalletError> {
+    pub async fn create<P: AsRef<Path>>(monfluo_directory: P, network: Network, wallet_name: &str, password: &str, seed: Seed, restore_height: Option<u32>, birthday: u64) -> Result<(), WalletError> {
         let key = seed.key();
         let spend_key = crate::util::bytes_to_scalar(&key).unwrap();
         let view_key = crate::util::bytes_to_scalar(&crate::crypto::spend_key_to_view_key(&key)).unwrap();
-        let secrets = WalletSecrets::new(spend_key, view_key, network, restore_height);
-        let state = WalletState::new(restore_height);
+        let secrets = WalletSecrets::new(spend_key, view_key, network, restore_height, birthday);
+        let state = WalletState::new();
         let wallet_dir_path = Self::get_wallet_directory(monfluo_directory, wallet_name)?;
         tokio::fs::create_dir_all(&wallet_dir_path).await?;
         let secrets_file_path = wallet_dir_path.join(WALLET_SECRETS_FILE_NAME);
@@ -234,7 +234,7 @@ impl Wallet {
         self.state.write().await
     }
 
-    pub async fn current_height(&self) -> u32 {
+    pub async fn current_height(&self) -> Option<u32> {
         self.state.read().await.current_height()
     }
 
@@ -245,6 +245,9 @@ impl Wallet {
     }
 
     async fn create_transaction_inner(&self, state: &WalletState, daemon: Daemon, payments: Vec<Payment>, fee_priority: FeePriority) -> (SignableTransaction, OutgoingTransfer) {
+        let current_height = state
+            .current_height()
+            .expect("Attempted to create sweep transaction from unsynced wallet");
         let rct_type: RctType = RctType::ClsagBulletproofPlus;
         let fee_rate: FeeRate = daemon.fee_rate(fee_priority).await.unwrap();
         let outgoing_view_key: Zeroizing<MoneroBytes> = Self::create_outgoing_view_key().await;
@@ -255,7 +258,7 @@ impl Wallet {
         while inputs_sum < payments_sum
             && let Some(available_wallet_output) = available_wallet_outputs_iter.next()
         {
-            let input: OutputWithDecoys = OutputWithDecoys::new(&mut *crate::get_rng_mut().await, &*daemon, 16, state.current_height() as usize, available_wallet_output.inner.clone())
+            let input: OutputWithDecoys = OutputWithDecoys::new(&mut *crate::get_rng_mut().await, &*daemon, 16, current_height as usize, available_wallet_output.inner.clone())
                 .await
                 .unwrap();
             inputs_sum += input.commitment().amount;
@@ -281,7 +284,7 @@ impl Wallet {
                     while inputs_sum < needed_amount
                         && let Some(available_wallet_output) = available_wallet_outputs_iter.next()
                     {
-                        let input: OutputWithDecoys = OutputWithDecoys::new(&mut *crate::get_rng_mut().await, &*daemon, 16, state.current_height() as usize, available_wallet_output.inner.clone())
+                        let input: OutputWithDecoys = OutputWithDecoys::new(&mut *crate::get_rng_mut().await, &*daemon, 16, current_height as usize, available_wallet_output.inner.clone())
                             .await
                             .unwrap();
                         inputs.push(input);
@@ -306,13 +309,16 @@ impl Wallet {
     }
 
     async fn create_sweep_transaction_inner(&self, state: &WalletState, daemon: Daemon, address: MoneroAddress, fee_priority: FeePriority) -> (SignableTransaction, OutgoingTransfer) {
+        let current_height = state
+            .current_height()
+            .expect("Attempted to create sweep transaction from unsynced wallet");
         let rct_type: RctType = RctType::ClsagBulletproofPlus;
         let fee_rate: FeeRate = daemon.fee_rate(fee_priority).await.unwrap();
         let outgoing_view_key: Zeroizing<MoneroBytes> = Self::create_outgoing_view_key().await;
         let mut inputs_sum = 0;
         let mut inputs = Vec::new();
         for available_wallet_output in state.find_available_wallet_outputs() {
-            let input: OutputWithDecoys = OutputWithDecoys::new(&mut *crate::get_rng_mut().await, &*daemon, 16, state.current_height() as usize, available_wallet_output.inner.clone())
+            let input: OutputWithDecoys = OutputWithDecoys::new(&mut *crate::get_rng_mut().await, &*daemon, 16, current_height as usize, available_wallet_output.inner.clone())
                 .await
                 .unwrap();
             inputs_sum += input.commitment().amount;
@@ -520,7 +526,7 @@ mod tests {
         const WALLET_NAME: &str = "Monero Wallet";
         let monfluo_directory = tempfile::tempdir().expect("Failed to create tempdir");
         let seed = monero_wallet_util::seed::Seed::Original(crate::generate_seed(monero_wallet_util::seed::original::Language::English).await);
-        Wallet::create(monfluo_directory.path(), Network::Stagenet, WALLET_NAME, "", seed.clone(), 0)
+        Wallet::create(monfluo_directory.path(), Network::Stagenet, WALLET_NAME, "", seed.clone(), None, 1780000000000)
             .await
             .unwrap();
         let wallet = Wallet::open(monfluo_directory.path(), WALLET_NAME, "")

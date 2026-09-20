@@ -23,16 +23,18 @@ pub struct WalletSecrets {
     #[serde(serialize_with = "serialize_network")]
     #[serde(deserialize_with = "deserialize_network")]
     network: Network,
-    restore_height: u32,
+    restore_height: Option<u32>,
+    birthday: u64,
 }
 
 impl WalletSecrets {
-    pub fn new(spend_key: Zeroizing<Scalar>, view_key: Zeroizing<Scalar>, network: Network, restore_height: u32) -> Self {
+    pub fn new(spend_key: Zeroizing<Scalar>, view_key: Zeroizing<Scalar>, network: Network, restore_height: Option<u32>, birthday: u64) -> Self {
         Self {
             spend_key,
             view_key,
             network,
             restore_height,
+            birthday,
         }
     }
 
@@ -61,8 +63,12 @@ impl WalletSecrets {
         self.network
     }
 
-    pub fn restore_height(&self) -> u32 {
+    pub fn restore_height(&self) -> Option<u32> {
         self.restore_height
+    }
+
+    pub fn birthday(&self) -> u64 {
+        self.birthday
     }
 }
 
