@@ -594,7 +594,7 @@ class WalletService :
                 applicationContext,
                 broadcastReceiver,
                 intentFilter,
-                ContextCompat.RECEIVER_EXPORTED,
+                ContextCompat.RECEIVER_NOT_EXPORTED,
             )
             return START_STICKY
         } else {
@@ -784,7 +784,10 @@ class WalletService :
     }
 
     private fun updateSynchronizationStatusNotification(wallet: Wallet) {
-        val broadcastIntent = Intent(CLOSE_WALLET_ACTION)
+        val broadcastIntent =
+            Intent(CLOSE_WALLET_ACTION).apply {
+                setPackage(packageName)
+            }
         val broadcastPendingIntent: PendingIntent =
             PendingIntent.getBroadcast(application, 0, broadcastIntent, PendingIntent.FLAG_IMMUTABLE)
 
@@ -836,6 +839,7 @@ class WalletService :
 
         val deleteNotificationBroadcastIntent =
             Intent(DELETE_NOTIFICATION_ACTION).apply {
+                setPackage(packageName)
                 putExtra(Constants.EXTRA_TRANSACTION_ID, txId)
             }
         val deleteNotificationBroadcastPendingIntent = PendingIntent.getBroadcast(application, id, deleteNotificationBroadcastIntent, PendingIntent.FLAG_IMMUTABLE)
