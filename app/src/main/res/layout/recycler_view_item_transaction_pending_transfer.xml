@@ -62,11 +62,26 @@
 
     <TextView
         android:id="@+id/address_resolved_from_textview"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/dnssec_warning_icon_imageview"
         app:layout_constraintTop_toBottomOf="@id/address_resolved_from_label_textview"
         android:layout_marginTop="@dimen/padding_mini"
         android:textSize="@dimen/text_big" />
+
+    <ImageView
+        android:id="@+id/dnssec_warning_icon_imageview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@id/address_resolved_from_textview"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/address_resolved_from_textview"
+        app:layout_constraintBottom_toBottomOf="@id/address_resolved_from_textview"
+        android:minHeight="32dp"
+        android:minWidth="32dp"
+        android:src="@android:drawable/stat_sys_warning"
+        android:contentDescription="@string/content_description_dnssec_warning"
+        android:visibility="gone"
+        tools:visibility="visible"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

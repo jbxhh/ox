@@ -254,6 +254,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="content_description_account">Select account</string>
     <string name="content_description_application_settings">Application settings</string>
     <string name="content_description_enotes">Enotes</string>
+    <string name="content_description_dnssec_warning">Warning: DNSSEC validation was unsuccessful</string>
     <string name="account_label">#<xliff:g>%1$d</xliff:g> <xliff:g>%2$s</xliff:g></string>
     <string name="address_label">#<xliff:g>%1$d</xliff:g> <xliff:g>%2$s</xliff:g></string>
     <!-- Unit XMR -->
