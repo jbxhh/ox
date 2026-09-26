@@ -3,6 +3,7 @@ package org.monfluo.wallet.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.R
@@ -129,6 +130,7 @@ class AdapterTransactionPending(
         private val addressTextView: TextView = itemView.findViewById(R.id.address_textview)
         private val addressResolvedFromLabelTextView: TextView = itemView.findViewById(R.id.address_resolved_from_label_textview)
         private val addressResolvedFromTextView: TextView = itemView.findViewById(R.id.address_resolved_from_textview)
+        private val dnssecWarningIconImageView: ImageView = itemView.findViewById(R.id.dnssec_warning_icon_imageview)
 
         private val transactionDestinationPendingAmountLabel: CharSequence = itemView.resources.getString(R.string.recycler_view_item_transaction_pending_amount_label)
         private val transactionDestinationPendingAmountWithPositionLabel: (Int) -> CharSequence = { position: Int ->
@@ -159,9 +161,15 @@ class AdapterTransactionPending(
                 addressResolvedFromLabelTextView.visibility = View.VISIBLE
                 addressResolvedFromTextView.visibility = View.VISIBLE
                 addressResolvedFromTextView.setText(resolvedFrom.value)
+                if (resolvedFrom.dnssec) {
+                    dnssecWarningIconImageView.visibility = View.GONE
+                } else {
+                    dnssecWarningIconImageView.visibility = View.VISIBLE
+                }
             } else {
                 addressResolvedFromLabelTextView.visibility = View.GONE
                 addressResolvedFromTextView.visibility = View.GONE
+                dnssecWarningIconImageView.visibility = View.GONE
             }
         }
     }
