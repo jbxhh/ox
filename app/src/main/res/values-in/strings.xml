@@ -375,4 +375,6 @@
     <string name="activity_contact_details_toast_failed_to_delete_contact">Gagal menghapus kontak</string>
     <string name="activity_contact_details_toast_contact_saved">Kontak tersimpan</string>
     <string name="activity_contact_details_toast_failed_to_save_contact">Gagal menyimpan kontak</string>
+    <string name="content_description_dnssec_warning">Peringatan: Validasi DNSSEC tidak berhasil</string>
+    <string name="toast_invalid_wallet_name">Nama wallet tidak boleh kosong, "." atau ".." atau mengandung karakter "/" atau "\\".</string>
 </resources>
