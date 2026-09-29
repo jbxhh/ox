@@ -221,7 +221,7 @@ Monfluo 属于自由开源软件，采用 GPLv3 许可证。
     <!-- Header for private view key -->
     <string name="private_view_key">私有观察密钥 (Private View Key)</string>
     <!-- Coin label in the enote list view -->
-    <string name="coin">币种</string>
+    <string name="coin">哈希</string>
     <!-- Coin public key in the enote list view -->
     <string name="coin_public_key">公钥</string>
     <!-- Coin global index in the enote list view -->
