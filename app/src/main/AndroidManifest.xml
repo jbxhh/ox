@@ -34,18 +34,18 @@
         <activity
             android:name=".activity.ActivityWalletList"
             android:windowSoftInputMode="adjustPan"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityWalletCreate"
             android:windowSoftInputMode="adjustPan"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityHome"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
@@ -65,107 +65,107 @@
 
         <activity
             android:name=".activity.ActivityReceive"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityPaymentRequest"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityApplicationSettings"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityWalletSettings"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityWalletChangePassword"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityTransactionDetails"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityEnoteList"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityNetwork"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityTransactionPending"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityAccountList"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityAccountAdd"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityAccountDetails"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityAddressDetails"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityContactList"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityContactAdd"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityContactDetails"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityNodeList"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityNodeAdd"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityNodeDetails"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityWalletSecrets"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity
             android:name=".activity.ActivityWalletDetails"
-            android:exported="true">
+            android:exported="false">
         </activity>
 
         <activity

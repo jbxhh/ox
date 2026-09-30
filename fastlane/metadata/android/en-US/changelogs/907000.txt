@@ -1,0 +1,4 @@
+* Update Chinese translation
+* Update Indonesian translation
+* Security fix: make most activities and broadcast receiver non-exported
+* Security fix: warn about DNSSEC failures

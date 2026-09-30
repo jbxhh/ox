@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="toast_bad_password">Kata sandi salah!</string>
-    <string name="toast_freezing_enotes">Membekukan catatan</string>
-    <string name="toast_thawing_enotes">Mencairkan catatan</string>
+    <string name="toast_freezing_enotes">Membekukan enotes</string>
+    <string name="toast_thawing_enotes">Mencairkan enotes</string>
     <string name="toast_failed_to_select_node">Gagal memilih node</string>
     <string name="toast_new_account_created">Akun baru berhasil dibuat</string>
     <string name="toast_account_selected">Akun diubah ke #%1$d</string>
@@ -69,7 +69,7 @@
     <string name="network">Jaringan</string>
     <string name="about_monfluo_header">Tentang Monfluo</string>
     <string name="about_monfluo">Monfluo adalah dompet Monero murni untuk Android yang dikembangkan oleh acx dan komunitas.\n Bergabung ke <a href="https://matrix.to/#/%23monfluo%3Amonero.social?via=monero.social">ruang Matrix</a> atau <a href="https://smp6.simplex.im/g#YDL6oaJK3YOTlAtHKbC9zWB3U72QQw1v729HR3k_6Gs">grup SimpleX</a> kami untuk tetap terhubung.\n Repositori Git tersedia di <a href="https://codeberg.org/Monfluo/monfluo-android">Codeberg</a>.\n Monfluo adalah Perangkat Lunak Bebas dan Sumber Terbuka (FOSS) berlisensi GPLv3.</string>
-    <string name="monfluo_build_header">Membangun</string>
+    <string name="monfluo_build_header">Versi Build</string>
     <string name="monfluo_build_application_id">Id Aplikasi</string>
     <string name="monfluo_build_application_version">Versi Aplikasi</string>
     <string name="monfluo_build_monero_version">Versi Monero</string>
@@ -157,12 +157,12 @@
     <string name="balance_frozen">Dibekukan</string>
     <string name="wallet_header">Dompet</string>
     <string name="wallet_change_password_header">Ganti kata sandi</string>
-    <string name="enotes_header">Catatan</string>
-    <string name="enotes_with_amount_header">Catatan (<xliff:g>%1$d</xliff:g>)</string>
+    <string name="enotes_header">Enotes</string>
+    <string name="enotes_with_amount_header">Enotes (<xliff:g>%1$d</xliff:g>)</string>
     <string name="content_description_back">Kembali</string>
     <string name="content_description_account">Pilih akun</string>
     <string name="content_description_application_settings">Pengaturan aplikasi</string>
-    <string name="content_description_enotes">Catatan</string>
+    <string name="content_description_enotes">Enotes</string>
     <string name="account_label">#<xliff:g>%1$d</xliff:g> <xliff:g>%2$s</xliff:g></string>
     <string name="network_header">Jaringan</string>
     <string name="accounts_header">Akun</string>
@@ -255,7 +255,7 @@
     <string name="activity_wallet_settings_wallet_name_label">Nama</string>
     <string name="activity_wallet_settings_wallet_network_label">Jaringan</string>
     <string name="activity_wallet_settings_total_balance_label">Saldo total</string>
-    <string name="activity_wallet_settings_display_wallet_secrets">Ungkapkan rahasia dompet Anda</string>
+    <string name="activity_wallet_settings_display_wallet_secrets">Tampilkan rahasia dompet Anda</string>
     <string name="activity_wallet_settings_change_password">Ganti kata sandi</string>
     <string name="activity_wallet_settings_close_wallet">Tutup dompet</string>
     <string name="activity_wallet_change_password_current_password_label">Kata sandi saat ini</string>
@@ -287,7 +287,7 @@
     <string name="activity_node_add_node_username_placeholder">Nama pengguna (opsional)</string>
     <string name="activity_node_add_node_password_label">Kata sandi</string>
     <string name="activity_node_add_node_password_placeholder">Kata sandi (optional)</string>
-    <string name="activity_node_add_node_add_button">Tambah node</string>
+    <string name="activity_node_add_node_add_button">Tambahkan node</string>
     <string name="activity_node_details_node_name_label">Nama</string>
     <string name="activity_node_details_node_name_placeholder">Node Monero Saya</string>
     <string name="activity_node_details_node_address_label">Alamat</string>
@@ -299,7 +299,7 @@
     <string name="activity_node_details_node_password_placeholder">Kata sandi (opsional)</string>
     <string name="activity_node_details_node_delete_button">Hapus node</string>
     <string name="activity_node_details_node_save_button">Simpan node</string>
-    <string name="activity_node_list_create_button">Tambah node</string>
+    <string name="activity_node_list_create_button">Tambahkan node</string>
     <string name="dialog_delete_node_title">Hapus node</string>
     <string name="dialog_delete_node_message">Apakah Anda yakin ingin menghapus node Anda?</string>
     <string name="dialog_delete_node_action_yes">Ya, hapus node</string>
@@ -314,7 +314,7 @@
     <string name="content_description_network_status_icon_synchronizing_wallet">Status jaringan - sinkronisasi dompet</string>
     <string name="content_description_network_status_icon_synchronized">Status jaringan - tersinkronisasi</string>
     <string name="content_description_network_status_icon_wallet_error">Status jaringan - dompet error</string>
-    <string name="activity_network_node_status_header_waiting_for_wallet">Menunggu dompet…</string>
+    <string name="activity_network_node_status_header_waiting_for_wallet">Menunggu respons dompet…</string>
     <string name="activity_network_node_status_header_fetching_blockchain_data">Mengambil ketinggian blockchain…</string>
     <string name="activity_network_node_status_header_node_is_synchronizing">Node sedang melakukan sinkronisasi…</string>
     <string name="activity_network_node_status_description_node_is_synchronizing">%1$s / %2$s (%3$s blok tersisa)</string>
@@ -330,9 +330,9 @@
     <string name="activity_network_wallet_status_description_wallet_is_synchronized">Tinggi blok: %1$s</string>
     <string name="activity_network_wallet_last_updated_at">Terakhir diperbarui: %1$s</string>
     <string name="recycler_view_item_transaction_details_transaction_type_label">Tipe</string>
-    <string name="recycler_view_item_transaction_details_transaction_type_incoming">Pemasukan</string>
+    <string name="recycler_view_item_transaction_details_transaction_type_incoming">Diterima</string>
     <string name="recycler_view_item_transaction_details_transaction_type_coinbase">Basis koin</string>
-    <string name="recycler_view_item_transaction_details_transaction_type_outgoing">Pengeluaran</string>
+    <string name="recycler_view_item_transaction_details_transaction_type_outgoing">Terkirim</string>
     <string name="activity_send_description_label">Deskripsi</string>
     <string name="activity_send_description_hint">Deskripsi transaksi (opsional)</string>
     <string name="recycler_view_item_transaction_pending_description_label">Deskripsi</string>
