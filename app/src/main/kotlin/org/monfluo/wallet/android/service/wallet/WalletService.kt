@@ -24,19 +24,13 @@ import org.monfluo.wallet.android.BuildConfig
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.activity.ActivityHome
 import org.monfluo.wallet.android.activity.ActivityTransactionDetails
-import org.monfluo.wallet.android.data.Heights
-import org.monfluo.wallet.android.data.SynchronizationStatus
-import org.monfluo.wallet.android.model.MoneroNetworkType
+import org.monfluo.wallet.android.data.Node
+import org.monfluo.wallet.android.data.NodeStore
 import org.monfluo.wallet.android.model.MoneroUnit
 import org.monfluo.wallet.android.model.TransactionDestination
 import org.monfluo.wallet.android.model.TransactionDestinationResolved
 import org.monfluo.wallet.android.model.TransactionDestinationWithAmount
 import org.monfluo.wallet.android.model.TransactionInfo
-import org.monfluo.wallet.android.model.Wallet
-import org.monfluo.wallet.android.model.Wallet.Companion.NEW_ACCOUNT_NAME
-import org.monfluo.wallet.android.model.WalletListener
-import org.monfluo.wallet.android.model.WalletManager
-import org.monfluo.wallet.android.model.WalletStatusWithError
 import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.Constants.FOREGROUND_SERVICE_NOTIFICATION_CHANNEL
 import org.monfluo.wallet.android.util.Constants.TRANSFERS_NOTIFICATION_CHANNEL
@@ -49,13 +43,15 @@ import org.monfluo.wallet.lib.data.FeePriority
 import org.monfluo.wallet.lib.data.NodeInfo
 import org.monfluo.wallet.lib.data.Payment
 import org.monfluo.wallet.lib.data.TransactionView
+import org.monfluo.wallet.lib.data.WalletView
 import org.monfluo.wallet.lib.wallet.Daemon
+import org.monfluo.wallet.lib.wallet.Wallet
 import org.monfluo.wallet.lib.wallet.sync.WalletSyncObserver
 import org.monfluo.wallet.lib.wallet.sync.WalletSyncState
 import timber.log.Timber
 import java.text.NumberFormat
-import java.time.Clock
 import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
@@ -63,11 +59,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.max
-import org.monfluo.wallet.lib.wallet.Wallet as NewWallet
 
 class WalletService :
     Service(),
-    WalletListener,
     DefaultLifecycleObserver {
     companion object {
         val RUNNING: AtomicBoolean = AtomicBoolean(false)
@@ -78,18 +72,11 @@ class WalletService :
         private const val DELETE_NOTIFICATION_ACTION = "${BuildConfig.APPLICATION_ID}.DELETE_NOTIFICATION"
     }
 
-    private val clock = Clock.systemUTC()
-
     private val broadcastReceiver = WalletServiceBroadcastReceiver()
 
     private val transactionNotifications = mutableMapOf<String, TransactionNotificationData>()
 
-    private var stateRef: AtomicReference<State> = AtomicReference(State())
-    private var proxyRef: AtomicReference<String> = AtomicReference("")
-    private var walletNameRef: AtomicReference<String> = AtomicReference("")
-    private var uninitWalletRef: AtomicReference<Wallet?> = AtomicReference(null)
-    private var walletRef: AtomicReference<Wallet?> = AtomicReference(null)
-    private var newWalletRef: AtomicReference<WalletWithData?> = AtomicReference(null)
+    private var walletRef: AtomicReference<WalletWithData?> = AtomicReference(null)
     private var pendingTransactionRef: AtomicReference<TransactionView?> = AtomicReference(null)
     private val observers = mutableSetOf<WalletServiceObserver>()
 
@@ -98,9 +85,9 @@ class WalletService :
     private var syncScheduledFuture: ScheduledFuture<*>? = null
 
     // Executor for the wallet's sync callbacks
-    // We MUST execute callbacks in a different thread
-    // because callback may call Monfluo's native methods which use tokio's block_on function
-    // which will get stuck because wallet sync itself is happening inside tokio's block_on function
+    // Callbacks may call Monfluo's native methods, which use tokio's block_on function.
+    // The wallet sync itself is executing inside block_on on the sync thread, so the callbacks
+    // MUST run on a different thread, otherwise the nested block_on would never get a runtime worker
     private val syncCallbackExecutor = Executors.newSingleThreadScheduledExecutor()
 
     inner class WalletServiceBroadcastReceiver : BroadcastReceiver() {
@@ -149,53 +136,27 @@ class WalletService :
                 WalletServiceCommand.UNKNOWN, null -> {
                     Timber.e("WalletHandler received UNKNOWN(%d) command", commandType)
                 }
-                WalletServiceCommand.INIT_WALLET -> {
-                    val daemonAddress = data.getString(Constants.EXTRA_NODE_ADDRESS)!!
-                    val daemonUsername = data.getString(Constants.EXTRA_NODE_USERNAME)!!
-                    val daemonPassword = data.getString(Constants.EXTRA_NODE_PASSWORD)!!
-                    val daemonTrusted = data.getBoolean(Constants.EXTRA_DAEMON_TRUSTED, false)
-                    val proxy = data.getString(Constants.EXTRA_PROXY)!!
-                    handleInitWallet(daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
-                }
                 WalletServiceCommand.OPEN_WALLET -> {
                     val wallet = data.getString(Constants.EXTRA_WALLET_NAME)!!
                     val walletPassword = data.getString(Constants.EXTRA_WALLET_PASSWORD)!!
-                    val nodeName = data.getString(Constants.EXTRA_NODE_NAME)!!
-                    val nodeAddress = data.getString(Constants.EXTRA_NODE_ADDRESS)!!
-                    val daemonUsername = data.getString(Constants.EXTRA_NODE_USERNAME)!!
-                    val daemonPassword = data.getString(Constants.EXTRA_NODE_PASSWORD)!!
-                    val proxy = data.getString(Constants.EXTRA_PROXY)!!
-                    val networkTypeInt = data.getInt(Constants.EXTRA_WALLET_NETWORK_TYPE)
-                    val networkType = MoneroNetworkType.fromInteger(networkTypeInt) ?: MoneroNetworkType.NetworkType_Mainnet
-                    handleOpenWallet(wallet, walletPassword, nodeName, nodeAddress, daemonUsername, daemonPassword, proxy, networkType)
+                    handleOpenWallet(wallet, walletPassword)
                 }
-                WalletServiceCommand.CLOSE_WALLET -> {
-                    handleCloseWallet()
-                }
-                WalletServiceCommand.SET_DAEMON_ADDRESS -> {
-                    val daemonAddress = data.getString(Constants.EXTRA_NODE_ADDRESS)!!
-                    val daemonUsername = data.getString(Constants.EXTRA_NODE_USERNAME)!!
-                    val daemonPassword = data.getString(Constants.EXTRA_NODE_PASSWORD)!!
-                    val daemonTrusted = data.getBoolean(Constants.EXTRA_DAEMON_TRUSTED, false)
-                    val proxy = data.getString(Constants.EXTRA_PROXY)!!
-                    setDaemonAddress(daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
-                }
-                WalletServiceCommand.FETCH_BLOCKCHAIN_AND_TARGET_HEIGHTS -> {
-                    handleFetchBlockchainAndTargetHeights()
+                WalletServiceCommand.RECONNECT_DAEMON -> {
+                    handleReconnectDaemon()
                 }
                 WalletServiceCommand.SET_PASSWORD -> {
                     val newPassword = data.getString(Constants.EXTRA_NEW_PASSWORD)!!
                     handleSetPassword(newPassword)
-                }
-                WalletServiceCommand.GENERATE_NEW_ADDRESS -> {
-                    val subaddressLabel = data.getString(Constants.EXTRA_ADDRESS_LABEL)!!
-                    handleGenerateNewAddress(subaddressLabel)
                 }
                 WalletServiceCommand.SET_ADDRESS_LABEL -> {
                     val accountIndex = data.getInt(Constants.EXTRA_ACCOUNT_INDEX)
                     val addressIndex = data.getInt(Constants.EXTRA_ADDRESS_INDEX)
                     val addressLabel = data.getString(Constants.EXTRA_ADDRESS_LABEL)!!
                     handleSetAddressLabel(accountIndex, addressIndex, addressLabel)
+                }
+                WalletServiceCommand.GENERATE_NEW_ADDRESS -> {
+                    val accountIndex = data.getInt(Constants.EXTRA_ACCOUNT_INDEX)
+                    handleGenerateNewAddress(accountIndex)
                 }
                 WalletServiceCommand.CREATE_SWEEP_TX -> {
                     Timber.d("Received message to create a sweep transaction")
@@ -240,10 +201,6 @@ class WalletService :
                         Timber.e("Attempted to send non-existent transaction")
                     }
                 }
-                WalletServiceCommand.SET_PROXY -> {
-                    val proxy = data.getString(Constants.EXTRA_PROXY)!!
-                    handleSetProxy(proxy)
-                }
                 WalletServiceCommand.FREEZE_ENOTES -> {
                     val enotes = data.getLongArray(Constants.EXTRA_ENOTES)!!
                     handleFreezeEnotes(enotes)
@@ -252,59 +209,34 @@ class WalletService :
                     val enotes = data.getLongArray(Constants.EXTRA_ENOTES)!!
                     handleThawEnotes(enotes)
                 }
-                WalletServiceCommand.CREATE_ACCOUNT -> {
-                    val label = data.getString(Constants.EXTRA_ACCOUNT_LABEL)
-                    handleCreateAccount(label)
-                }
-                WalletServiceCommand.SET_ACCOUNT -> {
-                    val index = data.getInt(Constants.EXTRA_ACCOUNT_INDEX)
-                    handleSetAccount(index)
-                }
                 WalletServiceCommand.SET_ACCOUNT_LABEL -> {
                     val index = data.getInt(Constants.EXTRA_ACCOUNT_INDEX)
                     val label = data.getString(Constants.EXTRA_ACCOUNT_LABEL)!!
                     handleSetAccountLabel(index, label)
                 }
+                WalletServiceCommand.CREATE_ACCOUNT -> {
+                    handleCreateAccount()
+                }
+                WalletServiceCommand.SET_ACCOUNT -> {
+                    val index = data.getInt(Constants.EXTRA_ACCOUNT_INDEX)
+                    handleSetAccount(index)
+                }
             }
-        }
-
-        private fun handleInitWallet(
-            daemonAddress: String,
-            daemonUsername: String,
-            daemonPassword: String,
-            daemonTrusted: Boolean,
-            proxy: String,
-        ) {
-            val wallet = this@WalletService.uninitWalletRef.getAndSet(null)
-            if (wallet == null) {
-                Timber.e("Init wallet was called, but uninit wallet ref is null")
-                return
-            }
-            this@WalletService.walletNameRef.set(wallet.info.name)
-            preOpenWallet(daemonAddress, proxy)
-            postOpenWallet(wallet, daemonAddress, daemonUsername, daemonPassword, daemonTrusted, proxy)
         }
 
         private fun handleOpenWallet(
             wallet: String,
             walletPassword: String,
-            nodeName: String,
-            nodeAddress: String,
-            nodeUsername: String?,
-            nodePassword: String?,
-            nodeProxy: String,
-            networkType: MoneroNetworkType,
         ) {
             val wallet = Monfluo.openWallet(Helper.getWalletRoot(this@WalletService).absolutePath, wallet, walletPassword)
-            val walletSyncData = WalletSyncData(null, wallet.getCurrentHeight() ?: 0)
-            val walletWithData = WalletWithData(wallet, walletSyncData)
-            newWalletRef.set(walletWithData)
+            val walletView = wallet.getWalletView()
+            val walletSyncData = WalletSyncData(DaemonState.NotSelected, walletView.currentHeight ?: 0)
+            val walletWithData = WalletWithData(wallet, walletSyncData, walletView)
+            applyDaemon(walletWithData, NodeStore.selected(this@WalletService, wallet.network()))
+            walletRef.set(walletWithData)
             forEachObserver {
-                it.onNewWalletOpened(walletWithData)
+                it.onWalletOpened(walletWithData)
             }
-            updateSynchronizationStatusNotificationV2(walletWithData)
-            val daemon = Monfluo.createDaemon(nodeName, nodeAddress, nodeUsername, nodePassword, nodeProxy)
-            walletSyncData.daemon = daemon
 
             syncScheduledFuture =
                 syncExecutor.scheduleWithFixedDelay(
@@ -319,13 +251,7 @@ class WalletService :
         private fun sync(
             walletWithData: WalletWithData,
         ) {
-            val lastSyncState = walletWithData.data.lastSyncState
-            if (lastSyncState?.isTerminal == false) {
-                Timber.d("Not syncing because last sync state $lastSyncState is not terminal")
-                return
-            }
-
-            val daemon = walletWithData.data.daemon
+            val daemon = walletWithData.data.connectedDaemon()
             if (daemon == null) {
                 Timber.w("Cannot sync because there is no daemon")
                 return
@@ -347,145 +273,39 @@ class WalletService :
                             is WalletSyncState.Finished -> walletWithData.data.syncCompleted = true
                             else -> {}
                         }
-                        updateSynchronizationStatusNotificationV2(walletWithData)
+                        refreshWalletView(walletWithData)
+                        updateSynchronizationStatusNotification(walletWithData)
                         forEachObserver {
-                            it.onNewWalletUpdated(walletWithData)
+                            it.onWalletUpdated(walletWithData)
                         }
                     }
                 },
             )
-            Timber.i("Wallet sync started")
+            Timber.i("Wallet sync finished")
         }
 
-        private fun preOpenWallet(
-            daemonAddress: String,
-            proxy: String,
-        ) {
-            showServiceNotification(createServiceNotificationBuilder().setContentText(getText(R.string.service_notification_description_opening_wallet)).build())
-            WalletManager.instance.setProxyJ(proxy)
-            WalletManager.instance.setDaemonAddressJ(daemonAddress)
-        }
-
-        private fun postOpenWallet(
-            wallet: Wallet,
-            daemonAddress: String,
-            daemonUsername: String,
-            daemonPassword: String,
-            daemonTrusted: Boolean,
-            proxy: String,
-        ) {
-            Timber.i("Initializing wallet with daemon address = $daemonAddress, daemon username = $daemonUsername, daemon password = ${"*".repeat(daemonPassword.length)}, proxy = $proxy")
-            wallet.initJ(daemonAddress, 0, daemonUsername, daemonPassword, proxy)
-            wallet.setTrustedDaemon(daemonTrusted)
-
-            this@WalletService.stateRef.updateAndGet { state ->
-                val walletHeight = wallet.getBlockChainHeightJ()
-                Timber.i("Wallet height when opened = $walletHeight")
-                val heights = state.heights.copy(walletBeginSyncHeight = walletHeight, walletHeight = walletHeight)
-                val status = wallet.getWalletStatusWithError()
-                return@updateAndGet state.copy(heights = heights, initialWalletStatus = status)
-            }
-            updateWallet(wallet)
-            this@WalletService.walletRef.set(wallet)
-
-            showServiceNotification(createServiceNotificationBuilder().setContentText(getText(R.string.service_notification_description_fetching_blockchain_height)).build())
-            handleFetchBlockchainAndTargetHeights() // TODO: investigate why there is a double free in Monero code when this is moved after startRefresh
-            updateSynchronizationStatusNotification(wallet)
-            wallet.setListener(this@WalletService)
-            wallet.startRefresh()
-        }
-
-        private fun handleCloseWallet() {
-            walletRef.getAndSet(null)?.let { wallet ->
-                wallet.setListener(null)
-                wallet.close()
-            }
-        }
-
-        private fun setDaemonAddress(
-            daemonAddress: String,
-            daemonUsername: String,
-            daemonPassword: String,
-            daemonTrusted: Boolean,
-            proxy: String,
-        ) {
-            WalletManager.instance.setProxyJ(proxy)
-            WalletManager.instance.setDaemonAddressJ(daemonAddress)
-            walletRef.get()?.let { wallet ->
-                Timber.i("Re-initializing wallet with daemon address = $daemonAddress, daemon username = $daemonUsername, daemon password = ${"*".repeat(daemonPassword.length)}, proxy = $proxy")
-                showServiceNotification(createServiceNotificationBuilder().setContentText(getText(R.string.service_notification_description_changing_node)).build())
-                wallet.initJ(daemonAddress, 0, daemonUsername, daemonPassword, proxy)
-                wallet.setTrustedDaemon(daemonTrusted)
-                updateWallet(wallet)
-                showServiceNotification(createServiceNotificationBuilder().setContentText(getText(R.string.service_notification_description_fetching_blockchain_height)).build())
-                handleFetchBlockchainAndTargetHeights()
-                updateSynchronizationStatusNotification(wallet)
-                wallet.setListener(this@WalletService)
-                wallet.startRefresh()
-            }
-        }
-
-        private fun handleFetchBlockchainAndTargetHeights() {
-            val newHeights = WalletManager.instance.getBlockchainAndTargetHeight()
-            if (newHeights.first > 0) {
-                Timber.i("Fetched blockchain height is ${newHeights.first} and target height is ${newHeights.second}")
-                stateRef.updateAndGet { state ->
-                    val heights = state.heights.copy(blockchainHeight = newHeights.first, blockchainTargetHeight = newHeights.second)
-                    return@updateAndGet state.copy(heights = heights, nodeLastRefreshedAt = clock.millis())
-                }
-            } else {
-                Timber.w("Fetched blockchain height is ${newHeights.first} and target height is ${newHeights.second}")
-            }
+        private fun handleReconnectDaemon() {
+            val walletWithData = getWalletOrLog() ?: return
+            applyDaemon(walletWithData, NodeStore.selected(this@WalletService, walletWithData.wallet.network()))
             forEachObserver {
-                it.onBlockchainAndTargetHeightsFetched(newHeights.first, newHeights.second)
-            }
-        }
-
-        private fun handleSetPassword(newPassword: String) {
-            val wallet = getWalletOrThrow()
-            wallet.setPassword(newPassword)
-            wallet.store()
-            forEachObserver {
-                it.onWalletPasswordSet()
+                it.onWalletUpdated(walletWithData)
             }
         }
 
         private fun resolveDestination(destination: TransactionDestination): TransactionDestinationResolved {
-            val value = destination.value
-            val wallet = getWalletOrThrow()
-            if (Wallet.isAddressValid(value, wallet.networkType())) {
-                return destination.toResolved()
-            } else if (Helper.isOpenaliasLike(destination.value)) {
-                Timber.d("Trying to resolve destination $value because it looks like an openalias")
-                val (resolvedAddress, dnssec) = WalletManager.instance.resolveOpenAlias(value)
-                Timber.d("Destination $value resolved as $resolvedAddress (dnssec = $dnssec)")
-                return destination.toResolved(resolvedAddress, dnssec)
-            } else {
-                Timber.w("Destination $value is neither a valid address nor looks like an openalias")
-                return destination.toResolved()
+            if (Helper.isOpenaliasLike(destination.value)) {
+                Timber.w("Not resolving destination ${destination.value} because openalias is not implemented yet")
             }
+            return destination.toResolved()
         }
 
-        private fun handleGenerateNewAddress(label: String) {
-            val wallet = getWalletOrThrow()
-            wallet.addAddress(wallet.getAccountIndex(), label)
-            wallet.store()
-            updateWallet(wallet)
+        private fun handleGenerateNewAddress(accountIndex: Int) {
+            val walletWithData = getWalletOrLog() ?: return
+            walletWithData.wallet.registerNewAddress(accountIndex)
+            walletWithData.wallet.store()
+            refreshWalletView(walletWithData)
             forEachObserver {
                 it.onAddressGenerated()
-            }
-        }
-
-        private fun handleSetAddressLabel(
-            accountIndex: Int,
-            addressIndex: Int,
-            label: String,
-        ) {
-            val wallet = getWalletOrThrow()
-            wallet.setAddressLabel(accountIndex, addressIndex, label)
-            wallet.store()
-            forEachObserver {
-                it.onAddressLabelChanged(accountIndex, addressIndex, label)
             }
         }
 
@@ -495,13 +315,7 @@ class WalletService :
             _selectedEnotes: ArrayList<String>?,
             _transactionDescription: String?,
         ) {
-            val (wallet, data) = getNewWalletOrLog()!!
-            val daemon = data.daemon!!
-            val transaction = wallet.createAndSignSweepTransaction(daemon, Address.fromString(destination)!!, priority)
-            this@WalletService.pendingTransactionRef.set(transaction)
-            forEachObserver {
-                it.onTransactionCreated(transaction)
-            }
+            publishTransactionCreation(runCatching { createSweepTransaction(destination, priority) })
         }
 
         private fun handleCreateTransaction(
@@ -510,96 +324,114 @@ class WalletService :
             _selectedEnotes: ArrayList<String>?,
             _transactionDescription: String?,
         ) {
-            val (wallet, data) = getNewWalletOrLog()!!
-            val daemon = data.daemon!!
-            val transaction = wallet.createAndSignTransaction(daemon, destinationAndAmounts.map { Payment(Address.fromString(it.value)!!, it.amount) }, priority)
-            this@WalletService.pendingTransactionRef.set(transaction)
-            forEachObserver {
-                it.onTransactionCreated(transaction)
-            }
+            publishTransactionCreation(runCatching { createTransaction(destinationAndAmounts, priority) })
+        }
+
+        private fun publishTransactionCreation(result: Result<TransactionView>) {
+            result.fold(
+                onSuccess = { transaction ->
+                    this@WalletService.pendingTransactionRef.set(transaction)
+                    forEachObserver {
+                        it.onTransactionCreated(transaction)
+                    }
+                },
+                onFailure = { error ->
+                    Timber.e(error, "Failed to create transaction")
+                    forEachObserver {
+                        it.onTransactionCreateFailed(error)
+                    }
+                },
+            )
+        }
+
+        private fun createSweepTransaction(
+            destination: String,
+            priority: FeePriority,
+        ): TransactionView {
+            val (wallet, data) = getWalletOrLog() ?: throw IllegalStateException("No wallet is open")
+            val daemon = data.connectedDaemon() ?: throw IllegalStateException("No node is selected")
+            val address = Address.fromString(destination) ?: throw IllegalArgumentException("Invalid destination address")
+
+            return wallet.createAndSignSweepTransaction(daemon, wallet.currentAccountIndex, address, priority)
+        }
+
+        private fun createTransaction(
+            destinations: List<TransactionDestinationWithAmount>,
+            priority: FeePriority,
+        ): TransactionView {
+            val (wallet, data) = getWalletOrLog() ?: throw IllegalStateException("No wallet is open")
+            val daemon = data.connectedDaemon() ?: throw IllegalStateException("No node is selected")
+            val payments =
+                destinations.map { destination ->
+                    val address = Address.fromString(destination.value) ?: throw IllegalArgumentException("Invalid destination address")
+                    Payment(address, destination.amount)
+                }
+
+            return wallet.createAndSignTransaction(daemon, wallet.currentAccountIndex, payments, priority)
         }
 
         private fun handleSendPendingTransaction(transaction: TransactionView) {
-            val (wallet, data) = getNewWalletOrLog()!!
-            val daemon = data.daemon!!
-            wallet.sendTransaction(daemon, transaction.transactionHash)
+            val walletWithData = getWalletOrLog()!!
+            val daemon = walletWithData.data.connectedDaemon() ?: return Timber.e("Cannot send a transaction because there is no daemon")
+            walletWithData.wallet.sendTransaction(daemon, transaction.transactionHash)
 //            wallet.setUserNote(txid, description)
 //            Timber.i("Set note for txid $txid to $description")
-            wallet.store()
+            walletWithData.wallet.store()
+            refreshWalletView(walletWithData)
             forEachObserver {
                 it.onTransactionSent(transaction, true)
-                it.onNewWalletUpdated(WalletWithData(wallet, data))
+                it.onWalletUpdated(walletWithData)
             }
         }
 
-        private fun handleSetProxy(value: String) {
-            val success = WalletManager.instance.setProxyJ(value)
-            // we assume that if setting proxy for daemon was successful,
-            // then setting proxy for wallet must have been successful as well
-            walletRef.get()?.setProxy(value)
-            if (success) {
-                this@WalletService.proxyRef.set(value)
-            }
-            forEachObserver {
-                it.onProxyUpdated(value, success)
-            }
+
+        private fun handleSetPassword(_newPassword: String) {
+            Timber.w("Changing the wallet password is not implemented yet")
         }
 
-        private fun handleFreezeEnotes(enotes: LongArray) {
-            val wallet = walletRef.get()!!
-            enotes.forEach {
-                wallet.freeze(it)
-            }
-            wallet.store("")
-            updateWallet(wallet)
+        private fun handleFreezeEnotes(_enotes: LongArray) {
+            Timber.w("Freezing enotes is not implemented yet")
         }
 
-        private fun handleThawEnotes(enotes: LongArray) {
-            val wallet = walletRef.get()!!
-            enotes.forEach {
-                wallet.thaw(it)
-            }
-            wallet.store("")
-            updateWallet(wallet)
+        private fun handleThawEnotes(_enotes: LongArray) {
+            Timber.w("Thawing enotes is not implemented yet")
         }
 
-        private fun handleCreateAccount(
-            label: String?,
+        private fun handleSetAddressLabel(
+            _accountIndex: Int,
+            _addressIndex: Int,
+            _label: String,
         ) {
-            getWallet()?.let { wallet ->
-                wallet.addAccount(label?.ifBlank { null } ?: NEW_ACCOUNT_NAME)
-                wallet.store("")
-                forEachObserver {
-                    it.onAccountCreated()
-                }
+            Timber.w("Setting address labels is not implemented yet")
+        }
+
+        private fun handleSetAccountLabel(
+            _index: Int,
+            _label: String,
+        ) {
+            Timber.w("Setting account labels is not implemented yet")
+        }
+
+        private fun handleCreateAccount() {
+            val walletWithData = getWalletOrLog() ?: return
+            walletWithData.wallet.registerNewAccount()
+            walletWithData.wallet.store()
+            refreshWalletView(walletWithData)
+            forEachObserver {
+                it.onAccountCreated()
             }
         }
 
         private fun handleSetAccount(
             index: Int,
         ) {
-            getWallet()?.let { wallet ->
-                wallet.setAccountIndex(index)
-                updateWallet(wallet)
-                forEachObserver {
-                    it.onAccountSet(index)
-                }
+            val walletWithData = getWalletOrLog() ?: return
+            walletWithData.wallet.currentAccountIndex = index
+            forEachObserver {
+                it.onAccountSet(index)
             }
         }
 
-        private fun handleSetAccountLabel(
-            index: Int,
-            label: String,
-        ) {
-            getWallet()?.let { wallet ->
-                wallet.setAccountLabel(index, label)
-                wallet.store("")
-                updateWallet(wallet)
-                forEachObserver {
-                    it.onAccountLabelChanged(index, label)
-                }
-            }
-        }
     }
 
     private val mBinder: IBinder = WalletServiceBinder()
@@ -665,7 +497,6 @@ class WalletService :
     override fun onDestroy() {
         Timber.d("Wallet Service is being destroyed")
         closeWallet()
-        closeNewWallet()
         syncScheduledFuture?.cancel(false)
         syncExecutor.shutdownNow()
         removeNotification(SERVICE_NOTIFICATION_ID)
@@ -691,181 +522,15 @@ class WalletService :
         }
     }
 
-    private fun updateWallet(wallet: Wallet) {
-        wallet.update()
-        updateSynchronizationStatusNotification(wallet)
-        forEachObserver {
-            it.onWalletUpdated(wallet)
-        }
+    private fun refreshWalletView(walletWithData: WalletWithData) {
+        val future =
+            syncCallbackExecutor.submit(Callable { walletWithData.wallet.getWalletView() })
+        walletWithData.walletView = future.get()
     }
 
-    override fun moneySpent(
-        txId: String,
-        amount: Long,
-    ) {
-        Timber.d("Money spent callback with txId $txId and amount $amount")
-    }
 
-    override fun moneyReceived(
-        txId: String,
-        amount: Long,
-    ) {
-        Timber.d("Money received callback txId $txId and amount $amount")
-        handleNewMoneyReceived(txId, amount, confirmed = true)
-    }
 
-    override fun unconfirmedMoneyReceived(
-        txId: String,
-        amount: Long,
-    ) {
-        Timber.d("Unconfirmed money received callback txId $txId and amount $amount")
-        handleNewMoneyReceived(txId, amount, confirmed = false)
-    }
-
-    override fun updated() {
-        Timber.d("Updated callback")
-    }
-
-    override fun newBlock(
-        height: Long,
-        last: Boolean,
-    ) {
-        Timber.d("New block callback at height $height, is last: $last")
-        // Monero heights are fucked up. Wallet and blockchain heights are always +1 to real height, but this callback receives real height
-        val prevState =
-            stateRef.getAndUpdate { state ->
-                val (_, _, blockchainHeight, blockchainTargetHeight) = state.heights
-
-                val newWalletHeight = height + 1
-                val newBlockchainHeight = if (blockchainHeight > 0 && blockchainHeight < (height + 1)) (height + 1) else blockchainHeight
-                val newTargetHeight = if (blockchainTargetHeight > newBlockchainHeight) blockchainTargetHeight else newBlockchainHeight
-
-                val heights =
-                    state.heights.copy(
-                        walletHeight = newWalletHeight,
-                        blockchainHeight = newBlockchainHeight,
-                        blockchainTargetHeight = newTargetHeight,
-                    )
-
-                return@getAndUpdate state.copy(heights = heights, walletLastRefreshedAt = clock.millis())
-            }
-        getWalletOrLog()?.let { wallet ->
-            forEachObserver {
-                it.onNewBlock(wallet)
-            }
-            if (last || prevState.heights.walletHeight <= 1L) {
-                Timber.d("Storing and updating wallet")
-                updateWallet(wallet)
-                wallet.store()
-            } else if (height % 1000L == 0L) {
-                // wallet is probably fast syncing
-                Timber.d("Updating synchronization status notification")
-                updateSynchronizationStatusNotification(wallet)
-            }
-            // we do not check here whether user has enabled notifications for transfers
-            // because we checked it before adding it to the map
-            transactionNotifications.entries.removeIf { entry ->
-                val (txId, firstSeenAt, notificationId) = entry.value
-                val transaction = wallet.getTransaction(txId)
-                if (transaction != null) {
-                    Timber.d("Updating a notification on new block for transaction id $txId and notification id $notificationId")
-                    createAndShowTransferNotification(
-                        transaction.amount,
-                        txId,
-                        firstSeenAt,
-                        transaction.confirmations.coerceAtMost(Constants.CONFIRMATIONS.toLong()).toInt(),
-                        notificationId,
-                    )
-                    return@removeIf transaction.confirmations >= Constants.CONFIRMATIONS
-                } else {
-                    Timber.w("Transaction with id $txId not found, but there was a notification created for it with id $notificationId")
-                    removeNotification(notificationId)
-                    return@removeIf true
-                }
-            }
-        }
-    }
-
-    override fun refreshed() {
-        Timber.d("Refreshed callback")
-        val wallet = getWallet()
-        val newWalletHeight = wallet?.getBlockChainHeightJ()
-        val oldState =
-            stateRef.updateAndGet { state ->
-                state.copy(walletLastRefreshedAt = clock.millis(), heights = state.heights.copy(walletHeight = newWalletHeight ?: state.heights.walletHeight))
-            }
-        if (wallet != null && newWalletHeight != null && oldState.heights.walletHeight < newWalletHeight) {
-            forEachObserver {
-                it.onWalletUpdated(wallet)
-            }
-        }
-        if (oldState.heights.blockchainHeight == 0L) {
-            Timber.d("Fetching blockchain height")
-            fetchBlockchainAndTargetHeights()
-        }
-        getWalletOrLog()?.let { wallet ->
-            updateWallet(wallet)
-        }
-    }
-
-    private fun handleNewMoneyReceived(
-        txId: String,
-        amount: Long,
-        confirmed: Boolean,
-    ) {
-        if (!PreferenceUtils.isShowTransferNotifications(this)) {
-            Timber.d("Not spawning transfer notification because transfer notifications are disabled")
-            return
-        }
-
-        val wallet = walletRef.get()
-
-        if (wallet == null) {
-            val confirmedText = if (confirmed) "confirmed" else "unconfirmed"
-            Timber.w("Wallet is null in new $confirmedText money received callback")
-            return
-        }
-
-        Timber.d("Refreshing wallet transaction history")
-        wallet.refreshTransactionHistory()
-        val transaction = wallet.getTransaction(txId)
-        if (transaction == null) {
-            Timber.w("Transaction $txId not found despite just getting a callback about it")
-            return
-        }
-
-        if (transaction.direction == TransactionInfo.Direction.Out) {
-            // we are getting back our change, not new money
-            Timber.d("Not spawning a notification for incoming money because it is an outgoing transaction")
-            return
-        }
-
-        val confirmations = transaction.confirmations
-
-        val time = System.currentTimeMillis()
-        val notificationId = createAndShowTransferNotification(amount, txId, time, confirmations.toInt())
-        transactionNotifications[txId] = TransactionNotificationData(txId, time, notificationId)
-        Timber.d("Spawned a notification for new money received with transaction id $txId and notification id $notificationId")
-    }
-
-    private fun updateSynchronizationStatusNotification(wallet: Wallet) {
-        val broadcastIntent =
-            Intent(CLOSE_WALLET_ACTION).apply {
-                setPackage(packageName)
-            }
-        val broadcastPendingIntent: PendingIntent =
-            PendingIntent.getBroadcast(application, 0, broadcastIntent, PendingIntent.FLAG_IMMUTABLE)
-
-        showServiceNotification(
-            createServiceNotificationBuilder()
-                .setContentText(
-                    SynchronizationStatus.from(stateRef.get()).getText(applicationContext),
-                ).addAction(NotificationCompat.Action.Builder(R.drawable.monfluo, getText(R.string.service_notification_close_wallet_action), broadcastPendingIntent).build())
-                .build(),
-        )
-    }
-
-    private fun updateSynchronizationStatusNotificationV2(walletWithData: WalletWithData) {
+    private fun updateSynchronizationStatusNotification(walletWithData: WalletWithData) {
         val broadcastIntent = Intent(CLOSE_WALLET_ACTION)
         val broadcastPendingIntent: PendingIntent =
             PendingIntent.getBroadcast(application, 0, broadcastIntent, PendingIntent.FLAG_IMMUTABLE)
@@ -873,7 +538,12 @@ class WalletService :
         val nf = NumberFormat.getInstance()
         val text: CharSequence =
             when (val state = walletWithData.data.getAdjustedLastSyncState()) {
-                null -> application.getString(R.string.wallet_not_connected)
+                null ->
+                    if (walletWithData.data.daemon is DaemonState.Failed) {
+                        application.getString(R.string.wallet_node_unavailable)
+                    } else {
+                        application.getString(R.string.wallet_not_connected)
+                    }
                 is WalletSyncState.Preparing -> application.getString(R.string.starting_wallet_synchronization)
                 is WalletSyncState.Syncing, is WalletSyncState.Starting -> {
                     val currentHeight = state.currentHeight!!
@@ -984,36 +654,8 @@ class WalletService :
         }
     }
 
-    fun getState(): State = stateRef.get()
-
-    fun getProxy(): String = proxyRef.get()
-
-    fun getWallet(): Wallet? = walletRef.get()
-
-    fun getWalletName(): String? = walletNameRef.get()
-
-    fun getWalletOrThrow(): Wallet {
+    fun getWalletOrLog(): WalletWithData? {
         val wallet = this.walletRef.get()
-        if (wallet != null) {
-            return wallet
-        } else {
-            throw IllegalStateException("Get wallet called on null wallet")
-        }
-    }
-
-    fun getWalletOrLog(): Wallet? {
-        val wallet = this.walletRef.get()
-        if (wallet != null) {
-            return wallet
-        } else {
-            val e = IllegalStateException("Get wallet called on null wallet")
-            Timber.e(e, "Get wallet called on null wallet (log only)")
-            return null
-        }
-    }
-
-    fun getNewWalletOrLog(): WalletWithData? {
-        val wallet = this.newWalletRef.get()
         if (wallet != null) {
             return wallet
         } else {
@@ -1025,85 +667,60 @@ class WalletService :
 
     fun getPendingTransaction(): TransactionView? = pendingTransactionRef.get()
 
-    fun getUninitWallet(): Wallet? = uninitWalletRef.get()
-
-    // used by activities that CREATE wallets (and therefore have a wallet already opened but not initialized)
-    // setUninitWallet must be called before that method
-    fun initWallet(
-        daemonAddress: String,
-        daemonUsername: String,
-        daemonPassword: String,
-        daemonTrusted: Boolean,
-        proxy: String,
-    ) {
-        closeWallet()
-        val message = handler.obtainMessage()
-        message.arg1 = WalletServiceCommand.INIT_WALLET.value()
-        message.data.putString(Constants.EXTRA_NODE_ADDRESS, daemonAddress)
-        message.data.putString(Constants.EXTRA_NODE_USERNAME, daemonUsername)
-        message.data.putString(Constants.EXTRA_NODE_PASSWORD, daemonPassword)
-        message.data.putBoolean(Constants.EXTRA_DAEMON_TRUSTED, daemonTrusted)
-        message.data.putString(Constants.EXTRA_PROXY, proxy)
-        handler.sendMessage(message)
-    }
-
     // used by activities that [want to] OPEN wallets (but do not have one opened yet)
     fun openWallet(
         wallet: String,
         walletPassword: String,
-        daemonAddress: String,
-        daemonUsername: String,
-        daemonPassword: String,
-        daemonTrusted: Boolean,
-        proxy: String,
-        networkType: MoneroNetworkType,
     ) {
         closeWallet()
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.OPEN_WALLET.value()
         message.data.putString(Constants.EXTRA_WALLET_NAME, wallet)
         message.data.putString(Constants.EXTRA_WALLET_PASSWORD, walletPassword)
-        message.data.putString(Constants.EXTRA_NODE_NAME, daemonAddress)
-        message.data.putString(Constants.EXTRA_NODE_ADDRESS, daemonAddress)
-        message.data.putString(Constants.EXTRA_NODE_USERNAME, daemonUsername)
-        message.data.putString(Constants.EXTRA_NODE_PASSWORD, daemonPassword)
-        message.data.putBoolean(Constants.EXTRA_DAEMON_TRUSTED, daemonTrusted)
-        message.data.putString(Constants.EXTRA_PROXY, proxy)
-        message.data.putInt(Constants.EXTRA_WALLET_NETWORK_TYPE, networkType.value)
         handler.sendMessage(message)
     }
 
     fun closeWallet() {
-        val message = handler.obtainMessage()
-        message.arg1 = WalletServiceCommand.CLOSE_WALLET.value()
-        handler.sendMessage(message)
+        val walletWithData = walletRef.getAndSet(null)
+        walletWithData?.wallet?.close()
     }
 
-    fun closeNewWallet() {
-        val newWalletWithData = newWalletRef.getAndSet(null)
-        newWalletWithData?.wallet?.close()
+    private fun connectDaemon(node: Node?): DaemonState {
+        if (node == null) {
+            return DaemonState.NotSelected
+        }
+
+        return try {
+            DaemonState.Connected(
+                Monfluo.createDaemon(
+                    node.name,
+                    node.address,
+                    node.credentials?.username,
+                    node.credentials?.password,
+                    PreferenceUtils.getProxyIfEnabled(this),
+                ),
+            )
+        } catch (e: RuntimeException) {
+            Timber.e(e, "Failed to create daemon for node ${node.name}")
+            DaemonState.Failed(e)
+        }
     }
 
-    fun setDaemonAddress(
-        daemonAddress: String,
-        daemonUsername: String,
-        daemonPassword: String,
-        daemonTrusted: Boolean,
-        proxy: String,
+    private fun applyDaemon(
+        walletWithData: WalletWithData,
+        node: Node?,
     ) {
-        val message = handler.obtainMessage()
-        message.arg1 = WalletServiceCommand.SET_DAEMON_ADDRESS.value()
-        message.data.putString(Constants.EXTRA_NODE_ADDRESS, daemonAddress)
-        message.data.putString(Constants.EXTRA_NODE_USERNAME, daemonUsername)
-        message.data.putString(Constants.EXTRA_NODE_PASSWORD, daemonPassword)
-        message.data.putBoolean(Constants.EXTRA_DAEMON_TRUSTED, daemonTrusted)
-        message.data.putString(Constants.EXTRA_PROXY, proxy)
-        handler.sendMessage(message)
+        walletWithData.data.daemon = connectDaemon(node)
+        walletWithData.data.lastSyncState = null
+        walletWithData.data.lastTerminalSyncState = null
+        walletWithData.data.lastNodeInfo = null
+        walletWithData.data.syncCompleted = false
+        updateSynchronizationStatusNotification(walletWithData)
     }
 
-    private fun fetchBlockchainAndTargetHeights() {
+    fun reconnectDaemon() {
         val message = handler.obtainMessage()
-        message.arg1 = WalletServiceCommand.FETCH_BLOCKCHAIN_AND_TARGET_HEIGHTS.value()
+        message.arg1 = WalletServiceCommand.RECONNECT_DAEMON.value()
         handler.sendMessage(message)
     }
 
@@ -1120,7 +737,7 @@ class WalletService :
     ) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.GENERATE_NEW_ADDRESS.value()
-        message.data.putString(Constants.EXTRA_ADDRESS_LABEL, label)
+        message.data.putInt(Constants.EXTRA_ACCOUNT_INDEX, accountIndex)
         handler.sendMessage(message)
     }
 
@@ -1184,13 +801,6 @@ class WalletService :
         handler.sendMessage(message)
     }
 
-    fun setProxy(value: String) {
-        val message = handler.obtainMessage()
-        message.arg1 = WalletServiceCommand.SET_PROXY.value()
-        message.data.putString(Constants.EXTRA_PROXY, value)
-        handler.sendMessage(message)
-    }
-
     fun freezeEnote(enotes: List<Long>) {
         val message = handler.obtainMessage()
         message.arg1 = WalletServiceCommand.FREEZE_ENOTES.value()
@@ -1236,8 +846,20 @@ data class SyncNodeInfo(
     val nodeInfo: NodeInfo,
 )
 
+sealed interface DaemonState {
+    data class Connected(
+        val daemon: Daemon,
+    ) : DaemonState
+
+    data class Failed(
+        val error: Throwable,
+    ) : DaemonState
+
+    data object NotSelected : DaemonState
+}
+
 data class WalletSyncData(
-    var daemon: Daemon?,
+    var daemon: DaemonState,
     var initialSyncHeight: Int,
     var latestHeight: Int? = null,
     var lastTerminalSyncState: WalletSyncState? = null,
@@ -1245,6 +867,8 @@ data class WalletSyncData(
     var lastNodeInfo: SyncNodeInfo? = null,
     var syncCompleted: Boolean = false,
 ) {
+    fun connectedDaemon(): Daemon? = (daemon as? DaemonState.Connected)?.daemon
+
     fun getAdjustedLastSyncState(): WalletSyncState? {
         val lastSyncState = this.lastSyncState ?: return null
         if (lastSyncState !is WalletSyncState.Preparing) return lastSyncState
@@ -1254,24 +878,16 @@ data class WalletSyncData(
 }
 
 data class WalletWithData(
-    val wallet: NewWallet,
+    val wallet: Wallet,
     val data: WalletSyncData,
+    var walletView: WalletView,
 )
 
 interface WalletServiceObserver : LifecycleOwner {
-    fun onNewWalletOpened(wallet: WalletWithData) {}
+    fun onWalletOpened(wallet: WalletWithData) {}
 
-    fun onWalletUpdated(wallet: Wallet) {}
-
-    fun onNewWalletUpdated(
+    fun onWalletUpdated(
         walletWithData: WalletWithData,
-    ) {}
-
-    fun onNewBlock(wallet: Wallet) {}
-
-    fun onBlockchainAndTargetHeightsFetched(
-        blockchainHeight: Long,
-        targetHeight: Long,
     ) {}
 
     fun onWalletPasswordSet() {}
@@ -1286,15 +902,13 @@ interface WalletServiceObserver : LifecycleOwner {
 
     fun onTransactionCreated(transaction: TransactionView) {}
 
+    fun onTransactionCreateFailed(error: Throwable) {}
+
     fun onTransactionSent(
         pendingTransaction: TransactionView,
         success: Boolean,
     ) {}
 
-    fun onProxyUpdated(
-        proxy: String,
-        success: Boolean,
-    ) {}
 
     fun onAccountCreated() {}
 
@@ -1306,27 +920,16 @@ interface WalletServiceObserver : LifecycleOwner {
     ) {}
 }
 
-data class State(
-    val heights: Heights = Heights(),
-    val initialWalletStatus: WalletStatusWithError? = null,
-    val walletLastRefreshedAt: Long? = null,
-    val nodeLastRefreshedAt: Long? = null,
-)
-
 private enum class WalletServiceCommand {
     UNKNOWN, // to catch bugs when command is set to 0 by accident
-    INIT_WALLET,
     OPEN_WALLET,
-    CLOSE_WALLET,
-    SET_DAEMON_ADDRESS,
-    FETCH_BLOCKCHAIN_AND_TARGET_HEIGHTS,
+    RECONNECT_DAEMON,
     SET_PASSWORD,
-    GENERATE_NEW_ADDRESS,
     SET_ADDRESS_LABEL,
+    GENERATE_NEW_ADDRESS,
     CREATE_SWEEP_TX,
     CREATE_TX,
     SEND_TX,
-    SET_PROXY,
     FREEZE_ENOTES,
     THAW_ENOTES,
     CREATE_ACCOUNT,

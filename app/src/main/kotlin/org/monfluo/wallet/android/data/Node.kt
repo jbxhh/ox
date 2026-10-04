@@ -1,60 +1,48 @@
-/*
- * Copyright (c) 2018 m2049r
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.monfluo.wallet.android.data
 
-import org.json.JSONObject
-import org.monfluo.wallet.android.model.MoneroNetworkType
+import org.monfluo.wallet.lib.data.Network
+import java.util.UUID
+
+data class Credentials(
+    val username: String,
+    val password: String,
+)
 
 data class Node(
+    val id: String,
     val name: String,
     val address: String,
-    val username: String?,
-    val password: String?,
-    val networkType: MoneroNetworkType = MoneroNetworkType.NetworkType_Mainnet,
-    val trusted: Boolean = false,
+    val credentials: Credentials?,
+    val network: Network,
+)
+
+enum class DefaultNode(
+    val nodeName: String,
+    val address: String,
 ) {
-    fun toJson(): Result<JSONObject> =
-        runCatching {
-            val jsonObject = JSONObject()
-            jsonObject.put(NAME, name)
-            jsonObject.put(ADDRESS, address)
-            jsonObject.put(USERNAME, username)
-            jsonObject.put(PASSWORD, password)
-            jsonObject.put(NETWORK_TYPE, networkType.string)
-            jsonObject.put(TRUSTED, trusted)
-            return Result.success(jsonObject)
-        }
+    MONERUJO("Monerujo", "http://nodex.monerujo.io:18081"),
+    SETHFORPRIVACY("Seth For Privacy (HTTPS)", "https://node.sethforprivacy.com:443"),
+    RUCKNIUM("Rucknium", "http://rucknium.me:18081"),
+    STACKWALLET("Stack Wallet (HTTPS)", "https://monero.stackwallet.com:18081"),
+    CAKEWALLET("Cake Wallet", "http://xmr-node.cakewallet.com:18081"),
+    HASHVAULT("HashVault", "http://nodes.hashvault.pro:18081"),
+    MONERUJO_ONION("Monerujo (Tor)", "http://monerujods7mbghwe6cobdr6ujih6c22zu5rl7zshmizz2udf7v7fsad.onion:18081"),
+    RUCKNIUM_ONION("Rucknium (Tor)", "http://rucknium757bokwv3ss35ftgc3gzb7hgbvvglbg3hisp7tsj2fkd2nyd.onion:18081"),
+    PLOWSOF_ONION1("plowsof #1 (Tor)", "http://plowsofe6cleftfmk2raiw5h2x66atrik3nja4bfd3zrfa2hdlgworad.onion:18089"),
+    PLOWSOF_ONION2("plowsof #2 (Tor)", "http://plowsoffjexmxalw73tkjmf422gq6575fc7vicuu4javzn2ynnte6tyd.onion:18089"),
+    BOLDSUCK("boldsuck (Tor)", "http://6dsdenp6vjkvqzy4wzsnzn6wixkdzihx3khiumyzieauxuxslmcaeiad.onion:18081"),
+    ;
 
     companion object {
-        private const val NAME = "name"
-        private const val ADDRESS = "address"
-        private const val USERNAME = "username"
-        private const val PASSWORD = "password"
-        private const val NETWORK_TYPE = "networkType"
-        private const val TRUSTED = "trusted"
-
-        fun fromJson(jsonObject: JSONObject): Result<Node> =
-            runCatching {
-                val name = jsonObject.getString(NAME)
-                val address = jsonObject.getString(ADDRESS)
-                val username = if (jsonObject.has(USERNAME)) jsonObject.getString(USERNAME) else null
-                val password = if (jsonObject.has(PASSWORD)) jsonObject.getString(PASSWORD) else null
-                val networkType = MoneroNetworkType.fromString(jsonObject.getString(NETWORK_TYPE))!!
-                val trusted = jsonObject.getBoolean(TRUSTED)
-                return Result.success(Node(name, address, username, password, networkType, trusted))
+        fun defaultNodes(): List<Node> =
+            entries.map {
+                Node(
+                    id = UUID.randomUUID().toString(),
+                    name = it.nodeName,
+                    address = it.address,
+                    credentials = null,
+                    network = Network.Mainnet,
+                )
             }
     }
 }

@@ -13,7 +13,7 @@ use monfluo_oxide::{
     transport::MonfluoTransport,
     wallet::{TransactionWrapper, Wallet, WalletSyncObserver},
 };
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, Notify};
 use tracing::{debug, error};
 
 static PENDING_TRANSACTION: Mutex<Option<TransactionWrapper<NotPruned>>> = Mutex::const_new(None);
@@ -66,8 +66,8 @@ pub fn get_name<'local>(
     .resolve::<ThrowRuntimeExAndDefault>()
 }
 
-#[jni_mangle("org.monfluo.wallet.lib.wallet.Wallet", "getCurrentHeight")]
-pub fn get_current_height<'local>(
+#[jni_mangle("org.monfluo.wallet.lib.wallet.Wallet", "getWalletView")]
+pub fn get_wallet_view<'local>(
     mut env: EnvUnowned<'local>,
     java_wallet: JObject<'local>,
 ) -> JObject<'local> {
@@ -77,74 +77,174 @@ pub fn get_current_height<'local>(
         crate::RUNTIME.block_on(async {
             let handle = crate::java::get_handle(env, cache, &java_wallet);
             let wallet = crate::bridge::from_java_handle::<Wallet>(handle);
-            let height = wallet.current_height().await;
-            let java_height = height.map_or(JObject::null(), |height| {
-                crate::java::new_integer(env, cache, height as i32)
+            let wallet_view = wallet.wallet_view().await;
+            let java_wallet_view = crate::java::new_wallet_view(env, cache, &wallet_view);
+            Ok::<JObject, jni::errors::Error>(java_wallet_view)
+        })
+    })
+    .resolve::<ThrowRuntimeExAndDefault>()
+}
+
+#[jni_mangle("org.monfluo.wallet.lib.wallet.Wallet", "getSeedView")]
+pub fn get_seed_view<'local>(
+    mut env: EnvUnowned<'local>,
+    java_wallet: JObject<'local>,
+) -> JObject<'local> {
+    let cache = crate::java::get_cache();
+
+    env.with_env(|env| {
+        crate::RUNTIME.block_on(async {
+            let handle = crate::java::get_handle(env, cache, &java_wallet);
+            let wallet = crate::bridge::from_java_handle::<Wallet>(handle);
+            let seed_view = wallet.seed_view();
+            let java_seed_view = seed_view.as_ref().map_or(JObject::null(), |seed_view| {
+                crate::java::new_wallet_seed_view(env, cache, seed_view)
             });
-
-            Ok::<JObject<'local>, jni::errors::Error>(java_height)
+            Ok::<JObject, jni::errors::Error>(java_seed_view)
         })
     })
     .resolve::<ThrowRuntimeExAndDefault>()
 }
 
-#[jni_mangle("org.monfluo.wallet.lib.wallet.Wallet", "getBalance")]
-pub fn get_balance<'local>(
+#[jni_mangle("org.monfluo.wallet.lib.wallet.Wallet", "getSpendKey")]
+pub fn get_spend_key<'local>(
     mut env: EnvUnowned<'local>,
     java_wallet: JObject<'local>,
 ) -> JObject<'local> {
     let cache = crate::java::get_cache();
 
     env.with_env(|env| {
-        crate::RUNTIME.block_on(async {
-            let handle = crate::java::get_handle(env, cache, &java_wallet);
-            let wallet = crate::bridge::from_java_handle::<Wallet>(handle);
-            let balance = wallet.balance_view().await;
-            let java_balance = crate::java::new_balance(env, cache, &balance);
-            Ok::<JObject, jni::errors::Error>(java_balance)
-        })
+        let handle = crate::java::get_handle(env, cache, &java_wallet);
+        let wallet = crate::bridge::from_java_handle::<Wallet>(handle);
+        let spend_key = wallet.spend_key();
+        Ok::<JObject, jni::errors::Error>(crate::java::new_monero_bytes(env, cache, &spend_key))
     })
     .resolve::<ThrowRuntimeExAndDefault>()
 }
 
-#[jni_mangle("org.monfluo.wallet.lib.wallet.Wallet", "getAccountView")]
-pub fn get_account_view<'local>(
+#[jni_mangle("org.monfluo.wallet.lib.wallet.Wallet", "getViewKey")]
+pub fn get_view_key<'local>(
     mut env: EnvUnowned<'local>,
     java_wallet: JObject<'local>,
-    java_account_index: jint,
 ) -> JObject<'local> {
     let cache = crate::java::get_cache();
 
     env.with_env(|env| {
-        crate::RUNTIME.block_on(async {
-            let wallet_handle = crate::java::get_handle(env, cache, &java_wallet);
-            let wallet = crate::bridge::from_java_handle::<Wallet>(wallet_handle);
-            let account_view = wallet.account_view(java_account_index as u32).await;
-            let java_account_view = crate::java::new_account_view(env, cache, &account_view);
-            Ok::<JObject, jni::errors::Error>(java_account_view)
-        })
+        let handle = crate::java::get_handle(env, cache, &java_wallet);
+        let wallet = crate::bridge::from_java_handle::<Wallet>(handle);
+        let view_key = wallet.view_key();
+        Ok::<JObject, jni::errors::Error>(crate::java::new_monero_bytes(env, cache, &view_key))
     })
     .resolve::<ThrowRuntimeExAndDefault>()
 }
 
-#[jni_mangle("org.monfluo.wallet.lib.wallet.Wallet", "getTransactionViews")]
-pub fn get_transaction_views<'local>(
+#[jni_mangle("org.monfluo.wallet.lib.wallet.Wallet", "getPublicSpendKey")]
+pub fn get_public_spend_key<'local>(
     mut env: EnvUnowned<'local>,
     java_wallet: JObject<'local>,
-    _java_account_index: jint,
 ) -> JObject<'local> {
     let cache = crate::java::get_cache();
 
     env.with_env(|env| {
-        crate::RUNTIME.block_on(async {
-            let wallet_handle = crate::java::get_handle(env, cache, &java_wallet);
-            let wallet = crate::bridge::from_java_handle::<Wallet>(wallet_handle);
-            let transaction_views = wallet.transaction_views().await;
-            let java_transactions_view =
-                crate::java::new_transaction_views(env, cache, &transaction_views);
+        let handle = crate::java::get_handle(env, cache, &java_wallet);
+        let wallet = crate::bridge::from_java_handle::<Wallet>(handle);
+        let public_spend_key = wallet.public_spend_key();
+        Ok::<JObject, jni::errors::Error>(crate::java::new_monero_bytes(
+            env,
+            cache,
+            &public_spend_key,
+        ))
+    })
+    .resolve::<ThrowRuntimeExAndDefault>()
+}
 
-            Ok::<JObject, jni::errors::Error>(java_transactions_view)
-        })
+#[jni_mangle("org.monfluo.wallet.lib.wallet.Wallet", "getPublicViewKey")]
+pub fn get_public_view_key<'local>(
+    mut env: EnvUnowned<'local>,
+    java_wallet: JObject<'local>,
+) -> JObject<'local> {
+    let cache = crate::java::get_cache();
+
+    env.with_env(|env| {
+        let handle = crate::java::get_handle(env, cache, &java_wallet);
+        let wallet = crate::bridge::from_java_handle::<Wallet>(handle);
+        let public_view_key = wallet.public_view_key();
+        Ok::<JObject, jni::errors::Error>(crate::java::new_monero_bytes(
+            env,
+            cache,
+            &public_view_key,
+        ))
+    })
+    .resolve::<ThrowRuntimeExAndDefault>()
+}
+
+#[jni_mangle("org.monfluo.wallet.lib.wallet.Wallet", "getLegacySeed")]
+pub fn get_legacy_seed<'local>(
+    mut env: EnvUnowned<'local>,
+    java_wallet: JObject<'local>,
+    java_language: JObject<'local>,
+    java_seed_offset_passphrase: JString<'local>,
+) -> JObject<'local> {
+    let cache = crate::java::get_cache();
+
+    env.with_env(|env| {
+        let handle = crate::java::get_handle(env, cache, &java_wallet);
+        let wallet = crate::bridge::from_java_handle::<Wallet>(handle);
+        let language = match crate::java::from_java_seed_language(env, cache, &java_language) {
+            monfluo_oxide::monero_wallet_util::seed::SeedType::Original(language) => language,
+            monfluo_oxide::monero_wallet_util::seed::SeedType::Polyseed(_) => {
+                panic!("Failed to get the legacy seed for a polyseed language")
+            }
+        };
+        let seed_offset_passphrase =
+            crate::java::JavaStringHelper::from_jstring(env, &java_seed_offset_passphrase);
+        let seed = wallet.legacy_seed(language, &seed_offset_passphrase.to_cow_str());
+        let seed = seed.to_string();
+        let java_mnemonic = env
+            .new_string(seed.as_str())
+            .expect("Failed to create java string for the legacy seed");
+        let java_language = crate::java::to_java_monero_seed_language(env, cache, language);
+        Ok::<JObject, jni::errors::Error>(crate::java::new_monero_seed(
+            env,
+            cache,
+            &java_mnemonic,
+            &java_language,
+        ))
+    })
+    .resolve::<ThrowRuntimeExAndDefault>()
+}
+
+#[jni_mangle("org.monfluo.wallet.lib.wallet.Wallet", "getAddress")]
+pub fn get_address<'local>(
+    mut env: EnvUnowned<'local>,
+    java_wallet: JObject<'local>,
+) -> JString<'local> {
+    let cache = crate::java::get_cache();
+
+    env.with_env(|env| {
+        let handle = crate::java::get_handle(env, cache, &java_wallet);
+        let wallet = crate::bridge::from_java_handle::<Wallet>(handle);
+        let address = wallet.address(None).to_string();
+        Ok::<JString, jni::errors::Error>(
+            env.new_string(address)
+                .expect("Failed to create java string for the wallet address"),
+        )
+    })
+    .resolve::<ThrowRuntimeExAndDefault>()
+}
+
+#[jni_mangle("org.monfluo.wallet.lib.wallet.Wallet", "network")]
+pub fn network<'local>(
+    mut env: EnvUnowned<'local>,
+    java_wallet: JObject<'local>,
+) -> JObject<'local> {
+    let cache = crate::java::get_cache();
+
+    env.with_env(|env| {
+        let handle = crate::java::get_handle(env, cache, &java_wallet);
+        let wallet = crate::bridge::from_java_handle::<Wallet>(handle);
+        let java_network = crate::java::to_java_network(env, cache, wallet.network());
+        Ok::<JObject, jni::errors::Error>(java_network)
     })
     .resolve::<ThrowRuntimeExAndDefault>()
 }
@@ -175,7 +275,8 @@ pub fn sync<'local>(
                 cache,
                 observer: global_observer,
             };
-            wallet.sync(&crate::RUNTIME, daemon, monfluo_java_observer);
+            let cancel = Notify::new();
+            wallet.sync(daemon, monfluo_java_observer, &cancel).await;
             Ok::<(), jni::errors::Error>(())
         })
     })
@@ -207,6 +308,7 @@ pub fn create_and_sign_transaction<'local>(
     mut env: EnvUnowned<'local>,
     java_wallet: JObject<'local>,
     java_daemon: JObject<'local>,
+    java_account_index: jint,
     java_payments: JObject<'local>,
     java_fee_priority: JObject<'local>,
 ) -> JObject<'local> {
@@ -223,11 +325,16 @@ pub fn create_and_sign_transaction<'local>(
                 .into_iter()
                 .map(|java_payment| crate::java::from_java_payment(env, cache, &java_payment))
                 .collect::<Vec<_>>();
+            let account_index = java_account_index as u32;
             let fee_priority = crate::java::from_java_fee_priority(env, cache, &java_fee_priority);
             let (transaction, outgoing_transfer) = wallet
-                .create_transaction(daemon, payments, fee_priority)
-                .await;
-            let transaction = wallet.sign_tranasction(transaction).await;
+                .create_transaction(daemon, account_index, payments, fee_priority)
+                .await
+                .expect("Failed to create transaction");
+            let transaction = wallet
+                .sign_transaction(transaction)
+                .await
+                .expect("Failed to sign transaction");
             let first_seen_timestamp = monfluo_oxide::current_timestamp();
             let pending_transaction = TransactionWrapper {
                 inner: transaction.clone(),
@@ -256,6 +363,7 @@ pub fn create_and_sign_sweep_transaction<'local>(
     mut env: EnvUnowned<'local>,
     java_wallet: JObject<'local>,
     java_daemon: JObject<'local>,
+    java_account_index: jint,
     java_address: JObject<'local>,
     java_fee_priority: JObject<'local>,
 ) -> JObject<'local> {
@@ -269,11 +377,16 @@ pub fn create_and_sign_sweep_transaction<'local>(
             let daemon =
                 crate::bridge::from_java_handle::<MoneroDaemon<MonfluoTransport>>(daemon_handle);
             let address = crate::java::from_java_address(env, cache, &java_address);
+            let account_index = java_account_index as u32;
             let fee_priority = crate::java::from_java_fee_priority(env, cache, &java_fee_priority);
             let (transaction, outgoing_transfer) = wallet
-                .create_sweep_transaction(daemon, address, fee_priority)
-                .await;
-            let transaction = wallet.sign_tranasction(transaction).await;
+                .create_sweep_transaction(daemon, account_index, address, fee_priority)
+                .await
+                .expect("Failed to create sweep transaction");
+            let transaction = wallet
+                .sign_transaction(transaction)
+                .await
+                .expect("Failed to sign transaction");
             let first_seen_timestamp = monfluo_oxide::current_timestamp();
             let pending_transaction = TransactionWrapper {
                 inner: transaction.clone(),
@@ -320,7 +433,8 @@ pub fn send_transaction<'local>(
                     }
                     wallet
                         .send_transaction(daemon, pending_tranasction.clone())
-                        .await;
+                        .await
+                        .expect("Failed to send transaction");
                     *pending_transaction_guard = None;
                 }
                 None => panic!("There is no pending transaction"),
@@ -339,7 +453,7 @@ pub fn store<'local>(mut env: EnvUnowned<'local>, java_wallet: JObject<'local>) 
         crate::RUNTIME.block_on(async {
             let wallet_handle = crate::java::get_handle(env, cache, &java_wallet);
             let wallet = crate::bridge::from_java_handle::<Wallet>(wallet_handle);
-            wallet.store().await;
+            wallet.store().await.expect("Failed to store wallet");
             Ok::<(), jni::errors::Error>(())
         })
     })
@@ -354,7 +468,7 @@ pub fn close<'local>(mut env: EnvUnowned<'local>, java_wallet: JObject<'local>) 
         crate::RUNTIME.block_on(async {
             let wallet_handle = crate::java::get_handle(env, cache, &java_wallet);
             let wallet = crate::bridge::from_java_handle::<Wallet>(wallet_handle);
-            wallet.close().await;
+            wallet.store().await.expect("Failed to store wallet");
             crate::bridge::drop(wallet);
             Ok::<(), jni::errors::Error>(())
         })

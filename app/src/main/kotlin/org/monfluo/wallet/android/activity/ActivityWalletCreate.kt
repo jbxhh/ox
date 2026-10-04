@@ -25,10 +25,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.monfluo.wallet.android.MoneroApplication
 import org.monfluo.wallet.android.R
-import org.monfluo.wallet.android.data.SeedType
+import org.monfluo.wallet.android.data.getDescriptionResourceId
+import org.monfluo.wallet.lib.seed.SeedType
+import org.monfluo.wallet.android.data.next
+import org.monfluo.wallet.android.data.resourceId
 import org.monfluo.wallet.android.livedata.combineLiveDatas
-import org.monfluo.wallet.android.model.MoneroNetworkType
-import org.monfluo.wallet.android.model.WalletManager
 import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.Helper
 import org.monfluo.wallet.android.util.PreferenceUtils
@@ -242,7 +243,7 @@ class ActivityWalletCreate : ActivityBase() {
         viewModel.seedType.observe(this) { seedType ->
             seedTypeButton.text = seedType.toString()
             seedTypeDescTextView.text = getText(seedType.getDescriptionResourceId())
-            if (seedType == SeedType.MONERO) {
+            if (seedType == SeedType.Monero) {
                 walletHeightLabelTextView.visibility = View.VISIBLE
                 walletRestoreHeightEditText.visibility = View.VISIBLE
                 walletSeedEditText.hint = getString(R.string.recovery_phrase_optional_legacy)
@@ -254,7 +255,7 @@ class ActivityWalletCreate : ActivityBase() {
         }
 
         viewModel.seedAndType.observe(this) { (seedType, seed) ->
-            if (seed.isNotBlank() || seedType == SeedType.POLYSEED) {
+            if (seed.isNotBlank() || seedType == SeedType.Polyseed) {
                 walletSeedOffsetLabelTextView.visibility = View.VISIBLE
                 walletSeedOffsetPassphraseEditText.visibility = View.VISIBLE
             } else {
@@ -265,7 +266,7 @@ class ActivityWalletCreate : ActivityBase() {
         }
 
         viewModel.networkType.observe(this) { networkType ->
-            networkTypeButton.text = getString(networkType.resourceId)
+            networkTypeButton.text = getString(networkType.resourceId())
         }
 
         viewModel.developerModeEnabled.observe(this) { isDeveloperModeEnabled ->
@@ -281,13 +282,7 @@ class ActivityWalletCreate : ActivityBase() {
 
     private fun toggleSeedType() {
         val seedType = viewModel.seedType.value ?: return
-        val newSeedType =
-            if (seedType == SeedType.POLYSEED) {
-                SeedType.MONERO
-            } else {
-                SeedType.POLYSEED
-            }
-        viewModel.seedType.value = newSeedType
+        viewModel.seedType.value = seedType.next()
     }
 
     fun toggleNetworkType() {
@@ -334,8 +329,8 @@ class ActivityWalletCreate : ActivityBase() {
     ) {
         val validWords =
             when (seedType) {
-                SeedType.MONERO -> MoneroSeedLanguage.getWords(MoneroSeedLanguage.English)
-                SeedType.POLYSEED -> PolyseedLanguage.getWords(PolyseedLanguage.English)
+                SeedType.Monero -> MoneroSeedLanguage.getWords(MoneroSeedLanguage.English)
+                SeedType.Polyseed -> PolyseedLanguage.getWords(PolyseedLanguage.English)
             }
         editable.getSpans(0, editable.length + 1, ForegroundColorSpan::class.java).forEach {
             editable.removeSpan(it)
@@ -352,10 +347,10 @@ class ActivityWalletCreate : ActivityBase() {
 }
 
 internal class CreateWalletViewModel : ViewModel() {
-    val seedType = MutableLiveData(SeedType.MONERO)
+    val seedType = MutableLiveData(SeedType.Monero)
     val showMoreOptions = MutableLiveData(false)
     val developerModeEnabled = MutableLiveData(false)
-    val networkType = MutableLiveData(MoneroNetworkType.NetworkType_Mainnet)
+    val networkType = MutableLiveData(Network.Mainnet)
     val password: MutableLiveData<String> = MutableLiveData("")
     private val confirmedPassphrase = MutableLiveData("")
     val seed = MutableLiveData("")
@@ -414,7 +409,7 @@ internal class CreateWalletViewModel : ViewModel() {
         val walletFile = File(Helper.getWalletRoot(activity), walletName)
         val seedTypeValue = seedType.value ?: return
 
-        if (seedTypeValue == SeedType.POLYSEED && WalletManager.isEncryptedPolyseed(walletSeed)) {
+        if (seedTypeValue == SeedType.Polyseed && Monfluo.isEncryptedPolyseed(walletSeed)) {
             creatingWallet.postValue(false)
             activity.runOnUiThread {
                 Toast
@@ -440,7 +435,7 @@ internal class CreateWalletViewModel : ViewModel() {
                 }
                 return
             }
-            Monfluo.restoreWallet(Helper.getWalletRoot(activity).absolutePath, Network.Mainnet, walletName, password, seed, null, restoreHeightText.toIntOrNull())
+            Monfluo.restoreWallet(Helper.getWalletRoot(activity).absolutePath, networkType.value!!, walletName, password, seed, null, restoreHeightText.toIntOrNull())
 
             activity.runOnUiThread {
                 Toast
@@ -451,7 +446,7 @@ internal class CreateWalletViewModel : ViewModel() {
                     ).show()
             }
         } else {
-            Monfluo.createWallet(Helper.getWalletRoot(activity).absolutePath, Network.Mainnet, walletName, password, MoneroSeedLanguage.English, "")
+            Monfluo.createWallet(Helper.getWalletRoot(activity).absolutePath, networkType.value!!, walletName, password, MoneroSeedLanguage.English, "")
 
             activity.runOnUiThread {
                 Toast
@@ -468,11 +463,11 @@ internal class CreateWalletViewModel : ViewModel() {
 
     private fun getMnemonicType(seed: String): SeedType? {
         val words = seed.split("\\s".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        val seedTypeValue = seedType.value ?: return SeedType.MONERO
-        return if (words.size == 16 && seedTypeValue == SeedType.POLYSEED) {
-            SeedType.POLYSEED
-        } else if (words.size == 25 && seedTypeValue == SeedType.MONERO) {
-            SeedType.MONERO
+        val seedTypeValue = seedType.value ?: return SeedType.Monero
+        return if (words.size == 16 && seedTypeValue == SeedType.Polyseed) {
+            SeedType.Polyseed
+        } else if (words.size == 25 && seedTypeValue == SeedType.Monero) {
+            SeedType.Monero
         } else {
             null
         }

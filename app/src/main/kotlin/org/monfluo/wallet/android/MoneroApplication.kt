@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import androidx.appcompat.app.AppCompatDelegate
 import org.monfluo.wallet.android.util.Constants.FOREGROUND_SERVICE_NOTIFICATION_CHANNEL
 import org.monfluo.wallet.android.util.Constants.TRANSFERS_NOTIFICATION_CHANNEL
+import org.monfluo.wallet.lib.Monfluo
 import timber.log.Timber
 
 class MoneroApplication : Application() {
@@ -18,6 +19,7 @@ class MoneroApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        Monfluo.init(this)
         Timber.plant(Timber.DebugTree())
         setNightMode()
 

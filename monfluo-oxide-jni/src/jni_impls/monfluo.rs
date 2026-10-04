@@ -1,13 +1,42 @@
-use std::{path::PathBuf, str::FromStr, sync::Arc};
+use std::{path::PathBuf, str::FromStr, sync::Arc, time::Duration};
 
 use crate::java::JavaStringHelper;
 use jni::{
-    EnvUnowned,
+    Env, EnvUnowned,
     errors::ThrowRuntimeExAndDefault,
     jni_mangle,
     objects::{JClass, JObject, JString},
+    sys::jboolean,
 };
-use monfluo_oxide::{monero_wallet::address::Network, transport::MonfluoTransport};
+use monfluo_oxide::transport::MonfluoTransport;
+
+const REQUEST_TIMEOUT: Duration = Duration::from_secs(30);
+
+#[cfg(target_os = "android")]
+fn init_certificate_verification(
+    env: &mut Env,
+    context: JObject,
+) -> Result<(), jni::errors::Error> {
+    rustls_platform_verifier::android::init_with_env(env, context)
+}
+
+#[cfg(not(target_os = "android"))]
+fn init_certificate_verification(
+    _env: &mut Env,
+    _context: JObject,
+) -> Result<(), jni::errors::Error> {
+    Ok(())
+}
+
+#[jni_mangle("org.monfluo.wallet.lib.Monfluo", "init")]
+pub fn init<'local>(
+    mut env: EnvUnowned<'local>,
+    _class: JClass<'local>,
+    java_context: JObject<'local>,
+) {
+    env.with_env(|env| init_certificate_verification(env, java_context))
+        .resolve::<ThrowRuntimeExAndDefault>();
+}
 
 #[jni_mangle("org.monfluo.wallet.lib.Monfluo", "monfluoVersion")]
 pub fn monfluo_version<'local>(
@@ -43,7 +72,7 @@ pub fn list_wallets<'local>(
             for wallet in wallets {
                 let wallet = env
                     .new_string(wallet)
-                    .expect("Failed to create java string for a wallet path");
+                    .expect("Failed to create java string for a wallet name");
                 crate::java::list_add(env, cache, &list, &JObject::from(wallet));
             }
             Ok::<JObject, jni::errors::Error>(list)
@@ -76,16 +105,47 @@ pub fn delete_wallet<'local>(
     .resolve::<ThrowRuntimeExAndDefault>()
 }
 
+#[jni_mangle("org.monfluo.wallet.lib.Monfluo", "renameWallet")]
+pub fn rename_wallet<'local>(
+    mut env: EnvUnowned<'local>,
+    _class: JClass<'local>,
+    java_monfluo_directory: JString,
+    java_wallet_name: JString,
+    java_new_wallet_name: JString,
+) {
+    env.with_env(|env| {
+        crate::RUNTIME.block_on(async {
+            let monfluo_directory = PathBuf::from_str(
+                &crate::java::JavaStringHelper::from_jstring(env, &java_monfluo_directory)
+                    .to_cow_str(),
+            )
+            .unwrap();
+            let wallet_name = crate::java::JavaStringHelper::from_jstring(env, &java_wallet_name);
+            let new_wallet_name =
+                crate::java::JavaStringHelper::from_jstring(env, &java_new_wallet_name);
+            monfluo_oxide::wallet::Wallet::rename(
+                monfluo_directory,
+                &wallet_name.to_cow_str(),
+                &new_wallet_name.to_cow_str(),
+            )
+            .await
+            .unwrap();
+            Ok::<(), jni::errors::Error>(())
+        })
+    })
+    .resolve::<ThrowRuntimeExAndDefault>()
+}
+
 #[jni_mangle("org.monfluo.wallet.lib.Monfluo", "createWallet")]
 pub fn create_wallet<'local>(
     mut env: EnvUnowned<'local>,
     _class: JClass<'local>,
     java_monfluo_directory: JString,
-    _java_network: JObject,
+    java_network: JObject<'local>,
     java_name: JString,
     java_password: JString,
     java_seed_language: JObject<'local>,
-    _java_seed_offset: JString,
+    java_seed_offset: JString<'local>,
 ) {
     let cache = crate::java::get_cache();
 
@@ -96,8 +156,11 @@ pub fn create_wallet<'local>(
                     .to_cow_str(),
             )
             .unwrap();
+            let network = crate::java::from_java_network(env, cache, &java_network);
             let wallet_name = crate::java::JavaStringHelper::from_jstring(env, &java_name);
             let password = crate::java::JavaStringHelper::from_jstring(env, &java_password);
+            let seed_offset =
+                crate::java::JavaStringHelper::from_nullable_jstring(env, &java_seed_offset);
 
             let seed_type = crate::java::from_java_seed_language(env, cache, &java_seed_language);
             let (seed, birthday) = match seed_type {
@@ -118,10 +181,14 @@ pub fn create_wallet<'local>(
 
             monfluo_oxide::wallet::Wallet::create(
                 monfluo_directory,
-                Network::Mainnet,
+                network,
                 &wallet_name.to_cow_str(),
                 &password.to_cow_str(),
                 seed,
+                seed_offset
+                    .as_ref()
+                    .map(JavaStringHelper::to_cow_str)
+                    .as_deref(),
                 None,
                 birthday,
             )
@@ -139,11 +206,11 @@ pub fn restore_wallet<'local>(
     mut env: EnvUnowned<'local>,
     _class: JClass<'local>,
     java_monfluo_directory: JString,
-    _java_network: JObject,
+    java_network: JObject<'local>,
     java_name: JString,
     java_password: JString,
     java_seed: JObject<'local>,
-    _java_seed_offset: JString,
+    java_seed_offset: JString,
     java_height: JObject<'local>,
 ) {
     let cache = crate::java::get_cache();
@@ -155,10 +222,12 @@ pub fn restore_wallet<'local>(
                     .to_cow_str(),
             )
             .unwrap();
+            let network = crate::java::from_java_network(env, cache, &java_network);
             let wallet_name = crate::java::JavaStringHelper::from_jstring(env, &java_name);
             let password = crate::java::JavaStringHelper::from_jstring(env, &java_password);
 
             let seed = crate::java::from_java_seed(env, cache, &java_seed);
+            let seed_offset = JavaStringHelper::from_nullable_jstring(env, &java_seed_offset);
             let height = crate::java::from_java_number_int_value(env, cache, &java_height);
             let birthday = match &seed {
                 monfluo_oxide::monero_wallet_util::seed::Seed::Original(_seed) => {
@@ -171,10 +240,14 @@ pub fn restore_wallet<'local>(
 
             monfluo_oxide::wallet::Wallet::create(
                 monfluo_directory,
-                Network::Mainnet,
+                network,
                 &wallet_name.to_cow_str(),
                 &password.to_cow_str(),
                 seed,
+                seed_offset
+                    .as_ref()
+                    .map(JavaStringHelper::to_cow_str)
+                    .as_deref(),
                 height.map(|height| height as u32),
                 birthday,
             )
@@ -232,7 +305,7 @@ pub fn create_daemon<'local>(
     java_node_username: JString,
     java_node_password: JString,
     java_node_proxy: JString,
-) {
+) -> JObject<'local> {
     let cache = crate::java::get_cache();
 
     env.with_env(|env| {
@@ -246,9 +319,23 @@ pub fn create_daemon<'local>(
             let node_proxy =
                 crate::java::JavaStringHelper::from_nullable_jstring(env, &java_node_proxy);
 
-            let daemon = MonfluoTransport::new(node_address.to_cow_str().into_owned(), None)
-                .await
-                .unwrap();
+            let credentials = match (&node_username, &node_password) {
+                (Some(username), Some(password)) => Some((
+                    username.to_cow_str().into_owned(),
+                    password.to_cow_str().into_owned(),
+                )),
+                _ => None,
+            };
+            let daemon = MonfluoTransport::new(
+                node_address.to_cow_str().into_owned(),
+                credentials,
+                node_proxy
+                    .as_ref()
+                    .map(|proxy| proxy.to_cow_str().into_owned()),
+                REQUEST_TIMEOUT,
+            )
+            .await
+            .expect("Failed to create the daemon");
             let daemon_handle = crate::bridge::into_java_handle(Arc::new(daemon));
             let java_daemon = crate::java::new_daemon(
                 env,
@@ -273,5 +360,20 @@ pub fn create_daemon<'local>(
             Ok::<JObject, jni::errors::Error>(java_daemon)
         })
     })
-    .resolve::<ThrowRuntimeExAndDefault>();
+    .resolve::<ThrowRuntimeExAndDefault>()
+}
+
+#[jni_mangle("org.monfluo.wallet.lib.Monfluo", "isEncryptedPolyseed")]
+pub fn is_encrypted_polyseed<'local>(
+    mut env: EnvUnowned<'local>,
+    _class: JClass<'local>,
+    java_polyseed: JString<'local>,
+) -> jboolean {
+    env.with_env(|env| {
+        let polyseed = crate::java::JavaStringHelper::from_jstring(env, &java_polyseed);
+        Ok::<jboolean, jni::errors::Error>(monfluo_oxide::seed::polyseed_words_are_encrypted(
+            &polyseed.to_cow_str(),
+        ) as jboolean)
+    })
+    .resolve::<ThrowRuntimeExAndDefault>()
 }

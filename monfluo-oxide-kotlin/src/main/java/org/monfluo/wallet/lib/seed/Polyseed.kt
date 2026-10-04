@@ -4,7 +4,7 @@ class Polyseed private constructor(
     mnemonic: String,
     language: PolyseedLanguage,
 ) : Seed<PolyseedLanguage>(mnemonic, language) {
-    override val type: SeedType = SeedType.POLYSEED
+    override val type: SeedType = SeedType.Polyseed
 
     companion object : SeedFactory<PolyseedLanguage, Polyseed> {
         @JvmStatic

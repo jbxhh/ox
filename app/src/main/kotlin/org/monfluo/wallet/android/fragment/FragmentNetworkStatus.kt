@@ -66,12 +66,12 @@ class FragmentNetworkStatus : FragmentMonero() {
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
-        walletService.getNewWalletOrLog()?.let { wallet ->
+        walletService.getWalletOrLog()?.let { wallet ->
             updateState(wallet)
         }
     }
 
-    override fun onNewWalletUpdated(
+    override fun onWalletUpdated(
         walletWithData: WalletWithData,
     ) {
         updateState(walletWithData)

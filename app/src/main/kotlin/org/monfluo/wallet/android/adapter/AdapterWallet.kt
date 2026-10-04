@@ -13,7 +13,7 @@ class AdapterWallet(
 ) : RecyclerView.Adapter<AdapterWallet.ViewHolder>() {
     private var wallets: List<String> = listOf()
 
-    fun setWalletPaths(wallets: List<String>) {
+    fun setWallets(wallets: List<String>) {
         if (this.wallets != wallets) {
             this.wallets = wallets
             notifyDataSetChanged()

@@ -17,7 +17,6 @@ import androidx.lifecycle.ViewModel
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.Helper
-import org.monfluo.wallet.android.util.PreferenceUtils
 import org.monfluo.wallet.android.util.component.ActivityBase
 import org.monfluo.wallet.lib.Monfluo
 import kotlin.math.max
@@ -74,7 +73,6 @@ class ActivityWalletDetails : ActivityBase() {
                     return@setOnClickListener
                 }
                 Monfluo.renameWallet(Helper.getWalletRoot(this).absolutePath, wallet, newWalletName)
-                PreferenceUtils.renameWalletNetworkType(this@ActivityWalletDetails, wallet, newWalletName)
             }
             finish()
         }
@@ -87,7 +85,6 @@ class ActivityWalletDetails : ActivityBase() {
                 .setMessage(getString(R.string.dialog_delete_wallet_message))
                 .setPositiveButton(getString(R.string.dialog_delete_wallet_action_yes)) { _, _ ->
                     Monfluo.deleteWallet(Helper.getWalletRoot(this).absolutePath, wallet)
-                    PreferenceUtils.deleteWalletNetworkType(this@ActivityWalletDetails, wallet)
                     finish()
                 }.setNegativeButton(getString(R.string.dialog_delete_wallet_action_no), null)
                 .create()

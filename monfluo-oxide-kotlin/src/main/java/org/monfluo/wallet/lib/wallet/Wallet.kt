@@ -1,12 +1,15 @@
 package org.monfluo.wallet.lib.wallet
 
-import org.monfluo.wallet.lib.data.AccountView
 import org.monfluo.wallet.lib.data.Address
-import org.monfluo.wallet.lib.data.Balance
 import org.monfluo.wallet.lib.data.FeePriority
 import org.monfluo.wallet.lib.data.MoneroBytes
+import org.monfluo.wallet.lib.data.Network
 import org.monfluo.wallet.lib.data.Payment
 import org.monfluo.wallet.lib.data.TransactionView
+import org.monfluo.wallet.lib.data.WalletSeedView
+import org.monfluo.wallet.lib.data.WalletView
+import org.monfluo.wallet.lib.seed.MoneroSeed
+import org.monfluo.wallet.lib.seed.MoneroSeedLanguage
 import org.monfluo.wallet.lib.wallet.sync.WalletSyncObserver
 
 class Wallet(
@@ -16,22 +19,31 @@ class Wallet(
 
     external fun getName(): String
 
-    external fun getCurrentHeight(): Int?
+    external fun network(): Network
 
     external fun sync(
         daemon: Daemon,
         observer: WalletSyncObserver,
     )
 
-    external fun getBalance(): Balance
+    external fun getWalletView(): WalletView
 
-    external fun getAccountView(accountIndex: Int): AccountView
+    external fun getSeedView(): WalletSeedView?
 
-    fun getAccountView(): AccountView = getAccountView(currentAccountIndex)
+    external fun getSpendKey(): MoneroBytes
 
-    external fun getTransactionViews(accountIndex: Int): List<TransactionView>
+    external fun getViewKey(): MoneroBytes
 
-    fun getTransactionViews(): List<TransactionView> = getTransactionViews(currentAccountIndex)
+    external fun getPublicSpendKey(): MoneroBytes
+
+    external fun getPublicViewKey(): MoneroBytes
+
+    external fun getAddress(): String
+
+    external fun getLegacySeed(
+        language: MoneroSeedLanguage,
+        seedOffsetPassphrase: String,
+    ): MoneroSeed
 
     external fun registerNewAccount(): Int
 
@@ -41,12 +53,14 @@ class Wallet(
 
     external fun createAndSignTransaction(
         daemon: Daemon,
+        accountIndex: Int,
         payments: List<Payment>,
         feePriority: FeePriority,
     ): TransactionView
 
     external fun createAndSignSweepTransaction(
         daemon: Daemon,
+        accountIndex: Int,
         address: Address,
         feePriority: FeePriority,
     ): TransactionView

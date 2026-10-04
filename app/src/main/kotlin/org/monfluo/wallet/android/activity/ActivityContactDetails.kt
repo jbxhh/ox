@@ -73,28 +73,10 @@ class ActivityContactDetails : ActivityMonero() {
             return@setOnLongClickListener true
         }
         deleteContactButton.setOnClickListener {
-            walletService?.let { walletService ->
-                walletService.getWalletOrLog()?.let { wallet ->
-                    if (wallet.deleteContact(viewModel.contact!!)) {
-                        Toast.makeText(this, getText(R.string.activity_contact_details_toast_contact_deleted), Toast.LENGTH_SHORT).show()
-                        finish()
-                    } else {
-                        Toast.makeText(this, getText(R.string.activity_contact_details_toast_failed_to_delete_contact), Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
+            Toast.makeText(this, getText(R.string.activity_contact_details_toast_failed_to_delete_contact), Toast.LENGTH_SHORT).show()
         }
         saveContactButton.setOnClickListener {
-            walletService?.let { walletService ->
-                walletService.getWalletOrLog()?.let { wallet ->
-                    if (wallet.renameContact(viewModel.contact!!.copy(name = contactNameEditText.text.toString()))) {
-                        Toast.makeText(this, getText(R.string.activity_contact_details_toast_contact_saved), Toast.LENGTH_SHORT).show()
-                        finish()
-                    } else {
-                        Toast.makeText(this, getText(R.string.activity_contact_details_toast_failed_to_save_contact), Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
+            Toast.makeText(this, getText(R.string.activity_contact_details_toast_failed_to_save_contact), Toast.LENGTH_SHORT).show()
         }
     }
 

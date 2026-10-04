@@ -33,7 +33,6 @@ import org.monfluo.wallet.android.model.Contact
 import org.monfluo.wallet.android.model.MoneroUnit
 import org.monfluo.wallet.android.model.TransactionDestinationRaw
 import org.monfluo.wallet.android.model.TransactionDestinationWithAmount
-import org.monfluo.wallet.android.model.Wallet
 import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.Helper
@@ -41,6 +40,7 @@ import org.monfluo.wallet.android.util.PreferenceUtils
 import org.monfluo.wallet.android.util.TextHelper
 import org.monfluo.wallet.android.util.UriPayment
 import org.monfluo.wallet.android.util.component.ActivityMonero
+import org.monfluo.wallet.lib.data.Address
 import org.monfluo.wallet.lib.data.FeePriority
 import org.monfluo.wallet.lib.data.TransactionView
 import timber.log.Timber
@@ -206,7 +206,7 @@ class ActivitySend : ActivityMonero() {
                 Toast.makeText(this, getString(R.string.activity_send_transaction_create_failed_no_wallet_toast), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            val walletWithData = walletService.getNewWalletOrLog()
+            val walletWithData = walletService.getWalletOrLog()
             if (walletWithData == null) {
                 Toast.makeText(this, getString(R.string.activity_send_transaction_create_failed_no_wallet_toast), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -241,11 +241,10 @@ class ActivitySend : ActivityMonero() {
             val sendAll = adapterTransactionDestination.getSendAll().value!!
             val feePriority = viewModel.priority.value!!
             val enotes = viewModel.enotes.value
-            val nettype = 0 // wallet.nettype()
             val description = transactionDescriptionEditText.getText().toString().takeIf { !it.isBlank() }
 
             if (sendAll) {
-                val address = parseTransactionDestinationAddressOrWarn(adapterTransactionDestination.getTransactionDestinations()[0].value, 1, nettype) ?: return@setOnClickListener
+                val address = parseTransactionDestinationAddressOrWarn(adapterTransactionDestination.getTransactionDestinations()[0].value, 1) ?: return@setOnClickListener
                 enabled.value = false
                 Toast.makeText(this, getString(R.string.activity_send_transaction_creating_toast), Toast.LENGTH_SHORT).show()
                 walletService.createSweepTransaction(address, feePriority, enotes, description)
@@ -254,7 +253,7 @@ class ActivitySend : ActivityMonero() {
                 for (indexed in adapterTransactionDestination.getTransactionDestinations().withIndex()) {
                     val transactionDestination = indexed.value
                     val position = indexed.index + 1
-                    val address = parseTransactionDestinationAddressOrWarn(transactionDestination.value, position, nettype) ?: return@setOnClickListener
+                    val address = parseTransactionDestinationAddressOrWarn(transactionDestination.value, position) ?: return@setOnClickListener
                     val amount = parseTransactionDestinationAmountOrWarn(transactionDestination.amount, position) ?: return@setOnClickListener
                     transactionDestinations.add(TransactionDestinationWithAmount(address, amount))
                 }
@@ -297,7 +296,7 @@ class ActivitySend : ActivityMonero() {
         viewModel.enotesValue.observe(this) { enotesValue ->
             if (enotesValue != null) {
                 selectedEnotesTextView.visibility = View.VISIBLE
-                selectedEnotesTextView.text = resources.getString(R.string.activity_send_selected_enotes_value_text, Wallet.getDisplayAmount(enotesValue))
+                selectedEnotesTextView.text = resources.getString(R.string.activity_send_selected_enotes_value_text, TextHelper.getDisplayAmount(enotesValue, MoneroUnit.MONERO, false))
             } else {
                 selectedEnotesTextView.visibility = View.GONE
             }
@@ -365,20 +364,17 @@ class ActivitySend : ActivityMonero() {
         }
     }
 
-    override fun onWalletServiceConnected(walletService: WalletService) {
-        walletService.getWalletOrLog()?.let { wallet ->
-            updateEnotesLabel(wallet)
-        }
-    }
-
-    override fun onWalletUpdated(wallet: Wallet) {
-        updateEnotesLabel(wallet)
-    }
-
     override fun onTransactionCreated(transaction: TransactionView) {
         runOnUiThread {
             enabled.value = true
             startActivityToSendPendingTransaction.launch(Intent(this, ActivityTransactionPending::class.java))
+        }
+    }
+
+    override fun onTransactionCreateFailed(error: Throwable) {
+        runOnUiThread {
+            enabled.value = true
+            Toast.makeText(this, getString(R.string.activity_send_transaction_create_failed_toast), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -397,20 +393,6 @@ class ActivitySend : ActivityMonero() {
         }
     }
 
-    private fun updateEnotesLabel(wallet: Wallet) {
-        val selectedEnotes = viewModel.enotes.value
-        if (selectedEnotes?.isNotEmpty() == true) {
-            var selectedValue: Long = 0
-            val enotes = wallet.getEnotes()
-            for (coinsInfo in enotes) {
-                if (selectedEnotes.contains(coinsInfo.keyImage)) {
-                    selectedValue += coinsInfo.amount
-                }
-            }
-            viewModel.enotesValue.postValue(selectedValue)
-        }
-    }
-
     private fun scanTransactionDestination() {
         if (Helper.getCameraPermission(this, startActivityToRequestCameraPermissions)) {
             val options = ScanOptions()
@@ -425,12 +407,12 @@ class ActivitySend : ActivityMonero() {
     private fun parseTransactionDestinationAddressOrWarn(
         address: String,
         position: Int,
-        nettype: Int,
     ): String? {
-//        if (!Helper.isOpenaliasLike(address) && !Wallet.isAddressValid(address, nettype)) {
-//            Toast.makeText(this, getString(R.string.activity_send_address_invalid_toast, position), Toast.LENGTH_SHORT).show()
-//            return null
-//        }
+        if (Address.fromString(address) == null) {
+            Toast.makeText(this, getString(R.string.activity_send_address_invalid_toast, position), Toast.LENGTH_SHORT).show()
+            return null
+        }
+
         return address
     }
 

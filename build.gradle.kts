@@ -16,6 +16,10 @@ buildscript {
 
 allprojects {
     repositories {
+        maven {
+            url = uri("https://raw.githubusercontent.com/rustls/rustls-platform-verifier/maven-archive/android-release-support/maven/")
+            content { includeGroup("org.rustls") }
+        }
         mavenCentral()
         google()
     }

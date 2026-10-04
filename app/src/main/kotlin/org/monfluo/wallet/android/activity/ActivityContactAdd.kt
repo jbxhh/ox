@@ -55,16 +55,7 @@ class ActivityContactAdd : ActivityMonero() {
             finish()
         }
         addContactButton.setOnClickListener {
-            walletService?.let { walletService ->
-                walletService.getWalletOrLog()?.let { wallet ->
-                    if (wallet.addContact(Contact(contactNameEditText.text.toString(), contactAddressEditText.text.toString()))) {
-                        Toast.makeText(this, getText(R.string.activity_contact_add_toast_contact_created), Toast.LENGTH_SHORT).show()
-                        finish()
-                    } else {
-                        Toast.makeText(this, getText(R.string.activity_contact_add_toast_failed_to_create_contact), Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
+            Toast.makeText(this, getText(R.string.activity_contact_add_toast_failed_to_create_contact), Toast.LENGTH_SHORT).show()
         }
     }
 }

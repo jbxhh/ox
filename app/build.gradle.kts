@@ -1,7 +1,42 @@
 import com.android.build.api.variant.FilterConfiguration
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.ValueSource
+import org.gradle.api.provider.ValueSourceParameters
 
 plugins {
     id("com.android.application")
+}
+
+abstract class RustlsPlatformVerifierVersion : ValueSource<String, RustlsPlatformVerifierVersion.Params> {
+    interface Params : ValueSourceParameters {
+        val lockFile: RegularFileProperty
+    }
+
+    override fun obtain(): String {
+        val lockFile = parameters.lockFile.get().asFile
+        val lines = lockFile.readLines()
+        val nameIndex = lines.indexOfFirst { it.trim() == "name = \"rustls-platform-verifier-android\"" }
+        check(nameIndex >= 0) { "Failed to find rustls-platform-verifier-android in $lockFile" }
+        return lines
+            .drop(nameIndex + 1)
+            .first { it.trim().startsWith("version = ") }
+            .trim()
+            .removePrefix("version = ")
+            .trim('"')
+    }
+}
+
+val rustlsPlatformVerifierVersion =
+    providers.of(RustlsPlatformVerifierVersion::class.java) {
+        parameters.lockFile.set(rootProject.layout.projectDirectory.file("monfluo-oxide-jni/Cargo.lock"))
+    }
+
+configurations.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.rustls" && requested.name == "rustls-platform-verifier") {
+            useVersion(rustlsPlatformVerifierVersion.get())
+        }
+    }
 }
 
 android {
@@ -109,6 +144,8 @@ dependencies {
     implementation("com.google.android.material:material:1.13.0")
     // Oxide
     implementation(project(":monfluo-oxide-kotlin"))
+    // Android component required by rustls-platform-verifier, its version is resolved from the Cargo lockfile
+    implementation("org.rustls:rustls-platform-verifier")
     // Logging
     implementation("com.jakewharton.timber:timber:5.0.1")
     // Slide to Send tx sliders

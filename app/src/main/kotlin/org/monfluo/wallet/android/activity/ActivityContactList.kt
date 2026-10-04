@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.adapter.AdapterContact
 import org.monfluo.wallet.android.model.Contact
-import org.monfluo.wallet.android.model.Wallet
 import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.component.ActivityMonero
@@ -82,9 +81,6 @@ class ActivityContactList : ActivityMonero() {
 
     override fun onResume() {
         super.onResume()
-        walletService?.getWallet()?.let { wallet ->
-            updateAdapterContact(wallet)
-        }
     }
 
     private fun bindWindowInsetsListener() {
@@ -107,19 +103,4 @@ class ActivityContactList : ActivityMonero() {
         }
     }
 
-    override fun onWalletServiceConnected(walletService: WalletService) {
-        walletService?.getWallet()?.let { wallet ->
-            updateAdapterContact(wallet)
-        }
-    }
-
-    override fun onWalletUpdated(wallet: Wallet) {
-        runOnUiThread {
-            updateAdapterContact(wallet)
-        }
-    }
-
-    private fun updateAdapterContact(wallet: Wallet) {
-        adapterContact.submitContacts(wallet.getContacts())
-    }
 }

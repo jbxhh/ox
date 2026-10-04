@@ -110,8 +110,8 @@ class ActivityWalletList : ActivityBase() {
     override fun onResume() {
         super.onResume()
 
-        val walletPaths = findWallets()
-        adapter.setWalletPaths(walletPaths)
+        val wallets = findWallets()
+        adapter.setWallets(wallets)
     }
 
     private fun bindWindowInsetsListener() {

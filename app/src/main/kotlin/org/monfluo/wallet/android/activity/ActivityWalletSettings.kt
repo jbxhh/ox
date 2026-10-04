@@ -12,10 +12,11 @@ import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
 import org.monfluo.wallet.android.R
+import org.monfluo.wallet.android.data.resourceId
 import org.monfluo.wallet.android.fragment.DialogFragmentPassword
 import org.monfluo.wallet.android.model.MoneroUnit
-import org.monfluo.wallet.android.model.Wallet
 import org.monfluo.wallet.android.service.wallet.WalletService
+import org.monfluo.wallet.android.service.wallet.WalletWithData
 import org.monfluo.wallet.android.util.TextHelper
 import org.monfluo.wallet.android.util.component.ActivityMonero
 import kotlin.math.max
@@ -66,23 +67,7 @@ class ActivityWalletSettings : ActivityMonero() {
             finish()
         }
         displaySeedButton.setOnClickListener {
-            walletService?.getWallet()?.let { wallet ->
-                val passwordDialog =
-                    DialogFragmentPassword(
-                        wallet.info.path,
-                        false,
-                        object : DialogFragmentPassword.Listener {
-                            override fun onCorrectPasswordSubmitted(
-                                self: DialogFragmentPassword,
-                                password: String,
-                            ) {
-                                self.dismiss()
-                                displaySeedDialog()
-                            }
-                        },
-                    )
-                passwordDialog.show(supportFragmentManager, "password_dialog")
-            }
+            displaySeedDialog()
         }
         changeWalletPasswordButton.setOnClickListener {
             startChangePasswordActivity()
@@ -93,34 +78,19 @@ class ActivityWalletSettings : ActivityMonero() {
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
-        walletService?.getWallet()?.let { wallet ->
-            update(wallet)
-        }
+        val walletWithData = walletService.getWalletOrLog() ?: return
+        update(walletWithData)
     }
 
-    override fun onWalletUpdated(wallet: Wallet) {
-        runOnUiThread {
-            update(wallet)
-        }
-    }
-
-    private fun update(wallet: Wallet) {
-        val name = wallet.info.name
-        walletNameTextView.setText(name)
-        val network = getString(wallet.networkType().resourceId)
-        walletNetworkTextView.setText(network)
-        val totalBalance =
-            wallet
-                .getBalances()
-                .values
-                .map { it.total }
-                .sum()
+    private fun update(walletWithData: WalletWithData) {
+        walletWithData.wallet.getName().let { walletNameTextView.setText(it) }
+        walletNetworkTextView.setText(getString(walletWithData.wallet.network().resourceId()))
+        val totalBalance = walletWithData.walletView.balance.total
         totalBalanceTextView.setText(TextHelper.formatUnlockedBalance(this, totalBalance, MoneroUnit.MONERO, false, 0))
     }
 
     private fun startChangePasswordActivity() {
-        val wallet = walletService!!.getWallet()
-        if (wallet != null) {
+        if (walletService!!.getWalletOrLog() != null) {
             startActivity(Intent(this, ActivityWalletChangePassword::class.java))
         } else {
             Toast.makeText(this, getText(R.string.toast_wallet_not_opened), Toast.LENGTH_SHORT).show()
@@ -128,8 +98,7 @@ class ActivityWalletSettings : ActivityMonero() {
     }
 
     private fun displaySeedDialog() {
-        val wallet = walletService!!.getWallet()
-        if (wallet != null) {
+        if (walletService!!.getWalletOrLog() != null) {
             startActivity(Intent(this, ActivityWalletSecrets::class.java))
         } else {
             Toast.makeText(this, getText(R.string.toast_wallet_not_opened), Toast.LENGTH_SHORT).show()

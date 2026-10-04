@@ -1,5 +1,6 @@
 package org.monfluo.wallet.lib.wallet.sync
 
+import org.monfluo.wallet.lib.data.Network
 import org.monfluo.wallet.lib.data.NodeInfo
 
 sealed interface WalletSyncError {
@@ -19,6 +20,13 @@ sealed interface WalletSyncError {
         val interfaceError: InterfaceError,
     ) : WalletSyncError {
         override fun toString(): String = "Could not fetch blocks: $interfaceError"
+    }
+
+    data class WrongNodeNetwork(
+        val nettype: String,
+        val walletNetwork: Network,
+    ) : WalletSyncError {
+        override fun toString(): String = "Node is on network $nettype, but the wallet is on $walletNetwork"
     }
 }
 

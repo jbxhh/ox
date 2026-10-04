@@ -21,8 +21,6 @@ import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.adapter.AdapterTransactionInfo
 import org.monfluo.wallet.android.livedata.combineLiveDatas
 import org.monfluo.wallet.android.model.MoneroUnit
-import org.monfluo.wallet.android.model.Wallet
-import org.monfluo.wallet.android.service.wallet.State
 import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.service.wallet.WalletWithData
 import org.monfluo.wallet.android.util.Constants
@@ -270,9 +268,8 @@ class ActivityHome : ActivityMonero() {
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
-        val wallet = walletService.getNewWalletOrLog()
-        viewModel.state.postValue(walletService.getState())
-        updateNewWallet(wallet!!)
+        val walletWithData = walletService.getWalletOrLog() ?: return
+        updateWallet(walletWithData)
     }
 
     override fun onWalletServiceDisconnected() {
@@ -285,54 +282,29 @@ class ActivityHome : ActivityMonero() {
 
     private fun stop() {
         Timber.d("Stopping")
-        walletService?.closeNewWallet()
+        walletService?.closeWallet()
         finish()
     }
 
-    override fun onWalletUpdated(wallet: Wallet) {
-        walletService?.let { walletService ->
-            viewModel.state.postValue(walletService.getState())
-        }
-//        updateWallet(wallet)
-    }
-
-    override fun onNewWalletUpdated(
+    override fun onWalletUpdated(
         walletWithData: WalletWithData,
     ) {
-        updateNewWallet(walletWithData)
+        updateWallet(walletWithData)
     }
 
-    override fun onNewBlock(wallet: Wallet) {
-        walletService?.let { walletService ->
-            viewModel.state.postValue(walletService.getState())
-        }
-    }
-
-    override fun onBlockchainAndTargetHeightsFetched(
-        blockchainHeight: Long,
-        targetHeight: Long,
-    ) {
-        walletService?.let { walletService ->
-            viewModel.state.postValue(walletService.getState())
-        }
-    }
-
-    private fun updateNewWallet(
+    private fun updateWallet(
         walletWithData: WalletWithData,
     ) {
         val (wallet, data) = walletWithData
         val name = wallet.getName()
         val isSynchronized = data.syncCompleted
-        val balance = wallet.getBalance()
-        val transactions = wallet.getTransactionViews()
-        viewModel.cardData.postValue(WalletCardData(name, isSynchronized, balance))
-        viewModel.transactions.postValue(transactions)
+        val walletView = walletWithData.walletView
+        viewModel.cardData.postValue(WalletCardData(name, isSynchronized, walletView.balance))
+        viewModel.transactions.postValue(walletView.transactions)
     }
 }
 
 internal class ActivityHomeViewModel : ViewModel() {
-    val state: MutableLiveData<State> = MutableLiveData(null)
-
     val multiAccountMode: MutableLiveData<Boolean> = MutableLiveData(false)
     val enoteManagement: MutableLiveData<Boolean> = MutableLiveData(false)
     val balanceTapTogglesStreetMode: MutableLiveData<Boolean> = MutableLiveData(false)
@@ -343,12 +315,11 @@ internal class ActivityHomeViewModel : ViewModel() {
 
     val walletCardInfo =
         combineLiveDatas(
-            state,
             cardData,
             streetMode,
             multiAccountMode,
             enoteManagement,
-        ) { state, cardData, streetMode, multiAccountMode, enableEnoteManagement ->
+        ) { cardData, streetMode, multiAccountMode, enableEnoteManagement ->
             WalletCardState(
                 streetMode = streetMode!!,
                 multiAccountMode = multiAccountMode!!,

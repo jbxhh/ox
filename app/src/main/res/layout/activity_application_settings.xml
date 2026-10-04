@@ -625,6 +625,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:text="@string/nodes_header"
             android:background="@drawable/button_background"
             android:ellipsize="middle"
             android:paddingStart="16dp"

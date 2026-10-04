@@ -3,7 +3,6 @@ package org.monfluo.wallet.android.activity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
@@ -16,11 +15,14 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import org.monfluo.wallet.android.R
-import org.monfluo.wallet.android.data.DefaultNode
-import org.monfluo.wallet.android.data.Node
-import org.monfluo.wallet.android.model.MoneroNetworkType
+import org.monfluo.wallet.android.data.Credentials
+import org.monfluo.wallet.android.data.NodeStore
+import org.monfluo.wallet.android.data.next
+import org.monfluo.wallet.android.data.resourceId
+import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.PreferenceUtils
 import org.monfluo.wallet.android.util.component.ActivityBase
+import org.monfluo.wallet.lib.data.Network
 import timber.log.Timber
 import kotlin.math.max
 
@@ -32,7 +34,6 @@ class ActivityNodeAdd : ActivityBase() {
 
     private lateinit var nodeNameEditText: EditText
     private lateinit var nodeAddressEditText: EditText
-    private lateinit var nodeDaemonTrustedCheckBox: CheckBox
     private lateinit var nodeNetworkTypeButton: Button
     private lateinit var nodeNetworkTypeLabelTextView: TextView
     private lateinit var nodeUsernameEditText: EditText
@@ -47,7 +48,6 @@ class ActivityNodeAdd : ActivityBase() {
         backImageView = findViewById(R.id.back_imageview)
         nodeNameEditText = findViewById(R.id.node_name_edittext)
         nodeAddressEditText = findViewById(R.id.node_address_edittext)
-        nodeDaemonTrustedCheckBox = findViewById(R.id.trusted_node_checkbox)
         nodeNetworkTypeButton = findViewById(R.id.node_network_type_button)
         nodeNetworkTypeLabelTextView = findViewById(R.id.node_network_type_label_textview)
         nodeUsernameEditText = findViewById(R.id.node_username_edittext)
@@ -57,6 +57,7 @@ class ActivityNodeAdd : ActivityBase() {
         bindWindowInsetsListener()
         bindListeners()
         bindObservers()
+        init()
     }
 
     override fun onResume() {
@@ -85,11 +86,10 @@ class ActivityNodeAdd : ActivityBase() {
         }
         nodeNetworkTypeButton.setOnClickListener { toggleNetworkType() }
         nodeAddButton.setOnClickListener {
-            val name = nodeNameEditText.text.toString()
-            val address = nodeAddressEditText.text.toString()
-            val username = nodeUsernameEditText.text.toString().ifBlank { null }
-            val password = nodePasswordEditText.text.toString().ifBlank { null }
-            val trusted = nodeDaemonTrustedCheckBox.isChecked
+            val name = nodeNameEditText.text.toString().trim()
+            val address = nodeAddressEditText.text.toString().trim()
+            val username = nodeUsernameEditText.text.toString().trim()
+            val password = nodePasswordEditText.text.toString()
             val networkType = viewModel.networkType.value!!
 
             if (name.isBlank()) {
@@ -98,38 +98,23 @@ class ActivityNodeAdd : ActivityBase() {
             } else if (address.isBlank()) {
                 Toast.makeText(this, getText(R.string.toast_enter_node_address), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
-            } else if (username != null && password == null) {
+            } else if (username.isNotBlank() != password.isNotBlank()) {
                 Toast.makeText(this, getText(R.string.toast_enter_node_password), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            val newNode = Node(name, address, username, password, networkType, trusted)
+            val credentials = if (username.isNotBlank()) Credentials(username, password) else null
 
-            val nodes = PreferenceUtils.getOrSetDefaultNodes(this, DefaultNode.defaultNodes())
-            if (nodes.any { it.name == newNode.name }) {
-                Timber.i("Failed to add nodes due to node with the same name already existing")
-                Toast.makeText(this, getText(R.string.toast_node_with_name_already_exists), Toast.LENGTH_SHORT).show()
-            } else {
-                val newNodes = nodes.toMutableList()
-                newNodes.add(newNode)
-                PreferenceUtils.setNodes(this, newNodes).fold(
-                    {
-                        Timber.i("New node ${newNode.name} added successfully")
-                        Toast.makeText(this, getText(R.string.toast_node_added), Toast.LENGTH_SHORT).show()
-                        finish()
-                    },
-                    {
-                        Timber.e(it, "Failed to add new node")
-                        Toast.makeText(this, getText(R.string.toast_failed_to_add_node), Toast.LENGTH_SHORT).show()
-                    },
-                )
-            }
+            NodeStore.add(this, name, address, credentials, networkType)
+            Timber.i("New node $name added successfully")
+            Toast.makeText(this, getText(R.string.toast_node_added), Toast.LENGTH_SHORT).show()
+            finish()
         }
     }
 
     private fun bindObservers() {
         viewModel.networkType.observe(this) { networkType ->
-            nodeNetworkTypeButton.text = getString(networkType.resourceId)
+            nodeNetworkTypeButton.text = getString(networkType.resourceId())
         }
 
         viewModel.developerModeEnabled.observe(this) { isDeveloperModeEnabled ->
@@ -143,12 +128,23 @@ class ActivityNodeAdd : ActivityBase() {
         }
     }
 
+    private fun init() {
+        if (viewModel.networkTypeInitialized) {
+            return
+        }
+        viewModel.networkTypeInitialized = true
+
+        val networkName = intent.getStringExtra(Constants.EXTRA_NETWORK) ?: return
+        Network.entries.find { it.name == networkName }?.let { viewModel.networkType.value = it }
+    }
+
     fun toggleNetworkType() {
         viewModel.networkType.value = viewModel.networkType.value!!.next()
     }
 }
 
 internal class ActivityNodeAddViewModel : ViewModel() {
+    var networkTypeInitialized: Boolean = false
     val developerModeEnabled: MutableLiveData<Boolean> = MutableLiveData(false)
-    val networkType: MutableLiveData<MoneroNetworkType> = MutableLiveData(MoneroNetworkType.NetworkType_Mainnet)
+    val networkType: MutableLiveData<Network> = MutableLiveData(Network.Mainnet)
 }

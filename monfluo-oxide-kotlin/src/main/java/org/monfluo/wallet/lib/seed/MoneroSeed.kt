@@ -4,7 +4,7 @@ class MoneroSeed private constructor(
     mnemonic: String,
     language: MoneroSeedLanguage,
 ) : Seed<MoneroSeedLanguage>(mnemonic, language) {
-    override val type: SeedType = SeedType.MONERO
+    override val type: SeedType = SeedType.Monero
 
     companion object : SeedFactory<MoneroSeedLanguage, MoneroSeed> {
         @JvmStatic

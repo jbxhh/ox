@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.adapter.AdapterEnote
 import org.monfluo.wallet.android.model.Enote
-import org.monfluo.wallet.android.model.Wallet
 import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.PreferenceUtils
@@ -166,29 +165,7 @@ class ActivityEnoteList : ActivityMonero() {
         viewModel.multiAccountMode.postValue(isMultiAccountMode)
     }
 
-    override fun onWalletServiceConnected(walletService: WalletService) {
-        walletService.getWallet()?.let { wallet ->
-            updateState(wallet)
-        }
-    }
-
-    override fun onWalletUpdated(wallet: Wallet) {
-        updateState(wallet)
-    }
-
-    private fun updateState(wallet: Wallet) {
-        val enotes = wallet.getEnotes()
-        val addresses =
-            (0 until wallet.numAddresses)
-                .map {
-                    wallet.getAddress(wallet.getAccountIndex(), it)
-                }.toSet()
-        val filteredEnotes =
-            enotes.filter {
-                it.address != null && addresses.contains(it.address)
-            }
-        viewModel.updateEnotes(filteredEnotes)
-    }
+    override fun onWalletServiceConnected(walletService: WalletService) {}
 }
 
 internal class EnotesViewModel : ViewModel() {

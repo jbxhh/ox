@@ -4,8 +4,8 @@ interface SeedLanguageUtils<L : SeedLanguage> {
     companion object {
         fun getUtils(seedType: SeedType): SeedLanguageUtils<*> =
             when (seedType) {
-                SeedType.MONERO -> MoneroSeedLanguage.Companion
-                SeedType.POLYSEED -> PolyseedLanguage.Companion
+                SeedType.Monero -> MoneroSeedLanguage.Companion
+                SeedType.Polyseed -> PolyseedLanguage.Companion
             }
     }
 

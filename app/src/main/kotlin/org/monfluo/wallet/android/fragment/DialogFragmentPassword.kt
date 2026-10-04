@@ -66,11 +66,6 @@ class DialogFragmentPassword(
         walletPassword: String,
         noSpendKey: Boolean = false,
     ): Boolean = true
-//        WalletManager.instance.verifyWalletPassword(
-//            "$walletPath.keys",
-//            walletPassword,
-//            noSpendKey,
-//        )
 
     interface Listener {
         fun onCorrectPasswordSubmitted(

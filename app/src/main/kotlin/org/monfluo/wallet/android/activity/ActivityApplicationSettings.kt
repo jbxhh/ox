@@ -11,20 +11,15 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type.displayCutout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import org.monfluo.wallet.android.BuildConfig
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.activity.ActivityNodeList
-import org.monfluo.wallet.android.model.MoneroNetworkType
-import org.monfluo.wallet.android.model.Wallet
 import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.util.Helper
 import org.monfluo.wallet.android.util.PreferenceUtils
@@ -34,8 +29,6 @@ import timber.log.Timber
 import kotlin.math.max
 
 class ActivityApplicationSettings : ActivityMonero() {
-    private val viewModel: ActivityApplicationSettingsViewModel by viewModels()
-
     private lateinit var layoutView: View
     private lateinit var backImageView: ImageView
     private lateinit var walletProxyAddressEditText: EditText
@@ -143,7 +136,6 @@ class ActivityApplicationSettings : ActivityMonero() {
 
         bindWindowInsetsListener()
         bindListeners()
-        bindObservers()
     }
 
     private fun bindWindowInsetsListener() {
@@ -232,31 +224,9 @@ class ActivityApplicationSettings : ActivityMonero() {
         saveProxyButton.setOnClickListener {
             val proxyAddress = walletProxyAddressEditText.text.toString()
             PreferenceUtils.setProxy(applicationContext, proxyAddress)
-            if (proxySwitch.isChecked) {
-                if (proxyAddress.isBlank()) {
-                    Toast.makeText(this, getText(R.string.toast_proxy_address_not_set), Toast.LENGTH_SHORT).show()
-                } else {
-                    val walletService = walletService
-                    if (walletService != null) {
-                        Toast.makeText(this, getText(R.string.toast_activating_proxy), Toast.LENGTH_SHORT).show()
-                        walletService.setProxy(proxyAddress)
-                    } else {
-                        Toast.makeText(this, getText(R.string.toast_proxy_saved), Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } else if (!walletService?.getProxy().isNullOrEmpty()) {
-                Toast.makeText(this, getText(R.string.toast_deactivating_proxy), Toast.LENGTH_SHORT).show()
-                walletService?.setProxy("")
-            } else {
-                Toast.makeText(this, getText(R.string.toast_proxy_saved), Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
 
-    private fun bindObservers() {
-        viewModel.walletNetworkType.observe(this) { networkType ->
-            val node = PreferenceUtils.getDefaultNode(this, networkType)
-            selectNodeButton.text = getString(R.string.node_button_text, node?.name ?: "null")
+            walletService?.reconnectDaemon()
+            Toast.makeText(this, getText(R.string.toast_proxy_saved), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -270,38 +240,4 @@ class ActivityApplicationSettings : ActivityMonero() {
         Timber.d("Wallet Service disconnected")
     }
 
-    override fun onWalletServiceConnected(walletService: WalletService) {
-        walletService.getWallet()?.let { wallet ->
-            viewModel.walletNetworkType.value = wallet.networkType()
-        }
-    }
-
-    override fun onWalletUpdated(wallet: Wallet) {
-        viewModel.walletNetworkType.postValue(wallet.networkType())
-    }
-
-    override fun onProxyUpdated(
-        proxy: String,
-        success: Boolean,
-    ) {
-        runOnUiThread {
-            if (proxy.isBlank()) {
-                if (success) {
-                    Toast.makeText(this, getText(R.string.toast_proxy_deactivated), Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, getText(R.string.toast_failed_to_deactivate_proxy), Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                if (success) {
-                    Toast.makeText(this, getText(R.string.toast_proxy_activated), Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, getText(R.string.toast_failed_to_activate_proxy), Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-}
-
-internal class ActivityApplicationSettingsViewModel : ViewModel() {
-    val walletNetworkType: MutableLiveData<MoneroNetworkType> = MutableLiveData(MoneroNetworkType.NetworkType_Mainnet)
 }

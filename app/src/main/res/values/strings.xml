@@ -11,7 +11,6 @@
     <!-- Toast shown when user tries to thaw enotes -->
     <string name="toast_thawing_enotes">Thawing enotes</string>
     <!-- Toast shown when selecting a node fails -->
-    <string name="toast_failed_to_select_node">Failed to select node</string>
     <!-- Toast shown when a new account was created -->
     <string name="toast_new_account_created">New account created</string>
     <!-- Toast shown when switching to a different account -->
@@ -19,19 +18,12 @@
     <!-- Toast shown when user attempts to interact with wallet before it is opened -->
     <string name="toast_wallet_not_opened">Wallet is not opened yet</string>
     <!-- Toast shown when user tries to activate proxy -->
-    <string name="toast_activating_proxy">Activating proxy</string>
     <!-- Toast shown when proxy was activated -->
-    <string name="toast_proxy_activated">Proxy activated</string>
     <!-- Toast shown when proxy failed to activated -->
-    <string name="toast_failed_to_activate_proxy">Failed to activate proxy</string>
     <!-- Toast shown when user tries to deactivate proxy -->
-    <string name="toast_deactivating_proxy">Deactivating proxy</string>
     <!-- Toast shown when proxy was deactivated -->
-    <string name="toast_proxy_deactivated">Proxy deactivated</string>
     <!-- Toast shown when proxy failed to deactivated -->
-    <string name="toast_failed_to_deactivate_proxy">Failed to deactivate proxy</string>
     <!-- Toast shown when user tries to activate proxy without specifying its address -->
-    <string name="toast_proxy_address_not_set">Proxy address is not set</string>
     <!-- Toast shown when user saves proxy settings -->
     <string name="toast_proxy_saved">Proxy settings saved</string>
     <!-- Toast shown when user attempts to edit wallet before it is closed -->
@@ -39,17 +31,13 @@
     <!-- Toast shown when node is deleted -->
     <string name="toast_node_deleted">Node deleted</string>
     <!-- Toast shown on failing to delete node -->
-    <string name="toast_failed_to_delete_node">Failed to delete node</string>
     <!-- Toast shown when node is saved -->
     <string name="toast_node_saved">Node saved</string>
     <!-- Toast shown on failing to save node -->
-    <string name="toast_failed_to_save_node">Failed to save node</string>
     <!-- Toast shown when user tries to add node with duplicated name -->
-    <string name="toast_node_with_name_already_exists">Node with this name already exists</string>
     <!-- Toast shown when node is added -->
     <string name="toast_node_added">Node added</string>
     <!-- Toast shown on failing to add node -->
-    <string name="toast_failed_to_add_node">Failed to add node</string>
     <!-- Toast shown when user tries to add/edit node without specifying its name -->
     <string name="toast_enter_node_name">Enter node name</string>
     <!-- Toast shown when user tries to add/edit node without specifying its address -->
@@ -57,18 +45,14 @@
     <!-- Toast shown when user tries to add/edit node without specifying its password while username is specified -->
     <string name="toast_enter_node_password">Enter node password</string>
     <!-- Toast shown when opening wallet fails due to missing node for the wallet's network -->
-    <string name="toast_no_node_for_network">No node found for network <xliff:g>%1$s</xliff:g></string>
 
     <!-- Foreground service notification header -->
     <string name="service_notification_header">Monfluo wallet service is running</string>
     <!-- Foreground service notification action for closing wallet -->
     <string name="service_notification_close_wallet_action">Close wallet</string>
     <!-- Foreground service notification text when opening wallet -->
-    <string name="service_notification_description_opening_wallet">Opening wallet</string>
     <!-- Foreground service notification text when fetching blockchain height -->
-    <string name="service_notification_description_fetching_blockchain_height">Fetching blockchain height</string>
     <!-- Foreground service notification text when changing node -->
-    <string name="service_notification_description_changing_node">Changing node</string>
     <!-- Transfer notification header -->
     <string name="transfer_notification_header">Received <xliff:g>%1$s</xliff:g> <xliff:g>%2$s</xliff:g></string>
     <!-- Transfer notification transaction id -->
@@ -82,7 +66,6 @@
     <!-- Toast shown when failing to send transaction -->
     <string name="toast_error_sending_tx">Error sending transaction</string>
     <!-- Toast shown when attempting to restore wallet from invalid seed -->
-    <string name="invalid_mnemonic_code">Invalid mnemonic</string>
     <!-- Toast shown when confirm password field does not match password field -->
     <string name="invalid_confirmed_password">Passwords do not match</string>
     <!-- Toast shown when something gets copied to clipboard -->
@@ -160,12 +143,10 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="wallet_name_hint">My Monero Wallet</string>
     <string name="tx_amount_no_prefix">%1$s XMR</string>
     <string name="proxy_address_hint">127.0.0.1:9050</string>
-    <string name="node_button_text">Node: %1$s</string>
     <string name="settings_save_proxy">Save &amp; update</string>
     <string name="settings_build_version" translatable="false"><xliff:g>%1$s</xliff:g> (<xliff:g>%2$d</xliff:g>)</string>
     <string name="global_index_text">%1$s</string>
     <string name="outpoint_text">%1$s</string>
-    <string name="create_wallet_failed">Create wallet failed: %1$s</string>
     <string name="freeze">Freeze</string>
     <string name="unfreeze">Unfreeze</string>
     <string name="done">Done</string>
@@ -202,10 +183,10 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="synchronized_at_label">Synchronized at %1$s</string>
     <string name="sync_cancelled">Synchronized cancelled</string>
     <string name="wallet_error">Wallet error: %1$s</string>
-    <string name="node_synchronization_blocks_remaining">Synchronizing node: %1$s / %2$s (%3$s blocks remaining)</string>
     <string name="wallet_synchronization_blocks_remaining">Synchronizing wallet: %1$s / %2$s (%3$s blocks remaining)</string>
     <string name="starting_wallet_synchronization">Starting wallet synchronization…</string>
     <string name="wallet_not_connected">Not connected</string>
+    <string name="wallet_node_unavailable">Node unavailable</string>
     <!-- Label for seed type in onboarding activity -->
     <string name="seed_type">Seed type</string>
     <!-- New wallet button -->
@@ -288,6 +269,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="receive_header">Receive</string>
     <string name="payment_request_header">Payment request</string>
     <string name="nodes_header">Nodes</string>
+    <string name="node_offline">No node (offline)</string>
     <string name="add_node_header">Add node</string>
     <string name="node_details_header">Node details</string>
     <string name="wallet_details_header">Wallet details</string>
@@ -336,7 +318,7 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="activity_send_amount_invalid_toast">Amount #<xliff:g>%1$d</xliff:g> is invalid</string>
     <string name="activity_send_amount_invalid_uri_payment_toast">Not a valid payment uri</string>
     <string name="activity_send_transaction_create_failed_no_wallet_toast">Cannot create transaction - wallet is not opened yet</string>
-    <string name="activity_send_transaction_create_failed">Creating transaction failed: %1$s</string>
+    <string name="activity_send_transaction_create_failed_toast">Failed to create transaction</string>
     <string name="activity_send_transaction_creating_toast">Creating transaction…</string>
     <string name="recycler_view_item_transaction_destination_remove_content_description">Remove destination from transaction</string>
     <string name="recycler_view_item_transaction_destination_amount_label">Amount</string>
@@ -344,7 +326,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="recycler_view_item_transaction_destination_address_label">Address</string>
     <string name="recycler_view_item_transaction_destination_address_with_position_label">Address #<xliff:g>%1$d</xliff:g></string>
     <string name="recycler_view_item_transaction_destination_recipient_name_label">Recipient name</string>
-    <string name="recycler_view_item_transaction_destination_recipient_name_with_position_label">Recipient name #<xliff:g>%1$d</xliff:g></string>
     <string name="recycler_view_item_transaction_destination_recipient_name_hint">Recipient name (optional)</string>
     <!-- Button for sending all available funds -->
     <string name="recycler_view_item_transaction_destination_send_all_label">Max</string>
@@ -364,7 +345,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="recycler_view_item_transaction_pending_address_resolved_from_label">Resolved from</string>
     <string name="recycler_view_item_transaction_pending_summary_total_label">Total</string>
     <string name="recycler_view_item_transaction_pending_summary_fee_label">Fee</string>
-    <string name="recycler_view_item_transaction_pending_summary_dust_label">Dust</string>
     <string name="recycler_view_item_transaction_pending_summary_grand_total_label">Grand total</string>
     <string name="activity_wallet_settings_wallet_name_label">Name</string>
     <string name="activity_wallet_settings_wallet_network_label">Network</string>
@@ -379,7 +359,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="activity_wallet_change_password_new_password_hint">New wallet password</string>
     <string name="activity_wallet_change_password_new_password_confirm_hint">Confirm password</string>
     <string name="activity_wallet_change_password_save">Save</string>
-    <string name="activity_wallet_change_password_incorrect_current_password_toast">Current password is incorrect</string>
     <string name="activity_wallet_change_password_new_password_does_not_match_toast">Password confirmation does not match</string>
     <string name="activity_wallet_change_password_changing_password_toast">Saving password…</string>
     <string name="activity_wallet_change_password_password_changed_toast">Password changed</string>
@@ -399,22 +378,18 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="activity_contact_add_address_label">Address</string>
     <string name="activity_contact_add_address_hint">Contact address</string>
     <string name="activity_contact_add_create_button">Add</string>
-    <string name="activity_contact_add_toast_contact_created">Contact created</string>
     <string name="activity_contact_add_toast_failed_to_create_contact">Failed to create contact</string>
     <string name="activity_contact_details_name_label">Name</string>
     <string name="activity_contact_details_name_hint">Contact name</string>
     <string name="activity_contact_details_address_label">Address</string>
     <string name="activity_contact_details_delete_button">Delete</string>
     <string name="activity_contact_details_save_button">Save</string>
-    <string name="activity_contact_details_toast_contact_deleted">Contact deleted</string>
     <string name="activity_contact_details_toast_failed_to_delete_contact">Failed to delete contact</string>
-    <string name="activity_contact_details_toast_contact_saved">Contact saved</string>
     <string name="activity_contact_details_toast_failed_to_save_contact">Failed to save contact</string>
     <string name="activity_node_add_node_name_label">Name</string>
     <string name="activity_node_add_node_name_placeholder">My Monero Node</string>
     <string name="activity_node_add_node_address_label">Address</string>
     <string name="activity_node_add_node_address_placeholder" translatable="false">127.0.0.1:18081</string>
-    <string name="activity_node_add_node_daemon_trusted_label">Trusted daemon</string>
     <string name="activity_node_add_node_username_label">Username</string>
     <string name="activity_node_add_node_username_placeholder">Username (optional)</string>
     <string name="activity_node_add_node_password_label">Password</string>
@@ -426,14 +401,12 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="activity_node_details_node_name_placeholder">My Monero Node</string>
     <string name="activity_node_details_node_address_label">Address</string>
     <string name="activity_node_details_node_address_placeholder" translatable="false">127.0.0.1:18081</string>
-    <string name="activity_node_details_node_daemon_trusted_label">Trusted daemon</string>
     <string name="activity_node_details_node_username_label">Username</string>
     <string name="activity_node_details_node_username_placeholder">Username (optional)</string>
     <string name="activity_node_details_node_password_label">Password</string>
     <string name="activity_node_details_node_password_placeholder">Password (optional)</string>
     <string name="activity_node_details_node_delete_button">Delete node</string>
     <string name="activity_node_details_node_save_button">Save node</string>
-    <string name="activity_node_details_node_network_type_label">Network Type</string>
 
     <string name="activity_node_list_create_button">Add node</string>
     <string name="dialog_delete_node_title">Delete node</string>
@@ -447,10 +420,11 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="toast_invalid_wallet_name">Wallet names cannot be empty, "." or ".." or contain "/" or "\\" characters.</string>
     <string name="content_description_network_status_icon_opening_wallet">Network status - opening wallet</string>
     <string name="content_description_network_status_icon_starting_synchronization">Network status - starting synchronization</string>
-    <string name="content_description_network_status_icon_synchronizing_node">Network status - synchronizing node</string>
     <string name="content_description_network_status_icon_synchronizing_wallet">Network status - synchronizing wallet</string>
     <string name="content_description_network_status_icon_synchronized">Network status - synchronized</string>
     <string name="content_description_network_status_icon_wallet_error">Network status - wallet error</string>
+    <string name="activity_network_node_status_header_no_node_selected">No node selected</string>
+    <string name="activity_network_node_status_header_node_unavailable">Node unavailable</string>
     <string name="activity_network_node_status_header_waiting_for_wallet">Waiting for wallet…</string>
     <string name="activity_network_node_status_header_fetching_blockchain_data">Fetching blockchain height…</string>
     <string name="activity_network_node_status_header_node_is_synchronizing">Node is synchronizing…</string>
@@ -463,7 +437,6 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="activity_network_wallet_status_header_cancelled">Cancelled</string>
     <string name="activity_network_wallet_status_header_not_synchronizing">Not synchronizing</string>
     <string name="activity_network_wallet_status_header_preparing_synchronization">Preparing synchronization</string>
-    <string name="activity_network_wallet_status_header_starting_synchronization">Starting synchronization</string>
     <string name="activity_network_wallet_status_header_wallet_is_synchronizing">Wallet is synchronizing…</string>
     <string name="activity_network_wallet_status_description_wallet_is_synchronizing">%1$s / %2$s (%3$s blocks remaining)</string>
     <string name="activity_network_wallet_status_header_wallet_is_synchronized">Wallet is synchronized</string>

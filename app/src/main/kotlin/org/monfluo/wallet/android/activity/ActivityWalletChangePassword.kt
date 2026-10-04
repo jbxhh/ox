@@ -70,16 +70,10 @@ class ActivityWalletChangePassword : ActivityMonero() {
         )
         saveButton.setOnClickListener {
             val walletService = walletService!!
-            val wallet = walletService.getWalletOrThrow()
 
             val currentPassword = currentPasswordEditText.getText().toString()
             val newPassword = newPasswordEditText.getText().toString()
             val newPasswordConfirm = newPasswordConfirmEditText.getText().toString()
-
-            if (wallet.getPassword() != currentPassword) {
-                Toast.makeText(this, getText(R.string.activity_wallet_change_password_incorrect_current_password_toast), Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
 
             if (newPassword != newPasswordConfirm) {
                 Toast.makeText(this, getText(R.string.activity_wallet_change_password_new_password_does_not_match_toast), Toast.LENGTH_SHORT).show()

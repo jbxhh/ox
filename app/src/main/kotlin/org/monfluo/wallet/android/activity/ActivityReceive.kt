@@ -18,13 +18,14 @@ import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.adapter.AdapterAddress
 import org.monfluo.wallet.android.adapter.AdapterAddress.AdapterAddressListener
 import org.monfluo.wallet.android.service.wallet.WalletService
+import org.monfluo.wallet.android.service.wallet.WalletWithData
 import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.Helper.clipBoardCopy
 import org.monfluo.wallet.android.util.PreferenceUtils
 import org.monfluo.wallet.android.util.component.ActivityMonero
 import org.monfluo.wallet.lib.data.AddressView
+import org.monfluo.wallet.lib.data.WalletView
 import kotlin.math.max
-import org.monfluo.wallet.lib.wallet.Wallet as NewWallet
 
 class ActivityReceive : ActivityMonero() {
     private val viewModel: ReceiveViewModel by viewModels()
@@ -75,10 +76,8 @@ class ActivityReceive : ActivityMonero() {
         }
         freshAddressImageView.setOnClickListener {
             walletService?.let { walletService ->
-                walletService.getNewWalletOrLog()?.let { (wallet) ->
-                    wallet.registerNewAddressForCurrentAccount()
-                    wallet.store()
-                    viewModel.refreshAddresses(wallet, true)
+                walletService.getWalletOrLog()?.let { walletWithData ->
+                    walletService.generateNewAddress(walletWithData.wallet.currentAccountIndex, "")
                 }
             }
         }
@@ -139,17 +138,26 @@ class ActivityReceive : ActivityMonero() {
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
-        walletService.getNewWalletOrLog()?.let { (wallet) ->
+        walletService.getWalletOrLog()?.let { walletWithData ->
             showUi()
-            viewModel.refreshAddresses(wallet)
+            viewModel.refreshAddresses(walletWithData.walletView)
+        }
+    }
+
+    override fun onWalletUpdated(
+        walletWithData: WalletWithData,
+    ) {
+        runOnUiThread {
+            showUi()
+            viewModel.refreshAddresses(walletWithData.walletView)
         }
     }
 
     override fun onAddressGenerated() {
         runOnUiThread {
-            walletService?.getNewWalletOrLog()?.let { (wallet) ->
+            walletService?.getWalletOrLog()?.let { walletWithData ->
                 showUi()
-                viewModel.refreshAddresses(wallet, true)
+                viewModel.refreshAddresses(walletWithData.walletView, true)
             }
         }
     }
@@ -160,18 +168,18 @@ class ActivityReceive : ActivityMonero() {
         label: String,
     ) {
         runOnUiThread {
-            walletService?.getNewWalletOrLog()?.let { (wallet) ->
+            walletService?.getWalletOrLog()?.let { walletWithData ->
                 showUi()
-                viewModel.refreshAddresses(wallet, false)
+                viewModel.refreshAddresses(walletWithData.walletView, false)
             }
         }
     }
 
     override fun onAccountSet(index: Int) {
         runOnUiThread {
-            walletService?.getNewWalletOrLog()?.let { (wallet) ->
+            walletService?.getWalletOrLog()?.let { walletWithData ->
                 showUi()
-                viewModel.refreshAddresses(wallet)
+                viewModel.refreshAddresses(walletWithData.walletView)
             }
         }
     }
@@ -198,11 +206,10 @@ class ReceiveViewModel : ViewModel() {
     val addresses: MutableLiveData<List<AddressView>> = MutableLiveData(null)
 
     fun refreshAddresses(
-        wallet: NewWallet,
+        walletView: WalletView,
         selectLatest: Boolean = false,
     ) {
-        val accountView = wallet.getAccountView(0)
-        val addresses = accountView.addresses
+        val addresses = walletView.accounts.firstOrNull()?.addresses ?: emptyList()
         this.addresses.value = addresses
 
         val addressIndex = this.addressIndex.value!!

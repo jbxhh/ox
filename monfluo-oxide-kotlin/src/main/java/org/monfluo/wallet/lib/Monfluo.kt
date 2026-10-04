@@ -7,6 +7,8 @@ import org.monfluo.wallet.lib.wallet.Daemon
 import org.monfluo.wallet.lib.wallet.Wallet
 
 object Monfluo {
+    external fun init(context: Any)
+
     external fun monfluoVersion(): String
 
     external fun listWallets(monfluoDirectory: String): List<String>
@@ -56,6 +58,8 @@ object Monfluo {
         name: String,
         password: String,
     ): Wallet
+
+    external fun isEncryptedPolyseed(polyseed: String): Boolean
 
     external fun createDaemon(
         nodeName: String,

@@ -27,7 +27,7 @@ def main [target: string, profile: string = "dev"] {
     cd ($env.FILE_PWD | path join .. monfluo-oxide-jni)
     with-env {
         $target_values.rust-linker: $"($env.ANDROID_NDK_HOME)/toolchains/llvm/prebuilt/($env.ANDROID_NDK_HOST)/bin/($target_values.android-abi)-clang",
-        # TODO: remove the following environment variables when `ring` is not our transitive dependency anymore
+        # Used by the C dependencies of the TLS stack (aws-lc-sys) when cross compiling
         TARGET_CC: $"($env.ANDROID_NDK_HOME)/toolchains/llvm/prebuilt/($env.ANDROID_NDK_HOST)/bin/($target_values.android-abi)-clang",
         TARGET_AR: $"($env.ANDROID_NDK_HOME)/toolchains/llvm/prebuilt/($env.ANDROID_NDK_HOST)/bin/llvm-ar",
     } {

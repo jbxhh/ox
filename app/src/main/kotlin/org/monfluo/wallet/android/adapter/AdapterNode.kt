@@ -27,66 +27,108 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.data.Node
+import org.monfluo.wallet.android.data.resourceId
 import org.monfluo.wallet.android.model.NodeNetworkType
+import org.monfluo.wallet.lib.data.Network
+
+sealed interface NodeListItem {
+    data class Header(
+        val network: Network,
+    ) : NodeListItem
+
+    data class Offline(
+        val network: Network,
+        val isSelected: Boolean,
+    ) : NodeListItem
+
+    data class Entry(
+        val node: Node,
+        val isSelected: Boolean,
+    ) : NodeListItem
+}
+
+private const val VIEW_TYPE_HEADER = 0
+private const val VIEW_TYPE_OFFLINE = 1
+private const val VIEW_TYPE_ENTRY = 2
 
 class AdapterNode(
     private val listener: Listener,
-) : RecyclerView.Adapter<AdapterNode.ViewHolder>() {
-    private var nodes: List<Node> = emptyList()
-    private var selectedNode: Node? = null
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private var items: List<NodeListItem> = emptyList()
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setNodes(nodes: List<Node>) {
-        if (this.nodes != nodes) {
-            this.nodes = nodes
+    fun setItems(items: List<NodeListItem>) {
+        if (this.items != items) {
+            this.items = items
             notifyDataSetChanged()
         }
     }
 
-    fun setSelectedNode(selectedNode: Node?) {
-        val oldSelectedNodePosition = nodes.indexOf(this.selectedNode)
-        val newSelectedNodePosition = nodes.indexOf(selectedNode)
-        this.selectedNode = selectedNode
-        if (oldSelectedNodePosition >= 0) {
-            notifyItemChanged(oldSelectedNodePosition)
+    override fun getItemViewType(position: Int): Int =
+        when (items[position]) {
+            is NodeListItem.Header -> VIEW_TYPE_HEADER
+            is NodeListItem.Offline -> VIEW_TYPE_OFFLINE
+            is NodeListItem.Entry -> VIEW_TYPE_ENTRY
         }
-        if (newSelectedNodePosition >= 0) {
-            notifyItemChanged(newSelectedNodePosition)
-        }
-    }
 
     override fun onCreateViewHolder(
         viewGroup: ViewGroup,
         viewType: Int,
-    ): ViewHolder {
-        val view = LayoutInflater.from(viewGroup.context).inflate(R.layout.recycler_view_item_node, viewGroup, false)
-        return ViewHolder(listener, view)
+    ): RecyclerView.ViewHolder {
+        val inflater = LayoutInflater.from(viewGroup.context)
+        return when (viewType) {
+            VIEW_TYPE_HEADER -> HeaderViewHolder(inflater.inflate(R.layout.recycler_view_item_node_header, viewGroup, false))
+            VIEW_TYPE_OFFLINE -> OfflineViewHolder(inflater.inflate(R.layout.recycler_view_item_node_offline, viewGroup, false))
+            else -> EntryViewHolder(inflater.inflate(R.layout.recycler_view_item_node, viewGroup, false))
+        }
     }
 
     override fun onBindViewHolder(
-        viewHolder: ViewHolder,
+        viewHolder: RecyclerView.ViewHolder,
         position: Int,
     ) {
-        val node = nodes[position]
-        viewHolder.bind(node, node == selectedNode)
+        when (val item = items[position]) {
+            is NodeListItem.Header -> (viewHolder as HeaderViewHolder).bind(item)
+            is NodeListItem.Offline -> (viewHolder as OfflineViewHolder).bind(item)
+            is NodeListItem.Entry -> (viewHolder as EntryViewHolder).bind(item)
+        }
     }
 
-    override fun getItemCount(): Int = nodes.size
+    override fun getItemCount(): Int = items.size
 
     interface Listener {
-        fun onSelectNode(
-            self: AdapterNode,
-            node: Node,
-        )
+        fun onSelectNode(node: Node)
 
-        fun onEditNode(
-            self: AdapterNode,
-            node: Node,
-        )
+        fun onEditNode(node: Node)
+
+        fun onSelectOffline(network: Network)
     }
 
-    inner class ViewHolder(
-        private val listener: Listener,
+    private class HeaderViewHolder(
+        view: View,
+    ) : RecyclerView.ViewHolder(view) {
+        private val nodeHeaderTextView: TextView = itemView.findViewById(R.id.node_header_textview)
+
+        fun bind(item: NodeListItem.Header) {
+            nodeHeaderTextView.setText(item.network.resourceId())
+        }
+    }
+
+    private inner class OfflineViewHolder(
+        view: View,
+    ) : RecyclerView.ViewHolder(view) {
+        private val nodeOfflineWrapperLayout: View = itemView.findViewById(R.id.node_offline_wrapper_layout)
+        private val nodeOfflineRadioButton: RadioButton = itemView.findViewById(R.id.node_offline_radiobutton)
+
+        fun bind(item: NodeListItem.Offline) {
+            nodeOfflineRadioButton.isChecked = item.isSelected
+            nodeOfflineRadioButton.isClickable = false
+
+            nodeOfflineWrapperLayout.setOnClickListener { _: View -> listener.onSelectOffline(item.network) }
+        }
+    }
+
+    private inner class EntryViewHolder(
         view: View,
     ) : RecyclerView.ViewHolder(view) {
         private val nodeWrapperLayout: View = itemView.findViewById(R.id.node_wrapper_layout)
@@ -96,11 +138,10 @@ class AdapterNode(
         private val nodeAddressTextView: TextView = itemView.findViewById(R.id.node_address_textview)
         private val nodeEditImageButton: ImageButton = itemView.findViewById(R.id.node_edit_imagebutton)
 
-        fun bind(
-            node: Node,
-            isSelected: Boolean,
-        ) {
-            nodeRadioButton.setChecked(isSelected)
+        fun bind(item: NodeListItem.Entry) {
+            val node = item.node
+
+            nodeRadioButton.isChecked = item.isSelected
             nodeNameTextView.text = node.name
             nodeAddressTextView.text = node.address
 
@@ -125,13 +166,13 @@ class AdapterNode(
                 }
             }
 
-            val onSelectNode = { _: View -> listener.onSelectNode(this@AdapterNode, node) }
+            val onSelectNode = { _: View -> listener.onSelectNode(node) }
+            nodeRadioButton.isClickable = false
             nodeWrapperLayout.setOnClickListener(onSelectNode)
-            nodeRadioButton.setOnClickListener(onSelectNode)
             nodeIconImageView.setOnClickListener(onSelectNode)
 
             nodeEditImageButton.setOnClickListener {
-                listener.onEditNode(this@AdapterNode, node)
+                listener.onEditNode(node)
             }
         }
     }

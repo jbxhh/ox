@@ -12,7 +12,6 @@ import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModel
 import org.monfluo.wallet.android.R
-import org.monfluo.wallet.android.model.Wallet
 import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.component.ActivityMonero
@@ -90,12 +89,6 @@ class ActivityAddressDetails : ActivityMonero() {
         updateAddressName()
     }
 
-    override fun onWalletUpdated(wallet: Wallet) {
-        runOnUiThread {
-            updateAddressName()
-        }
-    }
-
     override fun onAddressLabelChanged(
         accountIndex: Int,
         addressIndex: Int,
@@ -110,13 +103,9 @@ class ActivityAddressDetails : ActivityMonero() {
 
     private fun updateAddressName(label: String? = null) {
         if (addressNameEditText.text.isBlank()) {
-            label ?: walletService
-                ?.getWallet()
-                ?.let { wallet ->
-                    wallet.getAddressLabel(viewModel.accountIndex!!, viewModel.addressIndex!!)
-                }?.let { newLabel ->
-                    addressNameEditText.setText(newLabel)
-                }
+            label?.let { newLabel ->
+                addressNameEditText.setText(newLabel)
+            }
         }
     }
 }

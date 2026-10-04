@@ -5,15 +5,11 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
-import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.lifecycle.ViewModel
-import org.monfluo.wallet.android.R
-import org.monfluo.wallet.android.data.DefaultNode
 import org.monfluo.wallet.android.fragment.DialogFragmentPassword
-import org.monfluo.wallet.android.model.MoneroNetworkType
 import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.Helper
@@ -52,19 +48,19 @@ class ActivityStart : ActivityBase() {
 
     private fun launch() {
         val isMultiWalletMode = PreferenceUtils.isMultiWalletMode(this)
-        val walletPaths = Monfluo.listWallets(Helper.getWalletRoot(this).absolutePath)
-        if (walletPaths.isEmpty()) {
+        val wallets = Monfluo.listWallets(Helper.getWalletRoot(this).absolutePath)
+        if (wallets.isEmpty()) {
             Timber.d("No wallets found, launching onboarding activity")
             startActivityToOpenWallet.launch(Intent(this, ActivityWalletCreate::class.java))
         } else if (isMultiWalletMode) {
-            Timber.d("${walletPaths.size} wallets found, launching wallet activity")
+            Timber.d("${wallets.size} wallets found, launching wallet activity")
             startActivityToOpenWallet.launch(Intent(this, ActivityWalletList::class.java))
         } else {
-            Timber.d("${walletPaths.size} wallets found but multi-wallet mode is not enabled, asking for password to open a wallet")
-            val walletPath = walletPaths.find { it.endsWith(Constants.DEFAULT_WALLET_NAME) } ?: walletPaths.first()
+            Timber.d("${wallets.size} wallets found but multi-wallet mode is not enabled, asking for password to open a wallet")
+            val wallet = wallets.find { it == Constants.DEFAULT_WALLET_NAME } ?: wallets.first()
             val passwordDialog =
                 DialogFragmentPassword(
-                    walletPath,
+                    wallet,
                     true,
                     object : DialogFragmentPassword.Listener {
                         override fun onCorrectPasswordSubmitted(
@@ -72,7 +68,7 @@ class ActivityStart : ActivityBase() {
                             password: String,
                         ) {
                             self.dismiss()
-                            openWallet(walletPath, password, viewModel.takeUriPayment())
+                            openWallet(wallet, password, viewModel.takeUriPayment())
                         }
                     },
                 )
@@ -104,39 +100,13 @@ class ActivityStart : ActivityBase() {
                 ) {
                     Timber.d("Wallet Service connected")
                     val walletService = (service as WalletService.WalletServiceBinder).service
-                    if (wallet != null && walletPassword != null) {
-                        val networkType = MoneroNetworkType.fromInteger(PreferenceUtils.getWalletNetworkType(this@ActivityStart, wallet)) ?: MoneroNetworkType.NetworkType_Mainnet
-                        val node = PreferenceUtils.getOrSetDefaultOrAnyNode(this@ActivityStart, networkType, DefaultNode.defaultNodes())
-                        if (node != null) {
-                            walletService.openWallet(wallet, walletPassword, node.address, node.username ?: "", node.password ?: "", node.trusted, PreferenceUtils.getProxyIfEnabled(applicationContext) ?: "", networkType)
-                        } else {
-                            Timber.e("No node found for network $networkType, not starting wallet")
-                            Toast.makeText(this@ActivityStart, this@ActivityStart.getString(R.string.toast_no_node_for_network, this@ActivityStart.getString(networkType.resourceId)), Toast.LENGTH_SHORT).show()
-                            walletService.closeWallet()
-                            this@ActivityStart.recreate()
-                            return
-                        }
-                    } else {
-                        Timber.i("Wallet path or password are null, initializing wallet instead of opening it")
-                        val uninitWallet = walletService.getUninitWallet()
-                        if (uninitWallet == null) {
-                            Timber.e("No uninit wallet found!")
-                            walletService.closeWallet()
-                            this@ActivityStart.recreate()
-                            return
-                        }
-                        val networkType = uninitWallet.networkType()
-                        val node = PreferenceUtils.getOrSetDefaultOrAnyNode(this@ActivityStart, networkType, DefaultNode.defaultNodes())
-                        if (node != null) {
-                            walletService.initWallet(node.address, node.username ?: "", node.password ?: "", node.trusted, PreferenceUtils.getProxyIfEnabled(applicationContext) ?: "")
-                        } else {
-                            Timber.e("No node found for network $networkType, not starting wallet")
-                            Toast.makeText(this@ActivityStart, this@ActivityStart.getString(R.string.toast_no_node_for_network, this@ActivityStart.getString(networkType.resourceId)), Toast.LENGTH_SHORT).show()
-                            walletService.closeWallet()
-                            this@ActivityStart.recreate()
-                            return
-                        }
+                    if (wallet == null || walletPassword == null) {
+                        Timber.e("Wallet path or password are null, not starting wallet")
+                        walletService.closeWallet()
+                        this@ActivityStart.recreate()
+                        return
                     }
+                    walletService.openWallet(wallet, walletPassword)
 
                     val activityHomeIntent = Intent(this@ActivityStart, ActivityHome::class.java)
 

@@ -14,6 +14,7 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import org.monfluo.wallet.android.R
+import org.monfluo.wallet.android.service.wallet.DaemonState
 import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.service.wallet.WalletSyncData
 import org.monfluo.wallet.android.service.wallet.WalletWithData
@@ -121,10 +122,23 @@ class ActivityNetwork : ActivityMonero() {
                     nodeStatusDescriptionTextView.visibility = View.VISIBLE
                 }
             } else {
-                nodeStatusHeaderTextView.text = getString(R.string.activity_network_node_status_header_fetching_blockchain_data)
                 nodeStatusProgressBar.isIndeterminate = true
-                nodeStatusDescriptionTextView.visibility = View.INVISIBLE
                 nodeStatusUpdatedAtTextView.visibility = View.INVISIBLE
+                when (val daemon = state.daemon) {
+                    is DaemonState.Failed -> {
+                        nodeStatusHeaderTextView.text = getString(R.string.activity_network_node_status_header_node_unavailable)
+                        nodeStatusDescriptionTextView.text = daemon.error.message ?: daemon.error.toString()
+                        nodeStatusDescriptionTextView.visibility = View.VISIBLE
+                    }
+                    DaemonState.NotSelected -> {
+                        nodeStatusHeaderTextView.text = getString(R.string.activity_network_node_status_header_no_node_selected)
+                        nodeStatusDescriptionTextView.visibility = View.INVISIBLE
+                    }
+                    is DaemonState.Connected -> {
+                        nodeStatusHeaderTextView.text = getString(R.string.activity_network_node_status_header_fetching_blockchain_data)
+                        nodeStatusDescriptionTextView.visibility = View.INVISIBLE
+                    }
+                }
             }
 
             val adjustedLastSyncState = state.getAdjustedLastSyncState()
@@ -189,12 +203,12 @@ class ActivityNetwork : ActivityMonero() {
     }
 
     override fun onWalletServiceConnected(walletService: WalletService) {
-        walletService.getNewWalletOrLog()?.let { wallet ->
+        walletService.getWalletOrLog()?.let { wallet ->
             updateState(wallet)
         }
     }
 
-    override fun onNewWalletUpdated(walletWithData: WalletWithData) {
+    override fun onWalletUpdated(walletWithData: WalletWithData) {
         updateState(walletWithData)
     }
 
