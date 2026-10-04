@@ -46,19 +46,19 @@ jobs:
             # Does not work because Ubuntu 24 has old `just` package :/
             # just app-copy-native-libs-all
             export ANDROID_NDK_HOST=linux-x86_64
-            ./bin/build-oxide-native-lib.nu native
-            ./bin/build-oxide-native-lib.nu arm32
-            ./bin/build-oxide-native-lib.nu arm64
-            ./bin/build-oxide-native-lib.nu x86_64
+            ./bin/build-oxide-native-lib.nu native release
+            ./bin/build-oxide-native-lib.nu arm32 release
+            ./bin/build-oxide-native-lib.nu arm64 release
+            ./bin/build-oxide-native-lib.nu x86_64 release
             mkdir -p app/src/main/jniLibs/armeabi-v7a
             mkdir -p app/src/main/jniLibs/arm64-v8a
             mkdir -p app/src/main/jniLibs/x86_64
-            cp monfluo-oxide-jni/target/armv7-linux-androideabi/debug/libmonfluo_oxide_jni.so app/src/main/jniLibs/armeabi-v7a
-            cp monfluo-oxide-jni/target/aarch64-linux-android/debug/libmonfluo_oxide_jni.so app/src/main/jniLibs/arm64-v8a
-            cp monfluo-oxide-jni/target/x86_64-linux-android/debug/libmonfluo_oxide_jni.so app/src/main/jniLibs/x86_64
+            cp monfluo-oxide-jni/target/armv7-linux-androideabi/release/libmonfluo_oxide_jni.so app/src/main/jniLibs/armeabi-v7a
+            cp monfluo-oxide-jni/target/aarch64-linux-android/release/libmonfluo_oxide_jni.so app/src/main/jniLibs/arm64-v8a
+            cp monfluo-oxide-jni/target/x86_64-linux-android/release/libmonfluo_oxide_jni.so app/src/main/jniLibs/x86_64
       - name: Run tests and lints
         run: |
-          export LD_LIBRARY_PATH=$(realpath monfluo-oxide-jni/target/debug) && ./gradlew :monfluo-oxide-kotlin:test
+          export LD_LIBRARY_PATH=$(realpath monfluo-oxide-jni/target/release) && ./gradlew :monfluo-oxide-kotlin:test
           ./gradlew :app:test
           ./gradlew ktlintCheck
       - name: Make sure release build succeeds
