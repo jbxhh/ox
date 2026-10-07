@@ -35,7 +35,6 @@
 #include "transaction_history.h"
 #include "address_book.h"
 #include "subaddress.h"
-#include "coins.h"
 #include "subaddress_account.h"
 #include "common_defines.h"
 #include "common/util.h"
@@ -48,6 +47,7 @@
 
 #include <boost/locale.hpp>
 #include <boost/filesystem.hpp>
+#include <vector>
 
 using namespace std;
 using namespace cryptonote;
@@ -470,7 +470,6 @@ WalletImpl::WalletImpl(NetworkType nettype, uint64_t kdf_rounds)
     m_refreshEnabled = false;
     m_addressBook.reset(new AddressBookImpl(this));
     m_subaddress.reset(new SubaddressImpl(this));
-    m_coins.reset(new CoinsImpl(this));
     m_subaddressAccount.reset(new SubaddressAccountImpl(this));
 
 
@@ -2051,9 +2050,54 @@ AddressBook *WalletImpl::addressBook()
     return m_addressBook.get();
 }
 
-Coins *WalletImpl::coins()
+std::vector<Enote> WalletImpl::enotes()
 {
-    return m_coins.get();
+    LOG_PRINT_L2("Refreshing coins");
+
+    boost::shared_lock<boost::shared_mutex> transfers_lock(m_wallet->m_transfers_mutex);
+
+    std::vector<Enote> enotes;
+
+    for (size_t i = 0; i < m_wallet->get_num_transfer_details(); ++i)
+    {
+        const tools::wallet2::transfer_details &td = m_wallet->get_transfer_details(i);
+
+        Enote enote;
+        enote.idx = i;
+        enote.blockHeight = td.m_block_height;
+        enote.hash = epee::string_tools::pod_to_hex(td.m_txid);
+        enote.internalOutputIndex = td.m_internal_output_index;
+        enote.globalOutputIndex = td.m_global_output_index;
+        enote.spent = td.m_spent;
+        enote.frozen = td.m_frozen;
+        enote.spentHeight = td.m_spent_height;
+        enote.amount = td.m_amount;
+        enote.rct = td.m_rct;
+        enote.keyImageKnown = td.m_key_image_known;
+        enote.pkIndex = td.m_pk_index;
+        enote.subaddrIndex = td.m_subaddr_index.minor;
+        enote.subaddrAccount = td.m_subaddr_index.major;
+        enote.address = m_wallet->get_subaddress_as_str(td.m_subaddr_index); // todo: this is expensive, cache maybe?
+        enote.addressLabel = m_wallet->get_subaddress_label(td.m_subaddr_index);
+        enote.keyImage = epee::string_tools::pod_to_hex(td.m_key_image);
+        enote.unlockTime = td.m_tx.unlock_time;
+        enote.unlocked = m_wallet->is_transfer_unlocked(td);
+        enote.pubKey = epee::string_tools::pod_to_hex(td.get_public_key());
+        enote.coinbase = td.m_tx.vin.size() == 1 && td.m_tx.vin[0].type() == typeid(cryptonote::txin_gen);
+        enote.description = m_wallet->get_tx_note(td.m_txid);
+
+        enotes.push_back(enote);
+    }
+
+    return enotes;
+}
+
+void WalletImpl::freeze(size_t idx) {
+    m_wallet->freeze(idx);
+}
+
+void WalletImpl::thaw(size_t idx) {
+    m_wallet->thaw(idx);
 }
 
 Subaddress *WalletImpl::subaddress()
