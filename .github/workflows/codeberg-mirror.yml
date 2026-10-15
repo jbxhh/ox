@@ -21,6 +21,11 @@ jobs:
   mirror:
     runs-on: ubuntu-latest
     steps:
+      - name: Install history filtering tool
+        run: |
+          python3 -m pip install --user git-filter-repo
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
       - name: Discover public repositories under Codeberg Monfluo
         shell: bash
         run: |
@@ -63,22 +68,21 @@ jobs:
           test -s repos.tsv || { echo "No cloneable repositories found"; exit 1; }
           echo "Discovered $(wc -l < repos.tsv) public repository/repositories."
 
-      - name: Mirror branches and tags into ox without overwriting its main branch
+      - name: Mirror branches and tags without workflow files
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          GITHUB_TOKEN: ${{ github.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         shell: bash
         run: |
           set -euo pipefail
-          if [ -z "${GITHUB_TOKEN:-}" ]; then
-            echo "::error::Missing repository secret GH_PAT. Add a fine-grained token with Contents read/write and Workflows read/write access to jbxhh/ox."
-            exit 1
-          fi
           mkdir -p source-mirrors
           while IFS=$'\t' read -r repo_name source_url; do
             [ -n "$repo_name" ] || continue
-            echo "::group::Mirroring Monfluo/$repo_name"
+            echo "::group::Mirroring Monfluo/$repo_name (excluding .github/workflows)"
             git clone --mirror "$source_url" "source-mirrors/$repo_name.git"
+            git --git-dir="source-mirrors/$repo_name.git" config --unset-all remote.origin.fetch || true
+            git --git-dir="source-mirrors/$repo_name.git" config --unset-all remote.origin.url || true
+            git -C "source-mirrors/$repo_name.git" filter-repo --path .github/workflows --invert-paths --force
             git --git-dir="source-mirrors/$repo_name.git" remote add github "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 
             while IFS= read -r ref; do
