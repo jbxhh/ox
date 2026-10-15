@@ -65,8 +65,8 @@ jobs:
 
       - name: Mirror branches and tags into ox without overwriting its main branch
         env:
-          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: \${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         shell: bash
         run: |
           set -euo pipefail
@@ -75,17 +75,17 @@ jobs:
             [ -n "$repo_name" ] || continue
             echo "::group::Mirroring Monfluo/$repo_name"
             git clone --mirror "$source_url" "source-mirrors/$repo_name.git"
-            git --git-dir="source-mirrors/$repo_name.git" remote add github "https://x-access-token:\${GITHUB_TOKEN}@github.com/\${GITHUB_REPOSITORY}.git"
+            git --git-dir="source-mirrors/$repo_name.git" remote add github "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 
             while IFS= read -r ref; do
               [ -n "$ref" ] || continue
-              branch="\${ref#refs/heads/}"
+              branch="${ref#refs/heads/}"
               git --git-dir="source-mirrors/$repo_name.git" push --force github "$ref:refs/heads/codeberg/$repo_name/$branch"
             done < <(git --git-dir="source-mirrors/$repo_name.git" for-each-ref --format='%(refname)' refs/heads/)
 
             while IFS= read -r ref; do
               [ -n "$ref" ] || continue
-              tag="\${ref#refs/tags/}"
+              tag="${ref#refs/tags/}"
               git --git-dir="source-mirrors/$repo_name.git" push --force github "$ref:refs/tags/codeberg/$repo_name/$tag"
             done < <(git --git-dir="source-mirrors/$repo_name.git" for-each-ref --format='%(refname)' refs/tags/)
             echo "Finished $repo_name"
