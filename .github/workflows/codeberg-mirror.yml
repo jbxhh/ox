@@ -1,4 +1,4 @@
-name: Codeberg mirror
+name: Codeberg Monfluo mirror
 
 on:
   push:
@@ -14,37 +14,80 @@ permissions:
   contents: write
 
 concurrency:
-  group: codeberg-mirror
+  group: codeberg-monfluo-mirror
   cancel-in-progress: false
 
 jobs:
   mirror:
     runs-on: ubuntu-latest
-    env:
-      SOURCE_REPO: https://codeberg.org/acx/monfluo.git
     steps:
-      - name: Validate and clone source repository
+      - name: Discover public repositories under Codeberg Monfluo
+        shell: bash
         run: |
           set -euo pipefail
-          git ls-remote --symref "$SOURCE_REPO" HEAD
-          git clone --mirror "$SOURCE_REPO" source.git
+          python3 - <<'PY' > repos.tsv
+          import json, urllib.request
+          base = "https://codeberg.org/api/v1"
+          headers = {"User-Agent": "jbxhh-ox-codeberg-mirror"}
+          repos = None
+          errors = []
+          for kind in ("users", "orgs"):
+              try:
+                  all_repos = []
+                  page = 1
+                  while True:
+                      url = f"{base}/{kind}/Monfluo/repos?limit=50&page={page}"
+                      req = urllib.request.Request(url, headers=headers)
+                      with urllib.request.urlopen(req, timeout=30) as response:
+                          data = json.load(response)
+                      if not isinstance(data, list):
+                          raise RuntimeError(f"Unexpected response from {url}")
+                      all_repos.extend(data)
+                      if len(data) < 50:
+                          break
+                      page += 1
+                  repos = all_repos
+                  break
+              except Exception as exc:
+                  errors.append(f"{kind}: {exc}")
+          if repos is None:
+              raise SystemExit("Unable to list Monfluo repositories: " + "; ".join(errors))
+          for repo in repos:
+              name = repo.get("name", "")
+              clone_url = repo.get("clone_url", "")
+              if name and clone_url and not repo.get("empty", False):
+                  print(f"{name}\t{clone_url}")
+          if not repos:
+              raise SystemExit("Codeberg returned no public repositories for Monfluo.")
+          PY
+          test -s repos.tsv || { echo "No cloneable repositories found"; exit 1; }
+          echo "Discovered $(wc -l < repos.tsv) public repository/repositories."
 
-      - name: Sync source branches and tags without replacing this workflow
+      - name: Mirror branches and tags into ox without overwriting its main branch
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: \${{ github.repository }}
+        shell: bash
         run: |
           set -euo pipefail
-          cd source.git
-          git remote add github "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          mkdir -p source-mirrors
+          while IFS=$'\t' read -r repo_name source_url; do
+            [ -n "$repo_name" ] || continue
+            echo "::group::Mirroring Monfluo/$repo_name"
+            git clone --mirror "$source_url" "source-mirrors/$repo_name.git"
+            git --git-dir="source-mirrors/$repo_name.git" remote add github "https://x-access-token:\${GITHUB_TOKEN}@github.com/\${GITHUB_REPOSITORY}.git"
 
-          while IFS= read -r ref; do
-            [ -n "$ref" ] || continue
-            name="${ref#refs/heads/}"
-            git push --force github "$ref:refs/heads/codeberg/$name"
-          done < <(git for-each-ref --format='%(refname)' refs/heads/)
+            while IFS= read -r ref; do
+              [ -n "$ref" ] || continue
+              branch="\${ref#refs/heads/}"
+              git --git-dir="source-mirrors/$repo_name.git" push --force github "$ref:refs/heads/codeberg/$repo_name/$branch"
+            done < <(git --git-dir="source-mirrors/$repo_name.git" for-each-ref --format='%(refname)' refs/heads/)
 
-          while IFS= read -r ref; do
-            [ -n "$ref" ] || continue
-            name="${ref#refs/tags/}"
-            git push --force github "$ref:refs/tags/codeberg/$name"
-          done < <(git for-each-ref --format='%(refname)' refs/tags/)
+            while IFS= read -r ref; do
+              [ -n "$ref" ] || continue
+              tag="\${ref#refs/tags/}"
+              git --git-dir="source-mirrors/$repo_name.git" push --force github "$ref:refs/tags/codeberg/$repo_name/$tag"
+            done < <(git --git-dir="source-mirrors/$repo_name.git" for-each-ref --format='%(refname)' refs/tags/)
+            echo "Finished $repo_name"
+            echo "::endgroup::"
+          done < repos.tsv
