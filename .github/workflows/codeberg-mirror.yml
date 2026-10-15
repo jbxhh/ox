@@ -12,7 +12,6 @@ on:
 
 permissions:
   contents: write
-  workflows: write
 
 concurrency:
   group: codeberg-monfluo-mirror
@@ -66,11 +65,15 @@ jobs:
 
       - name: Mirror branches and tags into ox without overwriting its main branch
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         shell: bash
         run: |
           set -euo pipefail
+          if [ -z "${GITHUB_TOKEN:-}" ]; then
+            echo "::error::Missing repository secret GH_PAT. Add a fine-grained token with Contents read/write and Workflows read/write access to jbxhh/ox."
+            exit 1
+          fi
           mkdir -p source-mirrors
           while IFS=$'\t' read -r repo_name source_url; do
             [ -n "$repo_name" ] || continue
