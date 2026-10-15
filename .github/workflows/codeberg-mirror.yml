@@ -21,7 +21,7 @@ jobs:
   mirror:
     runs-on: ubuntu-latest
     env:
-      SOURCE_REPO: https://codeberg.org/Monfluo/ox.git
+      SOURCE_REPO: https://codeberg.org/acx/monfluo.git
     steps:
       - name: Validate and clone source repository
         run: |
