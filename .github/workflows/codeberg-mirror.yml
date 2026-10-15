@@ -1,6 +1,11 @@
 name: Codeberg mirror
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/codeberg-mirror.yml"
   workflow_dispatch:
   schedule:
     - cron: "17 18 * * *"
@@ -15,13 +20,31 @@ concurrency:
 jobs:
   mirror:
     runs-on: ubuntu-latest
+    env:
+      SOURCE_REPO: https://codeberg.org/Monfluo/ox.git
     steps:
-      - name: Mirror Codeberg repository to GitHub
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Validate and clone source repository
         run: |
           set -euo pipefail
-          git clone --mirror https://codeberg.org/Monfluo/ox.git source.git
+          git ls-remote --symref "$SOURCE_REPO" HEAD
+          git clone --mirror "$SOURCE_REPO" source.git
+
+      - name: Sync source branches and tags without replacing this workflow
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
           cd source.git
-          git remote add github "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git push --mirror github
+          git remote add github "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          while IFS= read -r ref; do
+            [ -n "$ref" ] || continue
+            name="${ref#refs/heads/}"
+            git push --force github "$ref:refs/heads/codeberg/$name"
+          done < <(git for-each-ref --format='%(refname)' refs/heads/)
+
+          while IFS= read -r ref; do
+            [ -n "$ref" ] || continue
+            name="${ref#refs/tags/}"
+            git push --force github "$ref:refs/tags/codeberg/$name"
+          done < <(git for-each-ref --format='%(refname)' refs/tags/)
