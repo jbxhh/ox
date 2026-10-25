@@ -1,5 +1,3 @@
-use std::path::Path;
-
 use monero_wallet::{address::Network, ed25519::Scalar};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
@@ -10,10 +8,48 @@ use crate::{MoneroBytes, util::HexFormatted};
 pub enum SecretsError {
     #[error("Wallet io: {0}")]
     WalletIo(#[from] crate::wallet::io::WalletIoError),
+    #[error("Encryption: {0}")]
+    Encryption(#[from] crate::wallet::encryption::EncryptionError),
 }
 
 #[derive(Debug, Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
-pub struct WalletSecrets {
+#[serde(tag = "seed_type", rename_all = "snake_case")]
+pub(crate) enum WalletSeed {
+    Monero {
+        seed: Zeroizing<String>,
+        #[serde(serialize_with = "serialize_language", deserialize_with = "deserialize_language")]
+        language: monero_wallet_util::seed::original::Language,
+    },
+    Polyseed {
+        seed: Zeroizing<String>,
+        #[serde(serialize_with = "serialize_language", deserialize_with = "deserialize_language")]
+        language: monero_wallet_util::seed::polyseed::Language,
+    },
+}
+
+impl WalletSeed {
+    pub fn view(&self) -> crate::wallet::view::seed::WalletSeedView {
+        match self {
+            WalletSeed::Monero {
+                seed,
+                language,
+            } => crate::wallet::view::seed::WalletSeedView::Monero {
+                seed: seed.to_string(),
+                language: *language,
+            },
+            WalletSeed::Polyseed {
+                seed,
+                language,
+            } => crate::wallet::view::seed::WalletSeedView::Polyseed {
+                seed: seed.to_string(),
+                language: *language,
+            },
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
+pub(crate) struct WalletSecrets {
     #[serde(serialize_with = "serialize_scalar")]
     #[serde(deserialize_with = "deserialize_scalar")]
     spend_key: Zeroizing<Scalar>,
@@ -25,30 +61,27 @@ pub struct WalletSecrets {
     network: Network,
     restore_height: Option<u32>,
     birthday: u64,
+    seed: Option<WalletSeed>,
 }
 
 impl WalletSecrets {
-    pub fn new(spend_key: Zeroizing<Scalar>, view_key: Zeroizing<Scalar>, network: Network, restore_height: Option<u32>, birthday: u64) -> Self {
+    pub fn new(spend_key: Zeroizing<Scalar>, view_key: Zeroizing<Scalar>, network: Network, restore_height: Option<u32>, birthday: u64, seed: Option<WalletSeed>) -> Self {
         Self {
             spend_key,
             view_key,
             network,
             restore_height,
             birthday,
+            seed,
         }
     }
 
-    pub async fn load(path: &Path, password: &str) -> Result<Self, SecretsError> {
-        Ok(super::io::read_json_from_file(path, password).await?)
+    pub fn from_bytes(bytes: &[u8], password: &str) -> Result<Self, SecretsError> {
+        Ok(super::encryption::open(bytes, password)?)
     }
 
-    pub async fn store(&self, path: &Path, password: &str) -> Result<(), SecretsError> {
-        let bytes = serde_json::to_vec(&self).unwrap();
-        let encrypted_bytes = super::encryption::encrypt(bytes, password).unwrap();
-        super::atomic_fs::write_atomically(path, &encrypted_bytes)
-            .await
-            .unwrap();
-        Ok(())
+    pub fn to_bytes(&self, password: &str) -> Result<Vec<u8>, SecretsError> {
+        Ok(super::encryption::seal(self, password)?)
     }
 
     pub fn spend_key(&self) -> &Zeroizing<Scalar> {
@@ -70,6 +103,28 @@ impl WalletSecrets {
     pub fn birthday(&self) -> u64 {
         self.birthday
     }
+
+    pub fn seed(&self) -> Option<&WalletSeed> {
+        self.seed.as_ref()
+    }
+}
+
+fn serialize_language<S, L>(language: &L, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+    L: std::fmt::Display,
+{
+    serializer.serialize_str(&language.to_string())
+}
+
+fn deserialize_language<'de, D, L>(deserializer: D) -> Result<L, D::Error>
+where
+    D: Deserializer<'de>,
+    L: std::str::FromStr,
+    L::Err: std::fmt::Display,
+{
+    let language = String::deserialize(deserializer)?;
+    L::from_str(&language).map_err(serde::de::Error::custom)
 }
 
 fn serialize_scalar<S>(value: &Zeroizing<Scalar>, serializer: S) -> Result<S::Ok, S::Error>

@@ -1,7 +1,10 @@
 use strum::{EnumString, VariantArray};
 use zeroize::Zeroizing;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumString)]
+const POLYSEED_ENCRYPTED_MASK: u8 = 1 << 4;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumString, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum SeedType {
     #[strum(serialize = "Monero", serialize = "monero", serialize = "Original", serialize = "original")]
     Monero,
@@ -40,7 +43,7 @@ pub fn try_decode_original_seed(words: Zeroizing<String>) -> Option<monero_walle
     None
 }
 
-pub fn try_decode_original_seed_with_language(words: Zeroizing<String>, language: monero_wallet_util::seed::original::Language) -> Option<monero_wallet_util::seed::original::Seed> {
+pub(crate) fn try_decode_original_seed_with_language(words: Zeroizing<String>, language: monero_wallet_util::seed::original::Language) -> Option<monero_wallet_util::seed::original::Seed> {
     monero_wallet_util::seed::original::Seed::from_string(language, words).ok()
 }
 
@@ -53,6 +56,14 @@ pub fn try_decode_polyseed(words: Zeroizing<String>) -> Option<monero_wallet_uti
     None
 }
 
-pub fn try_decode_polyseed_with_language(words: Zeroizing<String>, language: monero_wallet_util::seed::polyseed::Language) -> Option<monero_wallet_util::seed::polyseed::Polyseed> {
+pub(crate) fn try_decode_polyseed_with_language(words: Zeroizing<String>, language: monero_wallet_util::seed::polyseed::Language) -> Option<monero_wallet_util::seed::polyseed::Polyseed> {
     monero_wallet_util::seed::polyseed::Polyseed::from_string(language, words).ok()
+}
+
+pub fn polyseed_is_encrypted(seed: &monero_wallet_util::seed::polyseed::Polyseed) -> bool {
+    seed.features() & POLYSEED_ENCRYPTED_MASK != 0
+}
+
+pub fn polyseed_words_are_encrypted(words: &str) -> bool {
+    try_decode_polyseed(Zeroizing::new(words.to_owned())).is_some_and(|seed| polyseed_is_encrypted(&seed))
 }

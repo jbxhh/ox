@@ -4,6 +4,7 @@ pub mod account;
 pub mod address;
 pub mod balance;
 pub mod enote;
+pub mod seed;
 pub mod transaction;
 
 use std::collections::HashMap;
@@ -19,7 +20,48 @@ use crate::{
     },
 };
 
-pub fn balance_view(state: &WalletState) -> balance::BalanceView {
+#[derive(Debug, Clone)]
+pub struct WalletView {
+    pub current_height: Option<u32>,
+    pub restore_height: Option<u32>,
+    pub adjusted_restore_height: Option<u32>,
+    pub accounts: Vec<account::AccountView>,
+    pub transactions: Vec<transaction::TransactionView>,
+    pub balance: balance::BalanceView,
+}
+
+pub(crate) fn wallet_view(state: &WalletState, wallet: &Wallet) -> WalletView {
+    let restore_height = wallet.restore_height();
+    WalletView {
+        current_height: state.current_height(),
+        restore_height,
+        adjusted_restore_height: adjusted_restore_height(state).or(restore_height),
+        accounts: accounts_view(state, wallet),
+        transactions: transaction_views(state, wallet),
+        balance: balance_view(state),
+    }
+}
+
+// the height of the earliest output the wallet still holds, which is how far back a restore has to scan
+fn adjusted_restore_height(state: &WalletState) -> Option<u32> {
+    state
+        .outputs
+        .values()
+        .filter(|output| {
+            !state
+                .cache
+                .key_image_to_spend_transaction_input
+                .contains_key(&output.cached_key_image)
+        })
+        .filter_map(|output| {
+            state.transactions[&output.inner.transaction()]
+                .block_info
+                .map(|block_info| block_info.block.height)
+        })
+        .min()
+}
+
+pub(crate) fn balance_view(state: &WalletState) -> balance::BalanceView {
     let current_height = state.current_height();
     let current_timestamp = crate::current_timestamp();
     let mut total = 0;
@@ -35,13 +77,14 @@ pub fn balance_view(state: &WalletState) -> balance::BalanceView {
         let block_height = state.transactions[&output.inner.transaction()]
             .block_info
             .map(|block_info| block_info.block.height);
+        let required_confirmations = state.required_confirmations(&output.inner.transaction());
         let amount = output.inner.commitment().amount;
         total += amount;
         if output.is_frozen() {
             frozen += amount;
         } else if block_height
             .zip(current_height)
-            .is_none_or(|(block_height, current_height)| output.is_locked(block_height, current_height, current_timestamp))
+            .is_none_or(|(block_height, current_height)| output.is_locked(block_height, current_height, current_timestamp, required_confirmations))
         {
             pending += amount;
         } else {
@@ -56,14 +99,14 @@ pub fn balance_view(state: &WalletState) -> balance::BalanceView {
     }
 }
 
-pub fn accounts_view(state: &WalletState, wallet: &Wallet) -> Vec<account::AccountView> {
+pub(crate) fn accounts_view(state: &WalletState, wallet: &Wallet) -> Vec<account::AccountView> {
     let last_address_index = (state.account_addresses().addresses().len() - 1) as u32;
     (0..=last_address_index)
         .map(|account_index| account_view(state, wallet, account_index))
         .collect()
 }
 
-pub fn account_view(state: &WalletState, wallet: &Wallet, account_index: u32) -> account::AccountView {
+pub(crate) fn account_view(state: &WalletState, wallet: &Wallet, account_index: u32) -> account::AccountView {
     let last_address_index = state
         .account_addresses()
         .addresses()
@@ -81,7 +124,7 @@ pub fn account_view(state: &WalletState, wallet: &Wallet, account_index: u32) ->
     }
 }
 
-pub fn address_view(state: &WalletState, wallet: &Wallet, account_index: u32, address_index: u32) -> address::AddressView {
+pub(crate) fn address_view(state: &WalletState, wallet: &Wallet, account_index: u32, address_index: u32) -> address::AddressView {
     let subaddres_index = SubaddressIndex::new(account_index, address_index);
     let mut used: bool = false;
     let mut amount: u64 = 0;
@@ -110,17 +153,17 @@ pub fn address_view(state: &WalletState, wallet: &Wallet, account_index: u32, ad
     }
 }
 
-pub fn transaction_views(state: &WalletState, wallet: &Wallet) -> Vec<transaction::TransactionView> {
+pub(crate) fn transaction_views(state: &WalletState, wallet: &Wallet) -> Vec<transaction::TransactionView> {
     let mut raw_transactions = state.transactions.values().collect::<Vec<_>>();
     raw_transactions.sort_by_key(|raw_transaction| (raw_transaction.first_seen_timestamp, raw_transaction.hash));
     transaction_views_of(state, wallet, raw_transactions)
 }
 
-pub fn transaction_view_of<P: PotentiallyPruned>(state: &WalletState, wallet: &Wallet, raw_transaction: &TransactionWrapper<P>) -> transaction::TransactionView {
+pub(crate) fn transaction_view_of<P: PotentiallyPruned>(state: &WalletState, wallet: &Wallet, raw_transaction: &TransactionWrapper<P>) -> transaction::TransactionView {
     transaction_views_of(state, wallet, vec![raw_transaction]).remove(0)
 }
 
-pub fn transaction_views_of<P: PotentiallyPruned>(state: &WalletState, wallet: &Wallet, raw_transactions: Vec<&TransactionWrapper<P>>) -> Vec<transaction::TransactionView> {
+pub(crate) fn transaction_views_of<P: PotentiallyPruned>(state: &WalletState, wallet: &Wallet, raw_transactions: Vec<&TransactionWrapper<P>>) -> Vec<transaction::TransactionView> {
     let current_height = state.current_height();
 
     let mut wallet_inputs = HashMap::<MoneroBytes, Vec<&WalletOutputWrapper>>::new();

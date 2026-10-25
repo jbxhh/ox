@@ -1,7 +1,7 @@
-use std::{
-    collections::HashMap,
-    sync::{Arc, atomic::AtomicBool},
-};
+use std::{collections::HashMap, future::Future, pin::pin, sync::Arc};
+
+use futures_util::future::{Either, select};
+use tokio::sync::Notify;
 
 use monero_daemon_rpc::MoneroDaemon;
 use monero_interface::ProvidesUnvalidatedBlockchain;
@@ -30,6 +30,7 @@ pub enum SyncError {
     CouldNotFetchNodeInfo { error: InterfaceError },
     NodeNotSynced { node_info: NodeInfo },
     CouldNotFetchBlocks { error: InterfaceError },
+    WrongNodeNetwork { nettype: String, wallet_network: Network },
 }
 
 #[derive(Debug)]
@@ -46,6 +47,19 @@ pub trait WalletSyncObserver {
     fn observe(&mut self, state: WalletSyncState);
 }
 
+async fn race<F: Future>(cancel: &Notify, future: F) -> Option<F::Output> {
+    match select(pin!(cancel.notified()), pin!(future)).await {
+        Either::Left(((), _future)) => None,
+        Either::Right((output, _notified)) => Some(output),
+    }
+}
+
+fn cancelled<O: WalletSyncObserver>(observer: &mut O) {
+    observer.observe(WalletSyncState::Cancelled {
+        timestamp: current_timestamp(),
+    });
+}
+
 fn make_blocks_request(network: Network, blockchain: &Blockchain) -> BlocksRequest {
     let hashes = blockchain.hashes();
     if hashes.is_empty() {
@@ -55,18 +69,17 @@ fn make_blocks_request(network: Network, blockchain: &Blockchain) -> BlocksReque
     BlocksRequest::from_hashes(genesis, hashes)
 }
 
-async fn get_height_from_birthday(daemon: &MoneroDaemon<MonfluoTransport>, network: Network, birthday: u64) -> u32 {
+async fn get_height_from_birthday(daemon: &MoneroDaemon<MonfluoTransport>, network: Network, birthday: u64, cancel: &Notify) -> Option<u32> {
     let constants = crate::get_network_constants(network);
     let mut restore_height_estimation = constants.fork_block + ((birthday - constants.fork_timestamp - BIRTHDAY_SAFETY_MARGIN) / crate::TARGET_BLOCK_TIME) as u32 - constants.rollback_adjustment.unwrap_or(0);
     loop {
-        let block = daemon
-            .block_by_number(restore_height_estimation as usize)
-            .await
+        let block = race(cancel, daemon.block_by_number(restore_height_estimation as usize))
+            .await?
             .unwrap_or_else(|_| panic!("Failed to fetch block {} while estimating restore height from birthday {} on network {}", restore_height_estimation, birthday, network));
         let block_timestamp = block.header.timestamp * 1000;
         if block_timestamp < birthday {
             info!("Estimated birthday {} on network {} to correspond to restore height {}", birthday, network, restore_height_estimation);
-            return restore_height_estimation;
+            return Some(restore_height_estimation);
         }
         warn!("Estimated restore height for birthday {} on network {} was {}, but the block at that height has timestamp {}", birthday, network, restore_height_estimation, block_timestamp);
         restore_height_estimation -= RESTORE_HEIGHT_ESTIMATION_STEP;
@@ -80,7 +93,7 @@ async fn fetch_blocks(daemon: Arc<MoneroDaemon<MonfluoTransport>>, blocks_reques
         .await
 }
 
-pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: super::Daemon, mut observer: O, cancellation_token: Arc<AtomicBool>) {
+pub(crate) async fn sync<O: WalletSyncObserver>(wallet: &Wallet, daemon: super::Daemon, mut observer: O, cancel: &Notify) {
     let restore_height = wallet.secrets.restore_height();
     let wallet_initial_height = wallet
         .read_state()
@@ -94,10 +107,10 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
         current_height: wallet_initial_height,
     });
 
-    let mut scanner = create_scanner(&*wallet.read_state().await, &wallet);
-    let node_info = match daemon.node_info().await {
-        Ok(node_info) => node_info,
-        Err(e) => {
+    let mut scanner = create_scanner(&*wallet.read_state().await, wallet);
+    let node_info = match race(cancel, daemon.node_info()).await {
+        Some(Ok(node_info)) => node_info,
+        Some(Err(e)) => {
             observer.observe(WalletSyncState::Failed {
                 timestamp: current_timestamp(),
                 error: SyncError::CouldNotFetchNodeInfo {
@@ -106,6 +119,7 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
             });
             return;
         }
+        None => return cancelled(&mut observer),
     };
     let node_height = node_info.height;
     let node_target_height = node_info.target_height;
@@ -118,11 +132,24 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
         });
         return;
     }
+    if !node_info.nettype.eq_ignore_ascii_case(&network.to_string()) {
+        observer.observe(WalletSyncState::Failed {
+            timestamp: current_timestamp(),
+            error: SyncError::WrongNodeNetwork {
+                nettype: node_info.nettype.clone(),
+                wallet_network: network,
+            },
+        });
+        return;
+    }
     let wallet_initial_height = match wallet_initial_height {
         Some(wallet_initial_height) => wallet_initial_height,
         None => {
             info!("Wallet has no known restore height");
-            get_height_from_birthday(&daemon, network, birthday).await
+            match get_height_from_birthday(&daemon, network, birthday, cancel).await {
+                Some(restore_height) => restore_height,
+                None => return cancelled(&mut observer),
+            }
         }
     };
     info!("Will be syncing from current wallet height {}", wallet_initial_height);
@@ -145,19 +172,12 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
         let task = tokio::spawn(fetch_blocks(daemon.clone(), blocks_request, last_sync_daemon_time));
         (Some(task), blockchain)
     };
-    while let Some(current_handle) = handle.take() {
-        if cancellation_token.load(std::sync::atomic::Ordering::Relaxed) {
-            debug!("Sync cancelled");
-            observer.observe(WalletSyncState::Cancelled {
-                timestamp: current_timestamp(),
-            });
-            return;
-        }
+    while let Some(mut current_handle) = handle.take() {
         debug!("Waiting on block fetching task..");
-        let blocks_with_mempool = match current_handle
-            .await
-            .expect("Failed to spawn block fetching task")
-        {
+        let Some(blocks_with_mempool) = race(cancel, &mut current_handle).await else {
+            return cancelled(&mut observer);
+        };
+        let blocks_with_mempool = match blocks_with_mempool.expect("Failed to spawn block fetching task") {
             Ok(blocks) => blocks,
             Err(e) => {
                 observer.observe(WalletSyncState::Failed {
@@ -334,8 +354,11 @@ pub async fn sync<O: WalletSyncObserver + Send>(wallet: Arc<Wallet>, daemon: sup
         state.cache.last_sync_daemon_time = Some(daemon_time);
         drop(state);
         info!("Finished processing batch of blocks");
-        wallet.store().await;
-        debug!("Wallet stored after processing batch of blocks");
+        if let Err(e) = wallet.store().await {
+            warn!("Failed to store wallet after processing batch of blocks: {e}");
+        } else {
+            debug!("Wallet stored after processing batch of blocks");
+        }
         observer.observe(WalletSyncState::Syncing {
             timestamp: current_timestamp(),
             current_height: latest_synced_block,

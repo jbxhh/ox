@@ -1,6 +1,6 @@
 #![deny(clippy::unwrap_used)]
 
-pub mod crypto;
+mod crypto;
 pub mod seed;
 pub mod transport;
 pub mod util;
@@ -22,6 +22,7 @@ pub type MoneroBytes = [u8; 32];
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub const CONFIRMATIONS: u32 = 10;
+pub const COINBASE_CONFIRMATIONS: u32 = 60;
 pub const TARGET_BLOCK_TIME: u64 = 120_000;
 
 pub const MAINNET_CONSTANTS: NetworkConstants = NetworkConstants {

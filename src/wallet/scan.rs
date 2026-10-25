@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use monero_wallet::{Scanner, Timelocked, address::SubaddressIndex, ed25519::Scalar, transaction::Input};
+use monero_wallet::{Scanner, Timelocked, address::SubaddressIndex, ed25519::Scalar};
 use tracing::info;
 
 use crate::{
@@ -56,15 +56,10 @@ pub(crate) fn process_scan_result(state: &mut WalletState, spend_key: &Scalar, t
 }
 
 pub(crate) fn process_transaction(state: &mut WalletState, transaction: TransactionWrapper) {
-    let transaction_hash = transaction.hash;
-    let relevant_inputs = state.add_transaction_if_spends_output(transaction.clone());
-    for input_index in relevant_inputs.keys().copied() {
-        let Input::ToKey {
-            ..
-        } = transaction.inner.prefix().inputs[input_index as usize]
-        else {
-            panic!("Wallet returned bad relevant input index {input_index} for transaction {}", HexFormatted::borrowed(&transaction_hash));
-        };
-        info!("Found a spend in transaction {}", HexFormatted::borrowed(&transaction_hash));
+    if !state.spends_wallet_outputs(&transaction) {
+        return;
     }
+    let transaction_hash = transaction.hash;
+    let spent_outputs = state.add_transaction(transaction);
+    info!("Found {} spends in transaction {}", spent_outputs.len(), HexFormatted::borrowed(&transaction_hash));
 }

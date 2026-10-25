@@ -13,7 +13,8 @@ use monero_daemon_rpc::{HttpTransport, MoneroDaemon, prelude::InterfaceError};
 
 use crate::util::HexFormatted;
 
-const DEFAULT_TIMEOUT: Duration = Duration::from_secs(30);
+const DEFAULT_NODE_SCHEME: &str = "http";
+const DEFAULT_PROXY_SCHEME: &str = "socks5h";
 
 #[derive(Clone, Debug)]
 enum Authentication {
@@ -23,14 +24,13 @@ enum Authentication {
 
 /// An HTTP(S) transport to connect to a Monero daemon.
 ///
-/// Supports plain HTTP, HTTPS, and SOCKS5 proxies. Digest authentication
-/// is handled automatically when credentials are included in the URL.
+/// Supports HTTP(S) daemons through an HTTP(S) or SOCKS proxy, with automatic digest authentication.
 #[derive(Clone, Debug)]
 pub struct MonfluoTransport {
     read_response_before_next_request: Arc<Mutex<()>>,
     authentication: Authentication,
     request_timeout: Duration,
-    base_url: String,
+    base_url: Url,
     client: Client,
 }
 
@@ -51,8 +51,18 @@ impl MonfluoTransport {
         })
     }
 
-    fn parse_url(url: &str) -> Result<(String, Option<(String, String)>), InterfaceError> {
-        let mut parsed = Url::parse(url).map_err(|_| InterfaceError::InterfaceError("invalid URL".to_owned()))?;
+    // A bare `host:port` parses as a scheme, so only an authority means one was supplied
+    fn parse_address(address: &str, default_scheme: &str) -> Result<Url, InterfaceError> {
+        let address = address.trim();
+
+        match Url::parse(address) {
+            Ok(url) if url.host_str().is_some() => Ok(url),
+            _ => Url::parse(&format!("{default_scheme}://{address}")).map_err(|e| InterfaceError::InterfaceError(format!("invalid address: {e}"))),
+        }
+    }
+
+    fn parse_url(url: &Url) -> Result<(Url, Option<(String, String)>), InterfaceError> {
+        let mut parsed = url.clone();
 
         let username = parsed.username();
         let password = parsed.password();
@@ -66,9 +76,9 @@ impl MonfluoTransport {
             parsed
                 .set_password(None)
                 .map_err(|_| InterfaceError::InterfaceError("failed to clear password from URL".to_owned()))?;
-            Ok((parsed.to_string(), Some((username, password))))
+            Ok((parsed, Some((username, password))))
         } else {
-            Ok((parsed.to_string(), None))
+            Ok((parsed, None))
         }
     }
 
@@ -86,33 +96,31 @@ impl MonfluoTransport {
     ///
     /// The URL is parsed with the [`url`] crate. A daemon requiring authentication may be used
     /// by including the username and password in the URL
-    /// (`scheme://username:password@domain.tld`).
+    /// (`scheme://username:password@domain.tld`) or by passing them as `credentials`, which take
+    /// precedence over the ones in the URL.
     ///
     /// # Arguments
     ///
-    /// * `url` - The daemon URL (e.g., `http://localhost:18081` or `http://user:pass@localhost:18081`)
-    /// * `proxy` - Optional SOCKS5 proxy (e.g., `reqwest::Proxy::all("socks5h://127.0.0.1:1080")?`)
-    pub async fn new(url: String, proxy: Option<reqwest::Proxy>) -> Result<MoneroDaemon<MonfluoTransport>, InterfaceError> {
-        Self::with_custom_timeout(url, DEFAULT_TIMEOUT, proxy).await
-    }
-
-    /// Create a new HTTP(S) RPC connection with a custom timeout.
-    ///
-    /// # Arguments
-    ///
-    /// * `url` - The daemon URL (e.g., `http://localhost:18081` or `http://user:pass@localhost:18081`)
+    /// * `url` - The daemon URL (e.g., `http://localhost:18081` or `localhost:18081`)
+    /// * `credentials` - Optional username and password
+    /// * `proxy` - Optional proxy address, `socks5h` when the scheme is omitted (`127.0.0.1:9050`)
     /// * `request_timeout` - Maximum duration for each request
-    /// * `proxy` - Optional SOCKS5 proxy (e.g., `reqwest::Proxy::all("socks5h://127.0.0.1:1080")?`)
-    pub async fn with_custom_timeout(url: String, request_timeout: Duration, proxy: Option<reqwest::Proxy>) -> Result<MoneroDaemon<MonfluoTransport>, InterfaceError> {
+    pub async fn new(url: String, credentials: Option<(String, String)>, proxy: Option<String>, request_timeout: Duration) -> Result<MoneroDaemon<MonfluoTransport>, InterfaceError> {
+        let url = Self::parse_address(&url, DEFAULT_NODE_SCHEME)?;
+        let proxy = proxy
+            .map(|proxy| Self::parse_address(&proxy, DEFAULT_PROXY_SCHEME))
+            .transpose()?
+            .map(reqwest::Proxy::all)
+            .transpose()
+            .map_err(|e| InterfaceError::InterfaceError(format!("invalid proxy: {e}")))?;
         let client = Self::create_client(proxy)?;
-        let (base_url, credentials) = Self::parse_url(&url)?;
+        let (base_url, url_credentials) = Self::parse_url(&url)?;
+        let credentials = credentials.or(url_credentials);
 
         let authentication = if let Some((username, password)) = credentials {
-            let response = client
-                .post(&base_url)
-                .body(vec![])
-                .send()
+            let response = tokio::time::timeout(request_timeout, client.post(base_url.clone()).body(vec![]).send())
                 .await
+                .map_err(|e| InterfaceError::InterfaceError(format!("timeout reached: {e:?}")))?
                 .map_err(|e| InterfaceError::InterfaceError(format!("couldn't make request: {e:?}")))?;
 
             let challenge = Self::digest_auth_challenge(&response)?;
@@ -139,14 +147,17 @@ impl MonfluoTransport {
     async fn inner_post(&self, route: &str, body: Vec<u8>, response_size_limit: Option<usize>) -> Result<Vec<u8>, InterfaceError> {
         let _guard = self.read_response_before_next_request.lock().await;
 
-        let url = format!("{}{}", self.base_url, route);
+        let url = self
+            .base_url
+            .join(route)
+            .map_err(|e| InterfaceError::InterfaceError(format!("invalid route: {e}")))?;
 
         for attempt in 0..2 {
             match &self.authentication {
                 Authentication::Unauthenticated => {
                     let response = self
                         .client
-                        .post(&url)
+                        .post(url.clone())
                         .body(body)
                         .send()
                         .await
@@ -163,7 +174,7 @@ impl MonfluoTransport {
                     if state_lock.is_none() {
                         let response = self
                             .client
-                            .post(&url)
+                            .post(url.clone())
                             .body(body.clone())
                             .send()
                             .await
@@ -171,12 +182,12 @@ impl MonfluoTransport {
                         *state_lock = Self::digest_auth_challenge(&response)?;
                     }
 
-                    let mut request_builder = self.client.post(&url).body(body.clone());
+                    let mut request_builder = self.client.post(url.clone()).body(body.clone());
 
                     if let Some((challenge, cnonce)) = state_lock.as_mut() {
                         *cnonce += 1;
 
-                        let mut ctx = AuthContext::new_post::<_, _, _, &[u8]>(username.as_str(), password.as_str(), route, None);
+                        let mut ctx = AuthContext::new_post::<_, _, _, &[u8]>(username.as_str(), password.as_str(), url.path(), None);
                         ctx.set_custom_cnonce(HexFormatted::borrowed(&cnonce.to_le_bytes()).to_string());
 
                         let auth_header = challenge
@@ -224,18 +235,7 @@ impl MonfluoTransport {
                     }
 
                     let response = response.expect("no response yet also no error?");
-                    let bytes = response
-                        .bytes()
-                        .await
-                        .map_err(|e| InterfaceError::InterfaceError(format!("{e:?}")))?;
-
-                    if let Some(limit) = response_size_limit
-                        && bytes.len() > limit
-                    {
-                        return Err(InterfaceError::InterfaceError(format!("response size {} exceeds limit {}", bytes.len(), limit)));
-                    }
-
-                    return Ok(bytes.to_vec());
+                    return Self::body_from_response(response, response_size_limit).await;
                 }
             }
         }
@@ -243,19 +243,24 @@ impl MonfluoTransport {
         unreachable!()
     }
 
-    async fn body_from_response(response: reqwest::Response, response_size_limit: Option<usize>) -> Result<Vec<u8>, InterfaceError> {
-        let bytes = response
-            .bytes()
-            .await
-            .map_err(|e| InterfaceError::InterfaceError(format!("{e:?}")))?;
+    async fn body_from_response(mut response: reqwest::Response, response_size_limit: Option<usize>) -> Result<Vec<u8>, InterfaceError> {
+        let mut body = Vec::new();
 
-        if let Some(limit) = response_size_limit
-            && bytes.len() > limit
+        while let Some(chunk) = response
+            .chunk()
+            .await
+            .map_err(|e| InterfaceError::InterfaceError(format!("{e:?}")))?
         {
-            return Err(InterfaceError::InterfaceError(format!("response size {} exceeds limit {}", bytes.len(), limit)));
+            body.extend_from_slice(&chunk);
+
+            if let Some(limit) = response_size_limit
+                && body.len() > limit
+            {
+                return Err(InterfaceError::InterfaceError(format!("response size exceeds limit {}", limit)));
+            }
         }
 
-        Ok(bytes.to_vec())
+        Ok(body)
     }
 }
 

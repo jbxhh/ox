@@ -47,7 +47,7 @@ impl<'slice> HexFormatted<'slice> {
     }
 }
 
-pub struct SubaddressIndexDisplay(pub Option<SubaddressIndex>);
+pub(crate) struct SubaddressIndexDisplay(pub Option<SubaddressIndex>);
 
 impl Display for SubaddressIndexDisplay {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -64,14 +64,14 @@ impl Display for SubaddressIndexDisplay {
     }
 }
 
-pub fn bytes_to_scalar(bytes: &MoneroBytes) -> Option<Zeroizing<Scalar>> {
+pub(crate) fn bytes_to_scalar(bytes: &MoneroBytes) -> Option<Zeroizing<Scalar>> {
     curve25519_dalek::Scalar::from_canonical_bytes(*bytes)
         .into_option()
         .map(Scalar::from)
         .map(Zeroizing::new)
 }
 
-pub fn hex_to_bytes(hex: &str) -> Option<Zeroizing<Vec<u8>>> {
+pub(crate) fn hex_to_bytes(hex: &str) -> Option<Zeroizing<Vec<u8>>> {
     if !hex.len().is_multiple_of(2) {
         return None;
     }
