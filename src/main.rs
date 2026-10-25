@@ -159,7 +159,7 @@ pub fn main() {
             },
         } => {
             let seed = seed.map(|seed| monfluo_oxide::seed::try_decode_seed(&seed, None, None).unwrap());
-            RUNTIME.block_on(command::wallet::create::run(monfluo_directory, name, String::new(), seed, height.unwrap_or(0)));
+            RUNTIME.block_on(command::wallet::create::run(monfluo_directory, name, String::new(), seed, height));
         }
         Commands::Wallet {
             command: WalletCommands::Delete {

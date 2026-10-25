@@ -5,15 +5,14 @@ use monfluo_oxide::{monero_wallet::address::SubaddressIndex, util::HexFormatted}
 pub async fn run(monfluo_directory: PathBuf, name: String) {
     match monfluo_oxide::wallet::Wallet::open(monfluo_directory, &name, "").await {
         Ok(wallet) => {
-            let state = wallet.state();
             println!("Private spend key: {}", HexFormatted::borrowed(&*wallet.spend_key()));
             println!("Private view key: {}", HexFormatted::borrowed(&*wallet.view_key()));
-            println!("First mainnet address: {}", wallet.address(None, monfluo_oxide::monero_wallet::address::Network::Mainnet));
-            println!("Second mainnet address: {}", wallet.address(SubaddressIndex::new(0, 1), monfluo_oxide::monero_wallet::address::Network::Mainnet));
-            println!("Current height: {:?}", wallet.state().current_height());
+            println!("First mainnet address: {}", wallet.address(None));
+            println!("Second mainnet address: {}", wallet.address(SubaddressIndex::new(0, 1)));
+            println!("Current height: {:?}", wallet.current_height().await);
 
             println!(">>>>>>>>>> Accounts >>>>>>>>>>");
-            for account_view in wallet.accounts_view() {
+            for account_view in wallet.accounts_view().await {
                 println!("Account #{}", account_view.account_index);
                 let last_used_address = account_view
                     .addresses
@@ -33,25 +32,8 @@ pub async fn run(monfluo_directory: PathBuf, name: String) {
             }
             println!("<<<<<<<<<<");
 
-            let mut outputs = state.outputs().clone();
-            outputs.sort_by_key(|output| output.inner.index_on_blockchain());
-
-            println!("Outputs: {}", outputs.len());
-            for output in outputs {
-                println!(">>>>>>>>>>");
-                println!("Output #{} in transaction {} to address {} with value of {}", output.inner.index_on_blockchain(), HexFormatted::borrowed(&output.inner.transaction()), wallet.address(output.inner.subaddress(), monfluo_oxide::monero_wallet::address::Network::Mainnet), output.inner.commitment().amount);
-                if let Some((spent_transaction_hash, _)) = state
-                    .cache
-                    .key_image_to_spend_transaction_input
-                    .get(&output.cached_key_image)
-                {
-                    println!("Spent in transaction {}", HexFormatted::borrowed(spent_transaction_hash))
-                }
-                println!("<<<<<<<<<<");
-            }
-
             println!("Transactions\n");
-            for transaction in wallet.transaction_views() {
+            for transaction in wallet.transaction_views().await {
                 println!("Transaction hash: {}", HexFormatted::borrowed(&transaction.transaction_hash));
                 println!("Transaction fee: {}", monfluo_oxide::util::atomic_units_to_big_decimal(transaction.fee));
                 println!(
