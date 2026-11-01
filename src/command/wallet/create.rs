@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use monfluo_oxide::{monero_wallet::address::Network, monero_wallet_util::seed::Seed};
 
-pub async fn run(monfluo_directory: PathBuf, name: String, password: String, seed: Option<Seed>, height: Option<u32>) {
+pub async fn run(monfluo_directory: PathBuf, network: Network, name: String, password: String, seed: Option<Seed>, height: Option<u32>) {
     let seed_was_provided = seed.is_some();
     let seed = match seed {
         Some(seed) => seed,
@@ -15,7 +15,7 @@ pub async fn run(monfluo_directory: PathBuf, name: String, password: String, see
         None if seed_was_provided => (Some(0), 0),
         None => (None, monfluo_oxide::current_timestamp()),
     };
-    match monfluo_oxide::wallet::Wallet::create(monfluo_directory, Network::Mainnet, &name, &password, seed, restore_height, birthday).await {
+    match monfluo_oxide::wallet::Wallet::create(monfluo_directory, network, &name, &password, seed, restore_height, birthday).await {
         Ok(()) => println!("Wallet created"),
         Err(e) => println!("Failed to create wallet: {e}"),
     }

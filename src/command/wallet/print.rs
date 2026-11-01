@@ -2,13 +2,13 @@ use std::path::PathBuf;
 
 use monfluo_oxide::{monero_wallet::address::SubaddressIndex, util::HexFormatted};
 
-pub async fn run(monfluo_directory: PathBuf, name: String) {
-    match monfluo_oxide::wallet::Wallet::open(monfluo_directory, &name, "").await {
+pub async fn run(monfluo_directory: PathBuf, name: String, password: String) {
+    match monfluo_oxide::wallet::Wallet::open(monfluo_directory, &name, &password).await {
         Ok(wallet) => {
             println!("Private spend key: {}", HexFormatted::borrowed(&*wallet.spend_key()));
             println!("Private view key: {}", HexFormatted::borrowed(&*wallet.view_key()));
-            println!("First mainnet address: {}", wallet.address(None));
-            println!("Second mainnet address: {}", wallet.address(SubaddressIndex::new(0, 1)));
+            println!("First address: {}", wallet.address(None));
+            println!("Second address: {}", wallet.address(SubaddressIndex::new(0, 1)));
             println!("Current height: {:?}", wallet.current_height().await);
 
             println!(">>>>>>>>>> Accounts >>>>>>>>>>");
@@ -39,7 +39,7 @@ pub async fn run(monfluo_directory: PathBuf, name: String) {
                 println!(
                     "Transaction time: {}",
                     chrono::DateTime::from_timestamp_secs(transaction.timestamp as i64)
-                        .unwrap()
+                        .expect("Failed to convert transaction timestamp")
                         .with_timezone(&chrono::Local)
                 );
                 println!("Inputs size: {}", transaction.inputs.len());

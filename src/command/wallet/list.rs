@@ -1,9 +1,13 @@
 use std::path::PathBuf;
 
 pub async fn run(monfluo_directory: PathBuf) {
-    let wallets = monfluo_oxide::wallet::Wallet::list(monfluo_directory)
-        .await
-        .unwrap();
+    let wallets = match monfluo_oxide::wallet::Wallet::list(monfluo_directory).await {
+        Ok(wallets) => wallets,
+        Err(e) => {
+            println!("Failed to list wallets: {e}");
+            return;
+        }
+    };
 
     if wallets.is_empty() {
         println!("No wallets found");

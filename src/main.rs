@@ -82,16 +82,36 @@ enum WalletCommands {
     Create {
         #[arg(long)]
         height: Option<u32>,
+        #[arg(long, default_value = "Mainnet")]
+        network: monfluo_oxide::monero_wallet::address::Network,
         #[arg(long)]
-        seed: Option<String>,
+        password: Option<String>,
+        #[arg(long, value_parser = parse_seed)]
+        seed: Option<monfluo_oxide::monero_wallet_util::seed::Seed>,
         name: String,
     },
     /// Delets walet
     Delete { name: String },
     /// Prints wallet information
-    Print { name: String },
+    Print {
+        #[arg(long)]
+        password: Option<String>,
+        name: String,
+    },
     /// Open wallet in TUI
-    Open { name: String },
+    Open {
+        #[arg(long)]
+        password: Option<String>,
+        name: String,
+    },
+    /// Execute commands on wallet
+    Execute {
+        #[arg(long)]
+        password: Option<String>,
+        name: String,
+        #[arg(last = true, required = true)]
+        commands: Vec<String>,
+    },
     /// Start RPC server for wallet
     Start { name: String },
 }
@@ -147,19 +167,20 @@ pub fn main() {
             RUNTIME.block_on(command::seed::analyze::run(monfluo_directory));
         }
         Commands::Wallet {
-            command: WalletCommands::List {},
+            command: WalletCommands::List,
         } => {
             RUNTIME.block_on(command::wallet::list::run(monfluo_directory));
         }
         Commands::Wallet {
             command: WalletCommands::Create {
                 height,
+                network,
+                password,
                 seed,
                 name,
             },
         } => {
-            let seed = seed.map(|seed| monfluo_oxide::seed::try_decode_seed(&seed, None, None).unwrap());
-            RUNTIME.block_on(command::wallet::create::run(monfluo_directory, name, String::new(), seed, height));
+            RUNTIME.block_on(command::wallet::create::run(monfluo_directory, network, name, password.unwrap_or_default(), seed, height));
         }
         Commands::Wallet {
             command: WalletCommands::Delete {
@@ -170,17 +191,28 @@ pub fn main() {
         }
         Commands::Wallet {
             command: WalletCommands::Print {
+                password,
                 name,
             },
         } => {
-            RUNTIME.block_on(command::wallet::print::run(monfluo_directory, name));
+            RUNTIME.block_on(command::wallet::print::run(monfluo_directory, name, password.unwrap_or_default()));
         }
         Commands::Wallet {
             command: WalletCommands::Open {
+                password,
                 name,
             },
         } => {
-            RUNTIME.block_on(command::wallet::open::run(monfluo_directory, name, String::new()));
+            RUNTIME.block_on(command::wallet::open::run(monfluo_directory, name, password.unwrap_or_default()));
+        }
+        Commands::Wallet {
+            command: WalletCommands::Execute {
+                password,
+                name,
+                commands,
+            },
+        } => {
+            RUNTIME.block_on(command::wallet::execute::run(monfluo_directory, name, password.unwrap_or_default(), commands));
         }
         Commands::Wallet {
             command: WalletCommands::Start {
@@ -190,6 +222,10 @@ pub fn main() {
             RUNTIME.block_on(command::wallet::start::run(monfluo_directory, name));
         }
     }
+}
+
+fn parse_seed(seed: &str) -> Result<monfluo_oxide::monero_wallet_util::seed::Seed, String> {
+    monfluo_oxide::seed::try_decode_seed(seed, None, None).ok_or_else(|| "invalid seed".to_owned())
 }
 
 fn parse_language_from_or_exit<L: FromStr + VariantArray + Display>(language_str: &str) -> L {

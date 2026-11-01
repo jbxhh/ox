@@ -1726,6 +1726,7 @@ dependencies = [
  "directories",
  "monfluo-oxide",
  "ratatui",
+ "shlex",
  "strum 0.27.2",
  "tokio",
  "tracing",
@@ -1736,7 +1737,6 @@ dependencies = [
 [[package]]
 name = "monfluo-oxide"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monfluo-oxide#7c52d7ac75e982908d2ff8624c1f692481b5b282"
 dependencies = [
  "bigdecimal",
  "chrono",
