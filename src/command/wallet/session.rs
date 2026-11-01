@@ -1,4 +1,6 @@
-use std::{sync::Arc, sync::atomic::AtomicBool};
+use std::sync::Arc;
+
+use tokio::sync::Notify;
 
 use clap::Parser;
 use monfluo_oxide::{
@@ -67,10 +69,10 @@ impl Session {
                     return true;
                 };
                 println!("Starting refresh");
-                let cancellation_token = AtomicBool::new(false);
+                let cancel = Notify::new();
                 let observer = MonfluoObserver::default();
                 self.wallet
-                    .sync(daemon.clone(), observer.clone(), &cancellation_token)
+                    .sync(daemon.clone(), observer.clone(), &cancel)
                     .await;
                 match observer.take_outcome() {
                     Some(WalletSyncState::Failed {

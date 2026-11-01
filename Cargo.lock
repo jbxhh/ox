@@ -1742,6 +1742,7 @@ dependencies = [
  "chrono",
  "curve25519-dalek",
  "digest_auth",
+ "futures-util",
  "monero-daemon-rpc",
  "monero-interface 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
  "monero-wallet 0.1.0 (git+https://codeberg.org/Monfluo/monero-oxide.git?branch=monfluo)",
