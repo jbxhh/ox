@@ -9,10 +9,10 @@ pub async fn run(monfluo_directory: PathBuf, name: String, password: String) {
             println!("Private view key: {}", HexFormatted::borrowed(&*wallet.view_key()));
             println!("First address: {}", wallet.address(None));
             println!("Second address: {}", wallet.address(SubaddressIndex::new(0, 1)));
-            println!("Current height: {:?}", wallet.current_height().await);
-
+            let wallet_view = wallet.wallet_view().await;
+            println!("Current height: {:?}", wallet_view.current_height);
             println!(">>>>>>>>>> Accounts >>>>>>>>>>");
-            for account_view in wallet.accounts_view().await {
+            for account_view in wallet_view.accounts {
                 println!("Account #{}", account_view.account_index);
                 let last_used_address = account_view
                     .addresses
@@ -33,7 +33,7 @@ pub async fn run(monfluo_directory: PathBuf, name: String, password: String) {
             println!("<<<<<<<<<<");
 
             println!("Transactions\n");
-            for transaction in wallet.transaction_views().await {
+            for transaction in wallet_view.transactions {
                 println!("Transaction hash: {}", HexFormatted::borrowed(&transaction.transaction_hash));
                 println!("Transaction fee: {}", monfluo_oxide::util::atomic_units_to_big_decimal(transaction.fee));
                 println!(
