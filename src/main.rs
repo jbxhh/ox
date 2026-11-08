@@ -88,6 +88,8 @@ enum WalletCommands {
         password: Option<String>,
         #[arg(long, value_parser = parse_seed)]
         seed: Option<monfluo_oxide::monero_wallet_util::seed::Seed>,
+        #[arg(long)]
+        seed_offset_passphrase: Option<String>,
         name: String,
     },
     /// Delets walet
@@ -177,10 +179,11 @@ pub fn main() {
                 network,
                 password,
                 seed,
+                seed_offset_passphrase,
                 name,
             },
         } => {
-            RUNTIME.block_on(command::wallet::create::run(monfluo_directory, network, name, password.unwrap_or_default(), seed, height));
+            RUNTIME.block_on(command::wallet::create::run(monfluo_directory, network, name, password.unwrap_or_default(), seed, height, seed_offset_passphrase));
         }
         Commands::Wallet {
             command: WalletCommands::Delete {
