@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use tokio::sync::Notify;
 
@@ -10,6 +10,8 @@ use monfluo_oxide::{
 };
 
 use crate::command::wallet::MonfluoObserver;
+
+const REQUEST_TIMEOUT: Duration = Duration::from_secs(30);
 
 #[derive(Parser, Debug)]
 #[command(name = "wallet", no_binary_name = true, override_usage = "<COMMAND>")]
@@ -55,7 +57,7 @@ impl Session {
                 url,
             } => {
                 println!("Connecting to {}...", url);
-                match MonfluoTransport::new(url.to_owned(), None).await {
+                match MonfluoTransport::new(url.to_owned(), None, None, REQUEST_TIMEOUT).await {
                     Ok(transport) => {
                         self.daemon = Some(Arc::new(transport));
                         println!("Connected!");
