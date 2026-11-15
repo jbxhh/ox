@@ -93,6 +93,8 @@ pub enum WalletError {
     Encryption(#[from] crate::wallet::encryption::EncryptionError),
     #[error("Bad wallet name: {0}")]
     BadWalletName(String),
+    #[error("Wallet '{0}' already exists")]
+    WalletAlreadyExists(String),
     #[error("Encrypted polyseeds are not supported")]
     EncryptedPolyseed,
     #[error("Bad spend key")]
@@ -189,14 +191,27 @@ impl Wallet {
         };
         let secrets = WalletSecrets::new(spend_key, view_key, network, restore_height, birthday, Some(seed));
         let state = WalletState::new();
+        let wallets_directory = Self::get_wallets_directory(monfluo_directory.as_ref());
         let wallet_dir_path = Self::get_wallet_directory(monfluo_directory, wallet_name)?;
-        tokio::fs::create_dir_all(&wallet_dir_path).await?;
+        tokio::fs::create_dir_all(&wallets_directory).await?;
+        match tokio::fs::create_dir(&wallet_dir_path).await {
+            Ok(()) => {}
+            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => return Err(WalletError::WalletAlreadyExists(wallet_name.to_owned())),
+            Err(e) => return Err(e.into()),
+        }
         let secrets_file_path = wallet_dir_path.join(WALLET_SECRETS_FILE_NAME);
         let state_file_path = wallet_dir_path.join(WALLET_DATA_FILE_NAME);
         let secrets = secrets.to_bytes(password)?;
-        crate::wallet::io::write(&secrets_file_path, &secrets).await?;
         let state = state.to_bytes(password)?;
-        crate::wallet::io::write(&state_file_path, &state).await?;
+        let write_wallet_files = async {
+            crate::wallet::io::write(&secrets_file_path, &secrets).await?;
+            crate::wallet::io::write(&state_file_path, &state).await?;
+            Ok::<(), WalletError>(())
+        };
+        if let Err(e) = write_wallet_files.await {
+            let _ = tokio::fs::remove_dir_all(&wallet_dir_path).await;
+            return Err(e);
+        }
         Ok(())
     }
 
@@ -627,6 +642,25 @@ mod tests {
         let mut expected_spend_key = seed.key();
         crate::crypto::sc_reduce32(&mut expected_spend_key);
         assert_eq!(expected_spend_key, wallet.spend_key())
+    }
+
+    #[tokio::test]
+    async fn creating_a_wallet_with_an_existing_name_fails() {
+        const WALLET_NAME: &str = "Monero Wallet";
+        let monfluo_directory = tempfile::tempdir().expect("Failed to create tempdir");
+        let seed = monero_wallet_util::seed::Seed::Original(crate::generate_seed(monero_wallet_util::seed::original::Language::English).await);
+        Wallet::create(monfluo_directory.path(), Network::Stagenet, WALLET_NAME, "", seed.clone(), None, None, 1780000000000)
+            .await
+            .expect("Failed to create the wallet");
+
+        let other_seed = monero_wallet_util::seed::Seed::Original(crate::generate_seed(monero_wallet_util::seed::original::Language::English).await);
+        let create_result = Wallet::create(monfluo_directory.path(), Network::Stagenet, WALLET_NAME, "", other_seed, None, None, 1780000000000).await;
+        assert!(matches!(create_result, Err(WalletError::WalletAlreadyExists(name)) if name == WALLET_NAME));
+
+        let wallet = Wallet::open(monfluo_directory.path(), WALLET_NAME, "")
+            .await
+            .expect("Failed to open the wallet");
+        assert_eq!(seed.key(), wallet.spend_key())
     }
 
     #[tokio::test]
