@@ -147,7 +147,11 @@ pub(crate) async fn sync<O: WalletSyncObserver>(wallet: &Wallet, daemon: super::
         None => {
             info!("Wallet has no known restore height");
             match get_height_from_birthday(&daemon, network, birthday, cancel).await {
-                Some(restore_height) => restore_height,
+                Some(restore_height) => {
+                    let mut state = wallet.write_state().await;
+                    state.effective_restore_height = Some(restore_height);
+                    restore_height
+                }
                 None => return cancelled(&mut observer),
             }
         }

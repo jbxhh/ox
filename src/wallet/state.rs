@@ -232,6 +232,7 @@ impl WalletOutputWrapper {
 pub(crate) struct WalletState {
     #[zeroize(skip)]
     pub blockchain: Option<Blockchain>,
+    pub effective_restore_height: Option<u32>,
     #[zeroize(skip)]
     pub addresses: TrackedAddresses,
     #[serde(serialize_with = "serde_utils::serialize_hashmap_as_vec")]
@@ -281,6 +282,7 @@ impl WalletState {
     pub fn new() -> Self {
         Self {
             blockchain: None,
+            effective_restore_height: None,
             addresses: TrackedAddresses::new(),
             outputs: HashMap::new(),
             transactions: HashMap::new(),

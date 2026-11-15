@@ -31,7 +31,7 @@ pub struct WalletView {
 }
 
 pub(crate) fn wallet_view(state: &WalletState, wallet: &Wallet) -> WalletView {
-    let restore_height = wallet.restore_height();
+    let restore_height = wallet.restore_height().or(state.effective_restore_height);
     WalletView {
         current_height: state.current_height(),
         restore_height,
