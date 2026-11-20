@@ -16,7 +16,6 @@ import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.adapter.AdapterTransactionDetails
 import org.monfluo.wallet.android.livedata.combineLiveDatas
 import org.monfluo.wallet.android.model.TransactionInfo
-import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.PreferenceUtils
 import org.monfluo.wallet.android.util.component.ActivityMonero
@@ -111,7 +110,6 @@ class ActivityTransactionDetails : ActivityMonero() {
 
         viewModel.streetMode.value = isStreetModeMode
     }
-
 }
 
 internal class TransactionActivityViewModel : ViewModel() {

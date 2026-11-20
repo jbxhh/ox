@@ -18,18 +18,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import org.monfluo.wallet.android.R
-import org.monfluo.wallet.lib.data.WalletSeedView
-import org.monfluo.wallet.lib.data.WalletView
-import org.monfluo.wallet.lib.seed.MoneroSeedLanguage
-import org.monfluo.wallet.lib.seed.SeedType
-import org.monfluo.wallet.lib.wallet.Wallet
-import org.monfluo.wallet.android.livedata.combineLiveDatas
 import org.monfluo.wallet.android.data.next
+import org.monfluo.wallet.android.livedata.combineLiveDatas
 import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.util.Helper.clipBoardCopy
 import org.monfluo.wallet.android.util.PreferenceUtils
 import org.monfluo.wallet.android.util.TextHelper
 import org.monfluo.wallet.android.util.component.ActivityMonero
+import org.monfluo.wallet.lib.data.WalletSeedView
+import org.monfluo.wallet.lib.data.WalletView
+import org.monfluo.wallet.lib.seed.MoneroSeedLanguage
+import org.monfluo.wallet.lib.seed.SeedType
+import org.monfluo.wallet.lib.wallet.Wallet
 import java.text.NumberFormat
 import kotlin.math.max
 
@@ -297,7 +297,10 @@ internal class ActivityWalletSecretsViewModel : ViewModel() {
 
     private var polyseedPhrase: String = ""
 
-    fun loadSecrets(wallet: Wallet, walletView: WalletView) {
+    fun loadSecrets(
+        wallet: Wallet,
+        walletView: WalletView,
+    ) {
         restoreHeight.value = walletView.restoreHeight?.toLong() ?: 0L
         adjustedRestoreHeight.value = walletView.adjustedRestoreHeight?.toLong() ?: 0L
         walletAddress.value = wallet.getAddress()
@@ -336,7 +339,10 @@ internal class ActivityWalletSecretsViewModel : ViewModel() {
         }
     }
 
-    fun setSeedType(wallet: Wallet, seedType: SeedType) {
+    fun setSeedType(
+        wallet: Wallet,
+        seedType: SeedType,
+    ) {
         _seedType.value = seedType
         when (seedType) {
             SeedType.Polyseed -> seed.value = polyseedPhrase

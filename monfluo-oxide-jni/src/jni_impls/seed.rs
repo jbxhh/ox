@@ -1,4 +1,4 @@
-use std::{ops::Deref, str::FromStr};
+use std::str::FromStr;
 
 use jni::{
     EnvUnowned,
@@ -13,15 +13,27 @@ pub fn monero_seed_from_mnemonic<'local>(
     mut env: EnvUnowned<'local>,
     _class: JClass<'local>,
     java_mnemonic: JString<'local>,
+    java_monero_seed_language: JObject<'local>,
 ) -> JObject<'local> {
     let cache = crate::java::get_cache();
 
     env.with_env(|env| {
         let mnemonic = crate::java::JavaStringHelper::from_jstring(env, &java_mnemonic);
-        match monfluo_oxide::seed::try_decode_original_seed(Zeroizing::new(
-            mnemonic.to_cow_str().deref().to_owned(),
-        )) {
-            Some(seed) => {
+        let mnemonic = mnemonic.to_cow_str();
+        let seed = if java_monero_seed_language.is_null() {
+            monfluo_oxide::seed::try_decode_original_seed(Zeroizing::new(mnemonic.to_string()))
+                .map(monfluo_oxide::monero_wallet_util::seed::Seed::Original)
+        } else {
+            let language =
+                crate::java::from_java_monero_seed_language(env, cache, &java_monero_seed_language);
+            monfluo_oxide::seed::try_decode_seed(
+                &mnemonic,
+                Some(monfluo_oxide::seed::SeedType::Monero),
+                Some(language.to_string()),
+            )
+        };
+        match seed {
+            Some(monfluo_oxide::monero_wallet_util::seed::Seed::Original(ref seed)) => {
                 let language = seed.language();
                 let java_language = crate::java::to_java_monero_seed_language(env, cache, language);
                 Ok::<JObject<'local>, jni::errors::Error>(crate::java::new_monero_seed(
@@ -31,7 +43,7 @@ pub fn monero_seed_from_mnemonic<'local>(
                     &java_language,
                 ))
             }
-            None => Ok::<JObject<'local>, jni::errors::Error>(JObject::null()),
+            _ => Ok::<JObject<'local>, jni::errors::Error>(JObject::null()),
         }
     })
     .resolve::<ThrowRuntimeExAndDefault>()
@@ -42,15 +54,27 @@ pub fn polyseed_from_mnemonic<'local>(
     mut env: EnvUnowned<'local>,
     _class: JClass<'local>,
     java_mnemonic: JString<'local>,
+    java_polyseed_language: JObject<'local>,
 ) -> JObject<'local> {
     let cache = crate::java::get_cache();
 
     env.with_env(|env| {
         let mnemonic = crate::java::JavaStringHelper::from_jstring(env, &java_mnemonic);
-        match monfluo_oxide::seed::try_decode_polyseed(Zeroizing::new(
-            mnemonic.to_cow_str().deref().to_owned(),
-        )) {
-            Some(seed) => {
+        let mnemonic = mnemonic.to_cow_str();
+        let seed = if java_polyseed_language.is_null() {
+            monfluo_oxide::seed::try_decode_polyseed(Zeroizing::new(mnemonic.to_string()))
+                .map(monfluo_oxide::monero_wallet_util::seed::Seed::Polyseed)
+        } else {
+            let language =
+                crate::java::from_java_polyseed_language(env, cache, &java_polyseed_language);
+            monfluo_oxide::seed::try_decode_seed(
+                &mnemonic,
+                Some(monfluo_oxide::seed::SeedType::Polyseed),
+                Some(language.to_string()),
+            )
+        };
+        match seed {
+            Some(monfluo_oxide::monero_wallet_util::seed::Seed::Polyseed(ref seed)) => {
                 let language = seed.language();
                 let java_language = crate::java::to_java_polyseed_language(env, cache, language);
                 Ok::<JObject<'local>, jni::errors::Error>(crate::java::new_polyseed(
@@ -60,7 +84,7 @@ pub fn polyseed_from_mnemonic<'local>(
                     &java_language,
                 ))
             }
-            None => Ok::<JObject<'local>, jni::errors::Error>(JObject::null()),
+            _ => Ok::<JObject<'local>, jni::errors::Error>(JObject::null()),
         }
     })
     .resolve::<ThrowRuntimeExAndDefault>()

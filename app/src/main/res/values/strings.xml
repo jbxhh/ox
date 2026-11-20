@@ -66,6 +66,9 @@
     <!-- Toast shown when failing to send transaction -->
     <string name="toast_error_sending_tx">Error sending transaction</string>
     <!-- Toast shown when attempting to restore wallet from invalid seed -->
+    <string name="toast_bad_seed">Bad seed!</string>
+    <!-- Toast shown when the restore height is invalid -->
+    <string name="invalid_restore_height">Invalid restore height</string>
     <!-- Toast shown when confirm password field does not match password field -->
     <string name="invalid_confirmed_password">Passwords do not match</string>
     <!-- Toast shown when something gets copied to clipboard -->
@@ -112,6 +115,7 @@
     <string name="send">Send</string>
     <!-- Header (spoiler) for showing more options in onboarding activity -->
     <string name="more_options">More options</string>
+    <string name="recovery_phrase_optional">Recovery seed (optional)</string>
     <string name="recovery_phrase_optional_legacy">Recovery seed (legacy, optional)</string>
     <string name="recovery_phrase_optional_polyseed">Recovery seed (polyseed, optional)</string>
     <string name="restore_height_optional">Recovery height (optional)</string>
@@ -189,6 +193,9 @@ Monfluo is Free/Libre and Open Source Software licensed under GPLv3.
     <string name="wallet_node_unavailable">Node unavailable</string>
     <!-- Label for seed type in onboarding activity -->
     <string name="seed_type">Seed type</string>
+    <string name="seed_language">Language</string>
+    <string name="auto">Auto</string>
+    <string name="seed_desc_auto">Detect the seed type and language from the recovery seed, or use a legacy English seed when creating a new wallet.</string>
     <!-- New wallet button -->
     <string name="new_wallet">New wallet</string>
     <!-- Label for applying seed offset passphrase toggle in show secrets fragment -->

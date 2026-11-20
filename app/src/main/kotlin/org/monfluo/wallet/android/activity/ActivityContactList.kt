@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.adapter.AdapterContact
 import org.monfluo.wallet.android.model.Contact
-import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.component.ActivityMonero
 import timber.log.Timber
@@ -102,5 +101,4 @@ class ActivityContactList : ActivityMonero() {
             startActivity(Intent(this, ActivityContactAdd::class.java))
         }
     }
-
 }

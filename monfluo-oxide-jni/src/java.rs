@@ -177,7 +177,7 @@ mod constants {
     pub const FIELD_SIGNATURE__BYTE_ARRAY: &str = java_array!(JAVA_BYTE);
     pub const FIELD_SIGNATURE__java_lang_String: &str = java_class!(CLASS__java_lang_String);
     pub const FIELD_SIGNATURE__org_monfluo_wallet_lib_seed_MoneroSeedLanguage: &str = java_class!(CLASS__org_monfluo_wallet_lib_seed_MoneroSeedLanguage);
-    pub const FIELD_SIGNATURE__org_monfluo_wallet_lib_seed_PolyseedLanguage: &str = java_class!(CLASS__org_monfluo_wallet_lib_seed_MoneroSeedLanguage);
+    pub const FIELD_SIGNATURE__org_monfluo_wallet_lib_seed_PolyseedLanguage: &str = java_class!(CLASS__org_monfluo_wallet_lib_seed_PolyseedLanguage);
     pub const FIELD_SIGNATURE__org_monfluo_wallet_lib_data_Network: &str = java_class!(CLASS__org_monfluo_wallet_lib_data_Network);
     pub const FIELD_SIGNATURE__org_monfluo_wallet_lib_seed_SeedType: &str = java_class!(CLASS__org_monfluo_wallet_lib_seed_SeedType);
     pub const FIELD_SIGNATURE__org_monfluo_wallet_lib_data_FeePriority: &str = java_class!(CLASS__org_monfluo_wallet_lib_data_FeePriority);
@@ -958,6 +958,17 @@ impl<'env> JavaStringHelper<'env> {
     }
 }
 
+fn try_from_java_enum_using_from_str<'env, E: FromStr>(
+    env: &mut Env<'env>,
+    cache: &JniCache,
+    java_enum: &JObject<'env>,
+) -> Result<E, <E as FromStr>::Err> {
+    let enum_name = enum_name(env, cache, java_enum);
+    let enum_name = JavaStringHelper::from_jstring(env, &enum_name);
+    let enum_name = &*enum_name.to_cow_str();
+    E::from_str(enum_name)
+}
+
 fn from_java_enum_using_from_str<'env, E: FromStr>(
     env: &mut Env<'env>,
     cache: &JniCache,
@@ -966,14 +977,11 @@ fn from_java_enum_using_from_str<'env, E: FromStr>(
 where
     <E as FromStr>::Err: Debug,
 {
-    let enum_name = enum_name(env, cache, java_enum);
-    let enum_name = JavaStringHelper::from_jstring(env, &enum_name);
-    let enum_name = &*enum_name.to_cow_str();
-    E::from_str(enum_name).unwrap_or_else(|_| {
+    try_from_java_enum_using_from_str(env, cache, java_enum).unwrap_or_else(|e| {
         panic!(
-            "Failed to convert java string {} to {}",
-            enum_name,
-            std::any::type_name::<E>()
+            "Failed to convert java string to {}: {:?}",
+            std::any::type_name::<E>(),
+            e
         )
     })
 }
@@ -1946,6 +1954,22 @@ pub fn to_java_polyseed_language<'env>(
     )
 }
 
+pub fn from_java_monero_seed_language<'env>(
+    env: &mut Env<'env>,
+    cache: &JniCache,
+    monero_seed_language: &JObject<'env>,
+) -> monfluo_oxide::monero_wallet_util::seed::original::Language {
+    from_java_enum_using_from_str(env, cache, monero_seed_language)
+}
+
+pub fn from_java_polyseed_language<'env>(
+    env: &mut Env<'env>,
+    cache: &JniCache,
+    polyseed_language: &JObject<'env>,
+) -> monfluo_oxide::monero_wallet_util::seed::polyseed::Language {
+    from_java_enum_using_from_str(env, cache, polyseed_language)
+}
+
 pub fn from_java_seed_language<'env>(
     env: &mut Env<'env>,
     cache: &JniCache,
@@ -1953,23 +1977,15 @@ pub fn from_java_seed_language<'env>(
 ) -> monfluo_oxide::monero_wallet_util::seed::SeedType {
     let seed_language_class = env.get_object_class(seed_language).unwrap();
     let seed_language_class_name = seed_language_class.get_name(env).unwrap();
-    let enum_name = enum_name(env, cache, seed_language);
-    let enum_name = JavaStringHelper::from_jstring(env, &enum_name);
     match &*JavaStringHelper::from_jstring(env, &seed_language_class_name).to_cow_str() {
         CLASS__org_monfluo_wallet_lib_seed_MoneroSeedLanguage => {
             monfluo_oxide::monero_wallet_util::seed::SeedType::Original(
-                monfluo_oxide::monero_wallet_util::seed::original::Language::from_str(
-                    &enum_name.to_cow_str(),
-                )
-                .unwrap(),
+                from_java_monero_seed_language(env, cache, seed_language),
             )
         }
         CLASS__org_monfluo_wallet_lib_seed_PolyseedLanguage => {
             monfluo_oxide::monero_wallet_util::seed::SeedType::Polyseed(
-                monfluo_oxide::monero_wallet_util::seed::polyseed::Language::from_str(
-                    &enum_name.to_cow_str(),
-                )
-                .unwrap(),
+                from_java_polyseed_language(env, cache, seed_language),
             )
         }
         _ => unreachable!(),

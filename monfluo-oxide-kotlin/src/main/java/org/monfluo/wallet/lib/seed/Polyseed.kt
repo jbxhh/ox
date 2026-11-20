@@ -11,6 +11,12 @@ class Polyseed private constructor(
         external override fun generateSeed(language: PolyseedLanguage): Polyseed
 
         @JvmStatic
-        external override fun fromMnemonic(text: String): Polyseed?
+        external override fun fromMnemonic(
+            text: String,
+            language: PolyseedLanguage?,
+        ): Polyseed?
+
+        @JvmStatic
+        fun fromMnemonic(text: String): Polyseed? = fromMnemonic(text, null)
     }
 }

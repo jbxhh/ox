@@ -6,6 +6,7 @@
     android:id="@+id/create_wallet_activity_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:scrollbars="none"
     android:padding="@dimen/padding_big"
     android:background="@color/transparent"
     tools:context="org.monfluo.wallet.activity.ActivityWalletCreate">
@@ -68,7 +69,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/header_layout_view"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_medium"
             android:textColor="@color/text_subtler"
             android:text="@string/activity_wallet_create_wallet_name_label" />
 
@@ -92,7 +93,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/wallet_name_edittext"
             android:layout_marginTop="@dimen/padding_small"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_medium"
             android:textColor="@color/text_subtler"
             android:text="@string/activity_wallet_create_wallet_password_label" />
 
@@ -166,16 +167,40 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_big"
                 app:layout_constraintTop_toTopOf="parent">
-
+            
                 <Button
-                    android:id="@+id/seed_type_button"
+                    android:id="@+id/network_type_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     android:background="@drawable/button_small_background"
                     android:textColor="?attr/colorOnPrimary"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/text_mini"
+                    tools:text="NETWORK" />
+
+                <TextView
+                    android:id="@+id/network_type_label_textview"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="@id/seed_type_label_textview"
+                    app:layout_constraintEnd_toStartOf="@id/network_type_button"
+                    app:layout_constraintTop_toTopOf="@id/network_type_button"
+                    app:layout_constraintBottom_toBottomOf="@id/network_type_button"
+                    android:text="@string/activity_wallet_create_wallet_network_type_label"
+                    android:textColor="?attr/colorOnPrimary"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/seed_type_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/network_type_button"
+                    android:layout_marginTop="@dimen/padding_small"
+                    android:background="@drawable/button_small_background"
+                    android:textColor="?attr/colorOnPrimary"
+                    android:textSize="@dimen/text_mini"
                     tools:text="SEED TYPE" />
 
                 <TextView
@@ -202,25 +227,25 @@
                     tools:text="SEED TYPE DESCRIPTION" />
 
                 <Button
-                    android:id="@+id/network_type_button"
+                    android:id="@+id/seed_language_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/seed_type_desc_textview"
                     android:background="@drawable/button_small_background"
                     android:textColor="?attr/colorOnPrimary"
-                    android:textSize="12sp"
-                    tools:text="NETWORK" />
+                    android:textSize="@dimen/text_mini"
+                    tools:text="English" />
 
                 <TextView
-                    android:id="@+id/network_type_label_textview"
+                    android:id="@+id/seed_language_label_textview"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    app:layout_constraintStart_toStartOf="@id/seed_type_label_textview"
-                    app:layout_constraintEnd_toStartOf="@id/network_type_button"
-                    app:layout_constraintTop_toTopOf="@id/network_type_button"
-                    app:layout_constraintBottom_toBottomOf="@id/network_type_button"
-                    android:text="@string/activity_wallet_create_wallet_network_type_label"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/seed_language_button"
+                    app:layout_constraintTop_toTopOf="@id/seed_language_button"
+                    app:layout_constraintBottom_toBottomOf="@id/seed_language_button"
+                    android:text="@string/seed_language"
                     android:textColor="?attr/colorOnPrimary"
                     android:textStyle="bold" />
 
@@ -229,9 +254,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/network_type_button"
+                    app:layout_constraintTop_toBottomOf="@id/seed_language_button"
                     android:layout_marginTop="@dimen/padding_small"
-                    android:textSize="16sp"
+                    android:textSize="@dimen/text_medium"
                     android:textColor="@color/text_subtler"
                     android:text="@string/activity_wallet_create_wallet_seed_label" />
 
@@ -254,7 +279,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/wallet_seed_edittext"
                     android:layout_marginTop="@dimen/padding_small"
-                    android:textSize="16sp"
+                    android:textSize="@dimen/text_medium"
                     android:textColor="@color/text_subtler"
                     android:text="@string/activity_wallet_create_wallet_height_label" />
 
@@ -279,7 +304,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/wallet_restore_height_edittext"
                     android:layout_marginTop="@dimen/padding_small"
-                    android:textSize="16sp"
+                    android:textSize="@dimen/text_medium"
                     android:textColor="@color/text_subtler"
                     android:text="@string/activity_wallet_create_wallet_seed_offset_label" />
 

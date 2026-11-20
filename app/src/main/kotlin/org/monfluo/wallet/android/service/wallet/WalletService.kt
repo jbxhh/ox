@@ -30,7 +30,6 @@ import org.monfluo.wallet.android.model.MoneroUnit
 import org.monfluo.wallet.android.model.TransactionDestination
 import org.monfluo.wallet.android.model.TransactionDestinationResolved
 import org.monfluo.wallet.android.model.TransactionDestinationWithAmount
-import org.monfluo.wallet.android.model.TransactionInfo
 import org.monfluo.wallet.android.util.Constants
 import org.monfluo.wallet.android.util.Constants.FOREGROUND_SERVICE_NOTIFICATION_CHANNEL
 import org.monfluo.wallet.android.util.Constants.TRANSFERS_NOTIFICATION_CHANNEL
@@ -384,7 +383,6 @@ class WalletService :
             }
         }
 
-
         private fun handleSetPassword(_newPassword: String) {
             Timber.w("Changing the wallet password is not implemented yet")
         }
@@ -431,7 +429,6 @@ class WalletService :
                 it.onAccountSet(index)
             }
         }
-
     }
 
     private val mBinder: IBinder = WalletServiceBinder()
@@ -527,8 +524,6 @@ class WalletService :
             syncCallbackExecutor.submit(Callable { walletWithData.wallet.getWalletView() })
         walletWithData.walletView = future.get()
     }
-
-
 
     private fun updateSynchronizationStatusNotification(walletWithData: WalletWithData) {
         val broadcastIntent = Intent(CLOSE_WALLET_ACTION)
@@ -908,7 +903,6 @@ interface WalletServiceObserver : LifecycleOwner {
         pendingTransaction: TransactionView,
         success: Boolean,
     ) {}
-
 
     fun onAccountCreated() {}
 

@@ -20,7 +20,6 @@ import androidx.core.view.updatePadding
 import org.monfluo.wallet.android.BuildConfig
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.activity.ActivityNodeList
-import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.util.Helper
 import org.monfluo.wallet.android.util.PreferenceUtils
 import org.monfluo.wallet.android.util.component.ActivityMonero
@@ -239,5 +238,4 @@ class ActivityApplicationSettings : ActivityMonero() {
     override fun onWalletServiceDisconnected() {
         Timber.d("Wallet Service disconnected")
     }
-
 }

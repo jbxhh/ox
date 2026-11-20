@@ -228,13 +228,14 @@ pub fn restore_wallet<'local>(
 
             let seed = crate::java::from_java_seed(env, cache, &java_seed);
             let seed_offset = JavaStringHelper::from_nullable_jstring(env, &java_seed_offset);
-            let height = crate::java::from_java_number_int_value(env, cache, &java_height);
-            let birthday = match &seed {
-                monfluo_oxide::monero_wallet_util::seed::Seed::Original(_seed) => {
-                    monfluo_oxide::current_timestamp()
+            let height = crate::java::from_java_number_int_value(env, cache, &java_height)
+                .and_then(|height| u32::try_from(height).ok());
+            let (restore_height, birthday) = match &seed {
+                monfluo_oxide::monero_wallet_util::seed::Seed::Original(_) => {
+                    (Some(height.unwrap_or(0)), 0)
                 }
                 monfluo_oxide::monero_wallet_util::seed::Seed::Polyseed(polyseed) => {
-                    polyseed.birthday() * 1000
+                    (height, polyseed.birthday() * 1000)
                 }
             };
 
@@ -248,7 +249,7 @@ pub fn restore_wallet<'local>(
                     .as_ref()
                     .map(JavaStringHelper::to_cow_str)
                     .as_deref(),
-                height.map(|height| height as u32),
+                restore_height,
                 birthday,
             )
             .await

@@ -182,7 +182,7 @@ pub fn get_public_view_key<'local>(
 pub fn get_legacy_seed<'local>(
     mut env: EnvUnowned<'local>,
     java_wallet: JObject<'local>,
-    java_language: JObject<'local>,
+    java_monero_seed_language: JObject<'local>,
     java_seed_offset_passphrase: JString<'local>,
 ) -> JObject<'local> {
     let cache = crate::java::get_cache();
@@ -190,12 +190,8 @@ pub fn get_legacy_seed<'local>(
     env.with_env(|env| {
         let handle = crate::java::get_handle(env, cache, &java_wallet);
         let wallet = crate::bridge::from_java_handle::<Wallet>(handle);
-        let language = match crate::java::from_java_seed_language(env, cache, &java_language) {
-            monfluo_oxide::monero_wallet_util::seed::SeedType::Original(language) => language,
-            monfluo_oxide::monero_wallet_util::seed::SeedType::Polyseed(_) => {
-                panic!("Failed to get the legacy seed for a polyseed language")
-            }
-        };
+        let language =
+            crate::java::from_java_monero_seed_language(env, cache, &java_monero_seed_language);
         let seed_offset_passphrase =
             crate::java::JavaStringHelper::from_jstring(env, &java_seed_offset_passphrase);
         let seed = wallet.legacy_seed(language, &seed_offset_passphrase.to_cow_str());

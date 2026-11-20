@@ -13,7 +13,6 @@ import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePadding
 import org.monfluo.wallet.android.R
 import org.monfluo.wallet.android.data.resourceId
-import org.monfluo.wallet.android.fragment.DialogFragmentPassword
 import org.monfluo.wallet.android.model.MoneroUnit
 import org.monfluo.wallet.android.service.wallet.WalletService
 import org.monfluo.wallet.android.service.wallet.WalletWithData

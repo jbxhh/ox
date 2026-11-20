@@ -1,5 +1,6 @@
 package org.monfluo.wallet.android.activity
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -25,8 +26,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.monfluo.wallet.android.MoneroApplication
 import org.monfluo.wallet.android.R
+import org.monfluo.wallet.android.data.defaultLanguage
 import org.monfluo.wallet.android.data.getDescriptionResourceId
-import org.monfluo.wallet.lib.seed.SeedType
+import org.monfluo.wallet.android.data.languages
 import org.monfluo.wallet.android.data.next
 import org.monfluo.wallet.android.data.resourceId
 import org.monfluo.wallet.android.livedata.combineLiveDatas
@@ -43,8 +45,9 @@ import org.monfluo.wallet.lib.seed.MoneroSeedLanguage
 import org.monfluo.wallet.lib.seed.Polyseed
 import org.monfluo.wallet.lib.seed.PolyseedLanguage
 import org.monfluo.wallet.lib.seed.Seed
+import org.monfluo.wallet.lib.seed.SeedLanguage
+import org.monfluo.wallet.lib.seed.SeedType
 import timber.log.Timber
-import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.name
 import kotlin.math.max
@@ -60,6 +63,7 @@ class ActivityWalletCreate : ActivityBase() {
     private lateinit var walletPasswordEditText: EditText
     private lateinit var walletPasswordConfirmEditText: EditText
     private lateinit var seedTypeButton: Button
+    private lateinit var seedLanguageButton: Button
     private lateinit var moreOptionsDropdownTextView: TextView
     private lateinit var moreOptionsChevronImageView: ImageView
     private lateinit var advancedOptionsLayout: ConstraintLayout
@@ -84,6 +88,7 @@ class ActivityWalletCreate : ActivityBase() {
         walletPasswordEditText = findViewById(R.id.wallet_password_edittext)
         walletPasswordConfirmEditText = findViewById(R.id.wallet_password_confirm_edittext)
         seedTypeButton = findViewById(R.id.seed_type_button)
+        seedLanguageButton = findViewById(R.id.seed_language_button)
         moreOptionsDropdownTextView = findViewById(R.id.advanced_settings_dropdown_textview)
         moreOptionsChevronImageView = findViewById(R.id.advanced_settings_chevron_imageview)
         advancedOptionsLayout = findViewById(R.id.more_options_layout)
@@ -171,13 +176,7 @@ class ActivityWalletCreate : ActivityBase() {
         walletSeedEditText.addTextChangedListener(
             object : SimpleTextWatcher() {
                 override fun afterTextChanged(editable: Editable) {
-                    val text = editable.toString()
-                    viewModel.seed.value = text
-                    if (text.isEmpty()) {
-                        createWalletButton.setText(R.string.create_wallet)
-                    } else {
-                        createWalletButton.setText(R.string.restore_wallet)
-                    }
+                    viewModel.seed.value = editable.toString()
                 }
             },
         )
@@ -190,20 +189,6 @@ class ActivityWalletCreate : ActivityBase() {
             },
         )
 
-        walletSeedEditText.addTextChangedListener(
-            object : SimpleTextWatcher() {
-                override fun afterTextChanged(editable: Editable) {
-                    val text = editable.toString()
-                    viewModel.seed.value = text
-                    if (text.isEmpty()) {
-                        createWalletButton.setText(R.string.create_wallet)
-                    } else {
-                        createWalletButton.setText(R.string.restore_wallet)
-                    }
-                }
-            },
-        )
-
         walletSeedOffsetPassphraseEditText.addTextChangedListener(
             object : SimpleTextWatcher() {
                 override fun afterTextChanged(editable: Editable) {
@@ -212,7 +197,8 @@ class ActivityWalletCreate : ActivityBase() {
             },
         )
 
-        seedTypeButton.setOnClickListener { toggleSeedType() }
+        seedTypeButton.setOnClickListener { showSeedTypeDialog() }
+        seedLanguageButton.setOnClickListener { showSeedLanguageDialog() }
         networkTypeButton.setOnClickListener { toggleNetworkType() }
     }
 
@@ -240,29 +226,43 @@ class ActivityWalletCreate : ActivityBase() {
             createWalletButton.isEnabled = enable
         }
 
-        viewModel.seedType.observe(this) { seedType ->
-            seedTypeButton.text = seedType.toString()
-            seedTypeDescTextView.text = getText(seedType.getDescriptionResourceId())
-            if (seedType == SeedType.Monero) {
-                walletHeightLabelTextView.visibility = View.VISIBLE
-                walletRestoreHeightEditText.visibility = View.VISIBLE
-                walletSeedEditText.hint = getString(R.string.recovery_phrase_optional_legacy)
-            } else {
-                walletHeightLabelTextView.visibility = View.GONE
-                walletRestoreHeightEditText.visibility = View.GONE
-                walletSeedEditText.hint = getString(R.string.recovery_phrase_optional_polyseed)
-            }
+        viewModel.seedSelection.observe(this) { selection ->
+            val type = selection.type
+            seedTypeButton.text = type?.toString() ?: getString(R.string.auto)
+            seedTypeDescTextView.text =
+                when (type) {
+                    null -> getString(R.string.seed_desc_auto)
+                    SeedType.Monero -> getString(SeedType.Monero.getDescriptionResourceId())
+                    SeedType.Polyseed -> getString(SeedType.Polyseed.getDescriptionResourceId())
+                }
+            walletSeedEditText.hint =
+                when (type) {
+                    null -> getString(R.string.recovery_phrase_optional)
+                    SeedType.Monero -> getString(R.string.recovery_phrase_optional_legacy)
+                    SeedType.Polyseed -> getString(R.string.recovery_phrase_optional_polyseed)
+                }
+            seedLanguageButton.text = selection.language?.toString() ?: getString(R.string.auto)
+            seedLanguageButton.isEnabled = type != null
+            colorSeed(walletSeedEditText.editableText, selection)
         }
 
-        viewModel.seedAndType.observe(this) { (seedType, seed) ->
-            if (seed.isNotBlank() || seedType == SeedType.Polyseed) {
-                walletSeedOffsetLabelTextView.visibility = View.VISIBLE
-                walletSeedOffsetPassphraseEditText.visibility = View.VISIBLE
-            } else {
-                walletSeedOffsetLabelTextView.visibility = View.GONE
-                walletSeedOffsetPassphraseEditText.visibility = View.GONE
+        viewModel.seed.observe(this) { seed ->
+            val hasSeed = seed.isNotBlank()
+            createWalletButton.setText(if (hasSeed) R.string.restore_wallet else R.string.create_wallet)
+
+            val fieldVisibility = if (hasSeed) View.VISIBLE else View.GONE
+            walletHeightLabelTextView.visibility = fieldVisibility
+            walletRestoreHeightEditText.visibility = fieldVisibility
+            walletSeedOffsetLabelTextView.visibility = fieldVisibility
+            walletSeedOffsetPassphraseEditText.visibility = fieldVisibility
+            if (!hasSeed) {
+                walletRestoreHeightEditText.text = null
+                walletSeedOffsetPassphraseEditText.text = null
             }
-            colorSeed(walletSeedEditText.editableText, seedType)
+
+            viewModel.seedSelection.value?.let { selection ->
+                colorSeed(walletSeedEditText.editableText, selection)
+            }
         }
 
         viewModel.networkType.observe(this) { networkType ->
@@ -280,9 +280,31 @@ class ActivityWalletCreate : ActivityBase() {
         }
     }
 
-    private fun toggleSeedType() {
-        val seedType = viewModel.seedType.value ?: return
-        viewModel.seedType.value = seedType.next()
+    private fun showSeedTypeDialog() {
+        val selection = viewModel.seedSelection.value ?: return
+        val types = listOf<SeedType?>(null) + SeedType.entries
+        val labels = types.map { it?.toString() ?: getString(R.string.auto) }.toTypedArray()
+        AlertDialog
+            .Builder(this)
+            .setTitle(R.string.seed_type)
+            .setSingleChoiceItems(labels, types.indexOf(selection.type)) { dialog, which ->
+                viewModel.setSeedType(types[which])
+                dialog.dismiss()
+            }.show()
+    }
+
+    private fun showSeedLanguageDialog() {
+        val selection = viewModel.seedSelection.value ?: return
+        val type = selection.type ?: return
+        val languages = listOf<SeedLanguage?>(null) + type.languages()
+        val labels = languages.map { it?.toString() ?: getString(R.string.auto) }.toTypedArray()
+        AlertDialog
+            .Builder(this)
+            .setTitle(R.string.seed_language)
+            .setSingleChoiceItems(labels, languages.indexOf(selection.language)) { dialog, which ->
+                viewModel.setSeedLanguage(languages[which])
+                dialog.dismiss()
+            }.show()
     }
 
     fun toggleNetworkType() {
@@ -325,16 +347,18 @@ class ActivityWalletCreate : ActivityBase() {
 
     private fun colorSeed(
         editable: Editable,
-        seedType: SeedType,
+        selection: SeedSelection,
     ) {
-        val validWords =
-            when (seedType) {
-                SeedType.Monero -> MoneroSeedLanguage.getWords(MoneroSeedLanguage.English)
-                SeedType.Polyseed -> PolyseedLanguage.getWords(PolyseedLanguage.English)
-            }
         editable.getSpans(0, editable.length + 1, ForegroundColorSpan::class.java).forEach {
             editable.removeSpan(it)
         }
+        if (selection.type == null) return
+        val seedLanguage = selection.language ?: return
+        val validWords =
+            when (seedLanguage) {
+                is MoneroSeedLanguage -> MoneroSeedLanguage.getWords(seedLanguage)
+                is PolyseedLanguage -> PolyseedLanguage.getWords(seedLanguage)
+            }
         TextHelper
             .groupWordsBy(editable) { word ->
                 validWords.contains(word)
@@ -346,8 +370,13 @@ class ActivityWalletCreate : ActivityBase() {
     }
 }
 
+internal data class SeedSelection(
+    val type: SeedType?,
+    val language: SeedLanguage?,
+)
+
 internal class CreateWalletViewModel : ViewModel() {
-    val seedType = MutableLiveData(SeedType.Monero)
+    val seedSelection = MutableLiveData(SeedSelection(type = null, language = null))
     val showMoreOptions = MutableLiveData(false)
     val developerModeEnabled = MutableLiveData(false)
     val networkType = MutableLiveData(Network.Mainnet)
@@ -359,25 +388,27 @@ internal class CreateWalletViewModel : ViewModel() {
 
     val enableButton =
         combineLiveDatas(
-            seedType,
             password,
             confirmedPassphrase,
             creatingWallet,
-        ) { seedType, passphrase, confirmedPassphrase, creatingWallet ->
-            if (seedType == null || passphrase == null || confirmedPassphrase == null || creatingWallet == null) return@combineLiveDatas false
+        ) { passphrase, confirmedPassphrase, creatingWallet ->
+            if (passphrase == null || confirmedPassphrase == null || creatingWallet == null) return@combineLiveDatas false
             if ((passphrase.isNotEmpty() || confirmedPassphrase.isNotEmpty()) && passphrase != confirmedPassphrase) return@combineLiveDatas false
             if (creatingWallet) return@combineLiveDatas false
 
             return@combineLiveDatas true
         }
 
-    val seedAndType =
-        combineLiveDatas(
-            seedType,
-            seed,
-        ) { seedType, seed ->
-            Pair(seedType!!, seed!!)
-        }
+    fun setSeedType(type: SeedType?) {
+        val current = seedSelection.value ?: SeedSelection(null, null)
+        seedSelection.value = current.copy(type = type, language = null)
+    }
+
+    fun setSeedLanguage(language: SeedLanguage?) {
+        val current = seedSelection.value ?: return
+        if (current.type == null) return
+        seedSelection.value = current.copy(language = language)
+    }
 
     fun createOrImportWallet(
         activity: ActivityWalletCreate,
@@ -387,11 +418,11 @@ internal class CreateWalletViewModel : ViewModel() {
     ) {
         val password = password.value ?: return
         val confirmedPassword = confirmedPassphrase.value ?: return
+        val selection = seedSelection.value ?: SeedSelection(null, null)
 
         val application = activity.application as MoneroApplication
         creatingWallet.postValue(true)
 
-        val offset = seedOffsetPassphrase.value!!
         if (password.isNotEmpty()) {
             if (password != confirmedPassword) {
                 creatingWallet.postValue(false)
@@ -406,36 +437,54 @@ internal class CreateWalletViewModel : ViewModel() {
                 return
             }
         }
-        val walletFile = File(Helper.getWalletRoot(activity), walletName)
-        val seedTypeValue = seedType.value ?: return
-
-        if (seedTypeValue == SeedType.Polyseed && Monfluo.isEncryptedPolyseed(walletSeed)) {
-            creatingWallet.postValue(false)
-            activity.runOnUiThread {
-                Toast
-                    .makeText(
-                        activity,
-                        application.getString(R.string.activity_wallet_create_wallet_encrypted_polyseed_toast),
-                        Toast.LENGTH_SHORT,
-                    ).show()
-            }
-            return
-        }
 
         if (walletSeed.isNotBlank()) {
-            val seed: Seed<*>? = Polyseed.fromMnemonic(walletSeed) ?: MoneroSeed.fromMnemonic(walletSeed)
+            val seed = decodeSeed(walletSeed, selection)
             if (seed == null) {
+                creatingWallet.postValue(false)
                 activity.runOnUiThread {
                     Toast
                         .makeText(
                             activity,
-                            "Bad seed!",
+                            application.getString(R.string.toast_bad_seed),
                             Toast.LENGTH_SHORT,
                         ).show()
                 }
                 return
             }
-            Monfluo.restoreWallet(Helper.getWalletRoot(activity).absolutePath, networkType.value!!, walletName, password, seed, null, restoreHeightText.toIntOrNull())
+            if (seed.type == SeedType.Polyseed && Monfluo.isEncryptedPolyseed(walletSeed)) {
+                creatingWallet.postValue(false)
+                activity.runOnUiThread {
+                    Toast
+                        .makeText(
+                            activity,
+                            application.getString(R.string.activity_wallet_create_wallet_encrypted_polyseed_toast),
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                }
+                return
+            }
+            val restoreHeight =
+                if (restoreHeightText.isBlank()) {
+                    null
+                } else {
+                    val parsed = restoreHeightText.toIntOrNull()
+                    if (parsed == null || parsed < 0) {
+                        creatingWallet.postValue(false)
+                        activity.runOnUiThread {
+                            Toast
+                                .makeText(
+                                    activity,
+                                    application.getString(R.string.invalid_restore_height),
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                        }
+                        return
+                    }
+                    parsed
+                }
+            val offset = seedOffsetPassphrase.value?.takeIf { it.isNotEmpty() }
+            Monfluo.restoreWallet(Helper.getWalletRoot(activity).absolutePath, networkType.value!!, walletName, password, seed, offset, restoreHeight)
 
             activity.runOnUiThread {
                 Toast
@@ -446,7 +495,7 @@ internal class CreateWalletViewModel : ViewModel() {
                     ).show()
             }
         } else {
-            Monfluo.createWallet(Helper.getWalletRoot(activity).absolutePath, networkType.value!!, walletName, password, MoneroSeedLanguage.English, "")
+            Monfluo.createWallet(Helper.getWalletRoot(activity).absolutePath, networkType.value!!, walletName, password, createLanguage(selection), null)
 
             activity.runOnUiThread {
                 Toast
@@ -461,16 +510,19 @@ internal class CreateWalletViewModel : ViewModel() {
         activity.finish()
     }
 
-    private fun getMnemonicType(seed: String): SeedType? {
-        val words = seed.split("\\s".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        val seedTypeValue = seedType.value ?: return SeedType.Monero
-        return if (words.size == 16 && seedTypeValue == SeedType.Polyseed) {
-            SeedType.Polyseed
-        } else if (words.size == 25 && seedTypeValue == SeedType.Monero) {
-            SeedType.Monero
-        } else {
-            null
+    private fun decodeSeed(
+        walletSeed: String,
+        selection: SeedSelection,
+    ): Seed<*>? =
+        when (selection.type) {
+            null -> MoneroSeed.fromMnemonic(walletSeed, null) ?: Polyseed.fromMnemonic(walletSeed, null)
+            SeedType.Monero -> MoneroSeed.fromMnemonic(walletSeed, selection.language as? MoneroSeedLanguage)
+            SeedType.Polyseed -> Polyseed.fromMnemonic(walletSeed, selection.language as? PolyseedLanguage)
         }
+
+    private fun createLanguage(selection: SeedSelection): SeedLanguage {
+        val type = selection.type ?: SeedType.Monero
+        return selection.language ?: type.defaultLanguage()
     }
 
     fun setPassphrase(passphrase: String) {
