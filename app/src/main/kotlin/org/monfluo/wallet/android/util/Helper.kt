@@ -46,13 +46,6 @@ object Helper {
 
     fun getWalletRoot(context: Context): File = getStorage(context, WALLET_DIR)
 
-    fun findWallets(file: File): List<String> =
-        file
-            .listFiles()
-            ?.filter { it.isFile && it.path.endsWith(".keys") }
-            ?.map { it.path.removeSuffix(".keys") }
-            ?: emptyList()
-
     private fun getStorage(
         context: Context,
         folderName: String,
