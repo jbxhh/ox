@@ -9,13 +9,12 @@ data class WalletView(
 ) {
     val balance: Balance =
         accounts
-            .flatMap { it.addresses }
-            .let { addresses ->
+            .let { accounts ->
                 Balance(
-                    total = addresses.sumOf { it.balance.total },
-                    unlocked = addresses.sumOf { it.balance.unlocked },
-                    pending = addresses.sumOf { it.balance.pending },
-                    frozen = addresses.sumOf { it.balance.frozen },
+                    total = accounts.sumOf { it.balance.total },
+                    unlocked = accounts.sumOf { it.balance.unlocked },
+                    pending = accounts.sumOf { it.balance.pending },
+                    frozen = accounts.sumOf { it.balance.frozen },
                 )
             }
 }
