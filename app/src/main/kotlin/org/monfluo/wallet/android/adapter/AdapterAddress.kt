@@ -97,7 +97,7 @@ class AdapterAddress(
         ) {
             addressRadioButton.setChecked(isSelected)
             addressLabelTextView.text = itemView.resources.getString(R.string.address_label, address.addressIndex, "address.label")
-            addressBalanceTextView.text = TextHelper.formatUnlockedBalance(itemView.context, address.amount, MoneroUnit.MONERO, streetMode, 0)
+            addressBalanceTextView.text = TextHelper.formatUnlockedBalance(itemView.context, address.balance.unlocked, MoneroUnit.MONERO, streetMode, 0)
 
             addressTextView.text = TextHelper.formatAddress(address.value)
             if (address.used) {

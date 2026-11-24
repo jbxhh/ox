@@ -5,5 +5,5 @@ data class AddressView(
     val addressIndex: Int,
     val value: String,
     val used: Boolean,
-    val amount: Long,
+    val balance: Balance,
 )

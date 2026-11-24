@@ -149,11 +149,11 @@ mod constants {
     pub const CLASS__org_monfluo_wallet_lib_data_WalletSeedViewPolyseed: &str = "org.monfluo.wallet.lib.data.WalletSeedView$Polyseed";
     pub const CLASS__org_monfluo_wallet_lib_data_WalletSeedViewPolyseed__METHOD__init2__SIGNATURE: &str = java_constructor!(java_class!(CLASS__java_lang_String), java_class!(CLASS__org_monfluo_wallet_lib_seed_PolyseedLanguage));
     pub const CLASS__org_monfluo_wallet_lib_data_WalletView: &str = "org.monfluo.wallet.lib.data.WalletView";
-    pub const CLASS__org_monfluo_wallet_lib_data_WalletView__METHOD__init6__SIGNATURE: &str = java_constructor!(java_class!(CLASS__java_lang_Integer), java_class!(CLASS__java_lang_Integer), java_class!(CLASS__java_lang_Integer), java_class!(CLASS__java_util_List), java_class!(CLASS__java_util_List), java_class!(CLASS__org_monfluo_wallet_lib_data_Balance));
+    pub const CLASS__org_monfluo_wallet_lib_data_WalletView__METHOD__init5__SIGNATURE: &str = java_constructor!(java_class!(CLASS__java_lang_Integer), java_class!(CLASS__java_lang_Integer), java_class!(CLASS__java_lang_Integer), java_class!(CLASS__java_util_List), java_class!(CLASS__java_util_List));
     pub const CLASS__org_monfluo_wallet_lib_data_AccountView: &str = "org.monfluo.wallet.lib.data.AccountView";
     pub const CLASS__org_monfluo_wallet_lib_data_AccountView__METHOD__init2__SIGNATURE: &str = java_constructor!(JAVA_INT, java_class!(CLASS__java_util_List));
     pub const CLASS__org_monfluo_wallet_lib_data_AddressView: &str = "org.monfluo.wallet.lib.data.AddressView";
-    pub const CLASS__org_monfluo_wallet_lib_data_AddressView__METHOD__init5__SIGNATURE: &str = java_constructor!(JAVA_INT, JAVA_INT, java_class!(CLASS__java_lang_String), JAVA_BOOLEAN, JAVA_LONG);
+    pub const CLASS__org_monfluo_wallet_lib_data_AddressView__METHOD__init5__SIGNATURE: &str = java_constructor!(JAVA_INT, JAVA_INT, java_class!(CLASS__java_lang_String), JAVA_BOOLEAN, java_class!(CLASS__org_monfluo_wallet_lib_data_Balance));
     pub const CLASS__org_monfluo_wallet_lib_data_MoneroBytes: &str = "org.monfluo.wallet.lib.data.MoneroBytes";
     pub const CLASS__org_monfluo_wallet_lib_data_MoneroBytes__METHOD__init1__SIGNATURE: &str = java_constructor!(java_array!(JAVA_BYTE));
     pub const CLASS__org_monfluo_wallet_lib_data_MoneroBytes__FIELD__hash: &str = "hash";
@@ -1614,7 +1614,6 @@ pub fn new_wallet_view<'env>(
         adjusted_restore_height,
         accounts,
         transactions,
-        balance,
     } = wallet_view;
     let java_current_height = current_height.map_or(JObject::null(), |current_height| {
         new_integer(env, cache, current_height as i32)
@@ -1632,19 +1631,17 @@ pub fn new_wallet_view<'env>(
         list_add(env, cache, &java_accounts, &java_account);
     }
     let java_transactions = new_transaction_views(env, cache, transactions);
-    let java_balance = new_balance(env, cache, balance);
     create_new_object!(
         env,
         cache,
         class__org_monfluo_wallet_lib_data_WalletView,
-        CLASS__org_monfluo_wallet_lib_data_WalletView__METHOD__init6__SIGNATURE,
+        CLASS__org_monfluo_wallet_lib_data_WalletView__METHOD__init5__SIGNATURE,
         &[
             JValue::Object(&java_current_height),
             JValue::Object(&java_restore_height),
             JValue::Object(&java_adjusted_restore_height),
             JValue::Object(&java_accounts),
-            JValue::Object(&java_transactions),
-            JValue::Object(&java_balance)
+            JValue::Object(&java_transactions)
         ]
     )
 }
@@ -1686,13 +1683,13 @@ pub fn new_address_view<'env>(
         address_index,
         value,
         used,
-        amount,
+        balance,
     } = address_view;
     let java_account_index = *account_index as jint;
     let java_address_index = *address_index as jint;
     let java_value = create_new_string!(env, value);
     let java_used = *used as jboolean;
-    let java_amount = *amount as jlong;
+    let java_balance = new_balance(env, cache, balance);
     create_new_object!(
         env,
         cache,
@@ -1703,7 +1700,7 @@ pub fn new_address_view<'env>(
             JValue::Int(java_address_index),
             JValue::Object(&java_value),
             JValue::Bool(java_used),
-            JValue::Long(java_amount)
+            JValue::Object(&java_balance)
         ]
     )
 }
