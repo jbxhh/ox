@@ -20,6 +20,8 @@ use crate::{
     },
 };
 
+type AddressBalances = HashMap<u32, HashMap<u32, (balance::BalanceView, bool)>>;
+
 #[derive(Debug, Clone)]
 pub struct WalletView {
     pub current_height: Option<u32>,
@@ -27,18 +29,17 @@ pub struct WalletView {
     pub adjusted_restore_height: Option<u32>,
     pub accounts: Vec<account::AccountView>,
     pub transactions: Vec<transaction::TransactionView>,
-    pub balance: balance::BalanceView,
 }
 
 pub(crate) fn wallet_view(state: &WalletState, wallet: &Wallet) -> WalletView {
     let restore_height = wallet.restore_height().or(state.effective_restore_height);
+    let address_balances = address_balances_view(state);
     WalletView {
         current_height: state.current_height(),
         restore_height,
         adjusted_restore_height: adjusted_restore_height(state).or(restore_height),
-        accounts: accounts_view(state, wallet),
+        accounts: accounts_view(state, wallet, &address_balances),
         transactions: transaction_views(state, wallet),
-        balance: balance_view(state),
     }
 }
 
@@ -61,52 +62,14 @@ fn adjusted_restore_height(state: &WalletState) -> Option<u32> {
         .min()
 }
 
-pub(crate) fn balance_view(state: &WalletState) -> balance::BalanceView {
-    let current_height = state.current_height();
-    let current_timestamp = crate::current_timestamp();
-    let mut total = 0;
-    let mut unlocked = 0;
-    let mut pending = 0;
-    let mut frozen = 0;
-    for output in state.outputs.values().filter(|output| {
-        !state
-            .cache
-            .key_image_to_spend_transaction_input
-            .contains_key(&output.cached_key_image)
-    }) {
-        let block_height = state.transactions[&output.inner.transaction()]
-            .block_info
-            .map(|block_info| block_info.block.height);
-        let required_confirmations = state.required_confirmations(&output.inner.transaction());
-        let amount = output.inner.commitment().amount;
-        total += amount;
-        if output.is_frozen() {
-            frozen += amount;
-        } else if block_height
-            .zip(current_height)
-            .is_none_or(|(block_height, current_height)| output.is_locked(block_height, current_height, current_timestamp, required_confirmations))
-        {
-            pending += amount;
-        } else {
-            unlocked += amount;
-        }
-    }
-    balance::BalanceView {
-        total,
-        unlocked,
-        pending,
-        frozen,
-    }
-}
-
-pub(crate) fn accounts_view(state: &WalletState, wallet: &Wallet) -> Vec<account::AccountView> {
+fn accounts_view(state: &WalletState, wallet: &Wallet, address_balances: &AddressBalances) -> Vec<account::AccountView> {
     let last_address_index = (state.account_addresses().addresses().len() - 1) as u32;
     (0..=last_address_index)
-        .map(|account_index| account_view(state, wallet, account_index))
+        .map(|account_index| account_view(state, wallet, address_balances, account_index))
         .collect()
 }
 
-pub(crate) fn account_view(state: &WalletState, wallet: &Wallet, account_index: u32) -> account::AccountView {
+fn account_view(state: &WalletState, wallet: &Wallet, address_balances: &AddressBalances, account_index: u32) -> account::AccountView {
     let last_address_index = state
         .account_addresses()
         .addresses()
@@ -117,31 +80,19 @@ pub(crate) fn account_view(state: &WalletState, wallet: &Wallet, account_index: 
         addresses: last_address_index
             .map(|last_address_index| {
                 (0..=last_address_index)
-                    .map(|address_index| address_view(state, wallet, account_index, address_index))
+                    .map(|address_index| address_view(wallet, address_balances, account_index, address_index))
                     .collect()
             })
             .unwrap_or_default(),
     }
 }
 
-pub(crate) fn address_view(state: &WalletState, wallet: &Wallet, account_index: u32, address_index: u32) -> address::AddressView {
-    let subaddres_index = SubaddressIndex::new(account_index, address_index);
-    let mut used: bool = false;
-    let mut amount: u64 = 0;
-
-    for output in state.outputs.values() {
-        if output.inner.subaddress() == subaddres_index {
-            used = true;
-            if !state
-                .cache
-                .key_image_to_spend_transaction_input
-                .contains_key(&output.cached_key_image)
-            {
-                amount += output.inner.commitment().amount;
-            }
-        }
-    }
-
+fn address_view(wallet: &Wallet, address_balances: &AddressBalances, account_index: u32, address_index: u32) -> address::AddressView {
+    let (balance, used) = address_balances
+        .get(&account_index)
+        .and_then(|addresses| addresses.get(&address_index))
+        .copied()
+        .unwrap_or_default();
     address::AddressView {
         account_index,
         address_index,
@@ -149,11 +100,56 @@ pub(crate) fn address_view(state: &WalletState, wallet: &Wallet, account_index: 
             .address(SubaddressIndex::new(account_index, address_index))
             .to_string(),
         used,
-        amount,
+        balance,
     }
 }
 
-pub(crate) fn transaction_views(state: &WalletState, wallet: &Wallet) -> Vec<transaction::TransactionView> {
+fn address_balances_view(state: &WalletState) -> AddressBalances {
+    let current_height = state.current_height();
+    let current_timestamp = crate::current_timestamp();
+    let mut balances: AddressBalances = HashMap::new();
+    for output in state.outputs.values() {
+        let subaddress = output.inner.subaddress();
+        let (account_index, address_index) = subaddress.map_or((0, 0), |subaddress| (subaddress.account(), subaddress.address()));
+        let (balance, used) = balances
+            .entry(account_index)
+            .or_default()
+            .entry(address_index)
+            .or_default();
+        *used = true;
+        if !state
+            .cache
+            .key_image_to_spend_transaction_input
+            .contains_key(&output.cached_key_image)
+        {
+            add_output_to_balance(balance, state, output, current_height, current_timestamp);
+        }
+    }
+    balances
+}
+
+fn add_output_to_balance(balance: &mut balance::BalanceView, state: &WalletState, output: &WalletOutputWrapper, current_height: Option<u32>, current_timestamp: u64) {
+    let amount = output.inner.commitment().amount;
+    balance.total += amount;
+    if output.is_frozen() {
+        balance.frozen += amount;
+        return;
+    }
+    let block_height = state.transactions[&output.inner.transaction()]
+        .block_info
+        .map(|block_info| block_info.block.height);
+    let required_confirmations = state.required_confirmations(&output.inner.transaction());
+    if block_height
+        .zip(current_height)
+        .is_none_or(|(block_height, current_height)| output.is_locked(block_height, current_height, current_timestamp, required_confirmations))
+    {
+        balance.pending += amount;
+    } else {
+        balance.unlocked += amount;
+    }
+}
+
+fn transaction_views(state: &WalletState, wallet: &Wallet) -> Vec<transaction::TransactionView> {
     let mut raw_transactions = state.transactions.values().collect::<Vec<_>>();
     raw_transactions.sort_by_key(|raw_transaction| (raw_transaction.first_seen_timestamp, raw_transaction.hash));
     transaction_views_of(state, wallet, raw_transactions)
@@ -163,7 +159,7 @@ pub(crate) fn transaction_view_of<P: PotentiallyPruned>(state: &WalletState, wal
     transaction_views_of(state, wallet, vec![raw_transaction]).remove(0)
 }
 
-pub(crate) fn transaction_views_of<P: PotentiallyPruned>(state: &WalletState, wallet: &Wallet, raw_transactions: Vec<&TransactionWrapper<P>>) -> Vec<transaction::TransactionView> {
+fn transaction_views_of<P: PotentiallyPruned>(state: &WalletState, wallet: &Wallet, raw_transactions: Vec<&TransactionWrapper<P>>) -> Vec<transaction::TransactionView> {
     let current_height = state.current_height();
 
     let mut wallet_inputs = HashMap::<MoneroBytes, Vec<&WalletOutputWrapper>>::new();

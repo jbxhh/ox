@@ -498,26 +498,6 @@ impl Wallet {
         view::wallet_view(&state, self)
     }
 
-    pub async fn balance_view(&self) -> view::balance::BalanceView {
-        let state = self.read_state().await;
-        view::balance_view(&state)
-    }
-
-    pub async fn account_view(&self, account_index: u32) -> view::account::AccountView {
-        let state = self.read_state().await;
-        view::account_view(&state, self, account_index)
-    }
-
-    pub async fn accounts_view(&self) -> Vec<view::account::AccountView> {
-        let state = self.read_state().await;
-        view::accounts_view(&state, self)
-    }
-
-    pub async fn transaction_views(&self) -> Vec<view::transaction::TransactionView> {
-        let state = self.read_state().await;
-        view::transaction_views(&state, self)
-    }
-
     pub async fn create_transaction_view_of<P: PotentiallyPruned>(&self, raw_transaction: &TransactionWrapper<P>) -> view::transaction::TransactionView {
         let state = self.read_state().await;
         view::transaction_view_of(&state, self, raw_transaction)
