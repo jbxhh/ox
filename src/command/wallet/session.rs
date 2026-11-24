@@ -88,12 +88,22 @@ impl Session {
                 }
             }
             SessionCommands::Balance => {
-                let balance = self.wallet.balance_view().await;
-                println!("Balance: {}", monfluo_oxide::util::atomic_units_to_big_decimal(balance.total));
+                let wallet_view = self.wallet.wallet_view().await;
+                let total = wallet_view
+                    .accounts
+                    .iter()
+                    .flat_map(|account_view| &account_view.addresses)
+                    .map(|address_view| address_view.balance.total)
+                    .sum::<u64>();
+                println!("Balance: {}", monfluo_oxide::util::atomic_units_to_big_decimal(total));
             }
             SessionCommands::Address => {
-                let account_view = self.wallet.account_view(0).await;
-                match account_view.addresses.first() {
+                let wallet_view = self.wallet.wallet_view().await;
+                match wallet_view
+                    .accounts
+                    .first()
+                    .and_then(|account_view| account_view.addresses.first())
+                {
                     Some(address_view) => println!("Address: {}", address_view.value),
                     None => println!("No addresses"),
                 }

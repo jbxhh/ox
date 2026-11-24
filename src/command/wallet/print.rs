@@ -27,7 +27,7 @@ pub async fn run(monfluo_directory: PathBuf, name: String, password: String) {
                     .take(last_used_address + 1)
                 {
                     println!("Address #{}.{}: {}", address_view.account_index, address_view.address_index, address_view.value);
-                    println!("Used: {}, amount: {}", address_view.used, monfluo_oxide::util::atomic_units_to_big_decimal(address_view.amount));
+                    println!("Used: {}, amount: {}", address_view.used, monfluo_oxide::util::atomic_units_to_big_decimal(address_view.balance.total));
                 }
             }
             println!("<<<<<<<<<<");

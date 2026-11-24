@@ -1903,7 +1903,7 @@ dependencies = [
 [[package]]
 name = "monfluo-oxide"
 version = "0.1.0"
-source = "git+https://codeberg.org/Monfluo/monfluo-oxide?branch=master#60dea0903674e6e1a908db444d633e472d2eaad1"
+source = "git+https://codeberg.org/Monfluo/monfluo-oxide?branch=master#b7ea64eca36ea3ef03c01065bfbda1af69c62d40"
 dependencies = [
  "bigdecimal",
  "chrono",
